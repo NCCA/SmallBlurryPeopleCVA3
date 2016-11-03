@@ -9,3 +9,5 @@ You must also figure out a workflow for how the team will use GitHub and submit 
 
 Felix Marrington-Reeve
 Ben Hawkyard
+Quentin Corker-Marin
+
