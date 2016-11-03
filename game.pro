@@ -4,9 +4,10 @@ OBJECTS_DIR = obj
 
 INCLUDEPATH+=./include
 
-SOURCES+=$$PWD/src/main.cpp
+SOURCES+=$$PWD/src/main.cpp \
+         $$PWD/src/Scene.cpp
 
-#HEADERS+=
+HEADERS+=$$PWD/include/Scene.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 
