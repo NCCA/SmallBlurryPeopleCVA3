@@ -5,9 +5,15 @@ OBJECTS_DIR = obj
 INCLUDEPATH+=./include
 
 SOURCES+=$$PWD/src/main.cpp \
-         $$PWD/src/Scene.cpp
+         $$PWD/src/Scene.cpp \
+         $$PWD/src/Renderer.cpp \
+         $$PWD/src/Framebuffer.cpp \
+         $$PWD/src/Util.cpp
 
-HEADERS+=$$PWD/include/Scene.hpp
+HEADERS+=$$PWD/include/Scene.hpp \
+         $$PWD/include/Renderer.hpp \
+         $$PWD/include/Framebuffer.hpp \
+         $$PWD/include/Util.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 
@@ -19,3 +25,23 @@ include($(HOME)/NGL/UseNGL.pri)
 
 OTHER_FILES += README.md \
                $$PWD/shaders/*.glsl
+
+#This means I can build this on windows.
+win32 {
+    QT += core gui opengl
+
+    INCLUDEPATH += C:\SDL2\i686-w64-mingw32\include\SDL2
+    INCLUDEPATH += C:\SDL2\i686-w64-mingw32\include
+    LIBS += -L"C:/SDL2/lib/x64/" -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+    LIBS += -L"C:/NGL/lib/NGLDebug.lib" -lNGLDebug
+
+    PRE_TARGETDEPS += C:/NGL/lib/NGL.lib
+    INCLUDEPATH += -I c:/boost
+    INCLUDEPATH += C:/NGL/include/
+    DEFINES += GL42
+    DEFINES += WIN32
+    DEFINES += _WIN32
+    DEFINES += _USE_MATH_DEFINES
+    LIBS += -LC:/NGL/lib/ -lNGL
+    DEFINES += NO_DLL
+}
