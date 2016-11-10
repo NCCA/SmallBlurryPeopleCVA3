@@ -17,7 +17,7 @@ enum class Tile{EMPTY, FOREST, BUILDING};
 class Grid
 {
 public:
-  /// @brief default ctor that sets the grid to a default 10 by 10 set of empty tiles and runs the initialiser
+  /// @brief default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser
   Grid();
 
   /// @brief ctor that initialises a grid of empty tiles to a user specified size

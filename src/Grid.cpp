@@ -81,6 +81,6 @@ void Grid::init()
 {
   std::cout << "i made a grid! :D " << m_w << ", " << m_h << std::endl;
 
-  generateRandomMap(20, 10, 10);
+  generateRandomMap(20, 10, 5);
   printMap();
 }
