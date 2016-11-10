@@ -12,6 +12,8 @@ public:
     Grid(int _w, int _h);
     ~Grid() = default;
     void printMap();
+    Tile read(int _x, int _y);
+    void write(int _x, int _y, Tile _t);
 private:
     void init();
     int m_w;

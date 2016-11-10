@@ -24,10 +24,20 @@ void Grid::printMap()
   {
     for(int y = 0; y < m_h; y++)
     {
-      std::cout << (int)m_map[x + y * m_w];
+      std::cout << (int)read(x, y);
     }
     std::cout << std::endl;
   }
+}
+
+Tile Grid::read(int _x, int _y)
+{
+  return m_map[_x + _y * m_w];
+}
+
+void Grid::write(int _x, int _y, Tile _t)
+{
+  m_map[_x + _y * m_w] = _t;
 }
 
 void Grid::init()
