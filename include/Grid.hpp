@@ -46,6 +46,12 @@ public:
   /// @param [in] _t is the value to be set at the given coordiate
   void write(int _x, int _y, Tile _t);
 
+  /// @brief puts down random set of circles of random terrain types
+  /// @param [in] _max_rad is the maximum radius of the circles
+  /// @param [in] _num_circles is the number of circles to be put down
+  /// @param [in] _seed is the seed passed ot the random number generator
+  void generateRandomMap(int _max_rad, int _num_circles, float _seed);
+
 private:
   /// @brief initilaiser for the class that should be called by the constructors
   void init();
