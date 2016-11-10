@@ -1,6 +1,8 @@
 #include <iostream>
 #include "Grid.hpp"
 
+/// @file Grid.cpp
+/// @brief source code for the Grid class
 
 Grid::Grid():
   m_w(10),
@@ -50,4 +52,5 @@ void Grid::init()
   }
 
   printMap();
+  write(-100, -100, Tile::FOREST);
 }
