@@ -1,4 +1,6 @@
+#include "ngl/Util.h"
 #include "Camera.hpp"
+
 
 void Camera::calculateViewMat()
 {
