@@ -1,6 +1,8 @@
 #ifndef __SCENE_HPP__
 #define __SCENE_HPP__
 
+#include "Grid.hpp"
+
 class Scene
 {
 	public:
@@ -11,6 +13,7 @@ class Scene
 		void draw();
 	private:
 		bool m_active = true;
+    Grid m_grid;
 
 };
 

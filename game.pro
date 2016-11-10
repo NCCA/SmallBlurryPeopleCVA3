@@ -6,14 +6,16 @@ INCLUDEPATH+=./include
 
 SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Scene.cpp \
-         $$PWD/src/Renderer.cpp \
-         $$PWD/src/Framebuffer.cpp \
-         $$PWD/src/Util.cpp
+         $$PWD/src/Camera.cpp \
+         $$PWD/src/Grid.cpp \
+         $$PWD/src/Character.cpp \
+         $$PWD/src/Prop.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
-         $$PWD/include/Renderer.hpp \
-         $$PWD/include/Framebuffer.hpp \
-         $$PWD/include/Util.hpp
+         $$PWD/include/Camera.hpp \
+         $$PWD/include/Grid.hpp \
+         $$PWD/include/Character.hpp \
+         $$PWD/include/Prop.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 
