@@ -50,7 +50,7 @@ void Grid::generateRandomMap(int _max_rad, int _num_circles, float _seed)
   random_engine->setSeed(_seed);
 
   //generate 5 random regions
-  for (int i = 0; i < _num_loops; i++)
+  for (int i = 0; i < _num_circles; i++)
   {
     //generate 4 random numbers: type, x, y and radius to describe the circle to be drawn
     int x_rand = (int)random_engine->randomPositiveNumber(m_w);
