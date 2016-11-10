@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT5BUILD -DNGL_DEBUG -DQT_QML_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -I/usr/local/include/SDL2 -D_REENTRANT -msse -msse2 -msse3 -march=native -march=native -g -std=gnu++11 -Wall -W -Wno-unused-parameter -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -Iinclude -I/home/i7624405/NGL/include -I/opt/Qt5.7.0/5.7/gcc_64/include -I/opt/Qt5.7.0/5.7/gcc_64/include/QtGui -I/opt/Qt5.7.0/5.7/gcc_64/include/QtCore -I. -I/opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++
+INCPATH       = -I. -Iinclude -I/home/i7621149/NGL/include -I/opt/Qt5.7.0/5.7/gcc_64/include -I/opt/Qt5.7.0/5.7/gcc_64/include/QtGui -I/opt/Qt5.7.0/5.7/gcc_64/include/QtCore -I. -I/opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++
 QMAKE         = /opt/Qt5.7.0/5.7/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -33,10 +33,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = game1.0.0
-DISTDIR = /home/i7624405/CA2/SmallBlurryPeopleCVA3/obj/game1.0.0
+DISTDIR = /home/i7621149/CA2/SmallBlurryPeopleCVA3/obj/game1.0.0
 LINK          = g++
-LFLAGS        = -Wl,-z,origin -Wl,-rpath,\$$ORIGIN/L/home/i7624405/NGL/lib -Wl,-rpath,/home/i7624405/NGL/lib -Wl,-rpath,/opt/Qt5.7.0/5.7/gcc_64/lib
-LIBS          = $(SUBLIBS) -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -L/home/i7624405/NGL/lib -l NGL -ltiff -L/opt/Qt5.7.0/5.7/gcc_64/lib -lQt5Gui -L/usr/lib64 -lQt5Core -lGL -lpthread 
+LFLAGS        = -Wl,-rpath,/home/i7621149/NGL/lib -Wl,-rpath,/opt/Qt5.7.0/5.7/gcc_64/lib
+LIBS          = $(SUBLIBS) -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -L/home/i7621149/NGL/lib -l NGL -ltiff -L/opt/Qt5.7.0/5.7/gcc_64/lib -lQt5Gui -L/usr/lib64 -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -221,7 +221,7 @@ Makefile: game.pro .qmake.cache /opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++/qmake.
 		.qmake.stash \
 		/opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/default_pre.prf \
-		/home/i7624405/NGL/UseNGL.pri \
+		/home/i7621149/NGL/UseNGL.pri \
 		/opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/resolve_config.prf \
 		/opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/default_post.prf \
 		/opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/qml_debug.prf \
@@ -379,7 +379,7 @@ Makefile: game.pro .qmake.cache /opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++/qmake.
 .qmake.stash:
 /opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/exclusive_builds.prf:
 /opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/default_pre.prf:
-/home/i7624405/NGL/UseNGL.pri:
+/home/i7621149/NGL/UseNGL.pri:
 /opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/resolve_config.prf:
 /opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/default_post.prf:
 /opt/Qt5.7.0/5.7/gcc_64/mkspecs/features/qml_debug.prf:
@@ -460,9 +460,9 @@ obj/Scene.o: src/Scene.cpp include/Scene.hpp \
 		include/Grid.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Scene.o src/Scene.cpp
 
-obj/Camera.o: src/Camera.cpp /home/i7624405/NGL/include/ngl/Util.h \
-		/home/i7624405/NGL/include/ngl/Types.h \
-		/home/i7624405/NGL/include/ngl/glew.h \
+obj/Camera.o: src/Camera.cpp /home/i7621149/NGL/include/ngl/Util.h \
+		/home/i7621149/NGL/include/ngl/Types.h \
+		/home/i7621149/NGL/include/ngl/glew.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/QGLContext \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qgl.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
@@ -573,17 +573,17 @@ obj/Camera.o: src/Camera.cpp /home/i7624405/NGL/include/ngl/Util.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
-		/home/i7624405/NGL/include/ngl/Vec4.h \
-		/home/i7624405/NGL/include/ngl/Vec2.h \
-		/home/i7624405/NGL/include/ngl/Vec3.h \
+		/home/i7621149/NGL/include/ngl/Vec4.h \
+		/home/i7621149/NGL/include/ngl/Vec2.h \
+		/home/i7621149/NGL/include/ngl/Vec3.h \
 		include/Camera.hpp \
-		/home/i7624405/NGL/include/ngl/Mat4.h
+		/home/i7621149/NGL/include/ngl/Mat4.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Camera.o src/Camera.cpp
 
-obj/Grid.o: src/Grid.cpp /home/i7624405/NGL/include/ngl/Random.h \
-		/home/i7624405/NGL/include/ngl/Colour.h \
-		/home/i7624405/NGL/include/ngl/Types.h \
-		/home/i7624405/NGL/include/ngl/glew.h \
+obj/Grid.o: src/Grid.cpp /home/i7621149/NGL/include/ngl/Random.h \
+		/home/i7621149/NGL/include/ngl/Colour.h \
+		/home/i7621149/NGL/include/ngl/Types.h \
+		/home/i7621149/NGL/include/ngl/glew.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/QGLContext \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qgl.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qopengl.h \
@@ -694,10 +694,10 @@ obj/Grid.o: src/Grid.cpp /home/i7624405/NGL/include/ngl/Random.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
-		/home/i7624405/NGL/include/ngl/Singleton.h \
-		/home/i7624405/NGL/include/ngl/Vec4.h \
-		/home/i7624405/NGL/include/ngl/Vec2.h \
-		/home/i7624405/NGL/include/ngl/Vec3.h \
+		/home/i7621149/NGL/include/ngl/Singleton.h \
+		/home/i7621149/NGL/include/ngl/Vec4.h \
+		/home/i7621149/NGL/include/ngl/Vec2.h \
+		/home/i7621149/NGL/include/ngl/Vec3.h \
 		include/Grid.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Grid.o src/Grid.cpp
 
