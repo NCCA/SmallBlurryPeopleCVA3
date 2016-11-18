@@ -53,6 +53,8 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
+  int x = (int)_coord.m_x;
+  int y = (int)_coord.m_y;
   return _coord.m_x + m_w * _coord.m_y;
 }
 
