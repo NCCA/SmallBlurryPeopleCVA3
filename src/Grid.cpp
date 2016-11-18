@@ -2,6 +2,7 @@
 #include "ngl/Random.h"
 #include "Grid.hpp"
 
+
 /// @file Grid.cpp
 /// @brief source code for the Grid class
 
@@ -41,6 +42,18 @@ Tile Grid::read(int _x, int _y)
 void Grid::write(int _x, int _y, Tile _t)
 {
   m_map[_x + _y * m_w] = _t;
+}
+
+ngl::Vec2 Grid::idToCoord(int _tileId)
+{
+  int x = _tileId % m_w;
+  int y = _tileId / m_w;
+  return ngl::Vec2(x, y);
+}
+
+int Grid::coordToId(ngl::Vec2 _coord)
+{
+  return _coord.m_x + m_w * _coord.m_y;
 }
 
 void Grid::generateRandomMap(int _max_rad, int _num_circles, float _seed)

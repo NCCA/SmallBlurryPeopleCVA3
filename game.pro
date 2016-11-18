@@ -2,7 +2,7 @@ TARGET = game
 
 OBJECTS_DIR = obj
 
-INCLUDEPATH+=./include
+INCLUDEPATH +=./include
 
 SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Scene.cpp \
