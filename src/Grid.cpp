@@ -28,11 +28,11 @@ Grid::Grid(int _w, int _h):
 
 void Grid::printMap()
 {
-  for(int x = 0; x < m_w; x++)
+  for(int y = 0; y < m_h; y++)
   {
-    for(int y = 0; y < m_h; y++)
+    for(int x = 0; x < m_w; x++)
     {
-      std::cout << (int)read(x, y);
+      std::cout << (int)read(x, y) << " ";
     }
     std::cout << std::endl;
   }
@@ -101,14 +101,47 @@ void Grid::generatePyMap()
   //create pyobjects to represent the python types
   PyObject *main;
   PyObject *dict;
+  PyObject *py_map;
+  PyObject *py_width;
+  PyObject *py_height;
+
+  //main stores a dictionary of global variables and I will manipulate i as a global variable
+  main = PyImport_ImportModule("__main__");
+  dict = PyModule_GetDict(main);
+
+  //fill conector objects with data
+  py_width = PyInt_FromLong(m_w);
+  py_height = PyInt_FromLong(m_h);
+  py_map = PyList_New(m_w * m_h);
+
+  //pass data in connector objects to python
+  PyDict_SetItemString(dict, "map_width", py_width);
+  PyDict_SetItemString(dict, "map_height", py_height);
+  PyDict_SetItemString(dict, "grid", py_map);
+
+  for(int i = 0; i < m_map.size(); i++)
+  {
+    PyList_SetItem(py_map, i, PyInt_FromLong((int)m_map[i]));
+  }
 
   //pyi is the pyobject representation of the python value of i
   PyObject *pyi;
   double i = 10.5;
 
-  //main stores a dictionary of global variables and I will manipulate i as a global variable
-  main = PyImport_ImportModule("__main__");
-  dict = PyModule_GetDict(main);
+  py_map = PyMapping_GetItemString(dict, "grid");
+
+/*********************************************************************************
+ * things are not working here yet
+ * problem extracting values from python array
+ * look at jons demo again
+ * https://www.youtube.com/watch?v=fdQZK0_ADKM
+ *
+ */
+  for(int i = 0; i < m_map.size(); i++)
+  {
+    int abc = PyInt_AsLong(PyList_GetItem(py_map, i));
+    m_map[i] = (Tile)abc;
+  }
 
   pyi = PyFloat_FromDouble(i);
   PyDict_SetItemString(dict, "i", pyi);
@@ -145,5 +178,5 @@ void Grid::init()
 
   generateRandomMap(20, 10, 5);
   generatePyMap();
-  //printMap();
+  printMap();
 }
