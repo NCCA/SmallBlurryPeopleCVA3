@@ -5,12 +5,12 @@
 void Camera::calculateViewMat()
 {
     m_cameraTransformation = ngl::Mat4();
-    m_worldTransformation = ngl::Mat4();
+    m_pivotTransformation = ngl::Mat4();
 
     for(auto &i : m_cameraTransformationStack)
         m_cameraTransformation *= i;
-    for(auto &i : m_worldTransformationStack)
-        m_worldTransformation *= i;
+    for(auto &i : m_pivotTransformationStack)
+        m_pivotTransformation *= i;
 
     m_V = ngl::lookAt(
                 m_initPos,
@@ -22,10 +22,10 @@ void Camera::calculateViewMat()
         m_V *= (*i);*/
 
     m_V *= m_cameraTransformation;
-    m_V *= m_worldTransformation;
+    m_V *= m_pivotTransformation;
 
     ngl::Mat4 VI = m_V.inverse();
-    ngl::Mat4 wti = m_worldTransformation.inverse();
+    ngl::Mat4 wti = m_pivotTransformation.inverse();
     m_pos = ngl::Vec3(VI.m_30, VI.m_31, VI.m_32);
     m_pivot = ngl::Vec3(wti.m_30, wti.m_31, wti.m_32);
 
@@ -47,9 +47,9 @@ void Camera::rotateCamera(const float _pitch, const float _yaw, const float _rol
     m_cameraTransformationStack.push_back( rotationMatrix(_pitch, _yaw, _roll) );
 }
 
-void Camera::rotateWorld(const float _pitch, const float _yaw, const float _roll)
+void Camera::rotatePivot(const float _pitch, const float _yaw, const float _roll)
 {
-    m_worldTransformationStack.push_back( rotationMatrix(_pitch, _yaw, _roll) );
+    m_pivotTransformationStack.push_back( rotationMatrix(_pitch, _yaw, _roll) );
 }
 
 void Camera::moveCamera(const ngl::Vec3 _translation)
@@ -57,9 +57,9 @@ void Camera::moveCamera(const ngl::Vec3 _translation)
     m_cameraTransformationStack.push_back( translationMatrix(_translation) );
 }
 
-void Camera::moveWorld(const ngl::Vec3 _translation)
+void Camera::movePivot(const ngl::Vec3 _translation)
 {
-    m_worldTransformationStack.push_back( translationMatrix(_translation) );
+    m_pivotTransformationStack.push_back( translationMatrix(_translation) );
 }
 
 ngl::Mat4 Camera::rotationMatrix(float _pitch, float _yaw, float _roll)
