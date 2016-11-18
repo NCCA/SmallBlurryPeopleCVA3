@@ -31,6 +31,7 @@
 #extra
 *.pro.user.*
 *.pro.user
+game
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
