@@ -104,13 +104,13 @@ void Grid::generatePyMap()
 
   //pyi is the pyobject representation of the python value of i
   PyObject *pyi;
-  double i;
+  double i = 10.5;
 
   //main stores a dictionary of global variables and I will manipulate i as a global variable
   main = PyImport_ImportModule("__main__");
   dict = PyModule_GetDict(main);
 
-  pyi = PyFloat_FromDouble(20.5);
+  pyi = PyFloat_FromDouble(i);
   PyDict_SetItemString(dict, "i", pyi);
 
   //load and run the script to manipulate i
