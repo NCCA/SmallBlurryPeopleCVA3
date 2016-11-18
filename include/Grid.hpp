@@ -2,6 +2,7 @@
 #define __GRID_HPP__
 
 #include <vector>
+#include <ngl/Vec2.h>
 
 /// @file Grid.hpp
 /// @brief The Grid class holds information about what is contained in each cell of the map.
@@ -45,6 +46,10 @@ public:
   /// @param [in] _y is the y coordinate of the tile to be set
   /// @param [in] _t is the value to be set at the given coordiate
   void write(int _x, int _y, Tile _t);
+
+  ngl::Vec2 idToCoord(int _tileId);
+
+  int coordToId(ngl::Vec2 _coord);
 
   /// @brief puts down random set of circles of random terrain types
   /// @param [in] _max_rad is the maximum radius of the circles
