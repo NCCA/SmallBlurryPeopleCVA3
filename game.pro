@@ -18,15 +18,18 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Prop.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
+QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
 
 CONFIG += c++11
 
 LIBS+=$$system(sdl2-config --libs)
+LIBS+=$$system(python2.7-config --libs)
 
 include($(HOME)/NGL/UseNGL.pri)
 
 OTHER_FILES += README.md \
-               $$PWD/shaders/*.glsl
+               $$PWD/shaders/*.glsl\
+               $$PWD/python/*.py
 
 #This means I can build this on windows.
 win32 {

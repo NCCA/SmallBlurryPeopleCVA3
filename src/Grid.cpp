@@ -1,4 +1,8 @@
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <streambuf>
+#include <Python.h>
 #include "ngl/Random.h"
 #include "Grid.hpp"
 
@@ -89,11 +93,57 @@ void Grid::generateRandomMap(int _max_rad, int _num_circles, float _seed)
   }
 }
 
+void Grid::generatePyMap()
+{
+  // init python
+  Py_Initialize();
+
+  //create pyobjects to represent the python types
+  PyObject *main;
+  PyObject *dict;
+
+  //pyi is the pyobject representation of the python value of i
+  PyObject *pyi;
+  double i;
+
+  //main stores a dictionary of global variables and I will manipulate i as a global variable
+  main = PyImport_ImportModule("__main__");
+  dict = PyModule_GetDict(main);
+
+  pyi = PyFloat_FromDouble(20.5);
+  PyDict_SetItemString(dict, "i", pyi);
+
+  //load and run the script to manipulate i
+  loadPyScript("python/mapTest.py");
+  PyRun_SimpleString(m_script.c_str());
+
+  pyi = PyMapping_GetItemString(dict, "i");
+  i = PyFloat_AsDouble(pyi);
+  std::cout << i << std::endl;
+
+
+
+
+
+  Py_Finalize();
+}
+
+void Grid::loadPyScript(std::string _script)
+{
+  std::ifstream script(_script.c_str());
+  if (!script.is_open())
+  {
+    std::cerr << "file not found " << _script << std::endl;
+  }
+  m_script = std::string((std::istreambuf_iterator<char>(script)),
+                          std::istreambuf_iterator<char>());
+}
 
 void Grid::init()
 {
   std::cout << "i made a grid! :D " << m_w << ", " << m_h << std::endl;
 
   generateRandomMap(20, 10, 5);
-  printMap();
+  generatePyMap();
+  //printMap();
 }

@@ -57,6 +57,10 @@ public:
   /// @param [in] _seed is the seed passed ot the random number generator
   void generateRandomMap(int _max_rad, int _num_circles, float _seed);
 
+  void generatePyMap();
+
+  void loadPyScript(std::string _script);
+
 private:
   /// @brief initilaiser for the class that should be called by the constructors
   void init();
@@ -69,6 +73,8 @@ private:
 
   /// @brief container for map information
   std::vector<Tile> m_map;
+
+  std::string m_script;
 };
 
 #endif//__GRID_HPP__

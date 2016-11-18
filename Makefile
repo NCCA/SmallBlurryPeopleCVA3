@@ -14,8 +14,8 @@ CC            = gcc
 CXX           = g++
 DEFINES       = -DQT5BUILD -DNGL_DEBUG -DQT_QML_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -I/usr/local/include/SDL2 -D_REENTRANT -msse -msse2 -msse3 -march=native -march=native -g -std=gnu++11 -Wall -W -Wno-unused-parameter -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -Iinclude -isystem /usr/include/python2.7 -I/home/i7624405/NGL/include -I/opt/Qt5.7.0/5.7/gcc_64/include -I/opt/Qt5.7.0/5.7/gcc_64/include/QtGui -I/opt/Qt5.7.0/5.7/gcc_64/include/QtCore -I. -I/opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++
+CXXFLAGS      = -pipe -I/usr/local/include/SDL2 -D_REENTRANT -I/usr/include/python2.7 -I/usr/include/python2.7 -fno-strict-aliasing -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -D_GNU_SOURCE -fPIC -fwrapv -DNDEBUG -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -D_GNU_SOURCE -fPIC -fwrapv -msse -msse2 -msse3 -march=native -march=native -g -std=gnu++11 -Wall -W -Wno-unused-parameter -D_REENTRANT -fPIC $(DEFINES)
+INCPATH       = -I. -Iinclude -I/home/i7624405/NGL/include -I/opt/Qt5.7.0/5.7/gcc_64/include -I/opt/Qt5.7.0/5.7/gcc_64/include/QtGui -I/opt/Qt5.7.0/5.7/gcc_64/include/QtCore -I. -I/opt/Qt5.7.0/5.7/gcc_64/mkspecs/linux-g++
 QMAKE         = /opt/Qt5.7.0/5.7/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = game1.0.0
 DISTDIR = /home/i7624405/CA2/SmallBlurryPeopleCVA3/obj/game1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-z,origin -Wl,-rpath,\$$ORIGIN/L/home/i7624405/NGL/lib -Wl,-rpath,/home/i7624405/NGL/lib -Wl,-rpath,/opt/Qt5.7.0/5.7/gcc_64/lib
-LIBS          = $(SUBLIBS) -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -L/home/i7624405/NGL/lib -l NGL -ltiff -L/opt/Qt5.7.0/5.7/gcc_64/lib -lQt5Gui -L/usr/lib64 -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -ldl -lutil -lm -lpython2.7 -L/home/i7624405/NGL/lib -l NGL -ltiff -L/opt/Qt5.7.0/5.7/gcc_64/lib -lQt5Gui -L/usr/lib64 -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -806,8 +806,8 @@ obj/Camera.o: src/Camera.cpp /home/i7624405/NGL/include/ngl/Util.h \
 		/home/i7624405/NGL/include/ngl/Mat4.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Camera.o src/Camera.cpp
 
-obj/Grid.o: src/Grid.cpp include/Grid.hpp \
-		/home/i7624405/NGL/include/ngl/Vec2.h \
+obj/Grid.o: src/Grid.cpp /home/i7624405/NGL/include/ngl/Random.h \
+		/home/i7624405/NGL/include/ngl/Colour.h \
 		/home/i7624405/NGL/include/ngl/Types.h \
 		/home/i7624405/NGL/include/ngl/glew.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/QGLContext \
@@ -919,7 +919,12 @@ obj/Grid.o: src/Grid.cpp include/Grid.hpp \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qglcolormap.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtOpenGL/qtopenglglobal.h \
 		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/QSurfaceFormat \
-		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h
+		/opt/Qt5.7.0/5.7/gcc_64/include/QtGui/qsurfaceformat.h \
+		/home/i7624405/NGL/include/ngl/Singleton.h \
+		/home/i7624405/NGL/include/ngl/Vec4.h \
+		/home/i7624405/NGL/include/ngl/Vec2.h \
+		/home/i7624405/NGL/include/ngl/Vec3.h \
+		include/Grid.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/Grid.o src/Grid.cpp
 
 obj/Character.o: src/Character.cpp 
