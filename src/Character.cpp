@@ -15,7 +15,6 @@ Character::Character(Grid *_grid):
   m_target_id = m_grid->coordToId(target_pos);
   target_pos = m_grid->idToCoord(m_target_id);
 
-
   update();
 }
 

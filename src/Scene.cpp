@@ -1,6 +1,12 @@
 #include <iostream>
 #include "Scene.hpp"
 
+Scene::Scene() :
+  m_character(&m_grid)
+{
+
+}
+
 void Scene::update()
 {
 	std::cout<<"update\n";

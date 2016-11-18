@@ -2,11 +2,12 @@
 #define __SCENE_HPP__
 
 #include "Grid.hpp"
+#include "Character.hpp"
 
 class Scene
 {
 	public:
-		Scene() = default;
+    Scene();
 		~Scene() = default;
 		bool isActive();
 		void update();
@@ -14,7 +15,7 @@ class Scene
 	private:
 		bool m_active = true;
     Grid m_grid;
-
+    Character m_character;
 };
 
 #endif//__SCENE_HPP__
