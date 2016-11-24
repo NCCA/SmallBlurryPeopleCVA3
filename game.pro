@@ -2,7 +2,8 @@ TARGET = game
 
 OBJECTS_DIR = obj
 
-INCLUDEPATH +=./include
+INCLUDEPATH +=./include \
+                           ./include/imgui
 
 SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Scene.cpp \
@@ -11,7 +12,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Character.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
-         $$PWD/src/imgui/ImGUIImpl.cpp
+         $$PWD/src/imgui/*.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
@@ -19,7 +20,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Character.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
-         $$PWD/include/imgui/ImGUIImpl.h
+         $$PWD/include/imgui/*.h
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 
