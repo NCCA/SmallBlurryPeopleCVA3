@@ -59,17 +59,16 @@ int main()
     // Setup ImGui binding
     ImGuiImplSdlInit(window);
     ImGuiIO& io = ImGui::GetIO();
+		Scene scene;
 
-    Scene scene;
+		glViewport(0, 0, rect.w, rect.h);
+		glClearColor(0.5,0.5,0.5,1);
 
-    glViewport(0, 0, rect.w, rect.h);
-    glClearColor(0.5,0.5,0.5,1);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(window);
@@ -94,22 +93,23 @@ int main()
                 switch(event.type)
                 {
                 case SDL_QUIT : quit = true; break;
-                    //case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(); break;
+								case SDL_MOUSEMOTION : scene.mouseMoveEvent(event.motion); break;
+								case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
+								case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
+								case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
                 default : break;
                 }
             }
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        scene.draw();
+			scene.draw();
+			ImGui::Render();
 
-        ImGui::Render();
+			SDL_GL_SwapWindow(window);
 
-
-        SDL_GL_SwapWindow(window);
-    }
-
+		}
     ImGuiImplSdlShutdown();
 
     SDL_Quit();
