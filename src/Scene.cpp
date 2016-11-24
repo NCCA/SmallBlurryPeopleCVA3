@@ -3,6 +3,9 @@
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
 #include <SDL2/SDL.h>
+
+#include "imgui.h"
+
 #include "Scene.hpp"
 
 Scene::Scene() :
