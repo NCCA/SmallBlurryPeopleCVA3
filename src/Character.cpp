@@ -35,7 +35,7 @@ void Character::update()
 
 void Character::draw()
 {
-  m_grid->printMap();
+  m_grid->print();
   std::cout << "character position: " << m_pos << std::endl;
   std::cout << "character drawn" << std::endl;
 }

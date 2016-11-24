@@ -51,7 +51,6 @@ void Scene::update()
 
 void Scene::draw()
 {
-    std::cout<<"drawing\n";
 
     m_cam.clearTransforms();
     m_cam.rotateCamera(0.0f, m_temp_counter_delete, 0.0f);
