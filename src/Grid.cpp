@@ -29,7 +29,7 @@ Grid::Grid():
   m_h(10),
   m_map(m_w * m_h, Tile::EMPTY)
 {
-  newLayout("python/randomMap.py");
+  newLayout("python/test01Map.py");
 }
 
 Grid::Grid(int _w, int _h):
