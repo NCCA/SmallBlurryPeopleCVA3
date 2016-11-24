@@ -30,10 +30,6 @@ Grid::Grid():
   m_map(m_w * m_h, Tile::EMPTY)
 {
   newLayout("python/defaultMap.py");
-
-  Tile t = read(1, 1);
-  printMap();
-
 }
 
 Grid::Grid(int _w, int _h):
@@ -52,7 +48,7 @@ Grid::Grid(int _w, int _h, std::string _script_path):
   newLayout(_script_path);
 }
 
-void Grid::printMap()
+void Grid::print()
 {
   for(int y = 0; y < m_h; y++)
   {

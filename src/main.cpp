@@ -4,7 +4,8 @@
 
 int main()
 {
-	Scene scene;
+  Scene scene;
+  scene.update();
 
   /*
 	while(scene.isActive())

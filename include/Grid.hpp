@@ -20,6 +20,8 @@ enum class Tile{
                 BUILDING //building tile
                };
 
+std::ostream& operator<<(std::ostream& _os, const Tile _t);
+
 /// @class Grid
 /// @brief A wrapper around a std::vector used to store map information
 class Grid
@@ -43,7 +45,7 @@ public:
   ~Grid() = default;
 
   /// @brief prints the map to the terminal
-  void printMap();
+  void print();
 
   /// @brief returns the value of a tile at the specified width and height coordinate.
   /// It does not perform any error checking that the requested tile exists and will
@@ -53,8 +55,18 @@ public:
   /// @return returns the Tile at the given coordinate
   Tile read(int _x, int _y);
 
+  /// @brief returns the value of a tile at the specified coordinate.
+  /// It does not perform any error checking that the requested tile exists and will
+  /// return garbage if the index is out of range.
+  /// @param [in] _coord is the coordinate as a ngl::Vec2
+  /// @return returns the Tile at the given coordinate
   Tile read(ngl::Vec2 _coord );
 
+  /// @brief returns the value of a tile at the specified width and height coordinate.
+  /// It does not perform any error checking that the requested tile exists and will
+  /// return garbage if the index is out of range.
+  /// @param [in] _id is the 1d coordinate of the tile
+  /// @return returns the Tile at the given coordinate
   Tile read(int _id);
 
   /// @brief sets the value of a tile at a given coordinate
@@ -64,9 +76,18 @@ public:
   /// @param [in] _t is the value to be set at the given coordiate
   void write(int _x, int _y, Tile _t);
 
+  /// @brief sets the value of a tile at a given coordinate
+  /// It does not perform any error checking that the requested tile exists.
+  /// @param [in] _coord is the coordinate as a ngl::Vec2
+  /// @param [in] _t is the value to be set at the given coordiate
   void write(ngl::Vec2 _coord, Tile _t);
 
+  /// @brief sets the value of a tile at a given coordinate
+  /// It does not perform any error checking that the requested tile exists.
+  /// @param [in] _id is the 1d coord of the tile
+  /// @param [in] _t is the value to be set at the given coordiate
   void write(int _id, Tile _t);
+
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
   /// @param [in] the tile id to convert
@@ -83,7 +104,6 @@ public:
   /// function
   /// @param [in] the file path to the script, relative to the programs directory
   void newLayout(std::string _script_path);
-
 
 private:
   /// @brief puts down random set of circles of random terrain types
