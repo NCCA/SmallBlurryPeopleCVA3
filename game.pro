@@ -10,14 +10,16 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Grid.cpp \
          $$PWD/src/Character.cpp \
          $$PWD/src/Prop.cpp \
-         $$PWD/src/Node.cpp
+         $$PWD/src/Node.cpp \
+         $$PWD/src/imgui/ImGUIImpl.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
          $$PWD/include/Grid.hpp \
          $$PWD/include/Character.hpp \
          $$PWD/include/Prop.hpp \
-         $$PWD/include/Node.hpp
+         $$PWD/include/Node.hpp \
+         $$PWD/include/imgui/ImGUIImpl.h
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 
