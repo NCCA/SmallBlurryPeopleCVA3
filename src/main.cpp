@@ -13,7 +13,7 @@ int main()
 		bool quit = false;
 
 		SDL_Rect rect;
-        SDL_GetDisplayBounds(0, &rect);
+		SDL_GetDisplayBounds(0, &rect);
 
 		SDL_Window *window=SDL_CreateWindow("window_test",
 																				SDL_WINDOWPOS_CENTERED,
@@ -28,7 +28,6 @@ int main()
 			SDL_Quit();
 			exit(EXIT_FAILURE);
 		}
-
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -53,16 +52,16 @@ int main()
 
 		ngl::NGLInit::instance();
 
-        Scene scene;
+		Scene scene;
 
-        glViewport(0, 0, rect.w, rect.h);
+		glViewport(0, 0, rect.w, rect.h);
 		glClearColor(0.5,0.5,0.5,1);
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		SDL_GL_SwapWindow(window);
@@ -74,17 +73,20 @@ int main()
 				switch(event.type)
 				{
 					case SDL_QUIT : quit = true; break;
-					//case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(); break;
+					case SDL_MOUSEMOTION : scene.mouseMoveEvent(event.motion); break;
+					case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
+					case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
+					case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
 					default : break;
 				}
 			}
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            scene.draw();
+			scene.draw();
 
 			SDL_GL_SwapWindow(window);
-        }
+		}
 
 		SDL_Quit();
 		return EXIT_SUCCESS;
