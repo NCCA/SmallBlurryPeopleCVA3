@@ -105,6 +105,13 @@ public:
   /// @param [in] the file path to the script, relative to the programs directory
   void newLayout(std::string _script_path);
 
+  /// @brief returns grid width
+  /// @return int width of grid
+  int getW();
+  /// @brief returns grid height
+  /// @return int height of grid
+  int getH();
+
 private:
   /// @brief puts down random set of circles of random terrain types
   /// @param [in] _max_rad is the maximum radius of the circles

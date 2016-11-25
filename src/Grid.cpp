@@ -269,4 +269,14 @@ void Grid::newLayout(std::string _script_path)
   }
 }
 
+int Grid::getW()
+{
+  return m_w;
+}
+
+int Grid::getH()
+{
+  return m_h;
+}
+
 
