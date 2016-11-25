@@ -19,7 +19,24 @@
 #  map_data[tile] = tile_empty
 
 import os
+from PIL import Image
 
-with open("../maps/cross.bmp", "r") as f:
-  img_data = f.read()
-  print img_data
+
+img_filename = "maps/cross2.png"
+im = Image.open(img_filename)
+map_width = im.size[0]
+map_height = im.size[1]
+
+print map_width, map_height
+
+
+map_data = [tile_empty for i in range(map_width * map_height)]
+
+
+for y in range(map_height):
+  for x in range(map_width):
+    xy = (x, y)
+    rgb = im.getpixel(xy)
+    if rgb == (0, 255, 0):
+      map_data[x + map_width * y] = tile_forest
+

@@ -28,7 +28,7 @@ Grid::Grid():
   m_w(1),
   m_h(1)
 {
-  updateScript("python/defaultMap.py");
+  updateScript("python/readImgMap.py");
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -48,11 +48,7 @@ void Grid::runCurrentScript()
   //py_dict is a dictionary of global variables in the script
   PyObject *py_dict = PyModule_GetDict(py_main);
   //py_map is a bridge object between m_map and the python map
-  PyObject *py_map = PyList_New(m_w * m_h);
-  //py_width is a bridge object between m_w and the python variable map_width
-  PyObject *py_width = PyInt_FromLong(m_w);
-  //py_width is a bridge object between m_h and the python variable map_height
-  PyObject *py_height = PyInt_FromLong(m_h);
+  PyObject *py_map;
 
   PyObject *py_tile_error = PyInt_FromLong((int)Tile::ERROR);
   PyObject *py_tile_empty = PyInt_FromLong((int)Tile::EMPTY);
@@ -60,9 +56,6 @@ void Grid::runCurrentScript()
   PyObject *py_tile_building = PyInt_FromLong((int)Tile::BUILDING);
 
   //passing data from the c++ program to the dictionary of global variables in the script
-  //PyDict_SetItemString(py_dict, "map_width", py_width);
-  //PyDict_SetItemString(py_dict, "map_height", py_height);
-  //PyDict_SetItemString(py_dict, "map_data", py_map);
   PyDict_SetItemString(py_dict, "tile_error", py_tile_error);
   PyDict_SetItemString(py_dict, "tile_empty", py_tile_empty);
   PyDict_SetItemString(py_dict, "tile_forest", py_tile_forest);
@@ -72,16 +65,15 @@ void Grid::runCurrentScript()
   PyRun_SimpleString(m_script.c_str());
 
 
-
-
   m_w = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_width"));
   m_h = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_height"));
-  m_map = std::vector<Tile>();//making stuff here, good progress !
+  py_map = PyDict_GetItemString(py_dict, "map_data");
+  m_map = std::vector<Tile>( m_w * m_h, Tile::EMPTY);//making stuff here, good progress !
 
   //get grid values from the script
   for(size_t i = 0; i < m_map.size(); i++)
   {
-    m_map[i] =(Tile)PyInt_AsLong(PyList_GetItem(py_map, i));
+    m_map[i] = (Tile)PyInt_AsLong(PyList_GetItem(py_map, i));
   }
 
   //now that all python operations have finished, I can un-initialize the python libraries
@@ -89,7 +81,7 @@ void Grid::runCurrentScript()
 }
 
 void Grid::print()
-{/*
+{
   for(int y = 0; y < m_h; y++)
   {
     for(int x = 0; x < m_w; x++)
@@ -97,7 +89,7 @@ void Grid::print()
       std::cout << read(x, y) << " ";
     }
     std::cout << std::endl;
-  }*/
+  }
 }
 
 Tile Grid::read(int _x, int _y)

@@ -17,7 +17,7 @@
 map_width = 10
 map_height = 10
 
-map_data = [tile_empty for x in range(map_width * map_height)]
+map_data = [tile_forest for x in range(map_width * map_height)]
 
 
 
