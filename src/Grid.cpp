@@ -29,6 +29,7 @@ Grid::Grid():
   m_h(1)
 {
   updateScript("python/readImgMap.py");
+  print2();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -87,6 +88,25 @@ void Grid::print()
     for(int x = 0; x < m_w; x++)
     {
       std::cout << read(x, y) << " ";
+    }
+    std::cout << std::endl;
+  }
+}
+
+void Grid::print2()
+{
+  for(int y = 0; y < m_h; y++)
+  {
+    for(int x = 0; x < m_w; x++)
+    {
+      Tile t = read(x, y);
+      switch(t)
+      {
+        case(Tile::ERROR): std::cout << "E "; break;
+        case(Tile::BUILDING): std::cout << "X "; break;
+        case(Tile::EMPTY): std::cout << "  "; break;
+        case(Tile::FOREST): std::cout << "X "; break;
+      }
     }
     std::cout << std::endl;
   }

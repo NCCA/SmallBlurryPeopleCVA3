@@ -41,6 +41,8 @@ public:
   /// @brief prints the map to the terminal
   void print();
 
+  void print2();
+
   /// @brief returns the value of a tile at the specified width and height coordinate.
   /// It does not perform any error checking that the requested tile exists and will
   /// return garbage if the index is out of range.

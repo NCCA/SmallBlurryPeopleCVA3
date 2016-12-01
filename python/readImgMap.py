@@ -14,15 +14,17 @@
   tile_building:  Value to be given to a building tile
 """
 
-
-#for tile in map_data:
-#  map_data[tile] = tile_empty
-
 import os
 from PIL import Image
 
 
-img_filename = "maps/cross2.png"
+
+#current map images:
+#cross.png  500x500   green only
+#lines.png  50x50     green only
+#omaga.png  50x50     green only
+#ring.png   50x50     green only
+img_filename = "maps/omega.png"
 im = Image.open(img_filename)
 map_width = im.size[0]
 map_height = im.size[1]
@@ -37,6 +39,6 @@ for y in range(map_height):
   for x in range(map_width):
     xy = (x, y)
     rgb = im.getpixel(xy)
-    if rgb == (0, 255, 0):
+    if rgb == (0, 255, 1):
       map_data[x + map_width * y] = tile_forest
 
