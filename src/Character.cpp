@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <QTime>
 
 Character::Character(Grid *_grid):
   m_grid(_grid)
@@ -15,12 +16,12 @@ Character::Character(Grid *_grid):
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
 
-  m_pos = ngl::Vec2(1, 4);
-
+  //m_pos = ngl::Vec2(1, 4);
+  m_pos = ngl::Vec2(16, 47);
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(9, 8));
+  setTarget(ngl::Vec2(20, 20));
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
@@ -41,6 +42,9 @@ void Character::draw()
 
 void Character::findPath()
 {
+  QTime myTimer;
+  myTimer.start();
+
   std::vector<Node> nodes;
   nodes.push_back(Node(m_grid, &nodes, m_grid->coordToId(m_pos), m_target_id, -1));
 
@@ -144,7 +148,7 @@ void Character::findPath()
           {
             // if lower, update parent to current node
             neighbour->setParent(&nodes, nodes[lowest_f_node_id].getID());
-            std::cout << neighbour->getParentID() << std::endl;
+            //std::cout << neighbour->getParentID() << std::endl;
           }
         }
       }
@@ -158,13 +162,24 @@ void Character::findPath()
     {
       path_found = true;
       // create path with nodes
-      std::cout << "character position" << m_pos << std::endl;
-      std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
-      std::cout << "path found!" << std::endl;
+      //std::cout << "character position" << m_pos << std::endl;
+      //std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
+      //std::cout << "path found!" << std::endl;
+      Node *current_node = &(nodes[lowest_f_node_id]);
+      while(true)
+      {
+        m_path.push_back(current_node->getTileID());
+        if(current_node->getParentID() == -1)
+        {
+          break;
+        }
+        current_node = &(nodes[current_node->getParentID()]);
+      }
+
+      int nMilliseconds = myTimer.elapsed();
+      std::cout << "time taken" << nMilliseconds << std::endl;
     }
   }
-
-  /*
 
   std::cout << "nodes" << std::endl;
 
@@ -223,13 +238,26 @@ void Character::findPath()
     }
     std::cout << std::endl;
   }
-  for(Node &node:nodes)
+  for(int y=0; y<m_grid->getH(); y++)
   {
-    std::cout << node.getTileID() << std::endl;
-    std::cout << node.getPos() << std::endl;
+    for(int x=0; x<m_grid->getW(); x++)
+    {
+      for(int id: m_path)
+      {
+        if(m_grid->coordToId(ngl::Vec2(x, y)) == id)
+        {
+          std::cout << "o";
+        }
+        else
+        {
+          std::cout << " ";
+        }
+      }
+    }
+    std::cout << std::endl;
   }
 
-  */
+  m_grid->print2();
 
 }
 

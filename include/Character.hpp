@@ -43,6 +43,8 @@ private:
   ngl::Vec2 m_pos;
   /// @brief id of target tile on grid
   int m_target_id;
+
+  std::vector<int> m_path;
 };
 
 #endif//__CHARACTER_HPP__

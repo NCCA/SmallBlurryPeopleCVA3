@@ -24,7 +24,7 @@ from PIL import Image
 #lines.png  50x50     green only
 #omaga.png  50x50     green only
 #ring.png   50x50     green only
-img_filename = "maps/omega.png"
+img_filename = "maps/ring.png"
 im = Image.open(img_filename)
 map_width = im.size[0]
 map_height = im.size[1]
