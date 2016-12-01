@@ -24,6 +24,7 @@ private:
     Character m_character;
 
 		bool m_mouse_trans_active;
+		float m_mouse_zoom;
 		float m_mouse_rot;
 
 		ngl::Vec2 m_mouse_translation;
