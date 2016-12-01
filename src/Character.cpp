@@ -19,7 +19,8 @@ Character::Character(Grid *_grid):
 
   m_target_id = m_grid->coordToId(m_pos);
 
-  setTarget(ngl::Vec2(9, 1));
+  //setTarget(ngl::Vec2(9, 1));
+  setTarget(ngl::Vec2(9, 8));
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
@@ -144,6 +145,7 @@ void Character::findPath()
           {
             // if lower, update parent to current node
             neighbour->setParent(&nodes, nodes[lowest_f_node_id].getID());
+            std::cout << neighbour->getParentID() << std::endl;
           }
         }
       }
@@ -162,6 +164,9 @@ void Character::findPath()
       std::cout << "path found!" << std::endl;
     }
   }
+
+  /*
+
   std::cout << "nodes" << std::endl;
 
   for(int y=0; y<m_grid->getH(); y++)
@@ -193,7 +198,7 @@ void Character::findPath()
         }
         else if(m_grid->read(node_tile) != Tile::EMPTY)
         {
-          std::cout << "  #";
+          std::cout << "###";
         }
         else
         {
@@ -214,10 +219,19 @@ void Character::findPath()
           }
           std::cout << nodes[node_id].getGCost();
         }
+        //std::cout << "_" << nodes[node_id].getParentID();
       }
     }
     std::cout << std::endl;
   }
+  for(Node &node:nodes)
+  {
+    std::cout << node.getTileID() << std::endl;
+    std::cout << node.getPos() << std::endl;
+  }
+
+  */
+
 }
 
 void Character::setTarget(ngl::Vec2 _target_pos)

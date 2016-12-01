@@ -38,6 +38,8 @@ class Node
 
     void setParent(std::vector<Node> *_nodes, int _parent_id);
 
+    int getParentID();
+
     std::array<int, 4> getNeighbours(std::vector<Node> *_nodes);
 
   private:

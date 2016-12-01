@@ -1,5 +1,6 @@
 #include "Node.hpp"
 #include <cmath>
+#include "ngl/NGLStream.h"
 
 Node::Node(Grid *_grid, std::vector<Node> *nodes, int _tile_id, int _target_id, int _parent_id):
   m_grid(_grid),
@@ -75,6 +76,11 @@ void Node::setParent(std::vector<Node> *_nodes, int _parent_id)
 {
   m_parent_id = _parent_id;
   m_g_cost = calcGCost(_nodes, m_parent_id);
+}
+
+int Node::getParentID()
+{
+  return m_parent_id;
 }
 
 std::array<int, 4> Node::getNeighbours(std::vector<Node> *_nodes)
