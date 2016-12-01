@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ngl/NGLStream.h>
 #include <ngl/ShaderLib.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
@@ -20,11 +21,12 @@ Scene::Scene() :
 		SDL_GetDisplayBounds(0, &rect);
 
 		m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-		m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
+		m_cam.setInitPos( ngl::Vec3( 0.0f, 0.5f, m_mouse_zoom));
 		m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
+
 		float aspect = (float)rect.w / (float)rect.h;
 		m_cam.setAspect( aspect );
-		m_cam.setFOV( 60.0f );
+		m_cam.setFOV( 45.0f );
 		m_cam.calculateProjectionMat();
 		m_cam.calculateViewMat();
 
@@ -51,20 +53,28 @@ Scene::Scene() :
 
 		ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
-		prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
+		prim->createTrianglePlane("plane",30,30,80,80,ngl::Vec3(0,1,0));
+		prim->createSphere("sphere",0.5f,50);
 }
 
 void Scene::draw()
 {
-		m_cam.setInitPos(ngl::Vec3(0.0f, 1.0f, m_mouse_zoom));
+		m_cam.setInitPos(ngl::Vec3(0.0f, 0.5f, m_mouse_zoom));
 
 		m_cam.clearTransforms();
 
-		ngl::Vec3 trans (m_mouse_translation[0] * 0.1, 0.0f, m_mouse_translation[1] *  0.1);
-
 		m_cam.rotatePivot(m_mouse_pan, m_mouse_rotation, 0.0f);
 
-		m_cam.moveCamera(trans);
+		//ngl::Vec3 trans (m_mouse_translation[0] * 0.1, 0.0f, 0.0f);
+
+		//m_cam.moveCamera(trans);
+
+		ngl::Vec3 right_move (m_cam.right() * m_mouse_translation[0] * 0.1);
+		ngl::Vec3 forwards_move (m_cam.forwards() * m_mouse_translation[1] * 0.1);
+
+		//ngl::Vec3 trans(m_mouse_translation[0] * 0.1, 0.0f, m_mouse_translation[1] * 0.1);
+
+		m_cam.movePivot(right_move + forwards_move);
 
 		m_cam.calculateViewMat();
 
@@ -86,6 +96,16 @@ void Scene::draw()
 			 slib->setRegisteredUniform( "MVP", MVP );
 			 prim->draw("plane");
 		 }
+		 m_transform.reset();
+		 {
+			 m_transform.setPosition(0.0,0.0,0.0);
+			 ngl::Mat4 M = m_transform.getMatrix();
+			 ngl::Mat4 MVP = M * m_cam.getVP();
+			 slib->setRegisteredUniform( "M", M );
+			 slib->setRegisteredUniform( "MVP", MVP );
+			 prim->draw("sphere");
+		 }
+
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -120,6 +140,7 @@ void Scene::mouseMoveEvent(const SDL_MouseMotionEvent &_event)
 		m_mouse_trans_origin[1] = _event.y;
 		this->draw();
 	}
+
 	//rotates
 	else if(m_mouse_rot_active && _event.state &SDL_BUTTON_RMASK)
 	{
@@ -153,7 +174,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 	//pans camera up and down
 	if(_event.y > 0 && m_mouse_zoom > 10)
 	{
-		if (m_mouse_pan > -5)
+		if (m_mouse_pan > 0)
 		{
 			m_mouse_pan -= 0.5;
 		}
@@ -161,7 +182,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 		this->draw();
 	}
 
-	else if(_event.y < 0 && m_mouse_zoom < 20)
+	else if(_event.y < 0 && m_mouse_zoom < 30)
 	{
 		if(m_mouse_pan < 10)
 		{
