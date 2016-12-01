@@ -31,21 +31,17 @@ public:
   /// @brief default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser
   Grid();
 
-  /// @brief ctor that initialises a grid of empty tiles to a user specified size
-  /// @param [in] _w user specified width of the grid
-  /// @param [in] _h user specified height of the grid
-  Grid(int _w, int _h);
-
-  /// @brief ctor that initialises a grid of empty tiles to a user specified size
-  /// @param [in] _w user specified width of the grid
-  /// @param [in] _h user specified height of the grid
-  Grid(int _w, int _h, std::string _script_path);
-
   /// @brief default dtor
   ~Grid() = default;
 
+  void updateScript(std::string _script_path);
+
+  void genMap();
+
   /// @brief prints the map to the terminal
   void print();
+
+  void print2();
 
   /// @brief returns the value of a tile at the specified width and height coordinate.
   /// It does not perform any error checking that the requested tile exists and will
@@ -113,6 +109,10 @@ public:
   int getH();
 
 private:
+
+  void resize(int _w, int _h);
+
+
   /// @brief puts down random set of circles of random terrain types
   /// @param [in] _max_rad is the maximum radius of the circles
   /// @param [in] _num_circles is the number of circles to be put down
@@ -121,12 +121,12 @@ private:
 
   /// @brief runs the given python script to generate a map
   /// @param [in] the script that will set values in m_map
-  void runPyScript(std::string _script);
+  void runCurrentScript();
 
   /// @brief loads the script at the given path, returning the script in a single string
   /// @param [in] path to look for script
   /// @return a string containing the python script to be run
-  std::string loadPyScript(std::string _script_path);
+  void loadScript(std::string _script_path);
 
   /// @brief width of the grid
   int m_w;
@@ -136,6 +136,8 @@ private:
 
   /// @brief container for map information
   std::vector<Tile> m_map;
+
+  std::string m_script;
 };
 
 #endif//__GRID_HPP__

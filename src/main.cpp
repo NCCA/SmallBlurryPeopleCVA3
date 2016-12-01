@@ -9,6 +9,8 @@
 
 int main()
 {
+
+
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
@@ -59,16 +61,16 @@ int main()
     // Setup ImGui binding
     ImGuiImplSdlInit(window);
     ImGuiIO& io = ImGui::GetIO();
-		Scene scene;
+    Scene scene;
 
-		glViewport(0, 0, rect.w, rect.h);
-		glClearColor(0.5,0.5,0.5,1);
+    glViewport(0, 0, rect.w, rect.h);
+    glClearColor(0.5,0.5,0.5,1);
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     glClear(GL_COLOR_BUFFER_BIT);
     SDL_GL_SwapWindow(window);
@@ -80,9 +82,17 @@ int main()
             ImGuiImplSdlProcessEvent(&event);
             ImGuiImplSdlNewFrame(window);
 
-            ImGui::Begin("Main Menu", 0, {256, 128}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+            ImGui::Begin("Main Menu", 0, {128, 256}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
-            bool quitPressed = ImGui::Button("Quit", {256, 128});
+            ImGui::SetCursorPosY(0);
+            bool resumePressed = ImGui::Button("Resume", {128, 64});
+            ImGui::SetCursorPosY( 64 );
+            bool savePressed = ImGui::Button("Save", {128, 64});
+            ImGui::SetCursorPosY( 128 );
+            bool loadPressed = ImGui::Button("Load", {128, 64});
+            ImGui::SetCursorPosY( 186 );
+            bool quitPressed = ImGui::Button("Quit", {128, 64});
+            ImGui::SetCursorPosY( 256 );
             if(quitPressed)
                 quit = true;
 
@@ -93,34 +103,26 @@ int main()
                 switch(event.type)
                 {
                 case SDL_QUIT : quit = true; break;
-								case SDL_MOUSEMOTION : scene.mouseMoveEvent(event.motion); break;
-								case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
-								case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
-								case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
+                case SDL_MOUSEMOTION : scene.mouseMoveEvent(event.motion); break;
+                case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
+                case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
+                case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
                 default : break;
                 }
             }
         }
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			scene.draw();
-			ImGui::Render();
+        scene.draw();
+        ImGui::Render();
 
-			SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(window);
 
-		}
+    }
     ImGuiImplSdlShutdown();
 
     SDL_Quit();
     return EXIT_SUCCESS;
 
-    /*
-        while(scene.isActive())
-        {
-            scene.update();
-            scene.draw();
-        }
-        */
-    //return 0;
 }
