@@ -10,15 +10,26 @@ class Scene
 public:
     Scene();
     ~Scene() = default;
-    bool isActive();
-    void update();
     void draw();
+
+		void mousePressEvent(const SDL_MouseButtonEvent &_event);
+		void mouseMoveEvent (const SDL_MouseMotionEvent &_event);
+		void mouseReleaseEvent(const SDL_MouseButtonEvent &_event);
+		void wheelEvent(const SDL_MouseWheelEvent &_event);
+
 private:
     bool m_active = true;
     Camera m_cam;
     Grid m_grid;
     Character m_character;
-    float m_temp_counter_delete = 0.0f;
+
+		bool m_mouse_trans_active;
+		float m_mouse_rot;
+
+		ngl::Vec2 m_mouse_translation;
+		ngl::Vec2 m_mouse_trans_origin;
+
+
 };
 
 #endif//__SCENE_HPP__
