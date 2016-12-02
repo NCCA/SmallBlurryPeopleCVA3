@@ -103,7 +103,6 @@ int main()
                 switch(event.type)
                 {
                 case SDL_QUIT : quit = true; break;
-                case SDL_MOUSEMOTION : scene.mouseMoveEvent(event.motion); break;
                 case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
                 case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
                 case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
@@ -114,6 +113,7 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        scene.update();
         scene.draw();
         ImGui::Render();
 

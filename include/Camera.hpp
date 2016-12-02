@@ -67,7 +67,7 @@ public:
     /// @brief Gets the back vector of the camera. Just ignore the transpose stuff, it works I swear.
     ngl::Vec3 back() {return m_V.transpose().getBackVector();}
     /// @brief Gets the forwards vector of the camera. Just ignore the transpose stuff, it works I swear.
-    ngl::Vec3 forwards() {return m_V.transpose().getForwardVector();}
+    ngl::Vec3 forwards() {return m_V.getForwardVector();}
     /// @brief Gets the up vector of the camera. Just ignore the transpose stuff, it works I swear.
     ngl::Vec3 up() {return m_V.getUpVector();}
     /// @brief Gets the right vector of the camera. Just ignore the transpose stuff, it works I swear.
