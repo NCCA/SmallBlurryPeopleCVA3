@@ -18,9 +18,6 @@ void Camera::calculateViewMat()
                 m_up
                 );
 
-    /*for(auto i = m_transformationStack.rbegin(); i < m_transformationStack.rend(); ++i)
-        m_V *= (*i);*/
-
     m_V *= m_cameraTransformation;
     m_V *= m_pivotTransformation;
 

@@ -1,6 +1,8 @@
 #ifndef __SCENE_HPP__
 #define __SCENE_HPP__
 
+#include <ngl/Transformation.h>
+
 #include "Grid.hpp"
 #include "Camera.hpp"
 #include "Character.hpp"
@@ -11,17 +13,21 @@ public:
 		Scene();
 		~Scene() = default;
 		void draw();
+        void update();
 
 		void mousePressEvent(const SDL_MouseButtonEvent &_event);
 		void mouseMoveEvent (const SDL_MouseMotionEvent &_event);
 		void mouseReleaseEvent(const SDL_MouseButtonEvent &_event);
 		void wheelEvent(const SDL_MouseWheelEvent &_event);
-
 private:
+        void loadMatricesToShader();
+
 		bool m_active = true;
 		Camera m_cam;
 		Grid m_grid;
 		Character m_character;
+
+        ngl::Transformation m_transform;
 
 		bool m_mouse_trans_active;
 		bool m_mouse_rot_active;
@@ -33,7 +39,7 @@ private:
 		ngl::Vec2 m_mouse_trans_origin;
 		float m_mouse_rot_origin;
 
-
+        float m_temp_debug_counter;
 };
 
 #endif//__SCENE_HPP__
