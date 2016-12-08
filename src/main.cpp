@@ -6,11 +6,10 @@
 #include "ImGUIImpl.h"
 
 #include "Scene.hpp"
-
+#include "GridTile.hpp"
 int main()
 {
-
-
+/*
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
@@ -123,6 +122,7 @@ int main()
     ImGuiImplSdlShutdown();
 
     SDL_Quit();
+    */
     return EXIT_SUCCESS;
 
 }
