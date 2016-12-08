@@ -10,8 +10,12 @@
 #include <array>
 #include <QTime>
 
-Character::Character(Grid *_grid):
-  m_grid(_grid)
+int Character::m_id_counter(0);
+
+Character::Character(Grid *_grid, std::string _name):
+	m_id(m_id_counter++),
+	m_name(_name),
+	m_grid(_grid)
 {
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
@@ -275,3 +279,11 @@ void Character::setTarget(int _tile_id)
     findPath();
   }
 }
+
+///////////////////////////////
+void Character::printID()
+{
+	std::cout<<m_id<<" :ID\n"<<m_name<<" :name\n";
+}
+
+///////////////////////////////

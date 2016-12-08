@@ -9,7 +9,6 @@
 #include "Scene.hpp"
 
 Scene::Scene() :
-    m_character(&m_grid),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
@@ -49,6 +48,22 @@ Scene::Scene() :
     slib->attachShaderToProgram(name, frag);
 
     slib->linkProgramObject(name);
+
+		/////////////////////////////////////////////////////////
+
+		m_character.push_back(Character(&m_grid, "Paul"));
+		m_character.push_back(Character(&m_grid, "Alison"));
+		for (auto &c: m_character)
+			c.printID();
+
+		//character_names = std::string [m_character.size()]);
+		for (size_t i = 0; i<m_character.size(); i++)
+		{
+			character_names.push_back(m_character[i].getName());
+		}
+
+
+	////////////////////////////////////////////////////////////////
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
