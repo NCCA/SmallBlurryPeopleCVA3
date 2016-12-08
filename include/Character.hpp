@@ -28,6 +28,9 @@ public:
   /// @brief pathfinding function to get nodes for pathfinding
   void findPath();
 
+  /// @brief calculate vector towards next point
+  ngl::Vec2 calcAimVec(float *dist_squared);
+
   /// @brief set a new target position based on a position
   /// @param [in] _target_pos is the position to pathfind to
   void setTarget(ngl::Vec2 _target_pos);
@@ -43,8 +46,10 @@ private:
   ngl::Vec2 m_pos;
   /// @brief id of target tile on grid
   int m_target_id;
-
-  std::vector<int> m_path;
+  /// @brief max speed of character
+  float m_speed;
+  /// @brief list of target positions for movement
+  std::vector<ngl::Vec2> m_path;
 };
 
 #endif//__CHARACTER_HPP__

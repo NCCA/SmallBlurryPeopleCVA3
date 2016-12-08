@@ -11,7 +11,8 @@
 #include <QTime>
 
 Character::Character(Grid *_grid):
-  m_grid(_grid)
+  m_grid(_grid),
+  m_speed(0.1)
 {
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
@@ -25,13 +26,29 @@ Character::Character(Grid *_grid):
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
-  update();
 }
 
 void Character::update()
 {
   std::cout << "character updated" << std::endl;
-  draw();
+
+  // move by distance up to speed
+  float dist_moved = 0;
+  while(m_path.size() > 0 && dist_moved < m_speed)
+  {
+    float dist = 0;
+    ngl::Vec2 aim_vec = calcAimVec(&dist);
+    if(dist < m_speed)
+    {
+      aim_vec *= dist;
+    }
+    else
+    {
+      aim_vec *= m_speed;
+    }
+    dist_moved += aim_vec.length();
+    m_pos += aim_vec;
+  }
 }
 
 void Character::draw()
@@ -168,7 +185,7 @@ void Character::findPath()
       Node *current_node = &(nodes[lowest_f_node_id]);
       while(true)
       {
-        m_path.push_back(current_node->getTileID());
+        m_path.push_back(current_node->getPos());
         if(current_node->getParentID() == -1)
         {
           break;
@@ -242,9 +259,9 @@ void Character::findPath()
   {
     for(int x=0; x<m_grid->getW(); x++)
     {
-      for(int id: m_path)
+      for(ngl::Vec2 pos: m_path)
       {
-        if(m_grid->coordToId(ngl::Vec2(x, y)) == id)
+        if(ngl::Vec2(x,y) == pos)
         {
           std::cout << "o";
         }
@@ -259,6 +276,17 @@ void Character::findPath()
 
   m_grid->print2();
 
+}
+
+ngl::Vec2 Character::calcAimVec(float *dist)
+{
+  ngl::Vec2 aim_vec = m_path.back() - m_pos;
+  if(dist)
+  {
+    *dist = aim_vec.length();
+  }
+  aim_vec.normalize();
+  return aim_vec;
 }
 
 void Character::setTarget(ngl::Vec2 _target_pos)
