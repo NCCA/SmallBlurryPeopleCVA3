@@ -16,12 +16,12 @@ Character::Character(Grid *_grid):
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
 
-  //m_pos = ngl::Vec2(1, 4);
+  m_pos = ngl::Vec2(1, 4);
   m_pos = ngl::Vec2(16, 47);
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(20, 20));
+  setTarget(ngl::Vec2(20, 47));
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
