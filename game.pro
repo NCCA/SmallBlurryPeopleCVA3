@@ -30,6 +30,7 @@ QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
 CONFIG += c++11
 
 LIBS+=$$system(sdl2-config --libs)
+LIBS+= -lSDL2_image
 LIBS+=$$system(python2.7-config --libs)
 
 include($(HOME)/NGL/UseNGL.pri)
