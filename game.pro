@@ -12,6 +12,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Character.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
+         $$PWD/src/NodeNetwork.cpp \
          $$PWD/src/imgui/*.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
@@ -20,6 +21,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Character.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
+         $$PWD/include/NodeNetwork.hpp \
          $$PWD/include/imgui/*.h
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
