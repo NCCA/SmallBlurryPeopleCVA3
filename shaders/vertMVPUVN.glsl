@@ -14,6 +14,7 @@ uniform mat3 normalMat;
 void main()
 {
     gl_Position = MVP * inPosition;
-    UV = inUV;
+    //Weird, I seem to have to flip the y uv.
+    UV = vec2(inUV.x, -inUV.y);
     normal = /*normalMat */ inNormal;
 }

@@ -5,6 +5,7 @@
 
 #include <ngl/Transformation.h>
 
+#include "AssetStore.hpp"
 #include "Grid.hpp"
 #include "Camera.hpp"
 #include "Character.hpp"
@@ -12,39 +13,43 @@
 class Scene
 {
 public:
-		Scene();
-		~Scene() = default;
-		void draw();
-		void update();
+    Scene();
+    ~Scene() = default;
+    void draw();
+    void update();
 
-		void mousePressEvent(const SDL_MouseButtonEvent &_event);
-		void mouseReleaseEvent(const SDL_MouseButtonEvent &_event);
-		void wheelEvent(const SDL_MouseWheelEvent &_event);
+    void mousePressEvent(const SDL_MouseButtonEvent &_event);
+    void mouseReleaseEvent(const SDL_MouseButtonEvent &_event);
+    void wheelEvent(const SDL_MouseWheelEvent &_event);
 
-		std::vector<std::string> character_names;
+    std::vector<std::string> character_names;
 
 private:
+    //std::shared_ptr <std::string []> character_names;
+    void loadMatricesToShader();
+    bool m_active = true;
+    Camera m_cam;
+    Grid m_grid;
+    std::vector<Character> m_characters;
 
-		//std::shared_ptr <std::string []> character_names;
-		void loadMatricesToShader();
-		bool m_active = true;
-		Camera m_cam;
-		Grid m_grid;
-		std::vector<Character> m_characters;
+    ngl::Transformation m_transform;
 
-		ngl::Transformation m_transform;
+    bool m_mouse_trans_active;
+    bool m_mouse_rot_active;
+    float m_mouse_zoom;
+    float m_mouse_pan;
 
-		bool m_mouse_trans_active;
-		bool m_mouse_rot_active;
-		float m_mouse_zoom;
-		float m_mouse_pan;
+    ngl::Vec2 m_mouse_translation;
+    float m_mouse_rotation;
+    ngl::Vec2 m_mouse_trans_origin;
+    float m_mouse_rot_origin;
 
-		ngl::Vec2 m_mouse_translation;
-		float m_mouse_rotation;
-		ngl::Vec2 m_mouse_trans_origin;
-		float m_mouse_rot_origin;
+    AssetStore m_store;
 
+    void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
+    void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
 
+    void createShader(const std::string _name, const std::string _vert, const std::string _frag);
 };
 
 #endif//__SCENE_HPP__
