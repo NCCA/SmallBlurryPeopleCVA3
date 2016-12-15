@@ -30,7 +30,7 @@ private:
 		bool m_active = true;
 		Camera m_cam;
 		Grid m_grid;
-		std::vector<Character> m_character;
+		std::vector<Character> m_characters;
 
 		ngl::Transformation m_transform;
 

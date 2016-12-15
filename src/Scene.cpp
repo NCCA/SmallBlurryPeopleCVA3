@@ -54,23 +54,17 @@ Scene::Scene() :
 		m_character.push_back(Character(&m_grid));
 		m_character.push_back(Character(&m_grid));
 
-		std::vector<std::string> names = {"Paul", "Susan"};
+		character_names = {"Paul", "Susan"};
 
 		std::unordered_map<std::string, int> m_char_map;
 
 		for (size_t i = 0; i<m_character.size(); i++)
 		{
-			m_char_map[names[i]] =  m_character[i].getID();
-			std::cout<<names[i]<<" :name, "<< m_char_map[names[i]]<<": ID\n";
+			m_char_map[character_names[i]] =  m_character[i].getID();
+			std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
 		}
 
 
-
-		//character_names = std::string [m_character.size()]);
-		//for (size_t i = 0; i<m_character.size(); i++)
-		//{
-		//	character_names.push_back(m_character[i].getName());
-		//}
 
 
 	////////////////////////////////////////////////////////////////
