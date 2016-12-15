@@ -103,6 +103,8 @@ void Scene::update()
     m_cam.movePivot( trans );
 
     m_cam.calculateViewMat();
+
+    m_character.update();
 }
 
 void Scene::draw()
