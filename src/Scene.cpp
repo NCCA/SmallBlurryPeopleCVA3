@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <random>
 #include <ngl/ShaderLib.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
@@ -51,21 +53,22 @@ Scene::Scene() :
 
 		/////////////////////////////////////////////////////////
 
-		m_character.push_back(Character(&m_grid));
-		m_character.push_back(Character(&m_grid));
+		int numberNames = readNameFile();
 
-		character_names = {"Paul", "Susan"};
+		std::random_device rnd;
+		std::mt19937 mt_rand(rnd());
+		std::uniform_int_distribution<int> nameNo(0,numberNames);
+		int name_chosen = nameNo(mt_rand);
+
+		m_characters.push_back(Character(&m_grid));
+		character_names.push_back(getName(name_chosen));
 
 		std::unordered_map<std::string, int> m_char_map;
 
-		for (size_t i = 0; i<m_character.size(); i++)
+		for (size_t i = 0; i<m_characters.size(); i++)
 		{
-			m_char_map[character_names[i]] =  m_character[i].getID();
-			std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
+			m_char_map[character_names[i]] =  m_characters[i].getID();
 		}
-
-
-
 
 	////////////////////////////////////////////////////////////////
 
@@ -73,6 +76,59 @@ Scene::Scene() :
 
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
     prim->createSphere( "sphere", 0.1, 12 );
+}
+
+int Scene::readNameFile()
+{
+	std::ifstream namesFile;
+	namesFile.open("names/game_names.txt");
+
+	if(!namesFile.is_open())
+	{
+		std::cerr<<"Couldnt open file\n";
+		exit(EXIT_FAILURE);
+	}
+
+	int lineNo = 0;
+	std::string lineBuffer;
+	while (!namesFile.eof())
+	{
+		std::getline(namesFile, lineBuffer, '\n');
+		if(lineBuffer.size() != 0)
+		{
+			lineNo++;
+		}
+	}
+	namesFile.close();
+	return lineNo;
+
+}
+
+std::string Scene::getName(int line_number)
+{
+	std::ifstream namesFile;
+	namesFile.open("names/game_names.txt");
+
+	if(!namesFile.is_open())
+	{
+		std::cerr<<"Couldnt open file\n";
+		exit(EXIT_FAILURE);
+	}
+
+	int lineNo = 0;
+	std::string name;
+	std::string lineBuffer;
+	while (!namesFile.eof())
+	{
+		std::getline(namesFile, lineBuffer, '\n');
+		if(lineBuffer.size() != 0)
+		{
+			if (lineNo == line_number) name = lineBuffer;
+			lineNo++;
+		}
+	}
+	namesFile.close();
+	return name;
 }
 
 void Scene::update()
@@ -154,7 +210,17 @@ void Scene::draw()
         }
     }
 }
-
+///////////////////////////////////////////////////////////////////
+const char** Scene::getNameArray()
+{
+	const char* names[character_names.size()];
+	for (size_t i = 0; i< character_names.size(); i++)
+	{
+		names[i]= character_names[i].c_str();
+	}
+	return names;
+}
+/////////////////////////////////////////////////////////////////////
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
 {
     //checks if the left button has been pressed down and flags start

@@ -14,6 +14,10 @@ class Scene
 public:
 		Scene();
 		~Scene() = default;
+
+		int readNameFile();
+		std::string getName(int line_number);
+
 		void draw();
 		void update();
 
@@ -22,10 +26,10 @@ public:
 		void wheelEvent(const SDL_MouseWheelEvent &_event);
 
 		std::vector<std::string> character_names;
+		const char** getNameArray();
 
 private:
 
-		//std::shared_ptr <std::string []> character_names;
 		void loadMatricesToShader();
 		bool m_active = true;
 		Camera m_cam;

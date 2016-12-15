@@ -86,14 +86,10 @@ int main()
 
             ImGui::SetCursorPosY(0);
 
-						const char* names[scene.character_names.size()];
-						for (size_t i = 0; i< scene.character_names.size(); i++)
-						{
-							names[i]= scene.character_names[i].c_str();
-						}
 						static int current_character_name = -1;
+						const char** names = scene.getNameArray();
 						//current_character_name stores current element of char *array that has been selected
-						bool character_chosen = ImGui::Combo("character_select", &current_character_name, names, (sizeof(names)/sizeof(char*)));
+						bool character_chosen = ImGui::Combo("character_select", &current_character_name, names, (sizeof(names)/sizeof(char**)));
             ImGui::SetCursorPosY( 64 );
             bool savePressed = ImGui::Button("Save", {128, 64});
             ImGui::SetCursorPosY( 128 );
