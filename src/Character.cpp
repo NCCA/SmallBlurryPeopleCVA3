@@ -283,6 +283,7 @@ void Character::findPath()
   }
 
   m_grid->printTrees();
+  m_grid->printHeight();
 }
 
 ngl::Vec2 Character::calcAimVec(float *dist)

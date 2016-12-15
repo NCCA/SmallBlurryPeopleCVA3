@@ -80,7 +80,7 @@ void Grid::runCurrentScript()
   {
     m_map[i] = (Tile)PyInt_AsLong(PyList_GetItem(py_map, i));
     int num_trees = PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
-    int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    float height =  PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(py_map, i), 1));
     m_tiles[i].setNumTrees(num_trees);
     m_tiles[i].setHeight(height);
 
