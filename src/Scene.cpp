@@ -31,29 +31,16 @@ Scene::Scene() :
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    const std::string name = "simplesurface";
-    const std::string vert = "vertMVPUVN";
-    const std::string frag = "fragBasicLight";
-
-    slib->createShaderProgram( name );
-    slib->attachShader(vert, ngl::ShaderType::VERTEX);
-    slib->attachShader(frag, ngl::ShaderType::FRAGMENT);
-
-    slib->loadShaderSource(vert, "shaders/" + vert + ".glsl");
-    slib->loadShaderSource(frag, "shaders/" + frag + ".glsl");
-
-    slib->compileShader(vert);
-    slib->compileShader(frag);
-
-    slib->attachShaderToProgram(name, vert);
-    slib->attachShaderToProgram(name, frag);
-
-    slib->linkProgramObject(name);
+    createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
+    createShader("blinn", "vertMVPUVN", "fragBlinn" );
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
     prim->createSphere( "sphere", 0.1, 12 );
+
+    m_store.loadMesh("knight", "knight/knight.obj");
+    m_store.loadTexture("knight_d", "knight/knight_d.png");
 }
 
 void Scene::update()
@@ -116,24 +103,19 @@ void Scene::draw()
     ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
     m_transform.reset();
-    {
-        m_transform.setPosition(0.0,-0.5,0.0);
-        loadMatricesToShader();
-        prim->draw("plane");
-    }
+    m_transform.setPosition(0.0,-0.5,0.0);
+    loadMatricesToShader();
+    prim->draw("plane");
 
-    for(int i = -10; i < 10; ++i)
-    {
-        for(int j = -10; j < 10; ++j)
+    for(int i = 0; i < 20; ++i)
+        for(int j = 0; j < 20; ++j)
         {
-            for(int k = -10; k < 10; ++k)
-            {
-                m_transform.setPosition(i, j, k);
-                loadMatricesToShader();
-                prim->draw("sphere");
-            }
+            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
+            //slib->use("blinn");
+            loadMatricesToShader();
+            drawAsset( "knight", "knight_d", "blinn" );
+            //m_store.getModel("knight")->draw();
         }
-    }
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -200,4 +182,71 @@ void Scene::loadMatricesToShader()
     ngl::Mat4 MVP = M * m_cam.getVP();
     slib->setRegisteredUniform( "M", M );
     slib->setRegisteredUniform( "MVP", MVP );
+}
+
+void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    GLint spid = slib->getProgramID( _shaderID );
+    GLint loc = glGetUniformLocation(spid, _uniform);
+
+    if(loc == -1)
+    {
+        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+        return;
+    }
+    glUniform1i(loc, _target);
+
+    glActiveTexture(GL_TEXTURE0+_target);
+    glBindTexture(GL_TEXTURE_2D, _tex);
+}
+
+void Scene::drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader)
+{
+    if(_shader != "")
+    {
+        ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+        slib->use( _shader );
+    }
+
+    ngl::Obj * m = m_store.getModel(_model);
+    if(m == nullptr)
+    {
+        std::cerr << "Error! Mesh " << _model << " doesn't exist!\n";
+        return;
+    }
+
+    if(_texture != "")
+    {
+        GLuint t = m_store.getTexture( _texture );
+        if(t == 0)
+        {
+            std::cerr << "Error! Texture " << _texture << " doesn't exist!\n";
+            return;
+        }
+        bindTextureToShader(_shader, t, "diffuse", 0);
+    }
+
+    loadMatricesToShader();
+    m->draw();
+}
+
+void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+
+    slib->createShaderProgram( _name );
+    slib->attachShader(_vert, ngl::ShaderType::VERTEX);
+    slib->attachShader(_frag, ngl::ShaderType::FRAGMENT);
+
+    slib->loadShaderSource(_vert, "shaders/" + _vert + ".glsl");
+    slib->loadShaderSource(_frag, "shaders/" + _frag + ".glsl");
+
+    slib->compileShader(_vert);
+    slib->compileShader(_frag);
+
+    slib->attachShaderToProgram(_name, _vert);
+    slib->attachShaderToProgram(_name, _frag);
+
+    slib->linkProgramObject(_name);
 }
