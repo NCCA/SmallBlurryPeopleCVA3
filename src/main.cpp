@@ -9,9 +9,6 @@
 #include "Grid.hpp"
 int main()
 {
-  Grid g;
-  g.printTrees();
-/*
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
@@ -124,7 +121,6 @@ int main()
     ImGuiImplSdlShutdown();
 
     SDL_Quit();
-    */
     return EXIT_SUCCESS;
 
 }
