@@ -16,7 +16,7 @@ class Character
 public:
   /// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
-  Character(Grid *_grid);
+	Character(Grid *_grid);
   ~Character() = default;
 
   /// @brief updates character, including movement
@@ -39,7 +39,16 @@ public:
   /// @brief [in] _tile_id is the tile id to pathfind to
   void setTarget(int _tile_id);
 
+	////////////////
+	void printID();
+	int getID() {return m_id;}
+	///////////////
+
 private:
+	/// @brief counts how many objects have been created
+	static int m_id_counter;
+	/// @brief current object's id
+	const int m_id;
   /// @brief grid to reference for pathfinding
   Grid *m_grid;
   /// @brief character position

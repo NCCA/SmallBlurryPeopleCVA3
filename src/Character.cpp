@@ -11,9 +11,12 @@
 #include <array>
 #include <QTime>
 
+int Character::m_id_counter(0);
+
 Character::Character(Grid *_grid):
   m_grid(_grid),
-  m_speed(0.1)
+  m_speed(0.1),
+  m_id(m_id_counter++)
 {
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
@@ -314,4 +317,9 @@ void Character::setTarget(int _tile_id)
     m_target_id = _tile_id;
     findPath();
   }
+}
+
+void Character::printID()
+{
+	std::cout<<m_id<<" :ID\n";
 }
