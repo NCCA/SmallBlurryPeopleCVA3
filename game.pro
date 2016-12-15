@@ -13,7 +13,8 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
          $$PWD/src/NodeNetwork.cpp \
-         $$PWD/src/imgui/*.cpp
+         $$PWD/src/imgui/*.cpp \
+         $$PWD/src/AssetStore.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
@@ -22,7 +23,8 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
          $$PWD/include/NodeNetwork.hpp \
-         $$PWD/include/imgui/*.h
+         $$PWD/include/imgui/*.h \
+         $$PWD/include/AssetStore.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
@@ -30,6 +32,7 @@ QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
 CONFIG += c++11
 
 LIBS+=$$system(sdl2-config --libs)
+LIBS+= -lSDL2_image
 LIBS+=$$system(python2.7-config --libs)
 
 include($(HOME)/NGL/UseNGL.pri)
