@@ -10,7 +10,7 @@ GridTile::GridTile(int id):
 
 bool GridTile::isTraversable()
 {
-  if(m_trees == 0 & m_building == BuildingType::NONE)
+  if(m_trees == 0 && m_building == BuildingType::NONE)
   {
     return true;
   }

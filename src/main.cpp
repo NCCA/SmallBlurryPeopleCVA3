@@ -1,4 +1,4 @@
-#include <SDL.h>
+ #include <SDL.h>
 #include <iostream>
 #include <ngl/NGLInit.h>
 
@@ -6,9 +6,11 @@
 #include "ImGUIImpl.h"
 
 #include "Scene.hpp"
-#include "GridTile.hpp"
+#include "Grid.hpp"
 int main()
 {
+  Grid g;
+  g.printTrees();
 /*
     SDL_Init(SDL_INIT_VIDEO);
 

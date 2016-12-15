@@ -65,16 +65,25 @@ void Grid::runCurrentScript()
   //run the script
   PyRun_SimpleString(m_script.c_str());
 
-
+  //extract width and height
   m_w = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_width"));
   m_h = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_height"));
   py_map = PyDict_GetItemString(py_dict, "map_data");
-  m_map = std::vector<Tile>( m_w * m_h, Tile::EMPTY);//making stuff here, good progress !
+  m_map = std::vector<Tile>( m_w * m_h, Tile::EMPTY);
+  for (int i = 0; i < m_w * m_h; i++)
+  {
+    m_tiles.push_back(GridTile(i));
+  }
 
   //get grid values from the script
   for(size_t i = 0; i < m_map.size(); i++)
   {
     m_map[i] = (Tile)PyInt_AsLong(PyList_GetItem(py_map, i));
+    int num_trees = PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
+    int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    m_tiles[i].setNumTrees(num_trees);
+    m_tiles[i].setHeight(height);
+
   }
 
   //now that all python operations have finished, I can un-initialize the python libraries
@@ -88,6 +97,32 @@ void Grid::print()
     for(int x = 0; x < m_w; x++)
     {
       std::cout << read(x, y) << " ";
+    }
+    std::cout << std::endl;
+  }
+}
+
+void Grid::printHeight()
+{
+  for(int y = 0; y < m_h; y++)
+  {
+    for(int x = 0; x < m_w; x++)
+    {
+      GridTile t = get(x, y);
+      std::cout << t.getHeight() << " ";
+    }
+    std::cout << std::endl;
+  }
+}
+
+void Grid::printTrees()
+{
+  for(int y = 0; y < m_h; y++)
+  {
+    for(int x = 0; x < m_w; x++)
+    {
+      GridTile t = get(x, y);
+      std::cout << t.getNumTrees() << " ";
     }
     std::cout << std::endl;
   }
@@ -112,6 +147,31 @@ void Grid::print2()
   }
 }
 
+std::vector<ngl::Vec3> Grid::getTriangles()
+{
+  //initialize vector of points for triangles
+  std::vector<ngl::Vec3> tris;
+
+  for (int y = 0; y < m_h; y++)
+  {
+    for (int x = 0; x < m_w; x++)
+    {
+      ngl::Vec3 v1(x, 0, y);
+      ngl::Vec3 v2(x+1, 0, y);
+      ngl::Vec3 v3(x, 0, y+1);
+      ngl::Vec3 v4(x+1, 0, y+1);
+      tris.push_back(v1);
+      tris.push_back(v2);
+      tris.push_back(v3);
+      tris.push_back(v2);
+      tris.push_back(v4);
+      tris.push_back(v3);
+    }
+  }
+
+  return tris;
+}
+
 Tile Grid::read(int _x, int _y)
 {
   if (_x >= 0 &&
@@ -124,6 +184,21 @@ Tile Grid::read(int _x, int _y)
   else
   {
     return Tile::ERROR;
+  }
+}
+
+GridTile Grid::get(int _x, int _y)
+{
+  if (_x >= 0 &&
+      _y >= 0 &&
+      _x < m_w &&
+      _y < m_h)
+  {
+    return m_tiles[_x + _y * m_w];
+  }
+  else
+  {
+    return GridTile(-1);
   }
 }
 
@@ -142,6 +217,21 @@ Tile Grid::read(ngl::Vec2 _coord)
   }
 }
 
+GridTile Grid::get(ngl::Vec2 _coord)
+{
+  if (_coord.m_x >= 0 &&
+      _coord.m_y >= 0 &&
+      _coord.m_x < m_w &&
+      _coord.m_y < m_h)
+  {
+    return m_tiles[_coord.m_x + _coord.m_y * m_w];
+  }
+  else
+  {
+    return GridTile(-1);
+  }
+}
+
 Tile Grid::read(int _id)
 {
   if (_id >= 0 &&
@@ -155,6 +245,18 @@ Tile Grid::read(int _id)
   }
 }
 
+GridTile Grid::get(int _id)
+{
+  if (_id >= 0 && (size_t)_id < m_map.size())
+  {
+    return m_tiles[_id];
+  }
+  else
+  {
+    return GridTile(-1);
+  }
+}
+
 void Grid::write(int _x, int _y, Tile _t)
 {
   if (_x >= 0 &&
@@ -163,6 +265,21 @@ void Grid::write(int _x, int _y, Tile _t)
       _y < m_h)
   {
     m_map[_x + _y * m_w] = _t;
+  }
+  else
+  {
+    std::cerr << "ERROR: Attemtping to write tile out of range\n";
+  }
+}
+
+void Grid::set(int _x, int _y, GridTile _t)
+{
+  if (_x >= 0 &&
+      _y >= 0 &&
+      _x < m_w &&
+      _y < m_h)
+  {
+    m_tiles[_x + _y * m_w] = _t;
   }
   else
   {
@@ -185,6 +302,21 @@ void Grid::write(ngl::Vec2 _coord, Tile _t)
   }
 }
 
+void Grid::set(ngl::Vec2 _coord, GridTile _t)
+{
+  if (_coord.m_x >= 0 &&
+      _coord.m_y >= 0 &&
+      _coord.m_x < m_w &&
+      _coord.m_y < m_h)
+  {
+    m_tiles[_coord.m_x + _coord.m_y * m_w] = _t;
+  }
+  else
+  {
+    std::cerr << "ERROR: Attemtping to write tile out of range\n";
+  }
+}
+
 void Grid::write(int _id, Tile _t)
 {
   if (_id >= 0 &&
@@ -198,6 +330,18 @@ void Grid::write(int _id, Tile _t)
   }
 }
 
+void Grid::set(int _id, GridTile _t)
+{
+  if (_id >= 0 && (size_t)_id < m_map.size())
+  {
+    m_tiles[_id] = _t;
+  }
+  else
+  {
+    std::cerr << "ERROR: Attemtping to write tile out of range\n";
+  }
+}
+
 ngl::Vec2 Grid::idToCoord(int _tileId)
 {
   int x = _tileId % m_w;
@@ -207,8 +351,6 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-  int x = (int)_coord.m_x;
-  int y = (int)_coord.m_y;
   return _coord.m_x + m_w * _coord.m_y;
 }
 

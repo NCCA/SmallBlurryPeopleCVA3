@@ -32,7 +32,7 @@ map_height = im.size[1]
 print map_width, map_height
 
 
-map_data = [tile_empty for i in range(map_width * map_height)]
+map_data = [[0, 0] for i in range(map_width * map_height)]
 
 
 for y in range(map_height):
@@ -40,5 +40,6 @@ for y in range(map_height):
     xy = (x, y)
     rgb = im.getpixel(xy)
     if rgb == (0, 255, 1):
-      map_data[x + map_width * y] = tile_forest
+      map_data[x + map_width * y][0] = 9;
+      map_data[x + map_width * y][1] = 1;
 

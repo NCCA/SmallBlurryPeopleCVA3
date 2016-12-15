@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <ngl/Vec2.h>
+#include <ngl/Vec3.h>
+#include "GridTile.hpp"
 
 
 /// @file Grid.hpp
@@ -43,6 +45,12 @@ public:
 
   void print2();
 
+  void printHeight();
+  //void printType();
+  void printTrees();
+
+  std::vector<ngl::Vec3> getTriangles();
+
   /// @brief returns the value of a tile at the specified width and height coordinate.
   /// It does not perform any error checking that the requested tile exists and will
   /// return garbage if the index is out of range.
@@ -50,13 +58,15 @@ public:
   /// @param [in] _y is the y coordinate of the requested tile
   /// @return returns the Tile at the given coordinate
   Tile read(int _x, int _y);
+  GridTile get(int _x, int _y);
 
   /// @brief returns the value of a tile at the specified coordinate.
   /// It does not perform any error checking that the requested tile exists and will
   /// return garbage if the index is out of range.
   /// @param [in] _coord is the coordinate as a ngl::Vec2
   /// @return returns the Tile at the given coordinate
-  Tile read(ngl::Vec2 _coord );
+  Tile read(ngl::Vec2 _coord);
+  GridTile get(ngl::Vec2 _coord);
 
   /// @brief returns the value of a tile at the specified width and height coordinate.
   /// It does not perform any error checking that the requested tile exists and will
@@ -64,6 +74,7 @@ public:
   /// @param [in] _id is the 1d coordinate of the tile
   /// @return returns the Tile at the given coordinate
   Tile read(int _id);
+  GridTile get(int _id);
 
   /// @brief sets the value of a tile at a given coordinate
   /// It does not perform any error checking that the requested tile exists.
@@ -71,18 +82,21 @@ public:
   /// @param [in] _y is the y coordinate of the tile to be set
   /// @param [in] _t is the value to be set at the given coordiate
   void write(int _x, int _y, Tile _t);
+  void set(int _x, int _y, GridTile _t);
 
   /// @brief sets the value of a tile at a given coordinate
   /// It does not perform any error checking that the requested tile exists.
   /// @param [in] _coord is the coordinate as a ngl::Vec2
   /// @param [in] _t is the value to be set at the given coordiate
   void write(ngl::Vec2 _coord, Tile _t);
+  void set(ngl::Vec2 _coord, GridTile _t);
 
   /// @brief sets the value of a tile at a given coordinate
   /// It does not perform any error checking that the requested tile exists.
   /// @param [in] _id is the 1d coord of the tile
   /// @param [in] _t is the value to be set at the given coordiate
   void write(int _id, Tile _t);
+  void set(int _id, GridTile _t);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
@@ -129,6 +143,7 @@ private:
 
   /// @brief container for map information
   std::vector<Tile> m_map;
+  std::vector<GridTile> m_tiles;
 
   std::string m_script;
 };
