@@ -16,7 +16,7 @@ class Character
 public:
   /// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
-	Character(Grid *_grid, std::string _name);
+	Character(Grid *_grid);
   ~Character() = default;
 
   /// @brief updates character, including movement
@@ -38,7 +38,7 @@ public:
 
 	////////////////
 	void printID();
-	std::string getName() {return m_name;}
+	int getID() {return m_id;}
 	///////////////
 
 private:
@@ -46,8 +46,6 @@ private:
 	static int m_id_counter;
 	/// @brief current object's id
 	const int m_id;
-	/// @brief character's name
-	std::string m_name;
   /// @brief grid to reference for pathfinding
   Grid *m_grid;
   /// @brief character position

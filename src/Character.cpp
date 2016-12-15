@@ -12,9 +12,8 @@
 
 int Character::m_id_counter(0);
 
-Character::Character(Grid *_grid, std::string _name):
+Character::Character(Grid *_grid):
 	m_id(m_id_counter++),
-	m_name(_name),
 	m_grid(_grid)
 {
   ngl::Random *rand = ngl::Random::instance();
@@ -283,7 +282,6 @@ void Character::setTarget(int _tile_id)
 ///////////////////////////////
 void Character::printID()
 {
-	std::cout<<m_id<<" :ID\n"<<m_name<<" :name\n";
+	std::cout<<m_id<<" :ID\n";
 }
-
 ///////////////////////////////
