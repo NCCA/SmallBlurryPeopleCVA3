@@ -10,6 +10,7 @@ NodeNetwork::NodeNetwork(Grid *_grid, ngl::Vec2 _pos, ngl::Vec2 _target_pos) :
 
 std::vector<ngl::Vec2> NodeNetwork::findPath()
 {
+  std::vector<Node> nodes;
   bool path_found = false;
   while(!path_found)
   {
@@ -21,7 +22,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     // global open flag = false
     bool open_nodes_available = false;
     // for each node in nodes:
-    for(Node &node : m_nodes)
+    for(Node &node : nodes)
     {
       // if open:
       if(node.isOpen())
@@ -44,7 +45,8 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     if(!open_nodes_available)
     {
       std::cout << "no path found!" << std::endl;
-      break;
+      std::vector<ngl::Vec2> no_path;
+      return no_path;
     }
 
     ///FUNCTION END
@@ -96,7 +98,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         if(tile_id != -1)
         {
           neighbour_ids[i] = nodes.size();
-          nodes.push_back(Node(m_grid, &nodes, tile_id, m_target_id, nodes[lowest_f_node_id].getID()));
+          nodes.push_back(Node(m_grid, &nodes, tile_id, m_grid->coordToId(m_target_pos), nodes[lowest_f_node_id].getID()));
         }
       }
     }
@@ -127,10 +129,10 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
 
 
     // if current is target node, path is found
-    if(nodes[lowest_f_node_id].getTileID() == m_target_id)
+    if(nodes[lowest_f_node_id].getTileID() == m_grid->coordToId(m_target_pos))
     {
       ///FUNCTION CREATE PATH
-
+      std::vector<ngl::Vec2> path;
       path_found = true;
       // create path with nodes
       //std::cout << "character position" << m_pos << std::endl;
@@ -139,16 +141,14 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       Node *current_node = &(nodes[lowest_f_node_id]);
       while(true)
       {
-        m_path.push_back(current_node->getPos());
+        path.push_back(current_node->getPos());
         if(current_node->getParentID() == -1)
         {
           break;
         }
         current_node = &(nodes[current_node->getParentID()]);
       }
-
-      int nMilliseconds = myTimer.elapsed();
-      std::cout << "time taken" << nMilliseconds << std::endl;
+      return path;
     }
   }
 }
