@@ -22,20 +22,29 @@ Character::Character(Grid *_grid):
   rand->setSeed(0);
 
   //m_pos = ngl::Vec2(1, 4);
-  m_pos = ngl::Vec2(16, 47);
+  m_pos = ngl::Vec2(1,1);
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(20, 3));
+  setTarget(ngl::Vec2(1,2));
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
+  m_grid->printTrees();
 }
 
 void Character::update()
 {
   std::cout << "character updated" << std::endl;
 
+  // call movement function
+  move();
+
+  std::cout << "character position: " << m_pos << std::endl;
+}
+
+void Character::move()
+{
   // move by distance up to speed
   float dist_moved = 0;
   while(m_path.size() > 0 && dist_moved < m_speed)
@@ -55,8 +64,6 @@ void Character::update()
     dist_moved += aim_vec.length();
     m_pos += aim_vec;
   }
-
-  std::cout << "character position: " << m_pos << std::endl;
 }
 
 void Character::draw()

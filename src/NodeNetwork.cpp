@@ -5,12 +5,11 @@ NodeNetwork::NodeNetwork(Grid *_grid, ngl::Vec2 _pos, ngl::Vec2 _target_pos) :
   m_char_pos(_pos),
   m_target_pos(_target_pos)
 {
-
+  m_nodes.push_back(Node(_grid, &m_nodes, m_grid->coordToId(m_char_pos), m_grid->coordToId(m_char_pos), -1));
 }
 
 std::vector<ngl::Vec2> NodeNetwork::findPath()
 {
-  std::vector<Node> nodes;
   bool path_found = false;
   while(!path_found)
   {
@@ -22,7 +21,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     // global open flag = false
     bool open_nodes_available = false;
     // for each node in nodes:
-    for(Node &node : nodes)
+    for(Node &node : m_nodes)
     {
       // if open:
       if(node.isOpen())
@@ -33,7 +32,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         {
           lowest_f_node_id = node.getID();
         }
-        else if (node.getFCost() < nodes[lowest_f_node_id].getFCost())
+        else if (node.getFCost() < m_nodes[lowest_f_node_id].getFCost())
         {
           // update lowest cost node
           lowest_f_node_id = node.getID();
@@ -45,6 +44,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     if(!open_nodes_available)
     {
       std::cout << "no path found!" << std::endl;
+      printNetwork();
       std::vector<ngl::Vec2> no_path;
       return no_path;
     }
@@ -54,10 +54,10 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     ///FUNCTION GET NEIGHBOURS AND UPDATE COSTS
 
     // create neighbour list, (4)
-    std::array<int, 4> neighbour_ids = nodes[lowest_f_node_id].getNeighbours(&nodes);
+    std::array<int, 4> neighbour_ids = m_nodes[lowest_f_node_id].getNeighbours(&m_nodes);
     // check for neighbours
     // place neighbours that are not yet in the vector
-    int current_tile_id = nodes[lowest_f_node_id].getTileID();
+    int current_tile_id = m_nodes[lowest_f_node_id].getTileID();
     ngl::Vec2 current_pos = m_grid->idToCoord(current_tile_id);
 
     for(size_t i = 0; i < neighbour_ids.size(); i++)
@@ -97,8 +97,8 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         }
         if(tile_id != -1)
         {
-          neighbour_ids[i] = nodes.size();
-          nodes.push_back(Node(m_grid, &nodes, tile_id, m_grid->coordToId(m_target_pos), nodes[lowest_f_node_id].getID()));
+          neighbour_ids[i] = m_nodes.size();
+          m_nodes.push_back(Node(m_grid, &m_nodes, tile_id, m_grid->coordToId(m_target_pos), m_nodes[lowest_f_node_id].getID()));
         }
       }
     }
@@ -108,15 +108,15 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     {
       if(neighbour_id != -1)
       {
-        Node *neighbour = &(nodes[neighbour_id]);
+        Node *neighbour = &(m_nodes[neighbour_id]);
         // if open:
         if(neighbour->isOpen())
         {
           // check G cost
-          if(neighbour->calcGCost(&nodes, nodes[lowest_f_node_id].getID()) < neighbour->getGCost())
+          if(neighbour->calcGCost(&m_nodes, m_nodes[lowest_f_node_id].getID()) < neighbour->getGCost())
           {
             // if lower, update parent to current node
-            neighbour->setParent(&nodes, nodes[lowest_f_node_id].getID());
+            neighbour->setParent(&m_nodes, m_nodes[lowest_f_node_id].getID());
             //std::cout << neighbour->getParentID() << std::endl;
           }
         }
@@ -125,11 +125,10 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
 
     /// CLOSE NODE
     // close current node
-    nodes[lowest_f_node_id].close();
-
+    m_nodes[lowest_f_node_id].close();
 
     // if current is target node, path is found
-    if(nodes[lowest_f_node_id].getTileID() == m_grid->coordToId(m_target_pos))
+    if(m_nodes[lowest_f_node_id].getTileID() == m_grid->coordToId(m_target_pos))
     {
       ///FUNCTION CREATE PATH
       std::vector<ngl::Vec2> path;
@@ -137,8 +136,8 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       // create path with nodes
       //std::cout << "character position" << m_pos << std::endl;
       //std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
-      //std::cout << "path found!" << std::endl;
-      Node *current_node = &(nodes[lowest_f_node_id]);
+      std::cout << "path found!" << std::endl;
+      Node *current_node = &(m_nodes[lowest_f_node_id]);
       while(true)
       {
         path.push_back(current_node->getPos());
@@ -146,9 +145,24 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         {
           break;
         }
-        current_node = &(nodes[current_node->getParentID()]);
+        current_node = &(m_nodes[current_node->getParentID()]);
       }
       return path;
+    }
+  }
+}
+
+
+void NodeNetwork::printNetwork()
+{
+  for(int y=0; y<m_grid->getH(); y++)
+  {
+    for(int x=0; x<m_grid->getW(); x++)
+    {
+      for(Node &node : m_nodes)
+      {
+
+      }
     }
   }
 }

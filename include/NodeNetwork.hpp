@@ -26,12 +26,15 @@ public:
   /// @return vector of points in a path to target, or 0 length vector if no path is found
   std::vector<ngl::Vec2> findPath();
 
+  void printNetwork();
 private:
   /// @brief grid which network can read for pathfinding
   Grid *m_grid;
+  /// @brief list of nodes used for pathfinding
+  std::vector<Node> m_nodes;
   /// @brief initial position of character
   ngl::Vec2 m_char_pos;
-  /// @breif target position of character
+  /// @brief target position of character
   ngl::Vec2 m_target_pos;
 };
 

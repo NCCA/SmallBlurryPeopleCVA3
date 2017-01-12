@@ -19,8 +19,11 @@ public:
 	Character(Grid *_grid);
   ~Character() = default;
 
-  /// @brief updates character, including movement
+  /// @brief updates character, including calling move()
   void update();
+
+  /// @brief moves character along its path
+  void move();
 
   /// @brief draw character with openGL
   void draw();
