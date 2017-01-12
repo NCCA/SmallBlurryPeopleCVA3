@@ -33,25 +33,25 @@ Scene::Scene() :
     createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
     createShader("blinn", "vertMVPUVN", "fragBlinn" );
 
-		/////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
 
-		m_characters.push_back(Character(&m_grid));
-		m_characters.push_back(Character(&m_grid));
+    m_characters.push_back(Character(&m_grid));
+    m_characters.push_back(Character(&m_grid));
 
-		character_names = {"Paul", "Susan"};
+    character_names = {"Paul", "Susan"};
 
-		std::unordered_map<std::string, int> m_char_map;
+    std::unordered_map<std::string, int> m_char_map;
 
-		for (size_t i = 0; i<m_characters.size(); i++)
-		{
-			m_char_map[character_names[i]] =  m_characters[i].getID();
-			std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
-		}
-
-
+    for (size_t i = 0; i<m_characters.size(); i++)
+    {
+        m_char_map[character_names[i]] =  m_characters[i].getID();
+        std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
+    }
 
 
-	////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -60,6 +60,16 @@ Scene::Scene() :
 
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
+
+    //Get as vec4s
+    std::vector<ngl::Vec4> data;
+    std::vector<ngl::Vec3> original = m_grid.getTriangles();
+    data.reserve(original.size());
+    //Convert format, add some cheeky randomisation
+    for(auto &vert : original)
+        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+    m_terrainVAO = createVAO( data );
+    m_terrainVAOSize = data.size();
 }
 
 void Scene::update()
@@ -121,10 +131,16 @@ void Scene::draw()
 
     ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
-    m_transform.reset();
+    /*m_transform.reset();
     m_transform.setPosition(0.0,-0.5,0.0);
     loadMatricesToShader();
-    prim->draw("plane");
+    prim->draw("plane");*/
+    m_transform.reset();
+    glBindVertexArray(m_terrainVAO);
+    loadMatricesToShader();
+    std::cout << "Drawing " << m_terrainVAOSize << '\n';
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
 
     for(int i = 0; i < 20; ++i)
         for(int j = 0; j < 20; ++j)
@@ -268,4 +284,87 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
     slib->attachShaderToProgram(_name, _frag);
 
     slib->linkProgramObject(_name);
+}
+
+GLuint Scene::createVAO(std::vector<ngl::Vec4> _verts)
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    //Generate a VBO
+    GLuint vertBuffer = createBuffer4f( _verts );
+    setBufferLocation( vertBuffer, 0, 4 );
+
+    std::vector<ngl::Vec2> uvs;
+    uvs.assign( _verts.size(), ngl::Vec2(0.0f, 0.0f) );
+    GLuint UVBuffer = createBuffer2f( uvs );
+    setBufferLocation( UVBuffer, 1, 2 );
+
+    //Gen normals.
+    std::vector<ngl::Vec3> normals;
+    normals.reserve( _verts.size() );
+    for(size_t i = 0; i < _verts.size(); i += 3)
+    {
+        ngl::Vec4 a = _verts[i + 1] - _verts[i];
+        ngl::Vec4 b = _verts[i + 2] - _verts[i];
+        ngl::Vec3 a3 = ngl::Vec3(a.m_x, a.m_y, a.m_z);
+        ngl::Vec3 b3 = ngl::Vec3(b.m_x, b.m_y, b.m_z);
+        ngl::Vec3 normal;
+        normal.cross(a3, b3);
+        normal.normalize();
+        normal.m_y = -normal.m_y;
+        for(int i = 0; i < 3; ++i)
+            normals.push_back(normal);
+    }
+    GLuint normBuffer = createBuffer3f(normals);
+    setBufferLocation( normBuffer, 2, 3 );
+
+    return vao;
+}
+
+GLuint Scene::createBuffer4f(std::vector<ngl::Vec4> _vec)
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec4) * _vec.size(),
+                 &_vec[0].m_x,
+            GL_STATIC_DRAW
+            );
+    return buffer;
+}
+
+GLuint Scene::createBuffer3f(std::vector<ngl::Vec3> _vec)
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec3) * _vec.size(),
+                 &_vec[0].m_x,
+            GL_STATIC_DRAW
+            );
+    return buffer;
+}
+
+GLuint Scene::createBuffer2f(std::vector<ngl::Vec2> _vec)
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec2) * _vec.size(),
+                 &_vec[0].m_x,
+            GL_STATIC_DRAW
+            );
+    return buffer;
+}
+
+void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
+{
+    glEnableVertexAttribArray(_index);
+    glBindBuffer(GL_ARRAY_BUFFER, _buffer);
+    glVertexAttribPointer( _index, _size, GL_FLOAT, GL_FALSE, 0, 0 );
 }

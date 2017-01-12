@@ -45,11 +45,18 @@ private:
     float m_mouse_rot_origin;
 
     AssetStore m_store;
+    GLuint m_terrainVAO;
+    size_t m_terrainVAOSize;
 
     void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
 
     void createShader(const std::string _name, const std::string _vert, const std::string _frag);
+    GLuint createVAO(std::vector<ngl::Vec4> _verts);
+    GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
+    GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
+    GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
+    void setBufferLocation(GLuint _buffer, int _index, int _size);
 };
 
 #endif//__SCENE_HPP__
