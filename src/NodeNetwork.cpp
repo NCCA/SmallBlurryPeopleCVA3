@@ -5,7 +5,7 @@ NodeNetwork::NodeNetwork(Grid *_grid, ngl::Vec2 _pos, ngl::Vec2 _target_pos) :
   m_char_pos(_pos),
   m_target_pos(_target_pos)
 {
-  m_nodes.push_back(Node(_grid, &m_nodes, m_grid->coordToId(m_char_pos), m_grid->coordToId(m_char_pos), -1));
+  m_nodes.push_back(Node(_grid, &m_nodes, m_char_pos, m_target_pos, -1));
 }
 
 std::vector<ngl::Vec2> NodeNetwork::findPath()
@@ -15,7 +15,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
   {
 
     /// FUNCTION: GET LOWEST COST
-    // pointer to current node
+    // used as pointer to lowest f cost node, but since vector might be reallocated and addresses will change, id is used
     int lowest_f_node_id = -1;
 
     // global open flag = false
@@ -54,51 +54,50 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     ///FUNCTION GET NEIGHBOURS AND UPDATE COSTS
 
     // create neighbour list, (4)
-    std::array<int, 4> neighbour_ids = m_nodes[lowest_f_node_id].getNeighbours(&m_nodes);
+    std::array<int, 4> neighbour_ids = m_nodes[lowest_f_node_id].getNeighbours();
     // check for neighbours
     // place neighbours that are not yet in the vector
-    int current_tile_id = m_nodes[lowest_f_node_id].getTileID();
-    ngl::Vec2 current_pos = m_grid->idToCoord(current_tile_id);
+    ngl::Vec2 current_pos = m_nodes[lowest_f_node_id].getPos();
 
     for(size_t i = 0; i < neighbour_ids.size(); i++)
     {
       // if neighbour is not found
       if(neighbour_ids[i] == -1)
       {
-        int tile_id = -1;
+        ngl::Vec2 tile_pos(current_pos);
         switch(i)
         {
           case Neighbour::UP:
             if(current_pos[1] > 0)
             {
-              tile_id = current_tile_id - m_grid->getW();
+              tile_pos += ngl::Vec2(0, 1);
             }
             break;
           case Neighbour::DOWN:
             if(current_pos[1] < m_grid->getH() - 1)
             {
-              tile_id = current_tile_id + m_grid->getW();
+              tile_pos += ngl::Vec2(0, -1);
             }
             break;
           case Neighbour::LEFT:
             if(current_pos[0] > 0)
             {
-              tile_id = current_tile_id - 1;
+              tile_pos += ngl::Vec2(-1, 0);
             }
             break;
           case Neighbour::RIGHT:
             if(current_pos[0] < m_grid->getW() - 1)
             {
-              tile_id = current_tile_id + 1;
+              tile_pos += ngl::Vec2(1, 0);
             }
             break;
           default:
             std::cerr << "tile id not found" << std::endl;
         }
-        if(tile_id != -1)
+        if(tile_pos != current_pos)
         {
           neighbour_ids[i] = m_nodes.size();
-          m_nodes.push_back(Node(m_grid, &m_nodes, tile_id, m_grid->coordToId(m_target_pos), m_nodes[lowest_f_node_id].getID()));
+          m_nodes.push_back(Node(m_grid, &m_nodes, tile_pos, m_target_pos, m_nodes[lowest_f_node_id].getID()));
         }
       }
     }
@@ -113,11 +112,11 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         if(neighbour->isOpen())
         {
           // check G cost
-          if(neighbour->calcGCost(&m_nodes, m_nodes[lowest_f_node_id].getID()) < neighbour->getGCost())
+          float potential_g_cost = neighbour->calcNewGCost(m_nodes[lowest_f_node_id].getID());
+          if(potential_g_cost < neighbour->getGCost())
           {
             // if lower, update parent to current node
-            neighbour->setParent(&m_nodes, m_nodes[lowest_f_node_id].getID());
-            //std::cout << neighbour->getParentID() << std::endl;
+            neighbour->setParent(m_nodes[lowest_f_node_id].getID());
           }
         }
       }
@@ -128,30 +127,13 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     m_nodes[lowest_f_node_id].close();
 
     // if current is target node, path is found
-    if(m_nodes[lowest_f_node_id].getTileID() == m_grid->coordToId(m_target_pos))
+    if(m_nodes[lowest_f_node_id].getPos() == m_target_pos)
     {
-      ///FUNCTION CREATE PATH
-      std::vector<ngl::Vec2> path;
       path_found = true;
-      // create path with nodes
-      //std::cout << "character position" << m_pos << std::endl;
-      //std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
-      std::cout << "path found!" << std::endl;
-      Node *current_node = &(m_nodes[lowest_f_node_id]);
-      while(true)
-      {
-        path.push_back(current_node->getPos());
-        if(current_node->getParentID() == -1)
-        {
-          break;
-        }
-        current_node = &(m_nodes[current_node->getParentID()]);
-      }
-      return path;
+      return createFoundPath(m_nodes[lowest_f_node_id]);
     }
   }
 }
-
 
 void NodeNetwork::printNetwork()
 {
@@ -165,4 +147,24 @@ void NodeNetwork::printNetwork()
       }
     }
   }
+}
+
+std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
+{
+  std::vector<ngl::Vec2> path;
+  // create path with nodes
+  //std::cout << "character position" << m_pos << std::endl;
+  //std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
+  std::cout << "path found!" << std::endl;
+  Node *current_node = &_end_node;
+  while(true)
+  {
+    path.push_back(current_node->getPos());
+    if(current_node->getParentID() == -1)
+    {
+      break;
+    }
+    current_node = &(m_nodes[current_node->getParentID()]);
+  }
+  return path;
 }

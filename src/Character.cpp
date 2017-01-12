@@ -14,9 +14,9 @@
 int Character::m_id_counter(0);
 
 Character::Character(Grid *_grid):
+  m_id(m_id_counter++),
   m_grid(_grid),
-  m_speed(0.1),
-  m_id(m_id_counter++)
+  m_speed(0.1)
 {
   ngl::Random *rand = ngl::Random::instance();
   rand->setSeed(0);
