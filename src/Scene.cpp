@@ -237,10 +237,10 @@ void Scene::mouseSelection()
 
 	long unsigned int red = 0;
 	glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-	for (Character &c : m_characters)
+	for (Character &character : m_characters)
 	{
-		if (c.getID() == red)
-			c.setActive(true);
+		if (character.getID() == red)
+			character.setActive(true);
 	}
 }
 
