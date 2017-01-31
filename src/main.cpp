@@ -1,4 +1,4 @@
- #include <SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <ngl/NGLInit.h>
 
@@ -61,18 +61,6 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
     Scene scene;
 
-    glViewport(0, 0, rect.w, rect.h);
-    glClearColor(0.5,0.5,0.5,1);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_SwapWindow(window);
-
     while(!quit)
     {
         while(SDL_PollEvent(&event))
@@ -80,18 +68,18 @@ int main()
             ImGuiImplSdlProcessEvent(&event);
             ImGuiImplSdlNewFrame(window);
 
-						ImGui::Begin("Main Menu", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+            ImGui::Begin("Main Menu", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
             ImGui::SetCursorPosY(0);
 
-						const char* names[scene.character_names.size()];
-						for (size_t i = 0; i< scene.character_names.size(); i++)
-						{
-							names[i]= scene.character_names[i].c_str();
-						}
-						static int current_character_name = -1;
-						//current_character_name stores current element of char *array that has been selected
-						bool character_chosen = ImGui::Combo("character_select", &current_character_name, names, (sizeof(names)/sizeof(char*)));
+            const char* names[scene.character_names.size()];
+            for (size_t i = 0; i< scene.character_names.size(); i++)
+            {
+                names[i]= scene.character_names[i].c_str();
+            }
+            static int current_character_name = -1;
+            //current_character_name stores current element of char *array that has been selected
+            bool character_chosen = ImGui::Combo("character_select", &current_character_name, names, (sizeof(names)/sizeof(char*)));
             ImGui::SetCursorPosY( 64 );
             bool savePressed = ImGui::Button("Save", {128, 64});
             ImGui::SetCursorPosY( 128 );
@@ -100,20 +88,20 @@ int main()
             bool quitPressed = ImGui::Button("Quit", {128, 64});
 
 
-						ImGui::Begin("Character stats", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-						ImGui::SetCursorPosY(20);
-						ImGui::TextColored({1.0f, 1.0f, 1.0f, 1.0f},"hunger");
+            ImGui::Begin("Character stats", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+            ImGui::SetCursorPosY(20);
+            ImGui::TextColored({1.0f, 1.0f, 1.0f, 1.0f},"hunger");
 
-						ImGui::SetCursorPosY(40);
-						float hunger = 0.1;
-						ImGui::ProgressBar(hunger);
+            ImGui::SetCursorPosY(40);
+            float hunger = 0.1;
+            ImGui::ProgressBar(hunger);
 
-						if(character_chosen)
-						{
+            if(character_chosen)
+            {
 
-						}
-						if(quitPressed)
-								quit = true;
+            }
+            if(quitPressed)
+                quit = true;
 
             ImGui::End();
 
@@ -121,7 +109,7 @@ int main()
             {
                 switch(event.type)
                 {
-								case SDL_QUIT : quit = true; break;
+                case SDL_QUIT : quit = true; break;
                 case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
                 case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
                 case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
@@ -130,8 +118,6 @@ int main()
             }
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         scene.update();
         scene.draw();
         ImGui::Render();
@@ -139,7 +125,7 @@ int main()
         SDL_GL_SwapWindow(window);
 
     }
-		ImGuiImplSdlShutdown();
+    ImGuiImplSdlShutdown();
 
     SDL_Quit();
     return EXIT_SUCCESS;

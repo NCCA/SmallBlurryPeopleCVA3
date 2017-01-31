@@ -4,8 +4,6 @@
 #include <ngl/VAOPrimitives.h>
 #include <SDL2/SDL.h>
 
-#include "imgui.h"
-
 #include "Scene.hpp"
 
 Scene::Scene() :
@@ -30,10 +28,9 @@ Scene::Scene() :
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
-    createShader("blinn", "vertMVPUVN", "fragBlinn" );
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
-    createShader("deferredWrite", "vertMVPUVN", "fragDeferredData");
+    createShader("knight", "vertDeferredData", "fragDeferredKnight");
+    createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
 
     /////////////////////////////////////////////////////////
 
@@ -52,19 +49,18 @@ Scene::Scene() :
 
     ////////////////////////////////////////////////////////////////
 
-
     //Graphics stuff.
-
     //Framebuffers
+    std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
     m_mainBuffer.initialise(rect.w, rect.h);
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
-    m_mainBuffer.addTexture( "id", GL_R, GL_R16, GL_COLOR_ATTACHMENT3 );
+    //m_mainBuffer.addTexture( "id", GL_RED, GL_R16, GL_COLOR_ATTACHMENT3 );
     m_mainBuffer.addDepthAttachment( "depth" );
     if(!m_mainBuffer.checkComplete())
     {
-        std::cerr << "Uh oh! Framebuffer creation failed!\n";
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
         exit(EXIT_FAILURE);
     }
     m_mainBuffer.unbind();
@@ -79,15 +75,6 @@ Scene::Scene() :
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
-    std::vector<ngl::Vec4> cols;
-    for(size_t x = 0; x < m_grid.getW(); ++x)
-    {
-        for(size_t y = 0; y < m_grid.getH(); ++y)
-        {
-            //Six verts per square, six colours per square. I guess.
-            //for(int i = 6)
-        }
-    }
     std::vector<ngl::Vec3> original = m_grid.getTriangles();
     data.reserve(original.size());
     //Convert format, add some cheeky randomisation
@@ -115,6 +102,14 @@ Scene::Scene() :
                 verts,
                 uvs
                 );
+
+    glViewport(0, 0, rect.w, rect.h);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Scene::update()
@@ -168,20 +163,18 @@ void Scene::update()
 
 void Scene::draw()
 {
-    m_transform.setPosition(0.0f, 0.0f, 0.0f);
-
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-
-    slib->use("deferredWrite");
-
-    ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
-
     m_mainBuffer.bind();
+    m_mainBuffer.activeColourAttachments();
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_transform.reset();
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    slib->use("terrain");
+    ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
+
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
-    std::cout << "Drawing " << m_terrainVAOSize << '\n';
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
@@ -189,25 +182,28 @@ void Scene::draw()
         for(int j = 0; j < 20; ++j)
         {
             m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            //slib->use("blinn");
-            loadMatricesToShader();
-            drawAsset( "knight", "knight_d", "blinn" );
-            //m_store.getModel("knight")->draw();
+            drawAsset( "knight", "knight_d", "knight" );
         }
 
     m_mainBuffer.unbind();
 
     slib->use("deferredLight");
-
     GLuint id = slib->getProgramID("deferredLight");
+
+    m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
 
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_mainBuffer.bindTexture(id, "id", "id", 3);
+    //m_mainBuffer.bindTexture(id, "id", "id", 3);
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -264,7 +260,6 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
         }
         m_mouse_zoom += 0.5;
     }
-
 }
 
 void Scene::loadMatricesToShader()
@@ -284,8 +279,8 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
 
     if(loc == -1)
     {
-        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
-        return;
+        //std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+        //return;
     }
     glUniform1i(loc, _target);
 
