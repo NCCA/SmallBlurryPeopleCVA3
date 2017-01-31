@@ -32,6 +32,8 @@ Scene::Scene() :
 
     createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
     createShader("blinn", "vertMVPUVN", "fragBlinn" );
+    createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
+    createShader("deferredWrite", "vertMVPUVN", "fragDeferredData");
 
     /////////////////////////////////////////////////////////
 
@@ -48,10 +50,24 @@ Scene::Scene() :
         std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
     }
 
-
-
-
     ////////////////////////////////////////////////////////////////
+
+
+    //Graphics stuff.
+
+    //Framebuffers
+    m_mainBuffer.initialise(rect.w, rect.h);
+    m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
+    m_mainBuffer.addTexture( "id", GL_R, GL_R16, GL_COLOR_ATTACHMENT3 );
+    m_mainBuffer.addDepthAttachment( "depth" );
+    if(!m_mainBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer creation failed!\n";
+        exit(EXIT_FAILURE);
+    }
+    m_mainBuffer.unbind();
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -63,13 +79,42 @@ Scene::Scene() :
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
+    std::vector<ngl::Vec4> cols;
+    for(size_t x = 0; x < m_grid.getW(); ++x)
+    {
+        for(size_t y = 0; y < m_grid.getH(); ++y)
+        {
+            //Six verts per square, six colours per square. I guess.
+            //for(int i = 6)
+        }
+    }
     std::vector<ngl::Vec3> original = m_grid.getTriangles();
     data.reserve(original.size());
     //Convert format, add some cheeky randomisation
     for(auto &vert : original)
         data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
+
+    std::vector<ngl::Vec4> verts = {
+        ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, 1.0, 0.0f, 1.0f),
+        ngl::Vec4(-1.0, 1.0, 0.0f, 1.0f)
+    };
+
+    std::vector<ngl::Vec2> uvs = {
+        ngl::Vec2(0.0, 0.0),
+        ngl::Vec2(1.0, 0.0),
+        ngl::Vec2(1.0, 1.0),
+        ngl::Vec2(0.0, 1.0)
+    };
+
+    m_screenQuad = createVAO(
+                verts,
+                uvs
+                );
 }
 
 void Scene::update()
@@ -127,14 +172,12 @@ void Scene::draw()
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    slib->use("simplesurface");
+    slib->use("deferredWrite");
 
     ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
-    /*m_transform.reset();
-    m_transform.setPosition(0.0,-0.5,0.0);
-    loadMatricesToShader();
-    prim->draw("plane");*/
+    m_mainBuffer.bind();
+
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -151,6 +194,20 @@ void Scene::draw()
             drawAsset( "knight", "knight_d", "blinn" );
             //m_store.getModel("knight")->draw();
         }
+
+    m_mainBuffer.unbind();
+
+    slib->use("deferredLight");
+
+    GLuint id = slib->getProgramID("deferredLight");
+
+    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+    m_mainBuffer.bindTexture(id, "normal", "normal", 1);
+    m_mainBuffer.bindTexture(id, "position", "position", 2);
+    m_mainBuffer.bindTexture(id, "id", "id", 3);
+
+    glBindVertexArray(m_screenQuad);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -286,7 +343,7 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
     slib->linkProgramObject(_name);
 }
 
-GLuint Scene::createVAO(std::vector<ngl::Vec4> _verts)
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts)
 {
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -319,6 +376,22 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> _verts)
     }
     GLuint normBuffer = createBuffer3f(normals);
     setBufferLocation( normBuffer, 2, 3 );
+
+    return vao;
+}
+
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs)
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    //Generate a VBO
+    GLuint vertBuffer = createBuffer4f( _verts );
+    setBufferLocation( vertBuffer, 0, 4 );
+
+    GLuint UVBuffer = createBuffer2f( _uvs );
+    setBufferLocation( UVBuffer, 1, 2 );
 
     return vao;
 }

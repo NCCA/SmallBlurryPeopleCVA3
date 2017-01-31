@@ -15,7 +15,8 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/imgui/*.cpp \
          $$PWD/src/GridTile.cpp \
          $$PWD/src/NodeNetwork.cpp \
-         $$PWD/src/AssetStore.cpp
+         $$PWD/src/AssetStore.cpp \
+         $$PWD/src/Framebuffer.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
@@ -26,7 +27,8 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/imgui/*.h \
          $$PWD/include/GridTile.hpp \
          $$PWD/include/NodeNetwork.hpp \
-         $$PWD/include/AssetStore.hpp
+         $$PWD/include/AssetStore.hpp \
+         $$PWD/include/Framebuffer.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
