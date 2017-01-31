@@ -22,14 +22,11 @@ public:
     void mouseReleaseEvent(const SDL_MouseButtonEvent &_event);
     void wheelEvent(const SDL_MouseWheelEvent &_event);
 
-    std::vector<std::string> character_names;
-
 private:
-    //std::shared_ptr <std::string []> character_names;
-    void loadMatricesToShader();
     bool m_active = true;
     Camera m_cam;
     Grid m_grid;
+		std::vector<std::string> m_file_names;
     std::vector<Character> m_characters;
 
     ngl::Transformation m_transform;
@@ -47,6 +44,13 @@ private:
     AssetStore m_store;
     GLuint m_terrainVAO;
     size_t m_terrainVAOSize;
+
+		void readNameFile();
+		void createCharacter();
+
+		void loadMatricesToShader();
+
+		void mouseSelection();
 
     void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);

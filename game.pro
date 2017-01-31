@@ -40,8 +40,9 @@ LIBS+=$$system(python2.7-config --libs)
 include($(HOME)/NGL/UseNGL.pri)
 
 OTHER_FILES += README.md \
-               $$PWD/shaders/*.glsl\
-               $$PWD/python/*.py
+							 $$PWD/shaders/*.glsl \
+							 $$PWD/python/*.py \
+							 $$PWD/names/*.txt
 
 #This means I can build this on windows.
 win32 {

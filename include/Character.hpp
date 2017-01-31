@@ -16,7 +16,7 @@ class Character
 public:
   /// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
-	Character(Grid *_grid);
+	Character(Grid *_grid, std::string _name);
   ~Character() = default;
 
   /// @brief updates character, including movement
@@ -40,15 +40,20 @@ public:
   void setTarget(int _tile_id);
 
 	////////////////
-	void printID();
 	int getID() {return m_id;}
 	///////////////
+
+	void setActive(bool _selection) {m_active = _selection;}
 
 private:
 	/// @brief counts how many objects have been created
 	static int m_id_counter;
-	/// @brief current object's id
+	/// @brief current chracter's id
 	const int m_id;
+	/// @brief current character's name
+	std::string m_name;
+	/// @brief sets if the current character is selected
+	bool m_active;
   /// @brief grid to reference for pathfinding
   Grid *m_grid;
   /// @brief character position

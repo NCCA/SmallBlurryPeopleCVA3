@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <ngl/ShaderLib.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
@@ -33,25 +34,8 @@ Scene::Scene() :
     createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
     createShader("blinn", "vertMVPUVN", "fragBlinn" );
 
-    /////////////////////////////////////////////////////////
-
-    m_characters.push_back(Character(&m_grid));
-    m_characters.push_back(Character(&m_grid));
-
-    character_names = {"Paul", "Susan"};
-
-    std::unordered_map<std::string, int> m_char_map;
-
-    for (size_t i = 0; i<m_characters.size(); i++)
-    {
-        m_char_map[character_names[i]] =  m_characters[i].getID();
-        std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
-    }
-
-
-
-
-    ////////////////////////////////////////////////////////////////
+		readNameFile();
+		createCharacter();
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -70,6 +54,45 @@ Scene::Scene() :
         data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
+}
+
+void Scene::readNameFile()
+{
+	std::ifstream namesFile;
+	namesFile.open("names/game_names.txt");
+
+	if(!namesFile.is_open())
+	{
+		std::cerr<<"Couldnt open file\n";
+		exit(EXIT_FAILURE);
+	}
+
+	int lineNo = 0;
+	std::string lineBuffer;
+	while (!namesFile.eof())
+	{
+		std::getline(namesFile, lineBuffer, '\n');
+		if(lineBuffer.size() != 0)
+		{
+			m_file_names.push_back(lineBuffer);
+			lineNo++;
+		}
+	}
+	namesFile.close();
+}
+
+void Scene::createCharacter()
+{
+
+	int numberNames = m_file_names.size();
+
+	std::random_device rnd;
+	std::mt19937 mt_rand(rnd());
+	std::uniform_int_distribution<int> nameNo(0,numberNames);
+	int name_chosen = nameNo(mt_rand);
+
+	m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
+
 }
 
 void Scene::update()
@@ -116,7 +139,7 @@ void Scene::update()
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
-    m_cam.movePivot( trans );
+		m_cam.movePivot(trans);
 
     m_cam.calculateViewMat();
 }
@@ -131,10 +154,6 @@ void Scene::draw()
 
     ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
-    /*m_transform.reset();
-    m_transform.setPosition(0.0,-0.5,0.0);
-    loadMatricesToShader();
-    prim->draw("plane");*/
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -161,6 +180,7 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
         m_mouse_trans_origin[0] = _event.x;
         m_mouse_trans_origin[1] = _event.y;
         m_mouse_trans_active=true;
+				mouseSelection();
     }
 
     //checks if the right button has been pressed down and flags start
@@ -208,6 +228,20 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
         m_mouse_zoom += 0.5;
     }
 
+}
+
+void Scene::mouseSelection()
+{
+	int mouseCoords[2] = {0,0};
+	SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
+
+	long unsigned int red = 0;
+	glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+	for (Character &c : m_characters)
+	{
+		if (c.getID() == red)
+			c.setActive(true);
+	}
 }
 
 void Scene::loadMatricesToShader()

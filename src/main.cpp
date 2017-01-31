@@ -84,7 +84,7 @@ int main()
 
             ImGui::SetCursorPosY(0);
 
-						const char* names[scene.character_names.size()];
+						/*const char* names[scene.character_names.size()];
 						for (size_t i = 0; i< scene.character_names.size(); i++)
 						{
 							names[i]= scene.character_names[i].c_str();
@@ -96,7 +96,7 @@ int main()
             bool savePressed = ImGui::Button("Save", {128, 64});
             ImGui::SetCursorPosY( 128 );
             bool loadPressed = ImGui::Button("Load", {128, 64});
-            ImGui::SetCursorPosY( 186 );
+						ImGui::SetCursorPossY( 186 );
             bool quitPressed = ImGui::Button("Quit", {128, 64});
 
 
@@ -108,12 +108,14 @@ int main()
 						float hunger = 0.1;
 						ImGui::ProgressBar(hunger);
 
+
 						if(character_chosen)
 						{
 
 						}
 						if(quitPressed)
 								quit = true;
+						*/
 
             ImGui::End();
 
