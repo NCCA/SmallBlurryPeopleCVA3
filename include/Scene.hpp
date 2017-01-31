@@ -10,6 +10,8 @@
 #include "Camera.hpp"
 #include "Character.hpp"
 
+#include "Framebuffer.hpp"
+
 class Scene
 {
 public:
@@ -44,6 +46,8 @@ private:
     AssetStore m_store;
     GLuint m_terrainVAO;
     size_t m_terrainVAOSize;
+    GLuint m_screenQuad;
+    Framebuffer m_mainBuffer;
 
 		void readNameFile();
 		void createCharacter();
@@ -56,7 +60,8 @@ private:
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
 
     void createShader(const std::string _name, const std::string _vert, const std::string _frag);
-    GLuint createVAO(std::vector<ngl::Vec4> _verts);
+    GLuint createVAO(std::vector<ngl::Vec4> &_verts);
+    GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs);
     GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
     GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
