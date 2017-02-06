@@ -42,6 +42,7 @@ private:
     float m_mouse_rotation;
     ngl::Vec2 m_mouse_trans_origin;
     float m_mouse_rot_origin;
+		ngl::Vec2 m_mouse_prev_pos;
 
     AssetStore m_store;
     GLuint m_terrainVAO;
@@ -66,6 +67,9 @@ private:
     GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
     void setBufferLocation(GLuint _buffer, int _index, int _size);
+
+
+
 };
 
 #endif//__SCENE_HPP__

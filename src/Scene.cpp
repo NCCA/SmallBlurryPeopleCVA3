@@ -13,7 +13,8 @@ Scene::Scene() :
     m_mouse_zoom(10.0f),
     m_mouse_pan(1.0f),
     m_mouse_rotation(0.0f),
-    m_mouse_translation(0.0f,0.0f)
+		m_mouse_translation(0.0f,0.0f),
+		m_mouse_prev_pos(0.0f, 0.0f)
 {
     SDL_Rect rect;
     SDL_GetDisplayBounds(0, &rect);
@@ -33,7 +34,9 @@ Scene::Scene() :
     createShader("knight", "vertDeferredData", "fragDeferredKnight");
     createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
 
+		//reads file with list of names
     readNameFile();
+		//creates a character with a random name
     createCharacter();
 
     //Graphics stuff.
@@ -237,10 +240,12 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
     //checks if the left button has been pressed down and flags start
     if(_event.button == SDL_BUTTON_LEFT)
     {
-        m_mouse_trans_origin[0] = _event.x;
-        m_mouse_trans_origin[1] = _event.y;
+				m_mouse_trans_origin[0] = _event.x;
+				m_mouse_trans_origin[1] = _event.y;
+				//records position of mouse on press
+				m_mouse_prev_pos[0] = _event.x;
+				m_mouse_prev_pos[1] = _event.y;
         m_mouse_trans_active=true;
-        mouseSelection();
     }
 
     //checks if the right button has been pressed down and flags start
@@ -256,7 +261,16 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the left button has been released and turns off flag
     if (_event.button == SDL_BUTTON_LEFT)
     {
-        m_mouse_trans_active = false;
+
+			//checks if the mouse has moved, a click or a drag
+			ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
+
+			//if its a click then the mouseSelection funciton is called
+			if(distance.length() == 0)
+				mouseSelection();
+
+			m_mouse_prev_pos.set(0.0f, 0.0f);
+			m_mouse_trans_active = false;
     }
 
     //checks if the right button has been released and turns off flag
@@ -291,6 +305,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::mouseSelection()
 {
+		std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
     int mouseCoords[2] = {0,0};
     SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
 
