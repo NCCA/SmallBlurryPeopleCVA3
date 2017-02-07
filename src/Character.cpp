@@ -9,56 +9,63 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <QTime>
 
 int Character::m_id_counter(0);
 
 Character::Character(Grid *_grid, std::string _name):
-	m_grid(_grid),
-	m_speed(0.1),
 	m_id(m_id_counter++),
 	m_name(_name),
-	m_active(false)
+	m_active(false),
+	m_grid(_grid),
+	m_speed(0.1)
 {
 	ngl::Random *rand = ngl::Random::instance();
 	rand->setSeed(0);
 
-	//m_pos = ngl::Vec2(1, 4);
-  m_pos = ngl::Vec2(1, 1);
+  //m_pos = ngl::Vec2(1, 4);
+  m_pos = ngl::Vec2(1,1);
   m_target_id = m_grid->coordToId(m_pos);
 
-	//setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(2, 2));
+  //setTarget(ngl::Vec2(9, 1));
+  setTarget(ngl::Vec2(49,49));
 
-	std::cout << "character created" << std::endl;
-	std::cout << "character target: " << m_target_id << std::endl;
+
+  std::cout << "character created" << std::endl;
+  std::cout << "character target: " << m_target_id << std::endl;
+  m_grid->printTrees();
 }
 
 void Character::update()
 {
-	std::cout << "character updated" << std::endl;
+  std::cout << "character updating" << std::endl;
 
-	// move by distance up to speed
-	float dist_moved = 0;
-	while(m_path.size() > 0 && dist_moved < m_speed)
-	{
-		float dist = 1;
-		ngl::Vec2 aim_vec = calcAimVec(&dist);
-		std::cout << dist << std::endl;
-		if(dist < m_speed)
-		{
-			aim_vec *= dist;
-			m_path.pop_back();
-		}
-		else
-		{
-			aim_vec *= m_speed;
-		}
-		dist_moved += aim_vec.length();
-		m_pos += aim_vec;
-	}
+  // call movement function
+  move();
 
-	std::cout << "character position: " << m_pos << std::endl;
+  std::cout << "character position: " << m_pos << std::endl;
+}
+
+void Character::move()
+{
+  // move by distance up to speed
+  float dist_moved = 0;
+  while(m_path.size() > 0 && dist_moved < m_speed)
+  {
+    float dist = 1;
+    ngl::Vec2 aim_vec = calcAimVec(&dist);
+    std::cout << dist << std::endl;
+    if(dist < m_speed)
+    {
+      aim_vec *= dist;
+      m_path.pop_back();
+    }
+    else
+    {
+      aim_vec *= m_speed;
+    }
+    dist_moved += aim_vec.length();
+    m_pos += aim_vec;
+  }
 }
 
 void Character::draw()
@@ -69,9 +76,6 @@ void Character::draw()
 
 void Character::findPath()
 {
-	QTime myTimer;
-	myTimer.start();
-
 	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
 
 	m_path = network.findPath();

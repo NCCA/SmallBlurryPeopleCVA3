@@ -2,18 +2,19 @@
 #include <cmath>
 #include "ngl/NGLStream.h"
 
-Node::Node(Grid *_grid, std::vector<Node> *nodes, int _tile_id, int _target_id, int _parent_id):
+Node::Node(Grid *_grid, std::vector<Node> *_nodes, ngl::Vec2 _pos, ngl::Vec2 _target_pos, int _parent_id):
   m_grid(_grid),
-  m_id(nodes->size()),
-  m_tile_id(_tile_id),
-  m_target_id(_target_id),
-  m_pos(m_grid->idToCoord(m_tile_id)),
+  m_node_vector(_nodes),
+  m_id(_nodes->size()),
+  m_pos(_pos),
   m_parent_id(_parent_id),
   m_open(true),
-  m_g_cost(calcGCost(nodes, _parent_id)),
-  m_h_cost(manhattanDist(_target_id))
+  m_g_cost(calcNewGCost(_parent_id)),
+  m_h_cost(manhattanDist(_target_pos))
 {
-  if(!m_grid->get(m_tile_id).isTraversable())
+
+  if(!m_grid->get(m_pos).isTraversable())
+
   {
     close();
   }
@@ -24,7 +25,7 @@ void Node::close()
   m_open = false;
 }
 
-float Node::calcGCost(std::vector<Node> *_nodes, int _parent_id)
+float Node::calcNewGCost(int _parent_id)
 {
   if(_parent_id == -1)
   {
@@ -32,14 +33,13 @@ float Node::calcGCost(std::vector<Node> *_nodes, int _parent_id)
   }
   else
   {
-    return (*_nodes)[_parent_id].getGCost() + 1;
+    return (*m_node_vector)[_parent_id].getGCost() + 1;
   }
 }
 
-float Node::manhattanDist(int _target_id)
+float Node::manhattanDist(ngl::Vec2 _target_pos)
 {
-  ngl::Vec2 target_pos = m_grid->idToCoord(_target_id);
-  return fabs(target_pos[0] - m_pos[0]) + fabs(target_pos[1] - m_pos[1]);
+  return fabs(_target_pos[0] - m_pos[0]) + fabs(_target_pos[1] - m_pos[1]);
 }
 
 float Node::getFCost()
@@ -57,11 +57,6 @@ int Node::getID()
   return m_id;
 }
 
-int Node::getTileID()
-{
-  return m_tile_id;
-}
-
 ngl::Vec2 Node::getPos()
 {
   return m_pos;
@@ -72,39 +67,44 @@ float Node::getGCost()
   return m_g_cost;
 }
 
-void Node::setParent(std::vector<Node> *_nodes, int _parent_id)
+void Node::setParent(int _parent_id)
 {
   m_parent_id = _parent_id;
-  m_g_cost = calcGCost(_nodes, m_parent_id);
+  m_g_cost = calcNewGCost(m_parent_id);
 }
 
 int Node::getParentID()
 {
   return m_parent_id;
 }
-
-std::array<int, 4> Node::getNeighbours(std::vector<Node> *_nodes)
+std::array<int, 4> Node::getNeighbours()
 {
   std::array<int, 4> neighbour_ids = {-1, -1, -1, -1};
-  ngl::Vec2 pos = m_grid->idToCoord(m_tile_id);
-  for(Node &node : *_nodes)
+  for(Node &node : *m_node_vector)
   {
-    int id_dist = node.getTileID() - m_tile_id;
-    if(id_dist == -m_grid->getW() && pos[0] > 0)
+    if(&node != this)
     {
-      neighbour_ids[Neighbour::UP] = node.getTileID();
-    }
-    else if(id_dist == m_grid->getW() && pos[0] < m_grid->getW() - 1)
-    {
-      neighbour_ids[Neighbour::DOWN] = node.getTileID();
-    }
-    else if(id_dist == -1 && pos[1] > 0)
-    {
-      neighbour_ids[Neighbour::LEFT] = node.getTileID();
-    }
-    else if(id_dist == 1 && pos[1] < m_grid->getH() - 1)
-    {
-      neighbour_ids[Neighbour::RIGHT] = node.getTileID();
+      ngl::Vec2 vec_to_node = node.getPos() - m_pos;
+      float dist_sqaured = vec_to_node.lengthSquared();
+      if(dist_sqaured <= 1)
+      {
+        if(vec_to_node.m_y == 1)
+        {
+          neighbour_ids[Neighbour::UP] = node.getID();
+        }
+        else if(vec_to_node.m_y == -1)
+        {
+          neighbour_ids[Neighbour::DOWN] = node.getID();
+        }
+        else if(vec_to_node.m_x == -1)
+        {
+          neighbour_ids[Neighbour::LEFT] = node.getID();
+        }
+        else if(vec_to_node.m_x == 1)
+        {
+          neighbour_ids[Neighbour::RIGHT] = node.getID();
+        }
+      }
     }
   }
   return neighbour_ids;

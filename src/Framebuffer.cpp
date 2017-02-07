@@ -60,10 +60,10 @@ void Framebuffer::addDepthAttachment(const std::string &_identifier)
     m_textures.insert( tex );
 }
 
-void Framebuffer::addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat , GLenum _attachment)
+void Framebuffer::addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat , GLenum _attachment, GLint _type)
 {
     //Create texture.
-    std::pair<std::string, GLuint> tex ( _identifier, genTexture(m_w, m_h, _format, _iformat) );
+    std::pair<std::string, GLuint> tex ( _identifier, genTexture(m_w, m_h, _format, _iformat, _type) );
     m_textures.insert( tex );
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, _attachment, GL_TEXTURE_2D, m_textures[ _identifier ], 0);
@@ -100,13 +100,13 @@ void Framebuffer::clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-GLuint Framebuffer::genTexture(int _width, int _height, GLint _format, GLint _internalFormat)
+GLuint Framebuffer::genTexture(int _width, int _height, GLint _format, GLint _internalFormat, GLint _type)
 {
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, _internalFormat, _width, _height, 0, _format, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, _internalFormat, _width, _height, 0, _format, _type, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

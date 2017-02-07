@@ -5,64 +5,106 @@
 #include "ngl/Vec2.h"
 #include <vector>
 
-/// @file Character.hpp
-/// @brief The character refers to the grid for pathfinding and keeps track of a target
+/// \file Character.hpp
+/// \brief The character refers to the grid for pathfinding and keeps track of a target
 /// for pathfinding. It is responsible for updating and drawing itself.
 
-/// @class Character
-/// @brief Information for ingame characters, containing position, states and targets
+/// \class Character
+/// \brief Information for ingame characters, containing position, states and targets
 class Character
 {
 public:
+  /// \brief ctor sets reference to grid and initialised values
+  /// \param [in] _grid pointer to the grid to reference for pathfinding
+  Character(Grid *_grid);
   /// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
 	Character(Grid *_grid, std::string _name);
+
+	///
+	/// \brief default destructor
+	///
   ~Character() = default;
-
-  /// @brief updates character, including movement
+  ///
+  /// \brief update updates character, including calling move()
+  ///
   void update();
-
-  /// @brief draw character with openGL
+  ///
+  /// \brief move moves character along its path
+  ///
+  void move();
+  ///
+  /// \brief draw draws character with openGL
+  ///
   void draw();
-
-  /// @brief pathfinding function to get nodes for pathfinding
+  ///
+  /// \brief findPath pathfinding function to get nodes for pathfinding
+  ///
   void findPath();
-
-  /// @brief calculate vector towards next point
+  ///
+  /// \brief calcAimVec calculate vector towards next point
+  ///
   ngl::Vec2 calcAimVec(float *dist_squared);
-
-  /// @brief set a new target position based on a position
-  /// @param [in] _target_pos is the position to pathfind to
+  ///
+  /// \brief setTarget set a new target position based on a position
+  /// \param _target_pos is the position to pathfind to
+  ///
   void setTarget(ngl::Vec2 _target_pos);
 
-  /// @brief set a new target based on the grid tile id
-  /// @brief [in] _tile_id is the tile id to pathfind to
+  ///
+  /// \brief setTarget set a new target based on the grid tile id
+  /// \param _tile_id is the tile id to pathfind to
+  ///
   void setTarget(int _tile_id);
 
-	////////////////
+	///
+	/// \brief printID print character's id
+	///
+	void printID();
+	///
+	/// \brief getID get the unique character id
+	/// \return character's id
+	///
 	int getID() {return m_id;}
-	///////////////
 
 	void setActive(bool _selection) {m_active = _selection;}
 
 private:
-	/// @brief counts how many objects have been created
+	///
+	/// \brief m_id_counter counts how many objects have been created
+	///
 	static int m_id_counter;
-	/// @brief current chracter's id
+	///
+	/// \brief m_id current object's id
+	///
 	const int m_id;
+	///
 	/// @brief current character's name
+	///
 	std::string m_name;
+	///
 	/// @brief sets if the current character is selected
+	///
 	bool m_active;
-  /// @brief grid to reference for pathfinding
+	///
+	/// \brief m_grid grid pointer to reference for pathfinding
+	///
   Grid *m_grid;
-  /// @brief character position
+  ///
+  /// \brief m_pos character position
+  ///
   ngl::Vec2 m_pos;
-  /// @brief id of target tile on grid
+  ///
+  /// \brief m_target_id id of target tile on grid
+  ///
   int m_target_id;
-  /// @brief max speed of character
+  ///
+  /// \brief m_speed max speed of character
+  ///
   float m_speed;
-  /// @brief list of target positions for movement
+  ///
+  /// \brief m_path vector of target positions for movement
+  ///
   std::vector<ngl::Vec2> m_path;
 };
 
