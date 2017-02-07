@@ -9,11 +9,15 @@ uniform sampler2D position;
 
 layout (location = 0) out vec4 fragColour;
 
+uniform vec3 sunDir;
+
 void main()
 {
-    fragColour = vec4(texture(diffuse, UV).rgb, 1.0);
+    fragColour = vec4(texture(diffuse, UV));
+    if(fragColour.a == 0.0)
+        discard;
     vec3 n = texture(normal, UV).xyz;
-    float mul = dot(n, vec3(0.0, 1.0, 0.0));
+    float mul = dot(n, sunDir);
     mul = clamp(mul, 0.0, 1.0);
     fragColour.xyz *= mul;
     fragColour.a = 1.0;

@@ -35,6 +35,10 @@ Scene::Scene() :
     createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
+    createShader("sky", "vertScreenQuad", "fragSky");
+
+    slib->use("sky");
+    slib->setRegisteredUniform("viewport", ngl::Vec2(rect.w, rect.h));
 
     //reads file with list of names
     readNameFile();
@@ -112,7 +116,7 @@ Scene::Scene() :
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -156,7 +160,7 @@ void Scene::createCharacter()
 }
 
 void Scene::update()
-{
+{   
     //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
     m_mouse_translation = ngl::Vec2(0,0);
 
@@ -202,15 +206,23 @@ void Scene::update()
     m_cam.movePivot(trans);
 
     m_cam.calculateViewMat();
+
+    m_sunAngle.m_x += 1.0f;
+    if(m_sunAngle.m_x > 360.0f)
+        m_sunAngle.m_x = 0.0f;
 }
 
 void Scene::draw()
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    glClearColor(0.0,0.0,0.0,0.0);
 
     m_transform.reset();
     glEnable(GL_DEPTH_TEST);
 
+    //---------------------------//
+    // UTILITY ID DRAW //
+    //---------------------------//
     //Draw to pick buffer.
     m_pickBuffer.bind();
     m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
@@ -238,6 +250,9 @@ void Scene::draw()
 
     m_pickBuffer.unbind();
 
+    //---------------------------//
+    // RAW DATA PASS //
+    //---------------------------//
     m_mainBuffer.bind();
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -257,21 +272,43 @@ void Scene::draw()
         }
 
     m_mainBuffer.unbind();
-
-    slib->use("deferredLight");
-    GLuint id = slib->getProgramID("deferredLight");
-
     m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+    //glClearColor(1.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
+    //---------------------------//
+    //          SKY           //
+    //---------------------------//
     glBindVertexArray(m_screenQuad);
+
+    slib->use("sky");
+    slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
+    slib->setRegisteredUniform("iP", m_cam.getP().inverse());
+    slib->setRegisteredUniform("camPos", m_cam.getPos());
+    float rad = m_sunAngle.m_x * M_PI / 180.0f;
+    slib->setRegisteredUniform("sunDir", ngl::Vec3(
+                                   0.0f,
+                                   sin( rad ),
+                                   cos( rad )
+                                   ));
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //---------------------------//
+    //       LIGHTING      //
+    //---------------------------//
+    slib->use("deferredLight");
+    GLuint id = slib->getProgramID("deferredLight");
+    slib->setRegisteredUniform("sunDir", ngl::Vec3(
+                                   0.0f,
+                                   sin( rad ),
+                                   cos( rad )
+                                   ));
 
     //m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    //m_mainBuffer.bindTexture(id, "id", "id", 3);
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 

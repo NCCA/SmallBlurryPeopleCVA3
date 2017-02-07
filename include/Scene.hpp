@@ -93,6 +93,8 @@ private:
 
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
+
+    ngl::Vec3 m_sunAngle;
 };
 
 #endif//__SCENE_HPP__
