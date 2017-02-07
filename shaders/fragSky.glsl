@@ -63,9 +63,10 @@ void main()
         nitrogenAccumulation += airColour * alpha;
     }
 
-    nitrogenAccumulation /= stepCount;
-    aerosolAccumulation /= stepCount;
+    /*nitrogenAccumulation /= stepCount;
+    aerosolAccumulation /= stepCount;*/
 
     outColour = vec4(nitrogenAccumulation + aerosolAccumulation, 1.0);
     //outID = inID;
+    outColour = vec4(1.0, 0.0, 0.0, 1.0);
 }
