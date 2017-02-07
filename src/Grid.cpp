@@ -14,7 +14,7 @@ Grid::Grid():
   m_h(1)
 {
   updateScript("python/readImgMap.py");
-  //printTrees();
+  printTrees();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -51,7 +51,7 @@ void Grid::runCurrentScript()
   }
 
   //get grid values from the script
-  for(size_t i = 0; i <  m_w * m_h; i++)
+  for(int i = 0; i <  m_w * m_h; i++)
   {
     int num_trees = PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
     float height =  PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(py_map, i), 1));
@@ -96,7 +96,6 @@ std::vector<ngl::Vec3> Grid::getTriangles()
 {
   //initialize vector of points for triangles
   std::vector<ngl::Vec3> tris;
-
   for (int y = 0; y < m_h; y++)
   {
     for (int x = 0; x < m_w; x++)
@@ -113,7 +112,6 @@ std::vector<ngl::Vec3> Grid::getTriangles()
       tris.push_back(v3);
     }
   }
-
   return tris;
 }
 
@@ -149,7 +147,7 @@ GridTile Grid::get(ngl::Vec2 _coord)
 
 GridTile Grid::get(int _id)
 {
-  if (_id >= 0 && (size_t)_id < m_w * m_h)
+  if (_id >= 0 && _id < m_w * m_h)
   {
     return m_tiles[_id];
   }
@@ -191,7 +189,7 @@ void Grid::set(ngl::Vec2 _coord, GridTile _t)
 
 void Grid::set(int _id, GridTile _t)
 {
-  if (_id >= 0 && (size_t)_id < m_w * m_h)
+  if (_id >= 0 && _id < m_w * m_h)
   {
     m_tiles[_id] = _t;
   }
@@ -211,12 +209,6 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 int Grid::coordToId(ngl::Vec2 _coord)
 {
   return _coord.m_x + m_w * _coord.m_y;
-}
-
-void Grid::resize(int _w, int _h)
-{
-  m_w = _w;
-  m_h = _h;
 }
 
 void Grid::loadScript(std::string _script_path)
