@@ -7,7 +7,7 @@
 
 #include "Scene.hpp"
 
-Scene::Scene() :
+Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
@@ -16,13 +16,12 @@ Scene::Scene() :
     m_mouse_translation(0.0f,0.0f),
     m_mouse_prev_pos(0.0f, 0.0f)
 {
-    SDL_Rect rect;
-    SDL_GetDisplayBounds(0, &rect);
+    m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
     m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
-    float aspect = (float)rect.w / (float)rect.h;
+    float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
     m_cam.setFOV( 60.0f );
     m_cam.calculateProjectionMat();
@@ -36,9 +35,10 @@ Scene::Scene() :
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
+    createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
 
     slib->use("sky");
-    slib->setRegisteredUniform("viewport", ngl::Vec2(rect.w, rect.h));
+    slib->setRegisteredUniform("viewport", m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -47,8 +47,8 @@ Scene::Scene() :
 
     //Graphics stuff.
     //Framebuffers
-    std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
-    m_mainBuffer.initialise(rect.w, rect.h);
+    std::cout << "Initalising framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
@@ -60,7 +60,7 @@ Scene::Scene() :
     }
     m_mainBuffer.unbind();
 
-    m_pickBuffer.initialise( rect.w, rect.h );
+    m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
     m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
     m_pickBuffer.addDepthAttachment( "depth" );
@@ -71,6 +71,15 @@ Scene::Scene() :
     }
     m_pickBuffer.unbind();
 
+    m_shadowBuffer.initialise( 4096, 4096 );
+    m_shadowBuffer.addTexture("depth", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_DEPTH_ATTACHMENT );
+    if(!m_shadowBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_shadowBuffer.unbind();
+
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
@@ -79,16 +88,9 @@ Scene::Scene() :
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
 
-
-
-
     //playing with trees and houses and such
     m_store.loadMesh("tree", "sphere.obj");
     m_store.loadMesh("house", "house/house.obj");
-
-
-
-
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -120,7 +122,7 @@ Scene::Scene() :
                 uvs
                 );
 
-    glViewport(0, 0, rect.w, rect.h);
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
@@ -216,9 +218,17 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
-    m_sunAngle.m_x += 1.0f;
+    //m_sunAngle.m_x = 150.0f;
+    m_sunAngle.m_z = 20.0f;
+    m_sunAngle.m_x += 0.1f;
     if(m_sunAngle.m_x > 360.0f)
         m_sunAngle.m_x = 0.0f;
+    //std::cout << m_sunAngle.m_x << '\n';
+
+    ngl::Transformation t;
+    t.setRotation( m_sunAngle );
+    m_sunDir = t.getMatrix().getForwardVector();
+    m_sunDir.normalize();
 }
 
 void Scene::draw()
@@ -260,6 +270,63 @@ void Scene::draw()
     m_pickBuffer.unbind();
 
     //---------------------------//
+    //  SHADOW PASS  //
+    //---------------------------//
+    glViewport(0, 0, 4096, 4096);
+    m_shadowBuffer.bind();
+    glDrawBuffer( GL_NONE );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    slib->use("shadowDepth");
+
+    ngl::Vec3 cp = m_cam.getPos();
+
+    ngl::Mat4 P = ngl::ortho(
+                -16, 16,
+                -16, 16,
+                -32, 32
+                );
+
+    ngl::Mat4 V = ngl::lookAt(
+                m_sunDir,
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+
+    ngl::Transformation t;
+    t.setPosition( m_cam.getPos() );
+
+    m_shadowMat = V * P;
+
+    glBindVertexArray(m_terrainVAO);
+    //loadMatricesToShader();
+    loadMatricesToShader(ngl::Mat4(), m_shadowMat);
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
+
+    for(int i = 0; i < 20; ++i)
+        for(int j = 0; j < 20; ++j)
+        {
+            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
+            ngl::Obj * k = m_store.getModel( "knight" );
+            ngl::Mat4 t = m_transform.getMatrix() * m_shadowMat;
+            loadMatricesToShader( m_transform.getMatrix(), t );
+            //loadMatricesToShader();
+            k->draw();
+        }
+
+    //Tweaking the shadow matrix so that it can be used for shading.
+    ngl::Mat4 biasMat (
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+                );
+    m_shadowMat = m_shadowMat * biasMat;
+
+    m_shadowBuffer.unbind();
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+    //---------------------------//
     // RAW DATA PASS //
     //---------------------------//
     m_mainBuffer.bind();
@@ -295,12 +362,7 @@ void Scene::draw()
     slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
     slib->setRegisteredUniform("iP", m_cam.getP().inverse());
     slib->setRegisteredUniform("camPos", m_cam.getPos());
-    float rad = m_sunAngle.m_x * M_PI / 180.0f;
-    slib->setRegisteredUniform("sunDir", ngl::Vec3(
-                                   0.0f,
-                                   sin( rad ),
-                                   cos( rad )
-                                   ));
+    slib->setRegisteredUniform( "sunDir", m_sunDir );
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
@@ -308,16 +370,14 @@ void Scene::draw()
     //---------------------------//
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
-    slib->setRegisteredUniform("sunDir", ngl::Vec3(
-                                   0.0f,
-                                   sin( rad ),
-                                   cos( rad )
-                                   ));
+    slib->setRegisteredUniform("sunDir", m_sunDir );
+    slib->setRegisteredUniform( "shadowMatrix", m_shadowMat );
 
-    //m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
+    //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
+    m_shadowBuffer.bindTexture( id, "depth", "shadowDepth", 3 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -406,6 +466,13 @@ void Scene::mouseSelection()
         if (character.getID() == red)
             character.setActive(true);
     }
+}
+
+void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    slib->setRegisteredUniform( "M", _M );
+    slib->setRegisteredUniform( "MVP", _MVP );
 }
 
 void Scene::loadMatricesToShader()
