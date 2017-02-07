@@ -9,7 +9,6 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <QTime>
 
 int Character::m_id_counter(0);
 
@@ -74,9 +73,6 @@ void Character::draw()
 
 void Character::findPath()
 {
-  QTime myTimer;
-  myTimer.start();
-
   NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
 
   m_path = network.findPath();
