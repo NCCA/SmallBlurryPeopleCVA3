@@ -6,5 +6,5 @@ uniform int id;
 
 void main()
 {
-    outID = 1;
+    outID = id;
 }

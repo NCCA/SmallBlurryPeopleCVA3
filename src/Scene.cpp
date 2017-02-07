@@ -78,11 +78,15 @@ Scene::Scene() :
 
 
 
+
     //playing with trees and houses and such
     //m_store.loadMesh("tree", "sphere.obj");
     //m_store.loadMesh("house", "house/house.obj");
 
 
+
+
+    m_store.loadMesh( "s", "test/sphere.obj" );
 
 
     //Get as vec4s
@@ -273,13 +277,14 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
-    m_pickBuffer.bindTexture(id, "terrainpos", "diffuse", 0);
-    //m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+    glBindVertexArray(m_screenQuad);
+
+    //m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
+    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
     //m_mainBuffer.bindTexture(id, "id", "id", 3);
 
-    glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     glBindVertexArray(0);

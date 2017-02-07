@@ -23,7 +23,7 @@ Character::Character(Grid *_grid, std::string _name):
 	rand->setSeed(0);
 
   //m_pos = ngl::Vec2(1, 4);
-  m_pos = ngl::Vec2(1,1);
+  m_pos = ngl::Vec2(17,47);
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
