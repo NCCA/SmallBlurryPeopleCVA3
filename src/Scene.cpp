@@ -263,7 +263,7 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
-    m_pickBuffer.bindTexture(id, "terrainpos", "diffuse", 0);
+    m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
     //m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);

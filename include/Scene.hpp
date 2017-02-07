@@ -92,6 +92,7 @@ private:
     void setBufferLocation(GLuint _buffer, int _index, int _size);
 
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
+    GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
 };
 
 #endif//__SCENE_HPP__
