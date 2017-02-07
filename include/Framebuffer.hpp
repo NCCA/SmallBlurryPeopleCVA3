@@ -13,7 +13,7 @@ public:
     void initialise(int _w, int _h);
     void activeColourAttachments();
     void activeColourAttachments(const std::vector<GLenum> _bufs);
-    void addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat, GLenum _attachment);
+    void addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat, GLenum _attachment, GLint _type = GL_FLOAT);
     void addDepthAttachment(const std::string &_identifier);
     void bind();
     void bindTexture(const GLint _shaderID, const std::string &_tex, const char *_uniform, int _target);
@@ -22,7 +22,7 @@ public:
     void unbind();
     GLuint get(const std::string _id) {return m_textures[_id];}
 private:
-    GLuint genTexture(int _width, int _height, GLint _format, GLint _internalFormat);
+    GLuint genTexture(int _width, int _height, GLint _format, GLint _internalFormat, GLint _type);
     //Keeps track of textures.
     std::unordered_map< std::string, GLuint > m_textures;
     //Keeps track of the colour attachments that each texture uses.
