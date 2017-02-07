@@ -10,6 +10,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Camera.cpp \
          $$PWD/src/Grid.cpp \
          $$PWD/src/Character.cpp \
+				 $$PWD/src/FSM.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
          $$PWD/src/imgui/*.cpp \
@@ -22,6 +23,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
          $$PWD/include/Grid.hpp \
          $$PWD/include/Character.hpp \
+				 $$PWD/include/FSM.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
          $$PWD/include/imgui/*.h \

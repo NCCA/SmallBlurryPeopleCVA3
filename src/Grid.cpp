@@ -14,7 +14,7 @@ Grid::Grid():
   m_h(1)
 {
   updateScript("python/readImgMap.py");
-  printTrees();
+	printTrees();
 }
 
 void Grid::updateScript(std::string _script_path)

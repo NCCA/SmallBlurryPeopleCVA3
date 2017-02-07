@@ -43,7 +43,7 @@ Scene::Scene() :
 
     //Graphics stuff.
     //Framebuffers
-    std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
+		std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
     m_mainBuffer.initialise(rect.w, rect.h);
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
@@ -211,6 +211,12 @@ void Scene::update()
     m_cam.movePivot(trans);
 
     m_cam.calculateViewMat();
+
+		for(Character &character : m_characters)
+		{
+			if (character.isActive() == true)
+				character.update();
+		}
 }
 
 void Scene::draw()

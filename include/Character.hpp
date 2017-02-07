@@ -4,10 +4,21 @@
 #include "Grid.hpp"
 #include "ngl/Vec2.h"
 #include <vector>
+#include <SDL.h>
 
 /// \file Character.hpp
 /// \brief The character refers to the grid for pathfinding and keeps track of a target
 /// for pathfinding. It is responsible for updating and drawing itself.
+
+enum class State
+{
+	GET_WOOD,
+	BUILD,
+	SLEEP,
+	FORAGE,
+	MOVE,
+	NONE
+};
 
 /// \class Character
 /// \brief Information for ingame characters, containing position, states and targets
@@ -17,7 +28,7 @@ public:
   /// \brief ctor sets reference to grid and initialised values
   /// \param [in] _grid pointer to the grid to reference for pathfinding
   Character(Grid *_grid);
-  /// @brief ctor sets reference to grid and initialised values
+	/// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
 	Character(Grid *_grid, std::string _name);
 
@@ -25,14 +36,18 @@ public:
 	/// \brief default destructor
 	///
   ~Character() = default;
-  ///
-  /// \brief update updates character, including calling move()
-  ///
+	///
+	/// \brief sets state
+	///
+	void setState();
+	///
+	/// \brief update updates character, including calling move()
+	///
   void update();
   ///
   /// \brief move moves character along its path
   ///
-  void move();
+	bool move();
   ///
   /// \brief draw draws character with openGL
   ///
@@ -40,7 +55,7 @@ public:
   ///
   /// \brief findPath pathfinding function to get nodes for pathfinding
   ///
-  void findPath();
+	void findPath();
   ///
   /// \brief calcAimVec calculate vector towards next point
   ///
@@ -55,7 +70,7 @@ public:
   /// \brief setTarget set a new target based on the grid tile id
   /// \param _tile_id is the tile id to pathfind to
   ///
-  void setTarget(int _tile_id);
+	void setTarget(int _tile_id);
 
 	///
 	/// \brief printID print character's id
@@ -68,6 +83,8 @@ public:
 	int getID() {return m_id;}
 
 	void setActive(bool _selection) {m_active = _selection;}
+	bool isActive() {return m_active;}
+	static unsigned int getWood(unsigned int interval, void *param);
 
 private:
 	///
@@ -105,7 +122,11 @@ private:
   ///
   /// \brief m_path vector of target positions for movement
   ///
-  std::vector<ngl::Vec2> m_path;
+	std::vector<ngl::Vec2> m_path;
+
+	State m_state;
+
+	int m_chopping_speed;
 };
 
 #endif//__CHARACTER_HPP__
