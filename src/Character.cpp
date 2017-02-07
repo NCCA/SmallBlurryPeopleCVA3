@@ -27,7 +27,7 @@ Character::Character(Grid *_grid, std::string _name):
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(1,2));
+  setTarget(ngl::Vec2(49,49));
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
