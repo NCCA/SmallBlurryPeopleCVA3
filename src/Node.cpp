@@ -80,25 +80,28 @@ std::array<int, 4> Node::getNeighbours()
   std::array<int, 4> neighbour_ids = {-1, -1, -1, -1};
   for(Node &node : *m_node_vector)
   {
-    ngl::Vec2 vec_to_node = node.getPos() - m_pos;
-    float dist_sqaured = vec_to_node.lengthSquared();
-    if(dist_sqaured <= 1)
+    if(&node != this)
     {
-      if(vec_to_node.m_y == 1)
+      ngl::Vec2 vec_to_node = node.getPos() - m_pos;
+      float dist_sqaured = vec_to_node.lengthSquared();
+      if(dist_sqaured <= 1)
       {
-        neighbour_ids[Neighbour::UP] = node.getID();
-      }
-      else if(vec_to_node.m_y == -1)
-      {
-        neighbour_ids[Neighbour::DOWN] = node.getID();
-      }
-      else if(vec_to_node.m_x == -1)
-      {
-        neighbour_ids[Neighbour::LEFT] = node.getID();
-      }
-      else if(vec_to_node.m_x == 1)
-      {
-        neighbour_ids[Neighbour::RIGHT] = node.getID();
+        if(vec_to_node.m_y == 1)
+        {
+          neighbour_ids[Neighbour::UP] = node.getID();
+        }
+        else if(vec_to_node.m_y == -1)
+        {
+          neighbour_ids[Neighbour::DOWN] = node.getID();
+        }
+        else if(vec_to_node.m_x == -1)
+        {
+          neighbour_ids[Neighbour::LEFT] = node.getID();
+        }
+        else if(vec_to_node.m_x == 1)
+        {
+          neighbour_ids[Neighbour::RIGHT] = node.getID();
+        }
       }
     }
   }

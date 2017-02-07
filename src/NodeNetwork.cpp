@@ -45,8 +45,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     {
       std::cout << "no path found!" << std::endl;
       printNetwork();
-      std::vector<ngl::Vec2> no_path;
-      return no_path;
+      break;
     }
 
     ///FUNCTION END
@@ -68,13 +67,13 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         switch(i)
         {
           case Neighbour::UP:
-            if(current_pos[1] > 0)
+            if(current_pos[1] < m_grid->getH() - 1)
             {
               tile_pos += ngl::Vec2(0, 1);
             }
             break;
           case Neighbour::DOWN:
-            if(current_pos[1] < m_grid->getH() - 1)
+            if(current_pos[1] > 0)
             {
               tile_pos += ngl::Vec2(0, -1);
             }
@@ -122,6 +121,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       }
     }
 
+
     /// CLOSE NODE
     // close current node
     m_nodes[lowest_f_node_id].close();
@@ -133,6 +133,8 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       return createFoundPath(m_nodes[lowest_f_node_id]);
     }
   }
+  std::vector<ngl::Vec2> no_path;
+  return no_path;
 }
 
 void NodeNetwork::printNetwork()
@@ -141,11 +143,32 @@ void NodeNetwork::printNetwork()
   {
     for(int x=0; x<m_grid->getW(); x++)
     {
+      Node *matching_node = nullptr;
       for(Node &node : m_nodes)
       {
-
+        if(node.getPos().m_x == x && node.getPos().m_y == y)
+        {
+          matching_node = &node;
+          break;
+        }
+      }
+      if(matching_node)
+      {
+        if(matching_node->isOpen())
+        {
+          std::cout << "o ";
+        }
+        else
+        {
+          std::cout << "x ";
+        }
+      }
+      else
+      {
+        std::cout << "  ";
       }
     }
+    std::cout << '\n';
   }
 }
 
@@ -166,5 +189,41 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
     }
     current_node = &(m_nodes[current_node->getParentID()]);
   }
+  printPath(path);
   return path;
+}
+
+void NodeNetwork::printPath(std::vector<ngl::Vec2> &path)
+{
+  for(int y=0; y<m_grid->getH(); y++)
+  {
+    for(int x=0; x<m_grid->getW(); x++)
+    {
+      bool on_path = false;
+      for(ngl::Vec2 &pos : path)
+      {
+        if(pos.m_x == x && pos.m_y == y)
+        {
+          on_path = true;
+          break;
+        }
+      }
+      if(on_path)
+      {
+        std::cout << "o ";
+      }
+      else
+      {
+        if(m_grid->get(x, y).isTraversable())
+        {
+          std::cout << "  ";
+        }
+        else
+        {
+          std::cout << ". ";
+        }
+      }
+    }
+    std::cout << '\n';
+  }
 }

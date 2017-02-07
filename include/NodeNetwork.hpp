@@ -38,6 +38,11 @@ public:
   /// \return vector of points in path
   ///
   std::vector<ngl::Vec2> createFoundPath(Node _end_node);
+  ///
+  /// \brief printPath prints final path
+  /// \param path list of nodes that make up path
+  ///
+  void printPath(std::vector<ngl::Vec2> &path);
 private:
   ///
   /// \brief m_grid grid which network can read for pathfinding

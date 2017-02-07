@@ -13,8 +13,8 @@ Scene::Scene() :
     m_mouse_zoom(10.0f),
     m_mouse_pan(1.0f),
     m_mouse_rotation(0.0f),
-		m_mouse_translation(0.0f,0.0f),
-		m_mouse_prev_pos(0.0f, 0.0f)
+    m_mouse_translation(0.0f,0.0f),
+    m_mouse_prev_pos(0.0f, 0.0f)
 {
     SDL_Rect rect;
     SDL_GetDisplayBounds(0, &rect);
@@ -33,10 +33,12 @@ Scene::Scene() :
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("knight", "vertDeferredData", "fragDeferredKnight");
     createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
+    createShader("charPick", "vertDeferredData", "fragPickChar");
+    createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
 
-		//reads file with list of names
+    //reads file with list of names
     readNameFile();
-		//creates a character with a random name
+    //creates a character with a random name
     createCharacter();
 
     //Graphics stuff.
@@ -46,7 +48,6 @@ Scene::Scene() :
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
-    //m_mainBuffer.addTexture( "id", GL_RED, GL_R16, GL_COLOR_ATTACHMENT3 );
     m_mainBuffer.addDepthAttachment( "depth" );
     if(!m_mainBuffer.checkComplete())
     {
@@ -55,6 +56,17 @@ Scene::Scene() :
     }
     m_mainBuffer.unbind();
 
+    m_pickBuffer.initialise( rect.w, rect.h );
+    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
+    m_pickBuffer.addDepthAttachment( "depth" );
+    if(!m_pickBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_pickBuffer.unbind();
+
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
@@ -62,6 +74,8 @@ Scene::Scene() :
 
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
+
+    m_store.loadMesh( "s", "test/sphere.obj" );
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -192,15 +206,43 @@ void Scene::update()
 
 void Scene::draw()
 {
-    m_mainBuffer.bind();
-    m_mainBuffer.activeColourAttachments();
-    glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
     m_transform.reset();
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    glEnable(GL_DEPTH_TEST);
+
+    //Draw to pick buffer.
+    m_pickBuffer.bind();
+    m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    slib->use("terrainPick");
+
+    glBindVertexArray(m_terrainVAO);
+    loadMatricesToShader();
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
+
+    m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    slib->use("charPick");
+
+    for(int i = 0; i < 20; ++i)
+        for(int j = 0; j < 20; ++j)
+        {
+            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
+            slib->setRegisteredUniform("id", i * j + i);
+            drawAsset( "knight", "", "" );
+        }
+
+    m_pickBuffer.unbind();
+
+    m_mainBuffer.bind();
+    m_mainBuffer.activeColourAttachments();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     slib->use("terrain");
-    ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -223,12 +265,14 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
+    glBindVertexArray(m_screenQuad);
+
+    //m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
     //m_mainBuffer.bindTexture(id, "id", "id", 3);
 
-    glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     glBindVertexArray(0);
@@ -240,11 +284,11 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
     //checks if the left button has been pressed down and flags start
     if(_event.button == SDL_BUTTON_LEFT)
     {
-				m_mouse_trans_origin[0] = _event.x;
-				m_mouse_trans_origin[1] = _event.y;
-				//records position of mouse on press
-				m_mouse_prev_pos[0] = _event.x;
-				m_mouse_prev_pos[1] = _event.y;
+        m_mouse_trans_origin[0] = _event.x;
+        m_mouse_trans_origin[1] = _event.y;
+        //records position of mouse on press
+        m_mouse_prev_pos[0] = _event.x;
+        m_mouse_prev_pos[1] = _event.y;
         m_mouse_trans_active=true;
     }
 
@@ -262,15 +306,15 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     if (_event.button == SDL_BUTTON_LEFT)
     {
 
-			//checks if the mouse has moved, a click or a drag
-			ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
+        //checks if the mouse has moved, a click or a drag
+        ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
-			//if its a click then the mouseSelection funciton is called
-			if(distance.length() == 0)
-				mouseSelection();
+        //if its a click then the mouseSelection funciton is called
+        if(distance.length() == 0)
+            mouseSelection();
 
-			m_mouse_prev_pos.set(0.0f, 0.0f);
-			m_mouse_trans_active = false;
+        m_mouse_prev_pos.set(0.0f, 0.0f);
+        m_mouse_trans_active = false;
     }
 
     //checks if the right button has been released and turns off flag
@@ -305,7 +349,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::mouseSelection()
 {
-		std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+    std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
     int mouseCoords[2] = {0,0};
     SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
 
