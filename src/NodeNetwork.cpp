@@ -68,13 +68,13 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         switch(i)
         {
           case Neighbour::UP:
-            if(current_pos[1] > 0)
+            if(current_pos[1] < m_grid->getH() - 1)
             {
               tile_pos += ngl::Vec2(0, 1);
             }
             break;
           case Neighbour::DOWN:
-            if(current_pos[1] < m_grid->getH() - 1)
+            if(current_pos[1] > 0)
             {
               tile_pos += ngl::Vec2(0, -1);
             }
@@ -121,6 +121,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
         }
       }
     }
+
 
     /// CLOSE NODE
     // close current node
