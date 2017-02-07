@@ -13,6 +13,7 @@ public:
     void initialise(int _w, int _h);
     void activeColourAttachments();
     void activeColourAttachments(const std::vector<GLenum> _bufs);
+    void addTexture(const std::string &_identifier, GLuint _tex, GLenum _attachment);
     void addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat, GLenum _attachment, GLint _type = GL_FLOAT);
     void addDepthAttachment(const std::string &_identifier);
     void bind();
