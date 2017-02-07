@@ -13,7 +13,7 @@ Node::Node(Grid *_grid, std::vector<Node> *nodes, int _tile_id, int _target_id, 
   m_g_cost(calcGCost(nodes, _parent_id)),
   m_h_cost(manhattanDist(_target_id))
 {
-  if(m_grid->read(m_tile_id) != Tile::EMPTY)
+  if(!m_grid->get(m_tile_id).isTraversable())
   {
     close();
   }

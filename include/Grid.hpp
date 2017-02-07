@@ -14,15 +14,7 @@
 /// what is contained within each cell of the map, which can be used by other classes for
 /// rendering and path finding.
 
-/// @enum An enum to make identifying the cell type more obvious and easier to change
-enum class Tile{
-                ERROR, //returned when accessing non-existend tiles
-                EMPTY, //empty tile
-                FOREST, //forest tile
-                BUILDING //building tile
-               };
 
-std::ostream& operator<<(std::ostream& _os, const Tile _t);
 
 /// @class Grid
 /// @brief A wrapper around a std::vector used to store map information
@@ -57,7 +49,7 @@ public:
   /// @param [in] _x is the x coordinate of the requested tile
   /// @param [in] _y is the y coordinate of the requested tile
   /// @return returns the Tile at the given coordinate
-  Tile read(int _x, int _y);
+  //Tile read(int _x, int _y);
   GridTile get(int _x, int _y);
 
   /// @brief returns the value of a tile at the specified coordinate.
@@ -65,7 +57,7 @@ public:
   /// return garbage if the index is out of range.
   /// @param [in] _coord is the coordinate as a ngl::Vec2
   /// @return returns the Tile at the given coordinate
-  Tile read(ngl::Vec2 _coord);
+  //Tile read(ngl::Vec2 _coord);
   GridTile get(ngl::Vec2 _coord);
 
   /// @brief returns the value of a tile at the specified width and height coordinate.
@@ -73,7 +65,7 @@ public:
   /// return garbage if the index is out of range.
   /// @param [in] _id is the 1d coordinate of the tile
   /// @return returns the Tile at the given coordinate
-  Tile read(int _id);
+  //Tile read(int _id);
   GridTile get(int _id);
 
   /// @brief sets the value of a tile at a given coordinate
@@ -81,21 +73,21 @@ public:
   /// @param [in] _x is the x coordinate of the tile to be set
   /// @param [in] _y is the y coordinate of the tile to be set
   /// @param [in] _t is the value to be set at the given coordiate
-  void write(int _x, int _y, Tile _t);
+  //void write(int _x, int _y, Tile _t);
   void set(int _x, int _y, GridTile _t);
 
   /// @brief sets the value of a tile at a given coordinate
   /// It does not perform any error checking that the requested tile exists.
   /// @param [in] _coord is the coordinate as a ngl::Vec2
   /// @param [in] _t is the value to be set at the given coordiate
-  void write(ngl::Vec2 _coord, Tile _t);
+  //void write(ngl::Vec2 _coord, Tile _t);
   void set(ngl::Vec2 _coord, GridTile _t);
 
   /// @brief sets the value of a tile at a given coordinate
   /// It does not perform any error checking that the requested tile exists.
   /// @param [in] _id is the 1d coord of the tile
   /// @param [in] _t is the value to be set at the given coordiate
-  void write(int _id, Tile _t);
+  //void write(int _id, Tile _t);
   void set(int _id, GridTile _t);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
@@ -142,7 +134,6 @@ private:
   int m_h;
 
   /// @brief container for map information
-  std::vector<Tile> m_map;
   std::vector<GridTile> m_tiles;
 
   std::string m_script;

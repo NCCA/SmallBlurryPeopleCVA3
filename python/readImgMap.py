@@ -41,6 +41,6 @@ for y in range(map_height):
     g = rgb[1]
     b = rgb[2]
     if g == 255:
-      map_data[x + map_width * y][0] = 9;
+      map_data[x + map_width * y][0] = 1;
     map_data[x + map_width * y][1] = b/255.0;
 
