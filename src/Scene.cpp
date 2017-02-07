@@ -78,15 +78,12 @@ Scene::Scene() :
 
 
 
-
     //playing with trees and houses and such
-    //m_store.loadMesh("tree", "sphere.obj");
-    //m_store.loadMesh("house", "house/house.obj");
+    m_store.loadMesh("tree", "sphere.obj");
+    m_store.loadMesh("house", "house/house.obj");
 
 
 
-
-    m_store.loadMesh( "s", "test/sphere.obj" );
 
 
     //Get as vec4s
