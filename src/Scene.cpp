@@ -79,7 +79,16 @@ Scene::Scene() :
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
 
-    m_store.loadMesh( "s", "test/sphere.obj" );
+
+
+
+    //playing with trees and houses and such
+    m_store.loadMesh("tree", "sphere.obj");
+    m_store.loadMesh("house", "house/house.obj");
+
+
+
+
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;

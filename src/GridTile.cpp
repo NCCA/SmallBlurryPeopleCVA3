@@ -1,10 +1,7 @@
 #include "GridTile.hpp"
 
-GridTile::GridTile(int id):
-  m_id(id),
-  m_trees(0),
-  m_height(0.0),
-  m_building(BuildingType::NONE)
+GridTile::GridTile(int _id):
+  m_id(_id)
 {
 }
 
