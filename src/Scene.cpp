@@ -1,10 +1,9 @@
 #include <iostream>
+#include <random>
 #include <ngl/ShaderLib.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
 #include <SDL2/SDL.h>
-
-#include "imgui.h"
 
 #include "Scene.hpp"
 
@@ -14,7 +13,8 @@ Scene::Scene() :
     m_mouse_zoom(10.0f),
     m_mouse_pan(1.0f),
     m_mouse_rotation(0.0f),
-    m_mouse_translation(0.0f,0.0f)
+		m_mouse_translation(0.0f,0.0f),
+		m_mouse_prev_pos(0.0f, 0.0f)
 {
     SDL_Rect rect;
     SDL_GetDisplayBounds(0, &rect);
@@ -30,28 +30,30 @@ Scene::Scene() :
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    createShader("simplesurface", "vertMVPUVN", "fragBasicLight");
-    createShader("blinn", "vertMVPUVN", "fragBlinn" );
+    createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
+    createShader("knight", "vertDeferredData", "fragDeferredKnight");
+    createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
 
-    /////////////////////////////////////////////////////////
+		//reads file with list of names
+    readNameFile();
+		//creates a character with a random name
+    createCharacter();
 
-    m_characters.push_back(Character(&m_grid));
-    m_characters.push_back(Character(&m_grid));
-
-    character_names = {"Paul", "Susan"};
-
-    std::unordered_map<std::string, int> m_char_map;
-
-    for (size_t i = 0; i<m_characters.size(); i++)
+    //Graphics stuff.
+    //Framebuffers
+    std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
+    m_mainBuffer.initialise(rect.w, rect.h);
+    m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
+    //m_mainBuffer.addTexture( "id", GL_RED, GL_R16, GL_COLOR_ATTACHMENT3 );
+    m_mainBuffer.addDepthAttachment( "depth" );
+    if(!m_mainBuffer.checkComplete())
     {
-        m_char_map[character_names[i]] =  m_characters[i].getID();
-        std::cout<<character_names[i]<<" :name, "<< m_char_map[character_names[i]]<<": ID\n";
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
     }
-
-
-
-
-    ////////////////////////////////////////////////////////////////
+    m_mainBuffer.unbind();
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -68,8 +70,75 @@ Scene::Scene() :
     //Convert format, add some cheeky randomisation
     for(auto &vert : original)
         data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
+
+    std::vector<ngl::Vec4> verts = {
+        ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, 1.0, 0.0f, 1.0f),
+        ngl::Vec4(-1.0, 1.0, 0.0f, 1.0f)
+    };
+
+    std::vector<ngl::Vec2> uvs = {
+        ngl::Vec2(0.0, 0.0),
+        ngl::Vec2(1.0, 0.0),
+        ngl::Vec2(1.0, 1.0),
+        ngl::Vec2(0.0, 1.0)
+    };
+
+    m_screenQuad = createVAO(
+                verts,
+                uvs
+                );
+
+    glViewport(0, 0, rect.w, rect.h);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Scene::readNameFile()
+{
+    std::ifstream namesFile;
+    namesFile.open("names/game_names.txt");
+
+    if(!namesFile.is_open())
+    {
+        std::cerr<<"Couldnt open file\n";
+        exit(EXIT_FAILURE);
+    }
+
+    int lineNo = 0;
+    std::string lineBuffer;
+    while (!namesFile.eof())
+    {
+        std::getline(namesFile, lineBuffer, '\n');
+        if(lineBuffer.size() != 0)
+        {
+            m_file_names.push_back(lineBuffer);
+            lineNo++;
+        }
+    }
+    namesFile.close();
+}
+
+void Scene::createCharacter()
+{
+
+    int numberNames = m_file_names.size();
+
+    std::random_device rnd;
+    std::mt19937 mt_rand(rnd());
+    std::uniform_int_distribution<int> nameNo(0,numberNames);
+    int name_chosen = nameNo(mt_rand);
+
+    m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
+
 }
 
 void Scene::update()
@@ -116,29 +185,25 @@ void Scene::update()
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
-    m_cam.movePivot( trans );
+    m_cam.movePivot(trans);
 
     m_cam.calculateViewMat();
 }
 
 void Scene::draw()
 {
-    m_transform.setPosition(0.0f, 0.0f, 0.0f);
+    m_mainBuffer.bind();
+    m_mainBuffer.activeColourAttachments();
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    m_transform.reset();
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-
-    slib->use("simplesurface");
-
+    slib->use("terrain");
     ngl::VAOPrimitives * prim = ngl::VAOPrimitives::instance();
 
-    /*m_transform.reset();
-    m_transform.setPosition(0.0,-0.5,0.0);
-    loadMatricesToShader();
-    prim->draw("plane");*/
-    m_transform.reset();
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
-    std::cout << "Drawing " << m_terrainVAOSize << '\n';
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
@@ -146,11 +211,28 @@ void Scene::draw()
         for(int j = 0; j < 20; ++j)
         {
             m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            //slib->use("blinn");
-            loadMatricesToShader();
-            drawAsset( "knight", "knight_d", "blinn" );
-            //m_store.getModel("knight")->draw();
+            drawAsset( "knight", "knight_d", "knight" );
         }
+
+    m_mainBuffer.unbind();
+
+    slib->use("deferredLight");
+    GLuint id = slib->getProgramID("deferredLight");
+
+    m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+
+    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+    m_mainBuffer.bindTexture(id, "normal", "normal", 1);
+    m_mainBuffer.bindTexture(id, "position", "position", 2);
+    //m_mainBuffer.bindTexture(id, "id", "id", 3);
+
+    glBindVertexArray(m_screenQuad);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -158,8 +240,11 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
     //checks if the left button has been pressed down and flags start
     if(_event.button == SDL_BUTTON_LEFT)
     {
-        m_mouse_trans_origin[0] = _event.x;
-        m_mouse_trans_origin[1] = _event.y;
+				m_mouse_trans_origin[0] = _event.x;
+				m_mouse_trans_origin[1] = _event.y;
+				//records position of mouse on press
+				m_mouse_prev_pos[0] = _event.x;
+				m_mouse_prev_pos[1] = _event.y;
         m_mouse_trans_active=true;
     }
 
@@ -176,7 +261,16 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the left button has been released and turns off flag
     if (_event.button == SDL_BUTTON_LEFT)
     {
-        m_mouse_trans_active = false;
+
+			//checks if the mouse has moved, a click or a drag
+			ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
+
+			//if its a click then the mouseSelection funciton is called
+			if(distance.length() == 0)
+				mouseSelection();
+
+			m_mouse_prev_pos.set(0.0f, 0.0f);
+			m_mouse_trans_active = false;
     }
 
     //checks if the right button has been released and turns off flag
@@ -207,7 +301,21 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
         }
         m_mouse_zoom += 0.5;
     }
+}
 
+void Scene::mouseSelection()
+{
+		std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+    int mouseCoords[2] = {0,0};
+    SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
+
+    long unsigned int red = 0;
+    glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+    for (Character &character : m_characters)
+    {
+        if (character.getID() == red)
+            character.setActive(true);
+    }
 }
 
 void Scene::loadMatricesToShader()
@@ -227,8 +335,8 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
 
     if(loc == -1)
     {
-        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
-        return;
+        //std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+        //return;
     }
     glUniform1i(loc, _target);
 
@@ -286,7 +394,7 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
     slib->linkProgramObject(_name);
 }
 
-GLuint Scene::createVAO(std::vector<ngl::Vec4> _verts)
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts)
 {
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -319,6 +427,22 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> _verts)
     }
     GLuint normBuffer = createBuffer3f(normals);
     setBufferLocation( normBuffer, 2, 3 );
+
+    return vao;
+}
+
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs)
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    //Generate a VBO
+    GLuint vertBuffer = createBuffer4f( _verts );
+    setBufferLocation( vertBuffer, 0, 4 );
+
+    GLuint UVBuffer = createBuffer2f( _uvs );
+    setBufferLocation( UVBuffer, 1, 2 );
 
     return vao;
 }
