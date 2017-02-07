@@ -35,14 +35,15 @@ public:
   void printNetwork();
   ///
   /// \brief createFoundPath go through parent nodes and return list of positions of valid path
+  /// \param _end_node last node in path
   /// \return vector of points in path
   ///
   std::vector<ngl::Vec2> createFoundPath(Node _end_node);
   ///
   /// \brief printPath prints final path
-  /// \param path list of nodes that make up path
+  /// \param _path list of nodes that make up path
   ///
-  void printPath(std::vector<ngl::Vec2> &path);
+  void printPath(std::vector<ngl::Vec2> &_path);
 private:
   ///
   /// \brief m_grid grid which network can read for pathfinding
