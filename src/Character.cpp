@@ -23,11 +23,12 @@ Character::Character(Grid *_grid, std::string _name):
 	rand->setSeed(0);
 
   //m_pos = ngl::Vec2(1, 4);
-  m_pos = ngl::Vec2(17,47);
+  m_pos = ngl::Vec2(0,0);
   m_target_id = m_grid->coordToId(m_pos);
 
   //setTarget(ngl::Vec2(9, 1));
-  setTarget(ngl::Vec2(49,49));
+  setTarget(ngl::Vec2(25,25));
+
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
@@ -78,6 +79,7 @@ void Character::findPath()
 	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
 
 	m_path = network.findPath();
+
 }
 
 ngl::Vec2 Character::calcAimVec(float *dist)

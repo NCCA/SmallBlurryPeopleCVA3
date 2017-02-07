@@ -1,4 +1,5 @@
 #include "NodeNetwork.hpp"
+#include "ngl/NGLStream.h"
 
 NodeNetwork::NodeNetwork(Grid *_grid, ngl::Vec2 _pos, ngl::Vec2 _target_pos) :
   m_grid(_grid),
@@ -43,7 +44,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     // if no nodes are open
     if(!open_nodes_available)
     {
-      std::cout << "no path found!" << std::endl;
+      std::cout << "no path found between " << m_char_pos << " and " << m_target_pos << std::endl;
       printNetwork();
       break;
     }
@@ -178,7 +179,7 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
   // create path with nodes
   //std::cout << "character position" << m_pos << std::endl;
   //std::cout << "character target" << m_grid->idToCoord(m_target_id) << std::endl;
-  std::cout << "path found!" << std::endl;
+  std::cout << "path found between " << m_char_pos << " and " << m_target_pos << " :)" << std::endl;
   Node *current_node = &_end_node;
   while(true)
   {
