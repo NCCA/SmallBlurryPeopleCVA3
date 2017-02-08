@@ -13,7 +13,7 @@ uniform vec2 iResolution;
 uniform vec3 camPos;
 
 uniform vec3 sunDir;
-vec3 sunColour = vec3(1.0, 0.9, 0.8);
+vec3 sunColour = vec3(1.0);
 float lightScatterMul = 1.0;
 
 vec3 airColour = vec3(
@@ -22,11 +22,13 @@ vec3 airColour = vec3(
 
 int stepCount = 24;
 
-float nmul = 8.0;
+float nmul = 1.0;
 float amul = 1.0;
 
-float npow = 8.0;
+float npow = 1.0;
 float apow = 1.0;
+
+uniform float surfaceHeight;
 
 vec3 getEyeRay()
 {
@@ -83,14 +85,12 @@ vec3 absorb(float dist, vec3 color, float factor)
 
 void main()
 {
-    float surfaceHeight = 0.65;
-
     vec3 rayDir = getEyeRay();
     float alpha = dot(rayDir, sunDir);
 
-    float nitrogen = phase(alpha, -0.01);
-    float aerosol = phase(alpha, 0.02);
-    float spot = smoothstep(0.0, 15.0, phase(alpha, 0.9995));
+    float nitrogen = phase(alpha, -0.01) * nmul;
+    float aerosol = phase(alpha, 0.01) * amul;
+    float spot = smoothstep(0.0, 15.0, phase(alpha, 0.99));
 
     vec3 eyePos = vec3(0.0, surfaceHeight, 0.0);
     float eyeDepth = computeDepth(eyePos, rayDir);

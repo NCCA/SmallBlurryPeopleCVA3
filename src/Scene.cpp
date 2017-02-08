@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <ngl/ShaderLib.h>
@@ -6,6 +7,18 @@
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
+
+#include <ngl/NGLStream.h>
+
+//Can't believe std clamp is c++11 only. Pfffft.
+float clamp(float _in, float _lo, float _hi)
+{
+    if(_in < _lo)
+        return _lo;
+    else if(_in > _hi)
+        return _hi;
+    return _in;
+}
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
@@ -31,7 +44,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("knight", "vertDeferredData", "fragDeferredKnight");
-    createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
+    createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
@@ -98,7 +111,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     data.reserve(original.size());
     //Convert format, add some cheeky randomisation
     for(auto &vert : original)
-        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.01f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
 
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
@@ -129,6 +142,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    std::cout << "Scene constructor complete.\n";
 }
 
 void Scene::readNameFile()
@@ -219,7 +234,7 @@ void Scene::update()
     m_cam.calculateViewMat();
 
     //m_sunAngle.m_x = 150.0f;
-    m_sunAngle.m_z = 20.0f;
+    m_sunAngle.m_z = 5.0f;
     m_sunAngle.m_x += 0.1f;
     if(m_sunAngle.m_x > 360.0f)
         m_sunAngle.m_x = 0.0f;
@@ -278,22 +293,20 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     slib->use("shadowDepth");
 
-    ngl::Vec3 cp = m_cam.getPos();
-
     ngl::Mat4 P = ngl::ortho(
-                -16, 16,
-                -16, 16,
-                -32, 32
+                -48, 48,
+                -48, 48,
+                -48, 48
                 );
 
+    ngl::Vec3 s = m_sunDir;
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+        s = -s;
     ngl::Mat4 V = ngl::lookAt(
-                m_sunDir,
-                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                s + m_cam.getPos(),
+                m_cam.getPos(),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
-
-    ngl::Transformation t;
-    t.setPosition( m_cam.getPos() );
 
     m_shadowMat = V * P;
 
@@ -303,16 +316,26 @@ void Scene::draw()
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
-    for(int i = 0; i < 20; ++i)
-        for(int j = 0; j < 20; ++j)
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
         {
-            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            ngl::Obj * k = m_store.getModel( "knight" );
-            ngl::Mat4 t = m_transform.getMatrix() * m_shadowMat;
-            loadMatricesToShader( m_transform.getMatrix(), t );
-            //loadMatricesToShader();
-            k->draw();
+            GridTile t = m_grid.get(i, j);
+            m_transform.setPosition(i, 0, j);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
+            if(t.isTrees())
+            {
+                ngl::Obj * k = m_store.getModel( "tree" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
+            else if(t.isBuilding())
+            {
+                ngl::Obj * k = m_store.getModel( "house" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
         }
+
 
     //Tweaking the shadow matrix so that it can be used for shading.
     ngl::Mat4 biasMat (
@@ -333,18 +356,27 @@ void Scene::draw()
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    slib->use("terrain");
+    slib->use("colour");
+    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
+    m_transform.reset();
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
-    for(int i = 0; i < 20; ++i)
-        for(int j = 0; j < 20; ++j)
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
         {
-            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            drawAsset( "knight", "knight_d", "knight" );
+            GridTile t = m_grid.get(i, j);
+            m_transform.setPosition(i, 0, j);
+            if(t.isTrees())
+            {
+                slib->setRegisteredUniform("colour", ngl::Vec4(0.3f, 1.0f, 0.1f, 1.0f));
+                drawAsset( "tree", "", "colour" );
+            }
+            else if(t.isBuilding())
+                drawAsset( "house", "", "colour");
         }
 
     m_mainBuffer.unbind();
@@ -363,6 +395,9 @@ void Scene::draw()
     slib->setRegisteredUniform("iP", m_cam.getP().inverse());
     slib->setRegisteredUniform("camPos", m_cam.getPos());
     slib->setRegisteredUniform( "sunDir", m_sunDir );
+
+    slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
+
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
@@ -371,6 +406,8 @@ void Scene::draw()
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
+    slib->setRegisteredUniform( "sunInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
     slib->setRegisteredUniform( "shadowMatrix", m_shadowMat );
 
     //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
@@ -568,20 +605,22 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts)
 
     //Gen normals.
     std::vector<ngl::Vec3> normals;
-    normals.reserve( _verts.size() );
+    //Zero the elements
+    normals.reserve( _verts.size());
+
     for(size_t i = 0; i < _verts.size(); i += 3)
     {
         ngl::Vec4 a = _verts[i + 1] - _verts[i];
         ngl::Vec4 b = _verts[i + 2] - _verts[i];
         ngl::Vec3 a3 = ngl::Vec3(a.m_x, a.m_y, a.m_z);
         ngl::Vec3 b3 = ngl::Vec3(b.m_x, b.m_y, b.m_z);
-        ngl::Vec3 normal;
-        normal.cross(a3, b3);
+        ngl::Vec3 normal = a3.cross(b3);
         normal.normalize();
-        normal.m_y = -normal.m_y;
+        normal = -normal;
         for(int i = 0; i < 3; ++i)
             normals.push_back(normal);
     }
+
     GLuint normBuffer = createBuffer3f(normals);
     setBufferLocation( normBuffer, 2, 3 );
 
