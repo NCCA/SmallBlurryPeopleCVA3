@@ -15,7 +15,7 @@
 class Scene
 {
 public:
-    Scene();
+    Scene(ngl::Vec2 _viewport);
     ~Scene() = default;
     void draw();
     void update();
@@ -69,12 +69,14 @@ private:
     GLuint m_screenQuad;
     Framebuffer m_mainBuffer;
     Framebuffer m_pickBuffer;
+    Framebuffer m_shadowBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();
     /// @brief choses a random name and creates a character object with the name chosen
     void createCharacter();
 
+    void loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP);
     void loadMatricesToShader();
 
     /// @brief checks the colour of the pixel where the user has clicked and sets states on objects
@@ -93,6 +95,14 @@ private:
 
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
+
+    ngl::Vec3 m_sunAngle;
+    ngl::Vec3 m_sunDir;
+
+    ngl::Mat4 m_shadowMat;
+
+    /// @brief Tells me how big the screen is.
+    ngl::Vec2 m_viewport;
 };
 
 #endif//__SCENE_HPP__

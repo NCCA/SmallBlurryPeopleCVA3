@@ -59,7 +59,7 @@ int main()
     // Setup ImGui binding
     ImGuiImplSdlInit(window);
     ImGuiIO& io = ImGui::GetIO();
-    Scene scene;
+    Scene scene (ngl::Vec2(rect.w, rect.h));
 
     while(!quit)
     {
