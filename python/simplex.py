@@ -1,8 +1,11 @@
 from PIL import Image
+import random as rand
 import math
 
-perm = [(i&255) for i in range(512)]
-print perm
+rand.seed(100)
+p = [x for x in range(255)]
+rand.shuffle(p)
+
 
 grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
  		[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
@@ -12,7 +15,7 @@ def dot(a, x, y):
 	return a[0] * x + a[1] * y
 
 
-def simplexNoise(x_in, y_in):
+def simplexNoise(x_in, y_in, seed):
 	#vairables to store noise contributions from the three corners
 	n0 = .0;
 	n1 = .0;
@@ -46,9 +49,9 @@ def simplexNoise(x_in, y_in):
 	ii = int(i) & 255
 	jj = int(j) & 255
 
-	gi0 = perm[ii + perm[jj]] % 12
-	gi1 = perm[ii + i1 + perm[jj + j1]] % 12
-	gi2 = perm[ii + 1 + perm[jj + 1]] % 12
+	gi0 = p[(ii +  p[jj%255])%255] % 12
+	gi1 = p[(ii + i1 + p[(jj + j1)%255])%255] % 12
+	gi2 = p[(ii + 1 + p[(jj + 1)%255])%255] % 12
 
 	t0 = 0.5 - x0 * x0 - y0 * y0
 	if t0 < 0:
@@ -74,21 +77,47 @@ def simplexNoise(x_in, y_in):
 	return 70.0 * (n0 + n1 + n2)
 
 
-width = 1080
-height = 1080
+width = 200
+height = 200
 
-freq = 0.005
+freq = 0.01
 
+print min(p)
+print max(p)
 
 im = Image.new("RGB", (width, height), "grey")
+peak_height = 220
+mountain_height = 180 
+tree_band = (50, 190)
+tree_density_scale = 0.5
+water_height = 50
 #im.getpixel((0, 0))
 #im.putpixel((0, 0), (255, 0, 0))
 
 for x in range(width):
 	for y in range(height):
-		noise = (1 + simplexNoise(x * freq, y * freq))/2
-		#print noise
-		im.putpixel((x, y), (int(noise * 255), 0, 0))
+		pass
+		noise = int(255 * (1 + simplexNoise(x * freq, y * freq, 0))/2)
+		col = (0, 0, 0)
+		if noise > peak_height:
+			col = (255, 255, 255)
+		elif noise > mountain_height:
+			col = (150, 150, 150)
+		elif noise > water_height:
+			col = (80, 200, 50)
+		else:
+			col = (50, 50, 200)
+
+		if noise in range(tree_band[0], tree_band[1]):
+			print "inrange"
+			r = rand.random()
+			bw = tree_band[1] - tree_band[0]
+			bp = noise - tree_band[0]
+			td = (1 - bp/float(bw)) * float(tree_density_scale)
+			print r, td
+			if r < td:
+				col = (50, 120, 20)
+		im.putpixel((x, y), col)
 
 
 
