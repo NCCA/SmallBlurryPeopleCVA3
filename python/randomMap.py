@@ -2,44 +2,64 @@
   A test script for python scripting the map generation, which has
   access to the following variables:
 
-  map_data:       A one dimensional array that mirrors the std::vector in the c++ program
-                  The data from c++ is coppied to the script at the start, and then coppied back at the end of the script
+  map_data:       An array of data that represents the map, it stores lists where the
+                  first value is the ammount of trees and the second value is the
+                  geight of the tile
   map_width:      The width of the map, set in the main program.
                   This is set from the values in the main program and not passed back
   map_height:     The height of the map, set in the main program.
                   This is set from the values in the main program and not passed back
-  tile_error
-  tile_empty:     Value to be given to an empty tile.
-  tile_forest:    Value to be given to a forest tile
-  tile_building:  Value to be given to a building tile
 """
 
 import random as rand
+import math
 
-max_rad = 5
-num_circles = 20
+max_rad = 10
+tree_circles = 10
+height_circles = 10
 seed = 14
 
 
-def set(x, y, state):
-  if (0 <= x < map_width) and (0 <= y < map_height):
-    map_data[x + map_width * y] = state
+map_width = 50
+map_height = 50
+map_data = [[0, 0] for i in range(map_width * map_height)]
 
-choices = [tile_empty, tile_forest, tile_building]
+def set(x, y, t, state):
+  if (0 <= x < map_width) and (0 <= y < map_height):
+    map_data[x + map_width * y][t] += state
+
 
 rand.seed(seed)
 
 
-for i in range(num_circles):
+for i in range(tree_circles):
   x_rand = rand.randint(0, map_width)
   y_rand = rand.randint(0, map_height)
   r_rand = rand.randint(0, max_rad)
-  t_rand = rand.choice(choices)
+
   for y in range(-y_rand, y_rand):
     for x in range(-x_rand, x_rand):
       if x*x + y*y < r_rand*r_rand:
         x_out = x + x_rand
         y_out = y + y_rand
-        set(x_out, y_out, t_rand)
+        set(x_out, y_out, 0 ,1)
+
+
+
+
+for i in range(height_circles):
+  x_rand = rand.randint(0, map_width)
+  y_rand = rand.randint(0, map_height)
+  r_rand = rand.randint(0, max_rad)
+
+  for y in range(-y_rand, y_rand):
+    for x in range(-x_rand, x_rand):
+      if x*x + y*y < r_rand*r_rand:
+        height = 255 - (math.sqrt(x*x + y*y)/r_rand) * 255.0
+        x_out = x + x_rand
+        y_out = y + y_rand
+        set(x_out, y_out, 1, int(height))
+
+
 
 

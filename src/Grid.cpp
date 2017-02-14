@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <fstream>
 #include <streambuf>
@@ -13,8 +14,8 @@ Grid::Grid():
   m_w(1),
   m_h(1)
 {
-  updateScript("python/readImgMap.py");
-  printTrees();
+  updateScript("python/randomMap.py");
+  printHeight();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -54,10 +55,9 @@ void Grid::runCurrentScript()
   for(int i = 0; i <  m_w * m_h; i++)
   {
     int num_trees = PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
-    float height =  PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
     m_tiles[i].setNumTrees(num_trees);
     m_tiles[i].setHeight(height);
-
   }
 
   //now that all python operations have finished, I can un-initialize the python libraries
@@ -71,7 +71,7 @@ void Grid::printHeight()
     for(int x = 0; x < m_w; x++)
     {
       GridTile t = get(x, y);
-      std::cout << t.getHeight() << " ";
+      std::cout << std::setfill('0') << std::setw(3) << t.getHeight() << " ";
     }
     std::cout << std::endl;
   }
@@ -84,7 +84,7 @@ void Grid::printTrees()
     for(int x = 0; x < m_w; x++)
     {
       GridTile t = get(x, y);
-      std::cout << t.getNumTrees() << " ";
+      std::cout << std::setfill('0') << std::setw(1) << t.getNumTrees() << " ";
     }
     std::cout << std::endl;
   }
