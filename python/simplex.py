@@ -15,7 +15,7 @@ def dot(a, x, y):
 	return a[0] * x + a[1] * y
 
 
-def simplexNoise(x_in, y_in, seed):
+def simplexNoise(x_in, y_in):
 	#vairables to store noise contributions from the three corners
 	n0 = .0;
 	n1 = .0;
@@ -76,28 +76,52 @@ def simplexNoise(x_in, y_in, seed):
 
 	return 70.0 * (n0 + n1 + n2)
 
+def fractalNoise(x, y, freq, octaves, freq_scale):
+	noise_out = 0
+	for i in range(octaves):
+		noise_out += simplexNoise(x * freq, y * freq)
+		freq /= freq_scale
+	return noise_out
+
+def fractalSimlex(x, y, octaves, persistence, scale, low, high):
+	max_amp = 0
+	amp = 1
+	freq = scale
+	noise = 0
+
+	for i in range(octaves):
+		noise += simplexNoise(x * freq, y * freq) * amp
+		max_amp += amp
+		amp *= persistence
+		freq *= 2
+
+	noise /= max_amp
+	return noise * (high - low)/2 + (high + low)/2
+
+
 
 width = 200
 height = 200
 
-freq = 0.01
+freq = 0.02
 
 print min(p)
 print max(p)
 
 im = Image.new("RGB", (width, height), "grey")
-peak_height = 220
-mountain_height = 180 
-tree_band = (50, 190)
+peak_height = 190
+mountain_height = 170 
+tree_band = (90, 150)
 tree_density_scale = 0.5
-water_height = 50
+water_height = 90
 #im.getpixel((0, 0))
 #im.putpixel((0, 0), (255, 0, 0))
 
 for x in range(width):
 	for y in range(height):
-		pass
-		noise = int(255 * (1 + simplexNoise(x * freq, y * freq, 0))/2)
+		#noise = int(255 * (1 + simplexNoise(x * freq, y * freq)) * 0.5)
+		noise = int(fractalSimlex(x, y, 8, 0.4, 0.01, 0, 255))
+
 		col = (0, 0, 0)
 		if noise > peak_height:
 			col = (255, 255, 255)
@@ -109,15 +133,16 @@ for x in range(width):
 			col = (50, 50, 200)
 
 		if noise in range(tree_band[0], tree_band[1]):
-			print "inrange"
+
 			r = rand.random()
 			bw = tree_band[1] - tree_band[0]
 			bp = noise - tree_band[0]
 			td = (1 - bp/float(bw)) * float(tree_density_scale)
-			print r, td
+
 			if r < td:
 				col = (50, 120, 20)
 		im.putpixel((x, y), col)
+		
 
 
 
