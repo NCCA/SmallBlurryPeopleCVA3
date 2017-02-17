@@ -1,7 +1,6 @@
 #include "FSM.hpp"
 
-FSM::FSM()://(Character *_character):
-	//m_character(_character),
+FSM::FSM():
 	m_state(State::NONE)
 {
 

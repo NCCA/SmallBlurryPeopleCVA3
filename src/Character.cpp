@@ -18,8 +18,14 @@ Character::Character(Grid *_grid, std::string _name):
 	m_name(_name),
 	m_active(true),
 	m_grid(_grid),
-	m_speed(1)
+	m_speed(1),
+	m_wood_inventory(0)
 {
+
+	//timer for actions
+	m_timer.start();
+
+	//create random chopping and building speed
 	ngl::Random *rand = ngl::Random::instance();
 	rand->setSeed(0);
 
@@ -28,78 +34,107 @@ Character::Character(Grid *_grid, std::string _name):
 	std::uniform_int_distribution<int> chopping_speed(1,5);
 	m_chopping_speed = chopping_speed(mt_rand);
 
+	std::uniform_int_distribution<int> building_speed(5,10);
+	m_building_speed = building_speed(mt_rand);
 
-  //m_pos = ngl::Vec2(1, 4);
   m_pos = ngl::Vec2(0,0);
 	m_target_id = m_grid->coordToId(m_pos);
 
-  //setTarget(ngl::Vec2(9, 1));
-	setTarget(ngl::Vec2(19,25));
 
-	setState();
+	//creates state stack, will be called when selection made
+	ngl::Vec2 target = {19,25};
+		//check if chosen grid tile is current position tile
+	if (m_grid->coordToId(target) != m_grid->coordToId(m_pos))
+	{
+		setTarget(ngl::Vec2(19,25));
+		setState();
+	}
+	else
+		setActive(false);
 
 
   std::cout << "character created" << std::endl;
   std::cout << "character target: " << m_target_id << std::endl;
- // m_grid->printTrees();
 }
 
 void Character::setState()
 {
-	if(m_active == true)
-	{
-		GridTile target = m_grid->get(m_target_id);
+	GridTile target = m_grid->get(m_target_id);
 
-		if (target.isTrees() == true)
-			{
-				m_state = State::GET_WOOD;
-				std::cout<<"TREE"<<std::endl;
-			}
-		else if (target.isBuilding() == true)
-			{
-				m_state = State::BUILD;
-				std::cout<<"BUILDING"<<std::endl;
-			}
-		else
-			{
-				m_state = State::MOVE;
-				std::cout<<"MOVE"<<std::endl;
-			}
-	}
-	else m_state = State::NONE;
-
+	if (target.isTrees() == true)
+		{
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::GET_WOOD);
+			m_state_stack.push_back(State::MOVE);
+			std::cout<<"TREE"<<std::endl;
+		}
+	//WILL NEED OPTION BETWEEN BUILDING AND MOVING
+	else if (target.isBuilding() == true)
+		{
+		//SHOULD COLLECT THINGS FROM STORE HOUSE?
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::BUILD);
+			std::cout<<"BUILDING"<<std::endl;
+		}
+	else
+		{
+			m_state_stack.push_back(State::MOVE);
+			std::cout<<"MOVE"<<std::endl;
+		}
 }
 
 void Character::update()
 {
-	switch(m_state)
+	if(m_state_stack.size() > 0)
 	{
-		case(State::MOVE):
+		State current_state = m_state_stack[0];
+		switch(current_state)
 		{
-			bool finished = move();
-			std::cout<<"character pos"<<m_pos<<std::endl;
-			if (finished == true)
-			{
-				setActive(false);
-				std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
-			}
-			break;
+				case(State::MOVE):
+				{
+					std::cout<<"character pos"<<m_pos<<std::endl;
+					if (move())
+					{
+						std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
+						m_state_stack.pop_front();
+						m_timer.restart();
+						std::cout<<m_timer.elapsed()<<std::endl;
+					}
+					break;
+				}
+				case(State::GET_WOOD):
+				{
+					std::cout<<m_timer.elapsed()<<std::endl;
+					if(m_timer.elapsed() >= 1000 * m_chopping_speed)
+					{
+						m_wood_inventory += 1;
+						std::cout<<"GOT WOOD"<<std::endl;
+						m_state_stack.pop_front();
+						m_timer.restart();
+
+						if(!findNearestStorage())
+							//remove MOVE state from stack as well
+							m_state_stack.pop_front();
+					}
+					break;
+				}
+				case(State::BUILD):
+				{
+					std::cout<<m_timer.elapsed()<<std::endl;
+					//CHECK FOR CHARACTER INVENTORY OR STORE HOUSE?
+					if(m_timer.elapsed() >= 1000 * m_building_speed)
+					{
+						std::cout<<"BUILT"<<std::endl;
+						m_state_stack.pop_back();
+						m_timer.restart();
+					}
+					break;
+				}
 		}
-		case(State::GET_WOOD):
-		{
-			bool finished = move();
-			std::cout<<"character pos"<<m_pos<<std::endl;
-			if (finished == true)
-			{
-				SDL_AddTimer(m_chopping_speed * 10000, &Character::getWood, NULL);
-				m_active = false;
-			}
-			break;
-		}
-		case(State::NONE):
-		{
-			break;
-		}
+	}
+	else
+	{
+		setActive(false);
 	}
 }
 
@@ -123,6 +158,7 @@ bool Character::move()
     dist_moved += aim_vec.length();
     m_pos += aim_vec;
   }
+
 	if(m_path.size() <= 0)
 	{
 		return true;
@@ -130,12 +166,6 @@ bool Character::move()
 	else return false;
 }
 
-unsigned int Character::getWood(unsigned int interval, void *param)
-{
-	//ADD INVENTORY STUFF
-	std::cout<<"GOT WOOD"<<std::endl;
-	return 0;
-}
 void Character::draw()
 {
 	std::cout << "character position: " << m_pos << std::endl;
@@ -147,8 +177,6 @@ void Character::findPath()
 	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
 
 	m_path = network.findPath();
-	if (m_path.size() <= 0)
-		setActive(false);
 
 }
 
@@ -184,5 +212,53 @@ void Character::setTarget(int _tile_id)
 		m_target_id = _tile_id;
 		findPath();
 	}
-	else setActive(false);
+}
+
+bool Character::findNearestStorage()
+{
+	std::vector<ngl::Vec2> storage_houses;
+	int height = m_grid->getH();
+	int width = m_grid->getW();
+
+	for (int i=0; i< height; i++)
+	{
+		for (int j=0; j<width; j++)
+		{
+			ngl::Vec2 coord = {j, i};
+			GridTile current_tile = m_grid->get(coord);
+			if (current_tile.isBuilding())
+			{
+				BuildingType current_building = current_tile.getBuildingType();
+				//CHANGE TYPE WHEN FOUND
+				if (current_building == BuildingType::NONE)
+				{
+					storage_houses.push_back(coord);
+				}
+			}
+		}
+	}
+
+	if (storage_houses.size() > 0)
+	{
+		float length = 100.0;
+		ngl::Vec2 target = {0,0};
+
+		for (auto &storage : storage_houses)
+		{
+			ngl::Vec2 direction = storage - m_pos;
+			float current_length = direction.length();
+			if (current_length < length)
+			{
+				length = current_length;
+				target = storage;
+			}
+		}
+		setTarget(target);
+		return true;
+	}
+	else
+	{
+		std::cout<<"NO STORAGE HOUSE :((((((((((((((("<<std::endl;
+		return false;
+	}
 }

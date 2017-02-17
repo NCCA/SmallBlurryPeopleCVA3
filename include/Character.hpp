@@ -3,7 +3,9 @@
 
 #include "Grid.hpp"
 #include "ngl/Vec2.h"
+#include <QTime>
 #include <vector>
+#include <stack>
 #include <SDL.h>
 
 /// \file Character.hpp
@@ -17,7 +19,7 @@ enum class State
 	SLEEP,
 	FORAGE,
 	MOVE,
-	NONE
+	IDLE
 };
 
 /// \class Character
@@ -31,7 +33,6 @@ public:
 	/// @brief ctor sets reference to grid and initialised values
   /// @param [in] _grid pointer to the grid to reference for pathfinding
 	Character(Grid *_grid, std::string _name);
-
 	///
 	/// \brief default destructor
 	///
@@ -72,10 +73,7 @@ public:
   ///
 	void setTarget(int _tile_id);
 
-	///
-	/// \brief printID print character's id
-	///
-	void printID();
+	bool findNearestStorage();
 	///
 	/// \brief getID get the unique character id
 	/// \return character's id
@@ -84,7 +82,6 @@ public:
 
 	void setActive(bool _selection) {m_active = _selection;}
 	bool isActive() {return m_active;}
-	static unsigned int getWood(unsigned int interval, void *param);
 
 private:
 	///
@@ -124,9 +121,14 @@ private:
   ///
 	std::vector<ngl::Vec2> m_path;
 
-	State m_state;
+	QTime m_timer;
+
+	std::deque <State> m_state_stack;
+
+	int m_wood_inventory;
 
 	int m_chopping_speed;
+	int m_building_speed;
 };
 
 #endif//__CHARACTER_HPP__
