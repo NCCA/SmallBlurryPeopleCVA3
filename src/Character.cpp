@@ -85,8 +85,10 @@ void Character::setState()
 
 void Character::update()
 {
+	//check if states are still in stack
 	if(m_state_stack.size() > 0)
 	{
+		//check bottom state of stack
 		State current_state = m_state_stack[0];
 		switch(current_state)
 		{
@@ -96,6 +98,13 @@ void Character::update()
 					if (move())
 					{
 						std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
+						GridTile target = m_grid->get(m_target_id);
+						if (target.getBuildingType() == BuildingType::NONE && m_wood_inventory > 0)
+						{
+							m_wood_inventory-=1;
+							std::cout<<"WOOD DEPOSITED"<<std::endl;
+						}
+						//when the target has been reached, remove the state from the stack
 						m_state_stack.pop_front();
 						m_timer.restart();
 						std::cout<<m_timer.elapsed()<<std::endl;
@@ -105,16 +114,19 @@ void Character::update()
 				case(State::GET_WOOD):
 				{
 					std::cout<<m_timer.elapsed()<<std::endl;
+					//when chopping speed has been reached, gain a piece of wood
 					if(m_timer.elapsed() >= 1000 * m_chopping_speed)
 					{
 						m_wood_inventory += 1;
 						std::cout<<"GOT WOOD"<<std::endl;
+						//when recieved piece of wood, remove the state from the stack
 						m_state_stack.pop_front();
 						m_timer.restart();
 
+						//finds nearest storage house and sets as target for storing wood
 						if(!findNearestStorage())
-							//remove MOVE state from stack as well
-							m_state_stack.pop_front();
+							//remove MOVE state from stack as well, as can't find/move to storage house
+							m_state_stack.clear();
 					}
 					break;
 				}
