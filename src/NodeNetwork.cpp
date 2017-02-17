@@ -194,14 +194,14 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
   return path;
 }
 
-void NodeNetwork::printPath(std::vector<ngl::Vec2> &path)
+void NodeNetwork::printPath(std::vector<ngl::Vec2> &_path)
 {
   for(int y=0; y<m_grid->getH(); y++)
   {
     for(int x=0; x<m_grid->getW(); x++)
     {
       bool on_path = false;
-      for(ngl::Vec2 &pos : path)
+      for(ngl::Vec2 &pos : _path)
       {
         if(pos.m_x == x && pos.m_y == y)
         {
