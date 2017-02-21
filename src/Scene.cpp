@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
+#include "Gui.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -25,8 +26,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
     m_mouse_pan(1.0f),
-    m_mouse_rotation(0.0f),
     m_mouse_translation(0.0f,0.0f),
+    m_mouse_rotation(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f)
 {
     m_viewport = _viewport;
@@ -151,6 +152,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Gui::instance()->init();
+    Gui::instance()->setResolution(_viewport);
     std::cout << "Scene constructor complete.\n";
 }
 
@@ -181,16 +184,13 @@ void Scene::readNameFile()
 
 void Scene::createCharacter()
 {
+  int numberNames = m_file_names.size();
 
-    int numberNames = m_file_names.size();
-
-    std::random_device rnd;
-    std::mt19937 mt_rand(rnd());
-    std::uniform_int_distribution<int> nameNo(0,numberNames);
-    int name_chosen = nameNo(mt_rand);
-
-    m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
-
+  std::random_device rnd;
+  std::mt19937 mt_rand(rnd());
+  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+  int name_chosen = nameNo(mt_rand);
+  m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -518,11 +518,14 @@ void Scene::mouseSelection()
     int mouseCoords[2] = {0,0};
     SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
 
+    Gui::instance()->mousePos(ngl::Vec2(mouseCoords[0], mouseCoords[1]));
+    Gui::instance()->click();
+
     long unsigned int red = 0;
     glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
     for (Character &character : m_characters)
     {
-        if (character.getID() == red)
+        if (character.getID() == (int)red)
             character.setActive(true);
     }
 }
