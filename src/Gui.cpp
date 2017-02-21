@@ -5,10 +5,22 @@ Gui::Gui()
 
 }
 
+void Gui::init(ngl::Vec2 _res)
+{
+  init();
+  setResolution(_res);
+}
+
 void Gui::init()
 {
   wipeButtons();
   createTestButtons();
+}
+
+void Gui::setResolution(ngl::Vec2 _res)
+{
+  m_win_w = _res.m_x;
+  m_win_h = _res.m_y;
 }
 
 void Gui::click()
@@ -26,7 +38,7 @@ void Gui::mousePos(ngl::Vec2 _pos)
   {
     if(button.isInside(_pos))
     {
-      m_selected_button_id = button.m_id;
+      m_selected_button_id = button.getID();
       button_selected = true;
     }
   }
@@ -44,11 +56,10 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(0.1, 0.1, 0.2, 0.2);
-  addButton(0.7, 0.1, 0.2, 0.2);
+  addButton(10, 10, 100, 100);
 }
 
 void Gui::addButton(double _x, double _y, double _w, double _h)
 {
-  m_buttons.push_back(Button(ngl::Vec2(_x, _y), ngl::Vec2(_w, _h)));
+  m_buttons.push_back(Button(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(_x, _y), ngl::Vec2(_w, _h)));
 }

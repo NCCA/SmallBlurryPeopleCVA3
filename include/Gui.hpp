@@ -11,9 +11,18 @@ class Gui : public ngl::Singleton<Gui>
   friend class Singleton<Gui>;
 public :
   ///
-  /// \brief init initialises or resets Gui
+  /// \brief init initialise or reset Gui with specific resolution
+  /// \param _res resolution to initialise with
+  ///
+  void init(ngl::Vec2 _res);
+  ///
+  /// \brief init initialises or resets Gui without changing/setting resolution
   ///
   void init();
+  ///
+  /// \brief setResolution set the window width and window height
+  ///
+  void setResolution(ngl::Vec2 _res);
   ///
   /// \brief click check if user has clicked inside any button area
   /// \param pos mouse position to compare buttons against
@@ -51,6 +60,14 @@ private :
   /// \brief m_selected_button_id current button that mouse is over
   ///
   int m_selected_button_id;
+  ///
+  /// \brief m_win_w width of window
+  ///
+  int m_win_w;
+  ///
+  /// \brief m_win_h height of window
+  ///
+  int m_win_h;
 };
 
 #endif//__GUI_HPP__
