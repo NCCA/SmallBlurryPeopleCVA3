@@ -33,6 +33,8 @@ public:
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
 	Character(Grid *_grid, std::string _name);
+
+	Character& operator=(const Character &rhs);
 	///
 	/// \brief default destructor
 	///
@@ -82,6 +84,11 @@ public:
 	/// \return m_id, character's id
 	///
 	int getID() {return m_id;}
+	///
+	/// \brief getPos, get character's position
+	/// \return m_pos, character's position
+	///
+	ngl::Vec2 getPos() {return m_pos;}
 	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not

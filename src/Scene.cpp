@@ -110,6 +110,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
+		m_store.loadMesh("person", "person/person.obj");
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -186,7 +187,7 @@ void Scene::createCharacter()
 
     std::random_device rnd;
     std::mt19937 mt_rand(rnd());
-    std::uniform_int_distribution<int> nameNo(0,numberNames);
+		std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
 
     m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
@@ -355,7 +356,17 @@ void Scene::draw()
             }
         }
 
+		for(auto &character : m_characters)
+		{
+			ngl::Vec2 pos = character.getPos();
+			ngl::Vec3 new_pos = {pos[0],pos[1],0.0f};
+			m_transform.setPosition(new_pos);
+			ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
+			ngl::Obj *k = m_store.getModel("person");
+			loadMatricesToShader( m_transform.getMatrix(), mvp);
+			k->draw();
 
+		}
     //Tweaking the shadow matrix so that it can be used for shading.
     ngl::Mat4 biasMat (
                 0.5, 0.0, 0.0, 0.0,
@@ -475,7 +486,7 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
         ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
         //if its a click then the mouseSelection funciton is called
-        if(distance.length() == 0)
+				if(distance.length() < 1)
             mouseSelection();
 
         m_mouse_prev_pos.set(0.0f, 0.0f);
@@ -514,29 +525,68 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::mouseSelection()
 {
-/*	m_pickBuffer.bind();
-	GLuint texID = getTerrainPickTexture();
-	glBindTexture(GL_TEXTURE_2D, texID);
-
 	std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+
+	m_pickBuffer.bind();
+
+	//check character_id texture
+	GLuint char_texID = getCharPickTexture();
+	glBindTexture(GL_TEXTURE_2D, char_texID);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+
 	int mouse_coords[2] = {0,0};
 	SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
 
-	std::array<unsigned char, 3> grid_coord;
-	glReadPixels(mouse_coords[0], (m_viewport.m_x - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
+	long unsigned int red = -1;
+	glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+	//change depending on number characters
+	if(red >= 0 && red < m_characters.size())
+	{
+		for (Character &character : m_characters)
+		{
+			if (character.getID() == red)
+			{
+				m_active_char = &character;
+				if(character.isActive() == false)
+					character.setActive(true);
+			}
+		}
+	}
+	//check grid_id texture
+	else
+	{
+		//bind default texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+		GLuint grid_texID = getTerrainPickTexture();
+		glBindTexture(GL_TEXTURE_2D, grid_texID);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-	std::cout<<grid_coord[0]<<","<<grid_coord[1]<<","<<grid_coord[2]<<": GRID_COORDS"<<std::endl;
+		std::array<unsigned char, 3> grid_coord;
+		glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
 
-	//long unsigned int red = 0;
-	//glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-	//for (Character &character : m_characters)
-	//{
- //     if (character.getID() == red)
- //         character.setActive(true);
- // }
+		if(grid_coord[0] != 0 &&
+			 grid_coord[1] != 0 &&
+			 grid_coord[2] != 0)
+		{
+			std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
+			if(m_active_char->isActive() == true)
+			{
+				ngl::Vec2 grid_ID {grid_coord[0], grid_coord[1]};
+				m_active_char->setTarget(grid_ID);
+				m_active_char->setState();
+			}
+
+		}
+		else
+		{
+			//if grid_coord == {0,0,0}
+			std::cout<<"NO GRID CLICK D:"<<std::endl;
+		}
+	}
+
+	glReadBuffer(GL_NONE);
 	m_pickBuffer.unbind();
-	*/
 }
 
 void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)

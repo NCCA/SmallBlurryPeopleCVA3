@@ -18,7 +18,7 @@ Character::Character(Grid *_grid, std::string _name):
 	m_name(_name),
 	m_active(true),
 	m_grid(_grid),
-	m_speed(1),
+	m_speed(0.1),
 	m_wood_inventory(0)
 {
 
@@ -223,6 +223,7 @@ void Character::setTarget(int _tile_id)
 	{
 		m_target_id = _tile_id;
 		m_path = findPath(m_target_id);
+
 	}
 }
 

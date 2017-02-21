@@ -43,6 +43,8 @@ private:
     /// @brief Vector of character objects that have been created
     std::vector<Character> m_characters;
 
+		Character *m_active_char;
+
     ngl::Transformation m_transform;
 
     /// @brief sets if mouse is being used to translate the scene
