@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
+#include "Ui.hpp"
 
 Scene::Scene() :
     m_mouse_trans_active(false),
@@ -127,6 +128,8 @@ Scene::Scene() :
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Ui::instance()->init();
 }
 
 void Scene::readNameFile()

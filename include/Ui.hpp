@@ -10,6 +10,10 @@ class Ui : public ngl::Singleton<Ui>
   friend class Singleton<Ui>;
 public :
   ///
+  /// \brief init initialises or resets ui
+  ///
+  void init();
+  ///
   /// \brief click check if user has clicked inside any button area
   /// \param pos mouse position to compare buttons against
   ///
@@ -24,7 +28,7 @@ public :
   ///
   void wipeButtons();
 
-  void testButtons();
+  void createTestButtons();
 
   void addButton(double _x, double _y, double _w, double _h);
 private :

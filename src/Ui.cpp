@@ -2,7 +2,13 @@
 
 Ui::Ui()
 {
-  testButtons();
+
+}
+
+void Ui::init()
+{
+  wipeButtons();
+  createTestButtons();
 }
 
 void Ui::click()
@@ -27,7 +33,7 @@ void Ui::wipeButtons()
   Button::resetIdCounter();
 }
 
-void Ui::testButtons()
+void Ui::createTestButtons()
 {
   addButton(0.1, 0.1, 0.2, 0.2);
   addButton(0.7, 0.1, 0.2, 0.2);
