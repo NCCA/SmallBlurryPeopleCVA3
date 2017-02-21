@@ -20,6 +20,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Gui.cpp \
          $$PWD/src/Button.cpp
 
+
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
          $$PWD/include/Grid.hpp \
@@ -46,9 +47,9 @@ LIBS+=$$system(python2.7-config --libs)
 include($(HOME)/NGL/UseNGL.pri)
 
 OTHER_FILES += README.md \
-							 $$PWD/shaders/*.glsl \
-							 $$PWD/python/*.py \
-							 $$PWD/names/*.txt
+               $$PWD/shaders/*.glsl \
+               $$PWD/python/*.py \
+               $$PWD/names/*.txt
 
 #This means I can build this on windows.
 win32 {
