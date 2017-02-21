@@ -184,11 +184,11 @@ void Character::draw()
 	std::cout << "character drawn" << std::endl;
 }
 
-void Character::findPath()
+std::vector<ngl::Vec2> Character::findPath(int _target_id)
 {
-	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
+	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
 
-	m_path = network.findPath();
+	return network.findPath();
 
 }
 
@@ -222,7 +222,7 @@ void Character::setTarget(int _tile_id)
 	if(_tile_id != m_target_id)
 	{
 		m_target_id = _tile_id;
-		findPath();
+		m_path = findPath(m_target_id);
 	}
 }
 
@@ -252,21 +252,26 @@ bool Character::findNearestStorage()
 
 	if (storage_houses.size() > 0)
 	{
-		float length = 100.0;
-		ngl::Vec2 target = {0,0};
+		m_target_id = m_grid->coordToId(storage_houses[0]);
+		std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
+		storage_houses.erase(storage_houses.begin());
 
-		for (auto &storage : storage_houses)
+		if(storage_houses.size() > 0)
 		{
-			ngl::Vec2 direction = storage - m_pos;
-			float current_length = direction.length();
-			if (current_length < length)
+			for (auto &storage : storage_houses)
 			{
-				length = current_length;
-				target = storage;
+				int id = m_grid->coordToId(storage);
+				std::vector<ngl::Vec2> path = findPath(id);
+				if (path.size() < shortest_path.size())
+				{
+					m_target_id = id;
+					shortest_path = path;
+				}
 			}
 		}
-		setTarget(target);
+		m_path = shortest_path;
 		return true;
+
 	}
 	else
 	{

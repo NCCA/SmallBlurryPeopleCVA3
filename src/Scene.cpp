@@ -514,17 +514,29 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::mouseSelection()
 {
-    std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
-    int mouseCoords[2] = {0,0};
-    SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
+/*	m_pickBuffer.bind();
+	GLuint texID = getTerrainPickTexture();
+	glBindTexture(GL_TEXTURE_2D, texID);
 
-    long unsigned int red = 0;
-    glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-    for (Character &character : m_characters)
-    {
-        if (character.getID() == red)
-            character.setActive(true);
-    }
+	std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+	int mouse_coords[2] = {0,0};
+	SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+
+	std::array<unsigned char, 3> grid_coord;
+	glReadPixels(mouse_coords[0], (m_viewport.m_x - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
+
+	std::cout<<grid_coord[0]<<","<<grid_coord[1]<<","<<grid_coord[2]<<": GRID_COORDS"<<std::endl;
+
+	//long unsigned int red = 0;
+	//glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+	//for (Character &character : m_characters)
+	//{
+ //     if (character.getID() == red)
+ //         character.setActive(true);
+ // }
+
+	m_pickBuffer.unbind();
+	*/
 }
 
 void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)

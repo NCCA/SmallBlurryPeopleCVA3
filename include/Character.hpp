@@ -56,7 +56,7 @@ public:
   ///
 	/// \brief findPath, pathfinding function to get nodes for pathfinding
   ///
-	void findPath();
+	std::vector<ngl::Vec2> findPath(int _target_id);
   ///
 	/// \brief calcAimVec, calculate vector towards next point
 	/// \return
