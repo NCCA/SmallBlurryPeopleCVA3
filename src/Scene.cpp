@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
+#include "Gui.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -25,8 +26,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
     m_mouse_pan(1.0f),
-    m_mouse_rotation(0.0f),
     m_mouse_translation(0.0f,0.0f),
+    m_mouse_rotation(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f)
 {
     m_viewport = _viewport;
@@ -152,6 +153,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Gui::instance()->init();
+    Gui::instance()->setResolution(_viewport);
     std::cout << "Scene constructor complete.\n";
 }
 
@@ -182,16 +185,12 @@ void Scene::readNameFile()
 
 void Scene::createCharacter()
 {
-
-    int numberNames = m_file_names.size();
-
-    std::random_device rnd;
-    std::mt19937 mt_rand(rnd());
-		std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-    int name_chosen = nameNo(mt_rand);
-
-    m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
-
+  int numberNames = m_file_names.size();
+  std::random_device rnd;
+  std::mt19937 mt_rand(rnd());
+  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+  int name_chosen = nameNo(mt_rand);
+  m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -453,6 +452,14 @@ void Scene::draw()
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+
+
+    //---------------------------//
+    //          BUTTONS          //
+    //---------------------------//
+    // ?
+    slib->use("button");
+
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -587,6 +594,7 @@ void Scene::mouseSelection()
 
 	glReadBuffer(GL_NONE);
 	m_pickBuffer.unbind();
+
 }
 
 void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)
@@ -652,7 +660,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
     m->draw();
 }
 
-void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag)
+void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
@@ -668,6 +676,15 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
 
     slib->attachShaderToProgram(_name, _vert);
     slib->attachShaderToProgram(_name, _frag);
+
+    // add geometry shader if string given
+    if(!_geo.empty())
+    {
+      slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
+      slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
+      slib->compileShader(_geo);
+      slib->attachShaderToProgram(_name, _geo);
+    }
 
     slib->linkProgramObject(_name);
 }

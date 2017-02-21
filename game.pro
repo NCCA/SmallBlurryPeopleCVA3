@@ -17,7 +17,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/NodeNetwork.cpp \
          $$PWD/src/AssetStore.cpp \
          $$PWD/src/Framebuffer.cpp \
-         $$PWD/src/Ui.cpp \
+         $$PWD/src/Gui.cpp \
          $$PWD/src/Button.cpp
 
 HEADERS+=$$PWD/include/Scene.hpp \
@@ -31,7 +31,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/NodeNetwork.hpp \
          $$PWD/include/AssetStore.hpp \
          $$PWD/include/Framebuffer.hpp \
-         $$PWD/include/Ui.hpp \
+         $$PWD/include/Gui.hpp \
          $$PWD/include/Button.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
