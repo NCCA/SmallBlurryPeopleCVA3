@@ -11,8 +11,12 @@
                   This is set from the values in the main program and not passed back
 """
 
-import os
 from PIL import Image
+import os
+cwd = os.getcwd()+ "/python/"
+import sys
+sys.path.append(cwd)
+import noise.noise
 
 
 

@@ -14,7 +14,7 @@ Grid::Grid():
   m_w(1),
   m_h(1)
 {
-  updateScript("python/readImgMap.py");
+  updateScript("python/simplexMap.py");
   printTypes();
   printTrees();
 }
@@ -38,19 +38,15 @@ void Grid::runCurrentScript()
   //py_map is a bridge object between m_map and the python map
   PyObject *py_map;
 
-
+  //passing values from the TileType enum class to the python script
   PyObject *py_tileTypes = PyDict_New();
-
   PyDict_SetItemString(py_tileTypes, "NONE", PyInt_FromLong((long)TileType::NONE));
   PyDict_SetItemString(py_tileTypes, "TREES", PyInt_FromLong((long)TileType::TREES));
   PyDict_SetItemString(py_tileTypes, "WATER", PyInt_FromLong((long)TileType::WATER));
   PyDict_SetItemString(py_tileTypes, "MOUNTAINS", PyInt_FromLong((long)TileType::MOUNTAINS));
   PyDict_SetItemString(py_tileTypes, "HOUSE", PyInt_FromLong((long)TileType::HOUSE));
   PyDict_SetItemString(py_tileTypes, "STOREHOUSE", PyInt_FromLong((long)TileType::STOREHOUSE));
-
   PyDict_SetItemString(py_dict, "tileTypes", py_tileTypes);
-
-
 
   //run the script held in the m_script string
   PyRun_SimpleString(m_script.c_str());
@@ -76,7 +72,6 @@ void Grid::runCurrentScript()
     {
       m_tiles[i].setNumTrees(9);
     }
-    //m_tiles[i].setHeight(height);
   }
 
   //now that all python operations have finished, I can un-initialize the python libraries
@@ -253,5 +248,6 @@ int Grid::getH()
 {
   return m_h;
 }
+
 
 
