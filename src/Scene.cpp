@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
-#include "Ui.hpp"
+#include "Gui.hpp"
 
 #include <ngl/NGLStream.h>
 
