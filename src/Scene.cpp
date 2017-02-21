@@ -440,16 +440,16 @@ void Scene::draw()
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
-    glBindVertexArray(0);
-    glActiveTexture(GL_TEXTURE0);
-
-
     //---------------------------//
     //          BUTTONS          //
     //---------------------------//
     // ?
-    slib->use("button");
+    slib->use("sky");
+    glBindVertexArray(m_screenQuad);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
