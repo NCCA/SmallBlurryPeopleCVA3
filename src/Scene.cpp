@@ -520,6 +520,9 @@ void Scene::mouseSelection()
     int mouseCoords[2] = {0,0};
     SDL_GetMouseState(&mouseCoords[0], &mouseCoords[1]);
 
+    Ui::instance()->mousePos(ngl::Vec2(mouseCoords[0], mouseCoords[1]));
+    Ui::instance()->click();
+
     long unsigned int red = 0;
     glReadPixels(mouseCoords[0], mouseCoords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
     for (Character &character : m_characters)

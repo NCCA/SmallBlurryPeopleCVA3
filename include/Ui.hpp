@@ -1,16 +1,17 @@
-#ifndef __UI_HPP__
-#define __UI_HPP__
+#ifndef __GUI_HPP__
+#define __GUI_HPP__
 
 #include <vector>
 #include "ngl/Singleton.h"
+#include "ngl/Vec2.h"
 #include "Button.hpp"
 
-class Ui : public ngl::Singleton<Ui>
+class Gui : public ngl::Singleton<Gui>
 {
-  friend class Singleton<Ui>;
+  friend class Singleton<Gui>;
 public :
   ///
-  /// \brief init initialises or resets ui
+  /// \brief init initialises or resets Gui
   ///
   void init();
   ///
@@ -29,15 +30,21 @@ public :
   void wipeButtons();
 
   void createTestButtons();
-
+  ///
+  /// \brief addButton creates a button in the Gui
+  /// \param _x x position
+  /// \param _y y position
+  /// \param _w width
+  /// \param _h height
+  ///
   void addButton(double _x, double _y, double _w, double _h);
 private :
   ///
-  /// \brief Ui private default constructor due to singleton pattern
+  /// \brief Gui private default constructor due to singleton pattern
   ///
-  Ui();
+  Gui();
   ///
-  /// \brief m_buttons vector of buttons contained in the ui
+  /// \brief m_buttons vector of buttons contained in the Gui
   ///
   std::vector<Button> m_buttons;
   ///
@@ -46,4 +53,4 @@ private :
   int m_selected_button_id;
 };
 
-#endif//__UI_HPP__
+#endif//__GUI_HPP__
