@@ -2,15 +2,17 @@ from PIL import Image
 import random as rand
 import math
 
+#building the hash table
 rand.seed(100)
 p = [x for x in range(255)]
 rand.shuffle(p)
 
-
+#gradient table
 grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
  		[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
  		[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]]
 
+#custom dot product function
 def dot(a, x, y):
 	return a[0] * x + a[1] * y
 
