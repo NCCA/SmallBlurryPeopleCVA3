@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <ngl/ShaderLib.h>
@@ -8,7 +9,19 @@
 #include "Scene.hpp"
 #include "Ui.hpp"
 
-Scene::Scene() :
+#include <ngl/NGLStream.h>
+
+//Can't believe std clamp is c++11 only. Pfffft.
+float clamp(float _in, float _lo, float _hi)
+{
+    if(_in < _lo)
+        return _lo;
+    else if(_in > _hi)
+        return _hi;
+    return _in;
+}
+
+Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
@@ -17,13 +30,12 @@ Scene::Scene() :
     m_mouse_translation(0.0f,0.0f),
     m_mouse_prev_pos(0.0f, 0.0f)
 {
-    SDL_Rect rect;
-    SDL_GetDisplayBounds(0, &rect);
+    m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
     m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
-    float aspect = (float)rect.w / (float)rect.h;
+    float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
     m_cam.setFOV( 60.0f );
     m_cam.calculateProjectionMat();
@@ -32,14 +44,18 @@ Scene::Scene() :
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
-    createShader("knight", "vertDeferredData", "fragDeferredKnight");
-    createShader("terrain", "vertDeferredData", "fragDeferredTerrain");
+    createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
+		//createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
+    createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
 
     slib->use("sky");
-    slib->setRegisteredUniform("viewport", ngl::Vec2(rect.w, rect.h));
+    slib->setRegisteredUniform("viewport", m_viewport);
+
+    slib->use("deferredLight");
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -48,11 +64,13 @@ Scene::Scene() :
 
     //Graphics stuff.
     //Framebuffers
-    std::cout << "Initalising framebuffer to " << rect.w << " by " << rect.h << '\n';
-    m_mainBuffer.initialise(rect.w, rect.h);
+
+    std::cout << "Initalising framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
+
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
-    m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2 );
+    m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
     m_mainBuffer.addDepthAttachment( "depth" );
     if(!m_mainBuffer.checkComplete())
     {
@@ -61,7 +79,7 @@ Scene::Scene() :
     }
     m_mainBuffer.unbind();
 
-    m_pickBuffer.initialise( rect.w, rect.h );
+    m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
     m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
     m_pickBuffer.addDepthAttachment( "depth" );
@@ -72,6 +90,15 @@ Scene::Scene() :
     }
     m_pickBuffer.unbind();
 
+    m_shadowBuffer.initialise( 4096, 4096 );
+    m_shadowBuffer.addTexture("depth", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_DEPTH_ATTACHMENT );
+    if(!m_shadowBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_shadowBuffer.unbind();
+
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
@@ -80,16 +107,10 @@ Scene::Scene() :
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
 
-
-
-
     //playing with trees and houses and such
-    m_store.loadMesh("tree", "sphere.obj");
+    m_store.loadMesh("tree", "tree/tree.obj");
+    m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
-
-
-
-
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -97,7 +118,7 @@ Scene::Scene() :
     data.reserve(original.size());
     //Convert format, add some cheeky randomisation
     for(auto &vert : original)
-        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.5f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.01f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
 
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
@@ -121,7 +142,9 @@ Scene::Scene() :
                 uvs
                 );
 
-    glViewport(0, 0, rect.w, rect.h);
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
@@ -130,6 +153,7 @@ Scene::Scene() :
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Ui::instance()->init();
+    std::cout << "Scene constructor complete.\n";
 }
 
 void Scene::readNameFile()
@@ -219,9 +243,24 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
-    m_sunAngle.m_x += 1.0f;
+		for(Character &character : m_characters)
+		{
+			if (character.isActive() == true)
+				character.update();
+		}
+
+    //m_sunAngle.m_x = 150.0f;
+    m_sunAngle.m_z = 5.0f;
+    m_sunAngle.m_x += 0.1f;
     if(m_sunAngle.m_x > 360.0f)
         m_sunAngle.m_x = 0.0f;
+    //std::cout << m_sunAngle.m_x << '\n';
+
+    ngl::Transformation t;
+    t.setRotation( m_sunAngle );
+    m_sunDir = t.getMatrix().getForwardVector();
+    m_sunDir.normalize();
+
 }
 
 void Scene::draw()
@@ -252,15 +291,86 @@ void Scene::draw()
 
     slib->use("charPick");
 
-    for(int i = 0; i < 20; ++i)
+    /*for(int i = 0; i < 20; ++i)
         for(int j = 0; j < 20; ++j)
         {
             m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
             slib->setRegisteredUniform("id", i * j + i);
             drawAsset( "knight", "", "" );
-        }
+        }*/
 
     m_pickBuffer.unbind();
+
+    //---------------------------//
+    //  SHADOW PASS  //
+    //---------------------------//
+    glViewport(0, 0, 4096, 4096);
+    m_shadowBuffer.bind();
+    glDrawBuffer( GL_NONE );
+    glReadBuffer(GL_NONE);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    //glCullFace(GL_FRONT);
+    slib->use("shadowDepth");
+
+    ngl::Mat4 P = ngl::ortho(
+                -8, 8,
+                -8, 8,
+                -16, 16
+                );
+
+    ngl::Vec3 s = m_sunDir;
+    ngl::Vec3 f = m_cam.forwards();
+    f.m_y = 0.0f;
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+        s = -s;
+    ngl::Mat4 V = ngl::lookAt(
+                s + m_cam.getPos(),
+                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+
+    m_shadowMat = V * P;
+
+    glBindVertexArray(m_terrainVAO);
+    //loadMatricesToShader();
+    loadMatricesToShader(ngl::Mat4(), m_shadowMat);
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
+
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            GridTile t = m_grid.get(i, j);
+            m_transform.setPosition(i, 0.0f, j);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
+            if(t.isTrees())
+            {
+                ngl::Obj * k = m_store.getModel( "tree" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
+            else if(t.isBuilding())
+            {
+                ngl::Obj * k = m_store.getModel( "house" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
+        }
+
+
+    //Tweaking the shadow matrix so that it can be used for shading.
+    ngl::Mat4 biasMat (
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+                );
+    m_shadowMat = m_shadowMat * biasMat;
+
+    m_shadowBuffer.unbind();
+
+    //glCullFace(GL_BACK);
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
     // RAW DATA PASS //
@@ -269,18 +379,28 @@ void Scene::draw()
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    slib->use("terrain");
+    slib->use("colour");
+    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
+    m_transform.reset();
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
-    for(int i = 0; i < 20; ++i)
-        for(int j = 0; j < 20; ++j)
+    slib->use("diffuse");
+
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
         {
-            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            drawAsset( "knight", "knight_d", "knight" );
+            GridTile t = m_grid.get(i, j);
+            m_transform.setPosition(i, 0.0f, j);
+            if(t.isTrees())
+            {
+                drawAsset( "tree", "tree_d", "diffuse" );
+            }
+            else if(t.isBuilding())
+                drawAsset( "house", "", "colour");
         }
 
     m_mainBuffer.unbind();
@@ -298,12 +418,10 @@ void Scene::draw()
     slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
     slib->setRegisteredUniform("iP", m_cam.getP().inverse());
     slib->setRegisteredUniform("camPos", m_cam.getPos());
-    float rad = m_sunAngle.m_x * M_PI / 180.0f;
-    slib->setRegisteredUniform("sunDir", ngl::Vec3(
-                                   0.0f,
-                                   sin( rad ),
-                                   cos( rad )
-                                   ));
+    slib->setRegisteredUniform( "sunDir", m_sunDir );
+
+    slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
+
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
@@ -311,16 +429,16 @@ void Scene::draw()
     //---------------------------//
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
-    slib->setRegisteredUniform("sunDir", ngl::Vec3(
-                                   0.0f,
-                                   sin( rad ),
-                                   cos( rad )
-                                   ));
+    slib->setRegisteredUniform("sunDir", m_sunDir );
+    slib->setRegisteredUniform( "sunInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "shadowMatrix", m_shadowMat );
 
-    //m_pickBuffer.bindTexture(id, "charid", "diffuse", 0);
+    //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
+    m_shadowBuffer.bindTexture( id, "depth", "shadowDepth", 3 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -409,6 +527,13 @@ void Scene::mouseSelection()
         if (character.getID() == red)
             character.setActive(true);
     }
+}
+
+void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    slib->setRegisteredUniform( "M", _M );
+    slib->setRegisteredUniform( "MVP", _MVP );
 }
 
 void Scene::loadMatricesToShader()
@@ -504,20 +629,22 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts)
 
     //Gen normals.
     std::vector<ngl::Vec3> normals;
-    normals.reserve( _verts.size() );
+    //Zero the elements
+    normals.reserve( _verts.size());
+
     for(size_t i = 0; i < _verts.size(); i += 3)
     {
         ngl::Vec4 a = _verts[i + 1] - _verts[i];
         ngl::Vec4 b = _verts[i + 2] - _verts[i];
         ngl::Vec3 a3 = ngl::Vec3(a.m_x, a.m_y, a.m_z);
         ngl::Vec3 b3 = ngl::Vec3(b.m_x, b.m_y, b.m_z);
-        ngl::Vec3 normal;
-        normal.cross(a3, b3);
+        ngl::Vec3 normal = a3.cross(b3);
         normal.normalize();
-        normal.m_y = -normal.m_y;
+        //normal = -normal;
         for(int i = 0; i < 3; ++i)
             normals.push_back(normal);
     }
+
     GLuint normBuffer = createBuffer3f(normals);
     setBufferLocation( normBuffer, 2, 3 );
 

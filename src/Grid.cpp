@@ -14,7 +14,7 @@ Grid::Grid():
   m_h(1)
 {
   updateScript("python/readImgMap.py");
-  printTrees();
+	printTrees();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -104,12 +104,12 @@ std::vector<ngl::Vec3> Grid::getTriangles()
       ngl::Vec3 v2(x+1, 0, y);
       ngl::Vec3 v3(x, 0, y+1);
       ngl::Vec3 v4(x+1, 0, y+1);
+      tris.push_back(v3);
+      tris.push_back(v2);
       tris.push_back(v1);
-      tris.push_back(v2);
       tris.push_back(v3);
-      tris.push_back(v2);
       tris.push_back(v4);
-      tris.push_back(v3);
+      tris.push_back(v2);
     }
   }
   return tris;
