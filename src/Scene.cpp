@@ -190,7 +190,7 @@ void Scene::createCharacter()
   std::mt19937 mt_rand(rnd());
   std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
   int name_chosen = nameNo(mt_rand);
-  m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
+	m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -358,7 +358,7 @@ void Scene::draw()
 		for(auto &character : m_characters)
 		{
 			ngl::Vec2 pos = character.getPos();
-			ngl::Vec3 new_pos = {pos[0],pos[1],0.0f};
+			ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
 			m_transform.setPosition(new_pos);
 			ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
 			ngl::Obj *k = m_store.getModel("person");
@@ -581,7 +581,6 @@ void Scene::mouseSelection()
 			{
 				ngl::Vec2 grid_ID {grid_coord[0], grid_coord[1]};
 				m_active_char->setTarget(grid_ID);
-				m_active_char->setState();
 			}
 
 		}

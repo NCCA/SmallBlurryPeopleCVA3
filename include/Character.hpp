@@ -2,6 +2,7 @@
 #define __CHARACTER_HPP__
 
 #include "Grid.hpp"
+#include "Inventory.hpp"
 #include "ngl/Vec2.h"
 #include <QTime>
 #include <vector>
@@ -15,6 +16,7 @@
 enum class State
 {
 	GET_WOOD,
+	STORE_WOOD,
 	BUILD,
 	SLEEP,
 	FORAGE,
@@ -32,7 +34,7 @@ public:
   Character(Grid *_grid);
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
-	Character(Grid *_grid, std::string _name);
+	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
 
 	Character& operator=(const Character &rhs);
 	///
@@ -121,6 +123,10 @@ private:
 	/// \brief m_grid, grid pointer to reference for pathfinding
 	///
   Grid *m_grid;
+	///
+	/// \brief m_world_inventory, inventory in store houses around the map
+	///
+	Inventory *m_world_inventory;
   ///
 	/// \brief m_pos, character position
   ///
