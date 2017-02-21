@@ -325,7 +325,8 @@ void Scene::draw()
     glViewport(0, 0, 4096, 4096);
 
     //The intervals at which we will draw into shadow buffers.
-    std::vector<float> cascadeDistances = {0.01f, 24.0f, 64.0f, 1024.0f};
+    std::vector<float> cascadeDistances = {0.01f, 4.0f, 16.0f, 128.0f};
+    cascadeDistances = {0.01f, 16.0f};
 
     std::vector< std::pair< ngl::Vec3, ngl::Vec3 > > boxes = generateOrthoShadowMatrices( cascadeDistances );
 
@@ -333,17 +334,19 @@ void Scene::draw()
     size_t index = 0;
     for(auto &box : boxes)
     {
-        /*shadowPass( box, index );
-        index++;*/
+        std::cout << "Shadowpass for " << box.first << ", " << box.second << '\n';
+        shadowPass( box, index );
+        index++;
     }
+    std::cout << '\n';
 
-    bounds b = {
-        ngl::Vec3(-2,-2,-2),
-        ngl::Vec3(2,2,2)
+    /*bounds b = {
+        ngl::Vec3(-8,-8,-16),
+        ngl::Vec3(8,8,16)
     };
-    shadowPass(b, 0);
+    shadowPass(b, 0);*/
 
-    glViewport(0, 0, 4096, 4096);
+    /*glViewport(0, 0, 4096, 4096);
     m_shadowBuffer[0].bind();
     glDrawBuffer( GL_NONE );
     glReadBuffer(GL_NONE);
@@ -387,7 +390,7 @@ void Scene::draw()
                 );
     m_shadowMat[0] = m_shadowMat[0] * biasMat;
 
-    m_shadowBuffer[0].unbind();
+    m_shadowBuffer[0].unbind();*/
 
     //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
@@ -491,7 +494,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
     //Get cascades from this.
     std::vector< std::array<ngl::Vec3, 8> > cascades;
 
-    for(int i = 0; i < _divisions.size() - 2; ++i)
+    for(int i = 0; i <= _divisions.size() - 2; ++i)
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     //These cascades are in world space. We must convert them into light space.
     for(auto &c : cascades)

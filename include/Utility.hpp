@@ -8,6 +8,9 @@
 
 #include <ngl/Vec3.h>
 
+#include <iostream>
+#include <ngl/NGLStream.h>
+
 namespace Utility
 {
 
@@ -37,9 +40,9 @@ std::pair<ngl::Vec3, ngl::Vec3> enclose(const T &_pts)
         bounds.first.m_y = std::min(bounds.first.m_y, pt.m_y);
         bounds.first.m_z = std::min(bounds.first.m_z, pt.m_z);
 
-        bounds.second.m_x = std::max(bounds.first.m_x, pt.m_x);
-        bounds.second.m_y = std::max(bounds.first.m_y, pt.m_y);
-        bounds.second.m_z = std::max(bounds.first.m_z, pt.m_z);
+        bounds.second.m_x = std::max(bounds.second.m_x, pt.m_x);
+        bounds.second.m_y = std::max(bounds.second.m_y, pt.m_y);
+        bounds.second.m_z = std::max(bounds.second.m_z, pt.m_z);
     }
 
     return bounds;
