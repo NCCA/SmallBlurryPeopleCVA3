@@ -1,5 +1,10 @@
+//TO-DO: Delete
+#include <iostream>
+#include <ngl/NGLStream.h>
+
 #include <ngl/Util.h>
 #include "Camera.hpp"
+#include "Utility.hpp"
 
 
 void Camera::calculateViewMat()
@@ -38,7 +43,7 @@ void Camera::calculateProjectionMat()
                 m_fov,
                 m_aspect,
                 0.1f,
-                10000.0f
+                128.0f
                 );
 }
 
@@ -82,4 +87,45 @@ ngl::Mat4 Camera::translationMatrix(const ngl::Vec3 &_vec)
     ngl::Mat4 trans;
     trans.translate( _vec.m_x, _vec.m_y, _vec.m_z );
     return trans;
+}
+
+std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)
+{
+    std::array<ngl::Vec3, 8> cascade;
+
+    //Distance from the look vector, on the right vector
+    float horizontal = tanf( Utility::radians(m_fov) / 2.0f );
+
+    float verticalFOV = m_fov / m_aspect;
+    float vertical = tanf( Utility::radians(verticalFOV) / 2.0f );
+
+    float sh = _start * horizontal;
+    float sv = _start * vertical;
+    float eh = _end * horizontal;
+    float ev = _end * vertical;
+
+    //Near plane
+    cascade[0] = ngl::Vec3( -sh, sv, _start ); //Top left
+    cascade[1] = ngl::Vec3( sh, sv, _start ); //Top right
+    cascade[2] = ngl::Vec3( -sh, -sv, _start ); //Bottom left
+    cascade[3] = ngl::Vec3( sh, -sv, _start ); //Bottom right
+
+    //Far plane
+    cascade[4] = ngl::Vec3( -eh, ev, _end ); //Top left
+    cascade[5] = ngl::Vec3( eh, ev, _end ); //Top right
+    cascade[6] = ngl::Vec3( -eh, -ev, _end ); //Bottom left.
+    cascade[7] = ngl::Vec3( eh, -ev, _end ); //Bottom right
+
+    //Project from view space to world space
+    ngl::Mat4 iv = m_V.inverse();
+
+    for(auto &i : cascade)
+    {
+        ngl::Vec4 i4 = ngl::Vec4( i.m_x, i.m_y, i.m_z, 1.0f );
+        i4 = i4 * iv;
+        i = ngl::Vec3( i4.m_x, i4.m_y, i4.m_z );
+    }
+    std::cout << '\n';
+
+    return cascade;
 }

@@ -12,6 +12,8 @@
 
 #include "Framebuffer.hpp"
 
+typedef std::pair<ngl::Vec3, ngl::Vec3> bounds;
+
 class Scene
 {
 public:
@@ -69,7 +71,7 @@ private:
     GLuint m_screenQuad;
     Framebuffer m_mainBuffer;
     Framebuffer m_pickBuffer;
-    Framebuffer m_shadowBuffer;
+    std::vector< Framebuffer > m_shadowBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();
@@ -96,10 +98,13 @@ private:
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
 
+    std::vector< bounds > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
+    void shadowPass( bounds _box, size_t _index );
+
     ngl::Vec3 m_sunAngle;
     ngl::Vec3 m_sunDir;
 
-    ngl::Mat4 m_shadowMat;
+    std::vector<ngl::Mat4> m_shadowMat;
 
     /// @brief Tells me how big the screen is.
     ngl::Vec2 m_viewport;

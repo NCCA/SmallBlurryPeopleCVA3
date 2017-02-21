@@ -72,6 +72,10 @@ public:
     ngl::Vec3 up() {return m_V.getUpVector();}
     /// @brief Gets the right vector of the camera. Just ignore the transpose stuff, it works I swear.
     ngl::Vec3 right() {return m_V.transpose().getRightVector();}
+
+    /// @brief Returns the 8 corners of a frustum starting at _start units from the camera, and ending _end units away.
+    /// These vertices are in world space.
+    std::array<ngl::Vec3, 8> calculateCascade(float _start, float _end);
 private:
     /// @brief Holds the horizontal fov in degrees.
     float m_fov;
