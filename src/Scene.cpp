@@ -442,6 +442,14 @@ void Scene::draw()
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+
+
+    //---------------------------//
+    //          BUTTONS          //
+    //---------------------------//
+    // ?
+    slib->use("button");
+
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
@@ -593,7 +601,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
     m->draw();
 }
 
-void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag)
+void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
@@ -609,6 +617,15 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
 
     slib->attachShaderToProgram(_name, _vert);
     slib->attachShaderToProgram(_name, _frag);
+
+    // add geometry shader if string given
+    if(!_geo.empty())
+    {
+      slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
+      slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
+      slib->compileShader(_geo);
+      slib->attachShaderToProgram(_name, _geo);
+    }
 
     slib->linkProgramObject(_name);
 }

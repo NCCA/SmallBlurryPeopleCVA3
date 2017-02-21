@@ -78,6 +78,7 @@ int Node::getParentID()
 }
 std::array<int, 4> Node::getNeighbours()
 {
+  // find neighbours in parent vector
   std::array<int, 4> neighbour_ids = {-1, -1, -1, -1};
   for(Node &node : *m_node_vector)
   {
