@@ -37,16 +37,19 @@ public :
   /// \brief wipeButtons used to clear buttons, and button id counter is reset to 0
   ///
   void wipeButtons();
-
+  ///
+  /// \brief createTestButtons create a set of buttons for debugging
+  ///
   void createTestButtons();
-  ///
-  /// \brief addButton creates a button in the Gui
-  /// \param _x x position
-  /// \param _y y position
-  /// \param _w width
-  /// \param _h height
-  ///
-  void addButton(double _x, double _y, double _w, double _h);
+
+
+
+
+  void addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size);
+
+
+
+
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

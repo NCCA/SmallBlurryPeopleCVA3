@@ -134,6 +134,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       return createFoundPath(m_nodes[lowest_f_node_id]);
     }
   }
+  // no path found if loop exits
   std::vector<ngl::Vec2> no_path;
   return no_path;
 }

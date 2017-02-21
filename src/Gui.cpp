@@ -56,10 +56,10 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(10, 10, 100, 100);
+  addButton(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100,100));
 }
 
-void Gui::addButton(double _x, double _y, double _w, double _h)
+void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
 {
-  m_buttons.push_back(Button(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(_x, _y), ngl::Vec2(_w, _h)));
+  m_buttons.push_back(Button(_x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size));
 }

@@ -85,7 +85,7 @@ private:
     void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
 
-    void createShader(const std::string _name, const std::string _vert, const std::string _frag);
+    void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "");
     GLuint createVAO(std::vector<ngl::Vec4> &_verts);
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs);
     GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
