@@ -27,9 +27,8 @@ public:
 
   void updateScript(std::string _script_path);
 
-  void printHeight();
-  //void printType();
   void printTrees();
+  void printTypes();
 
   std::vector<ngl::Vec3> getTriangles();
 

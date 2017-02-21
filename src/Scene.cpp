@@ -44,7 +44,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
-    createShader("colour", "vertDeferredData", "fragBasicColour");
+		//createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
@@ -63,8 +63,10 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //Graphics stuff.
     //Framebuffers
+
     std::cout << "Initalising framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
+
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
@@ -239,6 +241,12 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
+		for(Character &character : m_characters)
+		{
+			if (character.isActive() == true)
+				character.update();
+		}
+
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 5.0f;
     m_sunAngle.m_x += 0.1f;
@@ -250,6 +258,7 @@ void Scene::update()
     t.setRotation( m_sunAngle );
     m_sunDir = t.getMatrix().getForwardVector();
     m_sunDir.normalize();
+
 }
 
 void Scene::draw()
@@ -332,13 +341,13 @@ void Scene::draw()
             GridTile t = m_grid.get(i, j);
             m_transform.setPosition(i, 0.0f, j);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
-            if(t.isTrees())
+            if(t.getType() == TileType::TREES)
             {
                 ngl::Obj * k = m_store.getModel( "tree" );
                 loadMatricesToShader( m_transform.getMatrix(), mvp );
                 k->draw();
             }
-            else if(t.isBuilding())
+            else if(t.getType() == TileType::HOUSE)
             {
                 ngl::Obj * k = m_store.getModel( "house" );
                 loadMatricesToShader( m_transform.getMatrix(), mvp );
@@ -384,11 +393,11 @@ void Scene::draw()
         {
             GridTile t = m_grid.get(i, j);
             m_transform.setPosition(i, 0.0f, j);
-            if(t.isTrees())
+            if(t.getType() == TileType::TREES)
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
             }
-            else if(t.isBuilding())
+            else if(t.getType() == TileType::HOUSE)
                 drawAsset( "house", "", "colour");
         }
 

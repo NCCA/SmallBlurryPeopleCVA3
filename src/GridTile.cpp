@@ -7,35 +7,21 @@ GridTile::GridTile(int _id):
 
 bool GridTile::isTraversable()
 {
-  if(m_trees == 0 && m_building == BuildingType::NONE)
+  if(m_type == TileType::NONE)
   {
     return true;
   }
   return false;
 }
 
-bool GridTile::isBuilding()
+TileType GridTile::getType()
 {
-  if(m_building == BuildingType::NONE)
-  {
-    return false;
-  }
-  return true;
+  return m_type;
 }
 
-bool GridTile::isTrees()
+void GridTile::setType(TileType _t)
 {
-  if(m_trees == 0)
-  {
-    return false;
-  }
-  return true;
-}
-
-
-BuildingType GridTile::getBuildingType()
-{
-  return m_building;
+  m_type = _t;
 }
 
 int GridTile::getNumTrees()
@@ -43,19 +29,9 @@ int GridTile::getNumTrees()
   return m_trees;
 }
 
-float GridTile::getHeight()
-{
-  return m_height;
-}
-
 int GridTile::getID()
 {
   return m_id;
-}
-
-void GridTile::setBuildingType(BuildingType _type)
-{
-  m_building = _type;
 }
 
 void GridTile::setNumTrees(int _num_trees)
@@ -63,10 +39,6 @@ void GridTile::setNumTrees(int _num_trees)
   m_trees = _num_trees;
 }
 
-void GridTile::setHeight(float _height)
-{
-  m_height = _height;
-}
 
 
 

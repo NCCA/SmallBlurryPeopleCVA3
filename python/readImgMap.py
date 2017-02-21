@@ -23,6 +23,13 @@ from PIL import Image
 #omaga.png  50x50     green only
 #ring.png   50x50     green only
 
+print "none: ", tileTypes["NONE"]
+print "trees: ", tileTypes["TREES"]
+print "water: ", tileTypes["WATER"]
+print "mountains: ", tileTypes["MOUNTAINS"]
+print "house: ", tileTypes["HOUSE"]
+print "storehouse: ", tileTypes["STOREHOUSE"]
+
 img_filename = "maps/spiral.png"
 im = Image.open(img_filename)
 map_width = im.size[0]
@@ -31,7 +38,7 @@ map_height = im.size[1]
 print map_width, map_height
 
 
-map_data = [[0, 0] for i in range(map_width * map_height)]
+map_data = [tileTypes["NONE"] for i in range(map_width * map_height)]
 
 
 for y in range(map_height):
@@ -42,6 +49,8 @@ for y in range(map_height):
     g = rgb[1]
     b = rgb[2]
     if g == 255:
-      map_data[x + map_width * y][0] = 1;
-    map_data[x + map_width * y][1] = b/255.0;
+      map_data[x + map_width * y] = tileTypes["TREES"]
+
+map_data[map_width/2 + map_width * map_height/2] = tileTypes["STOREHOUSE"]
+
 
