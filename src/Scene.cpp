@@ -486,8 +486,8 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
     ngl::Mat4 V = ngl::lookAt(
-                s + m_cam.getPos(),
-                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
+                s,
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
@@ -496,6 +496,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
 
     for(int i = 0; i <= _divisions.size() - 2; ++i)
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
+
     //These cascades are in world space. We must convert them into light space.
     for(auto &c : cascades)
     {
@@ -509,6 +510,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
         }
         std::cout << '\n';
     }
+
     //Create AABBs enclosing each cascade section
     std::vector< std::pair<ngl::Vec3, ngl::Vec3> > boxes;
     for(auto &c : cascades)
@@ -538,8 +540,8 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 );
 
     ngl::Mat4 V = ngl::lookAt(
-                s + mid + m_cam.getPos(),
-                ngl::Vec3(0.0f, 0.0f, 0.0f) + mid + m_cam.getPos(),
+                s + m_cam.getPos(),
+                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 

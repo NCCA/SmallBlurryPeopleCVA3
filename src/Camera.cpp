@@ -122,10 +122,11 @@ std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)
     for(auto &i : cascade)
     {
         ngl::Vec4 i4 = ngl::Vec4( i.m_x, i.m_y, i.m_z, 1.0f );
-        i4 = i4 * iv;
+        i4 = iv * i4;
         i = ngl::Vec3( i4.m_x, i4.m_y, i4.m_z );
     }
     std::cout << '\n';
 
+    //Return cascade in world space.
     return cascade;
 }
