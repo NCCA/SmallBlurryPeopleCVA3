@@ -97,7 +97,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_shadowBuffer.initialise( shadowResolution, shadowResolution );
     glDrawBuffer( GL_NONE );
     glReadBuffer( GL_NONE );
-    for(int i = 0; i < 1; ++i)
+    for(int i = 0; i < 3; ++i)
     {
         m_shadowBuffer.addTexture("depth[" + std::to_string(i) + "]", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
     }
@@ -317,7 +317,7 @@ void Scene::draw()
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
-    cascadeDistances = {0.01f, 16.0f};
+    //cascadeDistances = {0.01f, 16.0f};
 
     std::vector< std::pair< ngl::Vec3, ngl::Vec3 > > boxes = generateOrthoShadowMatrices( cascadeDistances );
 
@@ -328,7 +328,7 @@ void Scene::draw()
     for(auto &box : boxes)
     {
         std::cout << "Shadowpass for " << index << '\n';
-        shadowPass( box, 0 );
+        shadowPass( box, index );
         index++;
     }
     std::cout << '\n';
@@ -397,19 +397,20 @@ void Scene::draw()
     slib->setRegisteredUniform( "sunInts", powf( clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f), 0.1f ) );
     slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
-    /*slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
-    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );*/
+    slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
+    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
 
     slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
-    slib->setRegisteredUniform2f( "cascades", cascadeDistances[0], cascadeDistances[1]/*, cascadeDistances[2], cascadeDistances[3]*/ );
+    for( int i = 0; i < cascadeDistances.size(); ++i )
+        slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
     //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
     m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 3 );
-    /*m_shadowBuffer[1].bindTexture( id, "depth", "shadowDepths[1]", 4 );
-    m_shadowBuffer[2].bindTexture( id, "depth", "shadowDepths[2]", 5 );*/
+    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 4 );
+    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 

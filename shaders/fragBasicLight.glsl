@@ -64,6 +64,7 @@ void main()
     int cascadeIndex = -1;
     //TO-DO: Have a better way to compute depth. Maybe write to another buffer.
     float fragDepth = distance(camPos, texture(position, UV));
+
     if(fragDepth > cascades[0] && fragDepth < cascades[1])
         cascadeIndex = 0;
     else if(fragDepth > cascades[1] && fragDepth < cascades[2])
@@ -71,7 +72,7 @@ void main()
     else if(fragDepth > cascades[2] && fragDepth < cascades[3])
         cascadeIndex = 2;
 
-    /*if(cascadeIndex != -1)
+    if(cascadeIndex != -1)
     {
         vec4 sposition = shadowMatrix[cascadeIndex] * vec4(texture(position, UV).xyz, 1.0);
 
@@ -85,9 +86,9 @@ void main()
 
         shadow /= 5.0;
         mul -= shadow * 0.2;
-    }*/
+    }
 
-    vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
+    /*vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
 
     float depth = sposition.z - bias;
 
@@ -98,12 +99,12 @@ void main()
     shadow += shadowSample(depth, sposition.xy + pixelstep, 0);
 
     shadow /= 5.0;
-    mul -= shadow * 0.2;
+    mul -= shadow * 0.2;*/
 
     mul = max(mul, 0.05);
 
 #if shadowbuffer == 1
-    fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
+    fragColour.xyz = vec3(texture(shadowDepths[1], UV).r);
 #else
     fragColour.xyz *= mul;
 #endif
@@ -112,6 +113,6 @@ void main()
     if(moonmul > 0.0)
         fragColour.xyz *= moonColour;
 #endif
-    //fragColour = texture(position, UV);
+    //fragColour = vec4(fragDepth);
     fragColour.a = 1.0;
 }
