@@ -71,7 +71,7 @@ private:
     GLuint m_screenQuad;
     Framebuffer m_mainBuffer;
     Framebuffer m_pickBuffer;
-    std::vector< Framebuffer > m_shadowBuffer;
+    Framebuffer m_shadowBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();

@@ -93,20 +93,20 @@ Scene::Scene(ngl::Vec2 _viewport) :
     }
     m_pickBuffer.unbind();
 
+    std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
+    m_shadowBuffer.initialise( shadowResolution, shadowResolution );
+    glDrawBuffer( GL_NONE );
+    glReadBuffer( GL_NONE );
     for(int i = 0; i < 1; ++i)
     {
-        std::cout << "Initalising shadow framebuffer " << i << " to " << 1024 << " by " << 1024 << '\n';
-        Framebuffer f;
-        m_shadowBuffer.push_back( f );
-        m_shadowBuffer[i].initialise( shadowResolution, shadowResolution );
-        m_shadowBuffer[i].addTexture("depth", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
-        if(!m_shadowBuffer[i].checkComplete())
-        {
-            std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-            exit(EXIT_FAILURE);
-        }
-        m_shadowBuffer[i].unbind();
+        m_shadowBuffer.addTexture("depth[" + std::to_string(i) + "]", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
     }
+    if(!m_shadowBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_shadowBuffer.unbind();
 
     m_shadowMat.assign(1, ngl::Mat4());
 
@@ -407,8 +407,7 @@ void Scene::draw()
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_shadowBuffer[0].bindTexture( id, "depth", "shadowDepths[0]", 3 );
-    std::cout << "m_shadowBuffer size : " << m_shadowBuffer.size() << '\n';
+    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 3 );
     /*m_shadowBuffer[1].bindTexture( id, "depth", "shadowDepths[1]", 4 );
     m_shadowBuffer[2].bindTexture( id, "depth", "shadowDepths[2]", 5 );*/
 
@@ -509,9 +508,8 @@ void Scene::shadowPass(bounds _box, size_t _index)
 
     m_shadowMat[_index] = V * P;
 
-    m_shadowBuffer[_index].bind();
-    glDrawBuffer( GL_NONE );
-    glReadBuffer( GL_NONE );
+    m_shadowBuffer.bind();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowBuffer.get( "depth[" + std::to_string(_index) + "]" ), 0);
     glClear( GL_DEPTH_BUFFER_BIT );
     //glCullFace(GL_FRONT);
 
@@ -551,7 +549,7 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 );
     m_shadowMat[_index] = m_shadowMat[_index] * biasMat;
 
-    m_shadowBuffer[_index].unbind();
+    m_shadowBuffer.unbind();
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
