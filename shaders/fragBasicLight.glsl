@@ -3,12 +3,16 @@
 
 #define shadowbuffer 0
 
+#define NUM_CASCADES 3
+
 in vec2 UV;
+
+uniform float cascades[NUM_CASCADES + 1];
 
 uniform sampler2D diffuse;
 uniform sampler2D normal;
 uniform sampler2D position;
-uniform sampler2D shadowDepth;
+uniform sampler2D shadowDepths[NUM_CASCADES];
 
 layout (location = 0) out vec4 fragColour;
 
@@ -16,7 +20,7 @@ uniform vec3 sunDir;
 uniform float sunInts;
 uniform float moonInts;
 
-uniform mat4 shadowMatrix;
+uniform mat4 shadowMatrix[NUM_CASCADES];
 
 //UV per pixel 1/viewport
 uniform vec2 pixelstep;
@@ -30,9 +34,11 @@ vec2( 0.34495938, 0.29387760 )
 
 vec3 moonColour = vec3(0.2, 0.3, 0.4);
 
-float shadowSample(float depth, vec2 smpl)
-{
-    if(depth > texture(shadowDepth, smpl).r)
+uniform vec4 camPos;
+
+float shadowSample(float depth, vec2 smpl, int index)
+{  
+    if(depth > texture(shadowDepths[index], smpl).r)
         return 1.0f;
     return 0.0;
 }
@@ -52,36 +58,52 @@ void main()
     mul = clamp(mul, 0.0, 1.0);
     //mul = 1.0;
 
-    vec4 sposition = shadowMatrix * vec4(texture(position, UV).xyz, 1.0);
     float bias = 0.0005 * tan( acos( mul ) );
     bias = clamp( bias, 0.0, 0.001);
 
-    float depth = sposition.z - bias;
-    //if((sposition.z - bias) > texture(shadowDepth, sposition.xy).r))
+    int cascadeIndex = -1;
+    //TO-DO: Have a better way to compute depth. Maybe write to another buffer.
+    float fragDepth = distance(camPos, texture(position, UV));
+    if(fragDepth > cascades[0] && fragDepth < cascades[1])
+        cascadeIndex = 0;
+    else if(fragDepth > cascades[1] && fragDepth < cascades[2])
+        cascadeIndex = 1;
+    else if(fragDepth > cascades[2] && fragDepth < cascades[3])
+        cascadeIndex = 2;
 
-    float shadow = shadowSample(depth, sposition.xy);
-    shadow += shadowSample(depth, sposition.xy - pixelstep);
-    shadow += shadowSample(depth, sposition.xy + vec2(pixelstep.x, -pixelstep.y));
-    shadow += shadowSample(depth, sposition.xy + vec2(-pixelstep.x, pixelstep.y));
-    shadow += shadowSample(depth, sposition.xy + pixelstep);
+    /*if(cascadeIndex != -1)
+    {
+        vec4 sposition = shadowMatrix[cascadeIndex] * vec4(texture(position, UV).xyz, 1.0);
+
+        float depth = sposition.z - bias;
+
+        float shadow = shadowSample(depth, sposition.xy, cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy - pixelstep, cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy + vec2(pixelstep.x, -pixelstep.y), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy + vec2(-pixelstep.x, pixelstep.y), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy + pixelstep, cascadeIndex);
+
+        shadow /= 5.0;
+        mul -= shadow * 0.2;
+    }*/
+
+    vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
+
+    float depth = sposition.z - bias;
+
+    float shadow = shadowSample(depth, sposition.xy, 0);
+    shadow += shadowSample(depth, sposition.xy - pixelstep, 0);
+    shadow += shadowSample(depth, sposition.xy + vec2(pixelstep.x, -pixelstep.y), 0);
+    shadow += shadowSample(depth, sposition.xy + vec2(-pixelstep.x, pixelstep.y), 0);
+    shadow += shadowSample(depth, sposition.xy + pixelstep, 0);
 
     shadow /= 5.0;
     mul -= shadow * 0.2;
 
-    /*
-    for(int i = 0; i < 4; i++)
-    {
-        vec2 coord = vec2(sposition.xy + poissonDisk[i]/2048.0);
-        if((sposition.z/sposition.w - bias) > texture(shadowDepth, coord).r)
-            mul -= 0.15;
-    }
-    */
     mul = max(mul, 0.05);
 
-    //fragColour.xyz = vec3(texture(shadowDepth, sposition.xy).r);
-
 #if shadowbuffer == 1
-    fragColour.xyz = vec3(texture(shadowDepth, UV).r);
+    fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #else
     fragColour.xyz *= mul;
 #endif
