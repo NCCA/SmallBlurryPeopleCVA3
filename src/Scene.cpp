@@ -8,8 +8,11 @@
 
 #include "Scene.hpp"
 #include "Gui.hpp"
+#include "Utility.hpp"
 
 #include <ngl/NGLStream.h>
+
+#include <ngl/AABB.h>
 
 //Can't believe std clamp is c++11 only. Pfffft.
 float clamp(float _in, float _lo, float _hi)
@@ -20,6 +23,8 @@ float clamp(float _in, float _lo, float _hi)
         return _hi;
     return _in;
 }
+
+const int shadowResolution = 4096;
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
@@ -45,7 +50,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
-		//createShader("colour", "vertDeferredData", "fragBasicColour");
+    createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
@@ -64,8 +69,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //Graphics stuff.
     //Framebuffers
-
-    std::cout << "Initalising framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
 
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
@@ -79,6 +83,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     }
     m_mainBuffer.unbind();
 
+    std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
     m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
@@ -90,14 +95,22 @@ Scene::Scene(ngl::Vec2 _viewport) :
     }
     m_pickBuffer.unbind();
 
-    m_shadowBuffer.initialise( 4096, 4096 );
-    m_shadowBuffer.addTexture("depth", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, GL_DEPTH_ATTACHMENT );
+    std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
+    m_shadowBuffer.initialise( shadowResolution, shadowResolution );
+    glDrawBuffer( GL_NONE );
+    glReadBuffer( GL_NONE );
+    for(int i = 0; i < 3; ++i)
+    {
+        m_shadowBuffer.addTexture("depth[" + std::to_string(i) + "]", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
+    }
     if(!m_shadowBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
         exit(EXIT_FAILURE);
     }
     m_shadowBuffer.unbind();
+
+    m_shadowMat.assign(1, ngl::Mat4());
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -261,6 +274,7 @@ void Scene::update()
 
 }
 
+//I'm sorry this function is so long :(
 void Scene::draw()
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
@@ -289,83 +303,37 @@ void Scene::draw()
 
     slib->use("charPick");
 
-    /*for(int i = 0; i < 20; ++i)
-        for(int j = 0; j < 20; ++j)
-        {
-            m_transform.setPosition(i * 1.5 - 15, 0, j - 10);
-            slib->setRegisteredUniform("id", i * j + i);
-            drawAsset( "knight", "", "" );
-        }*/
+    //Draw characters...
 
     m_pickBuffer.unbind();
 
     //---------------------------//
     //  SHADOW PASS  //
     //---------------------------//
-    glViewport(0, 0, 4096, 4096);
-    m_shadowBuffer.bind();
-    glDrawBuffer( GL_NONE );
-    glReadBuffer(GL_NONE);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    //glCullFace(GL_FRONT);
-    slib->use("shadowDepth");
-
-    ngl::Mat4 P = ngl::ortho(
-                -8, 8,
-                -8, 8,
-                -16, 16
-                );
-
     ngl::Vec3 s = m_sunDir;
-    ngl::Vec3 f = m_cam.forwards();
-    f.m_y = 0.0f;
+    //Flip if the moon is up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
-    ngl::Mat4 V = ngl::lookAt(
-                s + m_cam.getPos(),
-                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
-                ngl::Vec3(0.0f, 1.0f, 0.0f)
-                );
 
-    m_shadowMat = V * P;
+    glViewport(0, 0, shadowResolution, shadowResolution);
 
-    glBindVertexArray(m_terrainVAO);
-    //loadMatricesToShader();
-    loadMatricesToShader(ngl::Mat4(), m_shadowMat);
-    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
-    glBindVertexArray(0);
+    //The intervals at which we will draw into shadow buffers.
+    std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
+    //cascadeDistances = {0.01f, 16.0f};
 
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
-        {
-            GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, 0.0f, j);
-            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat;
-            if(t.getType() == TileType::TREES)
-            {
-                ngl::Obj * k = m_store.getModel( "tree" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::HOUSE)
-            {
-                ngl::Obj * k = m_store.getModel( "house" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-        }
+    std::vector< std::pair< ngl::Vec3, ngl::Vec3 > > boxes = generateOrthoShadowMatrices( cascadeDistances );
 
+    //Render a pass from each AABB
+    slib->use("shadowDepth");
 
-    //Tweaking the shadow matrix so that it can be used for shading.
-    ngl::Mat4 biasMat (
-                0.5, 0.0, 0.0, 0.0,
-                0.0, 0.5, 0.0, 0.0,
-                0.0, 0.0, 0.5, 0.0,
-                0.5, 0.5, 0.5, 1.0
-                );
-    m_shadowMat = m_shadowMat * biasMat;
-
-    m_shadowBuffer.unbind();
+    size_t index = 0;
+    for(auto &box : boxes)
+    {
+        std::cout << "Shadowpass for " << index << '\n';
+        shadowPass( box, index );
+        index++;
+    }
+    std::cout << '\n';
 
     //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
@@ -428,15 +396,23 @@ void Scene::draw()
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "sunInts", powf( clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f), 0.1f ) );
     slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
-    slib->setRegisteredUniform( "shadowMatrix", m_shadowMat );
+    slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
+    slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
+    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+
+    slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
+    for( int i = 0; i < cascadeDistances.size(); ++i )
+        slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
     //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_shadowBuffer.bindTexture( id, "depth", "shadowDepth", 3 );
+    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 3 );
+    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 4 );
+    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -444,12 +420,137 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
     // ?
-    slib->use("sky");
+    /*slib->use("sky");
     glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);*/
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+}
+
+std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
+{
+    ngl::Vec3 s = m_sunDir;
+    //Flip if the moon is up.
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+        s = -s;
+    ngl::Mat4 V = ngl::lookAt(
+                s,
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+
+    //Get cascades from this.
+    std::vector< std::array<ngl::Vec3, 8> > cascades;
+
+    for(int i = 0; i <= _divisions.size() - 2; ++i)
+    {
+        std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
+        cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
+    }
+
+    //These cascades are in world space. We must convert them into light space.
+    for(auto &c : cascades)
+    {
+        //Loop through each vertex.
+        for(auto &vert : c)
+        {
+            ngl::Vec4 vert4 (vert.m_x, vert.m_y, vert.m_z, 1.0f);
+            vert4 = V * vert4;
+            vert = ngl::Vec3( vert4.m_x, vert4.m_y, vert4.m_z );
+            //std::cout << "Post trans " << vert << '\n';
+        }
+        //std::cout << '\n';
+    }
+
+    //Create AABBs enclosing each cascade section
+    std::vector< std::pair<ngl::Vec3, ngl::Vec3> > boxes;
+    for(auto &c : cascades)
+        boxes.push_back( Utility::enclose(c) );
+
+    return boxes;
+}
+
+void Scene::shadowPass(bounds _box, size_t _index)
+{
+    ngl::Vec3 s = m_sunDir;
+    //Flip if the moon is up.
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+        s = -s;
+
+    //Box dimensions
+    ngl::Vec3 dim = _box.second - _box.first;
+    //Box position
+    //ngl::Vec3 mid = (_box.first + _box.second) / 2.0f;
+
+    ngl::Mat4 P = ngl::ortho(
+                -dim.m_x, dim.m_x,
+                -dim.m_y, dim.m_y,
+                -dim.m_z, dim.m_z
+                );
+
+    ngl::Mat4 V = ngl::lookAt(
+                s + m_cam.getPos(),
+                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+
+    /*ngl::Mat4 P = ngl::ortho(
+                -32, 32,
+                -32, 32,
+                -32, 32
+                );
+
+    ngl::Mat4 V = ngl::lookAt(
+                s,
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );*/
+
+    m_shadowMat[_index] = V * P;
+
+    m_shadowBuffer.bind();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowBuffer.get( "depth[" + std::to_string(_index) + "]" ), 0);
+    glClear( GL_DEPTH_BUFFER_BIT );
+    //glCullFace(GL_FRONT);
+
+    glBindVertexArray(m_terrainVAO);
+    //loadMatricesToShader();
+    loadMatricesToShader(ngl::Mat4(), m_shadowMat[_index]);
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
+
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            GridTile t = m_grid.get(i, j);
+            m_transform.setPosition(i, 0.0f, j);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+            if(t.getType() == TileType::TREES)
+            {
+                ngl::Obj * k = m_store.getModel( "tree" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
+            else if(t.getType() == TileType::HOUSE)
+            {
+                ngl::Obj * k = m_store.getModel( "house" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
+        }
+
+
+    //Tweaking the shadow matrix so that it can be used for shading.
+    ngl::Mat4 biasMat (
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+                );
+    m_shadowMat[_index] = m_shadowMat[_index] * biasMat;
+
+    m_shadowBuffer.unbind();
 }
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)

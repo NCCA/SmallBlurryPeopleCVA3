@@ -57,20 +57,20 @@ int main()
     ngl::NGLInit::instance();
 
     // Setup ImGui binding
-    ImGuiImplSdlInit(window);
-    ImGuiIO& io = ImGui::GetIO();
+    /*ImGuiImplSdlInit(window);
+    ImGuiIO& io = ImGui::GetIO();*/
     Scene scene (ngl::Vec2(rect.w, rect.h));
 
     while(!quit)
     {
         while(SDL_PollEvent(&event))
         {
-            ImGuiImplSdlProcessEvent(&event);
+            /*ImGuiImplSdlProcessEvent(&event);
             ImGuiImplSdlNewFrame(window);
 
             ImGui::Begin("Main Menu", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
-            ImGui::SetCursorPosY(0);
+            ImGui::SetCursorPosY(0);*/
 
             /*const char* names[scene.character_names.size()];
                         for (size_t i = 0; i< scene.character_names.size(); i++)
@@ -105,29 +105,29 @@ int main()
                                 quit = true;
                         */
 
-            ImGui::End();
+            //ImGui::End();
 
-            if(!io.WantCaptureMouse)
+            /*if(!io.WantCaptureMouse)
+            {*/
+            switch(event.type)
             {
-                switch(event.type)
-                {
-                case SDL_QUIT : quit = true; break;
-                case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
-                case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
-                case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
-                default : break;
-                }
+            case SDL_QUIT : quit = true; break;
+            case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
+            case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
+            case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
+            default : break;
             }
+            /*}*/
         }
 
         scene.update();
         scene.draw();
-        ImGui::Render();
+        //ImGui::Render();
 
         SDL_GL_SwapWindow(window);
 
     }
-    ImGuiImplSdlShutdown();
+    //ImGuiImplSdlShutdown();
 
     SDL_Quit();
     return EXIT_SUCCESS;
