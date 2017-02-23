@@ -65,12 +65,19 @@ private:
     /// @brief stores mouse position when pressed down to check if mouse has moved at release
     ngl::Vec2 m_mouse_prev_pos;
 
+    /// @brief stores textures and meshes
     AssetStore m_store;
+    /// @brief terrain base mesh
     GLuint m_terrainVAO;
+    /// @brief vert count of terrain mesh
     size_t m_terrainVAOSize;
+    /// @brief a screen quad, used mostly for postprocessing
     GLuint m_screenQuad;
+    /// @brief framebuffer to store data for the deferred rendering pipeline
     Framebuffer m_mainBuffer;
+    /// @brief framebuffer to store id and positional data, to be clicked on
     Framebuffer m_pickBuffer;
+    /// @brief buffer to store depth for shadowing
     Framebuffer m_shadowBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
