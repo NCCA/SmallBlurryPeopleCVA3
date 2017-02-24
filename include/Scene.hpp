@@ -115,6 +115,8 @@ private:
 
     /// @brief Tells me how big the screen is.
     ngl::Vec2 m_viewport;
+
+    GLuint constructTerrain();
 };
 
 #endif//__SCENE_HPP__
