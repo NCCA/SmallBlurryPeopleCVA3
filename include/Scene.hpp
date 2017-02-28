@@ -35,6 +35,16 @@ public:
     /// @brief Sets the mouse pan according to the mouse wheel
     /// @param _event, SDL mouse event structure
     void wheelEvent(const SDL_MouseWheelEvent &_event);
+    ///
+    /// \brief mouseMotionEvent check where mouse is for gui
+    /// \param _event SDL window event
+    ///
+    void mouseMotionEvent(const SDL_MouseMotionEvent &_event);
+    ///
+    /// \brief windowEvent called upon window event such as resize to update resolution parameters
+    /// \param _event SDL window event
+    ///
+    void windowEvent(const SDL_WindowEvent &_event);
 
 private:
 

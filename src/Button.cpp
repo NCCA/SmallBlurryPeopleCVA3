@@ -40,7 +40,7 @@ void Button::updatePos(ngl::Vec2 _window_res)
     y_pos = (_window_res.m_y - m_size.m_y) / 2 + m_offset.m_y;
     break;
   case YAlignment::BOTTOM:
-    y_pos = _window_res.m_y + m_offset.m_y;
+    y_pos = _window_res.m_y - (m_offset.m_y + m_size.m_y);
     break;
   default:
     break;

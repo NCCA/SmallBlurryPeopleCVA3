@@ -667,6 +667,38 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
     }
 }
 
+void Scene::mouseMotionEvent(const SDL_MouseMotionEvent &_event)
+{
+  Gui::instance()->mousePos(ngl::Vec2(_event.x, _event.y));
+}
+
+void Scene::windowEvent(const SDL_WindowEvent &_event)
+{
+  ngl::Vec2 res;
+  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+  switch (_event.event) {
+  case SDL_WINDOWEVENT_SIZE_CHANGED:
+    res = ngl::Vec2(_event.data1, _event.data2);
+
+    //????
+    m_viewport = res;
+    m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
+    m_cam.calculateProjectionMat();
+    m_cam.calculateViewMat();
+    slib->setRegisteredUniform("iResolution", m_viewport);
+    slib->use("sky");
+    slib->setRegisteredUniform("viewport", m_viewport);
+    slib->use("deferredLight");
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    // PLUS CHANGE FRAMEBUFFERS?
+
+    Gui::instance()->setResolution(res);
+    break;
+  default:
+    break;
+  }
+}
+
 void Scene::mouseSelection()
 {
   std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;

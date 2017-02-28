@@ -85,7 +85,7 @@ private :
 
   GLuint m_vao_id;
 
-  GLuint m_vbo_ids[2];
+  GLuint m_vbo_ids[3];
 };
 
 #endif//__GUI_HPP__

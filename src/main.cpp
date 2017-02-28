@@ -117,6 +117,8 @@ int main()
             case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
             case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
             case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
+            case SDL_MOUSEMOTION : scene.mouseMotionEvent(event.motion); break;
+            case SDL_WINDOWEVENT : scene.windowEvent(event.window); break;
             default : break;
             }
             /*}*/
