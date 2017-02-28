@@ -55,6 +55,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
+    createShader("button", "buttonVert", "buttonFrag");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -165,8 +166,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Gui::instance()->init();
-    Gui::instance()->setResolution(_viewport);
+    Gui *gui = Gui::instance();
+    gui->init(_viewport, "button");
     std::cout << "Scene constructor complete.\n";
 }
 
