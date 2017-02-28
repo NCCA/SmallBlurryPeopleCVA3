@@ -1,12 +1,15 @@
 #version 410 core
 
-layout( location = 0 ) in vec3 inPosition;
-layout( location = 1 ) in vec2 inUV;
+layout( location = 0 ) in vec2 inPosition;
 
 out vec2 UV;
+uniform vec2 vResolution;
 
 void main()
 {
-    gl_Position = vec4(inPosition.xyz, 1.0);
-    UV = inUV;
+  gl_PointSize = 50.0;
+  vec2 uv;
+  uv.x = inPosition.x;
+  uv.y = inPosition.y;
+  gl_Position = vec4(uv, 1.0, 1.0);
 }
