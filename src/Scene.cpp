@@ -128,7 +128,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
-		m_store.loadMesh("person", "person/person.obj");
+    m_store.loadMesh("person", "person/person.obj");
+    m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
+    m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -207,7 +209,7 @@ void Scene::createCharacter()
   std::mt19937 mt_rand(rnd());
   std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
   int name_chosen = nameNo(mt_rand);
-	m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+  m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -369,9 +371,13 @@ void Scene::draw()
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
             }
-            if(t.getType() == TileType::MOUNTAINS)
+            else if(t.getType() == TileType::MOUNTAINS)
             {
                 drawAsset( "mountain", "mountain_d", "diffuse" );
+            }
+            else if(t.getType() == TileType::STOREHOUSE)
+            {
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
             }
             else if(t.getType() == TileType::HOUSE)
             {
@@ -379,13 +385,13 @@ void Scene::draw()
             }
         }
 
-		for(auto &character : m_characters)
-		{
-			ngl::Vec2 pos = character.getPos();
-			ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-			m_transform.setPosition(new_pos);
-			drawAsset( "person", "", "colour");
-		}
+    for(auto &character : m_characters)
+    {
+      ngl::Vec2 pos = character.getPos();
+      ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
+      m_transform.setPosition(new_pos);
+      drawAsset( "person", "", "colour");
+    }
 
     m_mainBuffer.unbind();
     m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
@@ -562,18 +568,24 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 loadMatricesToShader( m_transform.getMatrix(), mvp );
                 k->draw();
             }
+            else if(t.getType() == TileType::STOREHOUSE)
+            {
+                ngl::Obj * k = m_store.getModel( "storehouse" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
         }
 
-		for(auto &character : m_characters)
-		{
-			ngl::Vec2 pos = character.getPos();
-			m_transform.setPosition(pos[0],0.0f,pos[1]);
-			ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+    for(auto &character : m_characters)
+    {
+      ngl::Vec2 pos = character.getPos();
+      m_transform.setPosition(pos[0],0.0f,pos[1]);
+      ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-			ngl::Obj * k = m_store.getModel( "person" );
-			loadMatricesToShader( m_transform.getMatrix(), mvp );
-			k->draw();
-		}
+      ngl::Obj * k = m_store.getModel( "person" );
+      loadMatricesToShader( m_transform.getMatrix(), mvp );
+      k->draw();
+    }
 
 
     //Tweaking the shadow matrix so that it can be used for shading.
@@ -619,7 +631,7 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
         ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
         //if its a click then the mouseSelection funciton is called
-				if(distance.length() < 1)
+        if(distance.length() < 1)
             mouseSelection();
 
         m_mouse_prev_pos.set(0.0f, 0.0f);
@@ -658,67 +670,67 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::mouseSelection()
 {
-	std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+  std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
 
-	m_pickBuffer.bind();
+  m_pickBuffer.bind();
 
-	//check character_id texture
-	GLuint char_texID = getCharPickTexture();
-	glBindTexture(GL_TEXTURE_2D, char_texID);
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
+  //check character_id texture
+  GLuint char_texID = getCharPickTexture();
+  glBindTexture(GL_TEXTURE_2D, char_texID);
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-	int mouse_coords[2] = {0,0};
-	SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+  int mouse_coords[2] = {0,0};
+  SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
 
-	long unsigned int red = -1;
-	glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-	//change depending on number characters
-	if(red >= 0 && red < m_characters.size())
-	{
-		for (Character &character : m_characters)
-		{
-			if (character.getID() == red)
-			{
-				m_active_char = &character;
-				if(character.isActive() == false)
-					character.setActive(true);
-			}
-		}
-	}
-	//check grid_id texture
-	else
-	{
-		//bind default texture
-		glBindTexture(GL_TEXTURE_2D, 0);
-		GLuint grid_texID = getTerrainPickTexture();
-		glBindTexture(GL_TEXTURE_2D, grid_texID);
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
+  long unsigned int red = -1;
+  glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+  //change depending on number characters
+  if(red >= 0 && red < m_characters.size())
+  {
+    for (Character &character : m_characters)
+    {
+      if (character.getID() == red)
+      {
+        m_active_char = &character;
+        if(character.isActive() == false)
+          character.setActive(true);
+      }
+    }
+  }
+  //check grid_id texture
+  else
+  {
+    //bind default texture
+    glBindTexture(GL_TEXTURE_2D, 0);
+    GLuint grid_texID = getTerrainPickTexture();
+    glBindTexture(GL_TEXTURE_2D, grid_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-		std::array<unsigned char, 3> grid_coord;
-		glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
+    std::array<unsigned char, 3> grid_coord;
+    glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
 
-		if(grid_coord[0] != 0 &&
-			 grid_coord[1] != 0 &&
-			 grid_coord[2] != 0)
-		{
-			std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
+    if(grid_coord[0] != 0 &&
+       grid_coord[1] != 0 &&
+       grid_coord[2] != 0)
+    {
+      std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
-			if(m_active_char->isActive() == true)
-			{
-				ngl::Vec2 grid_ID {grid_coord[0], grid_coord[1]};
-				m_active_char->setTarget(grid_ID);
-			}
+      if(m_active_char->isActive() == true)
+      {
+        ngl::Vec2 grid_ID {grid_coord[0], grid_coord[1]};
+        m_active_char->setTarget(grid_ID);
+      }
 
-		}
-		else
-		{
-			//if grid_coord == {0,0,0}
-			std::cout<<"NO GRID CLICK D:"<<std::endl;
-		}
-	}
+    }
+    else
+    {
+      //if grid_coord == {0,0,0}
+      std::cout<<"NO GRID CLICK D:"<<std::endl;
+    }
+  }
 
-	glReadBuffer(GL_NONE);
-	m_pickBuffer.unbind();
+  glReadBuffer(GL_NONE);
+  m_pickBuffer.unbind();
 
 }
 

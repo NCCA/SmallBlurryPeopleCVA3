@@ -56,6 +56,11 @@ for x in range(map_width):
       if r < td:
         map_data[x + map_width * y] = tileTypes["TREES"]
 
+for i in range(10):
+  x_rand = rand.randint(0, map_width)
+  y_rand = rand.randint(0, map_height)
+  map_data[x_rand + map_width * y_rand] = tileTypes["STOREHOUSE"]
+
 
 
 
