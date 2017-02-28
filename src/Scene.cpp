@@ -55,7 +55,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
-    createShader("button", "buttonVert", "buttonFrag");
+    createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -128,7 +128,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
-		m_store.loadMesh("person", "person/person.obj");
+    m_store.loadMesh("person", "person/person.obj");
+    m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
+    m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -207,7 +209,7 @@ void Scene::createCharacter()
   std::mt19937 mt_rand(rnd());
   std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
   int name_chosen = nameNo(mt_rand);
-	m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+  m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -369,9 +371,13 @@ void Scene::draw()
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
             }
-            if(t.getType() == TileType::MOUNTAINS)
+            else if(t.getType() == TileType::MOUNTAINS)
             {
                 drawAsset( "mountain", "mountain_d", "diffuse" );
+            }
+            else if(t.getType() == TileType::STOREHOUSE)
+            {
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
             }
             else if(t.getType() == TileType::HOUSE)
             {
@@ -379,13 +385,13 @@ void Scene::draw()
             }
         }
 
-		for(auto &character : m_characters)
-		{
-			ngl::Vec2 pos = character.getPos();
-			ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-			m_transform.setPosition(new_pos);
-			drawAsset( "person", "", "colour");
-		}
+    for(auto &character : m_characters)
+    {
+      ngl::Vec2 pos = character.getPos();
+      ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
+      m_transform.setPosition(new_pos);
+      drawAsset( "person", "", "colour");
+    }
 
     m_mainBuffer.unbind();
     m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
@@ -438,9 +444,8 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
     // ?
-    /*slib->use("sky");
-    glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);*/
+    glClear(GL_DEPTH_BUFFER_BIT);
+    Gui::instance()->drawButtons();
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
@@ -562,18 +567,24 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 loadMatricesToShader( m_transform.getMatrix(), mvp );
                 k->draw();
             }
+            else if(t.getType() == TileType::STOREHOUSE)
+            {
+                ngl::Obj * k = m_store.getModel( "storehouse" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
+            }
         }
 
-		for(auto &character : m_characters)
-		{
-			ngl::Vec2 pos = character.getPos();
-			m_transform.setPosition(pos[0],0.0f,pos[1]);
-			ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+    for(auto &character : m_characters)
+    {
+      ngl::Vec2 pos = character.getPos();
+      m_transform.setPosition(pos[0],0.0f,pos[1]);
+      ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-			ngl::Obj * k = m_store.getModel( "person" );
-			loadMatricesToShader( m_transform.getMatrix(), mvp );
-			k->draw();
-		}
+      ngl::Obj * k = m_store.getModel( "person" );
+      loadMatricesToShader( m_transform.getMatrix(), mvp );
+      k->draw();
+    }
 
 
     //Tweaking the shadow matrix so that it can be used for shading.
@@ -619,7 +630,7 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
         ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
         //if its a click then the mouseSelection funciton is called
-				if(distance.length() < 1)
+        if(distance.length() < 1)
             mouseSelection();
 
         m_mouse_prev_pos.set(0.0f, 0.0f);

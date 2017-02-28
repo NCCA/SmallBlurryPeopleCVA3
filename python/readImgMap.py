@@ -1,14 +1,36 @@
 """
-  A test script for python scripting the map generation, which has
-  access to the following variables:
+A user can write custom scripts for the game to use to generate maps. To do this they
+must define the 3 following variables:
 
-  map_data:       An array of data that represents the map, it stores lists where the
-                  first value is the ammount of trees and the second value is the
-                  geight of the tile
+  map_data:       An array of integers that set the types of the map tiles in game.
+                  To allow the setting of specific types, a dictionary is passed from
+                  the c++ program that links strings with the tile type integers. The
+                  dictionary is called tileTypes and stoes the following strings:
+                    NONE
+                    TREES
+                    WATER
+                    MOUNTAINS
+                    HOUSE
+                    STOEREHOUSE
+                  To set one of these values the following syntax is used:
+                    $map_data[x + map_width * y] = tileTypes["TREES"]
+
   map_width:      The width of the map, set in the main program.
                   This is set from the values in the main program and not passed back
+
   map_height:     The height of the map, set in the main program.
                   This is set from the values in the main program and not passed back
+
+
+A python module for producing fractal simple noise is also provided and can be imported
+using the following lines:
+  $import os
+  $cwd = os.getcwd()+ "/python/"
+  $import sys
+  $sys.path.append(cwd)
+  $import noise.noise as n
+The preamble is required because the module is stoeed as part of the game, which is not
+on the PYTHONPATH variable
 """
 
 from PIL import Image
