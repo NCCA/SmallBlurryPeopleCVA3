@@ -55,7 +55,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
-    createShader("button", "buttonVert", "buttonFrag");
+    createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -444,9 +444,8 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
     // ?
-    /*slib->use("sky");
-    glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);*/
+    glClear(GL_DEPTH_BUFFER_BIT);
+    Gui::instance()->drawButtons();
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
