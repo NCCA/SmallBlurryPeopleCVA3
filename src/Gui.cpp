@@ -1,18 +1,20 @@
 #include "Gui.hpp"
+#include "ngl/ShaderLib.h"
 
 Gui::Gui()
 {
 
 }
 
-void Gui::init(ngl::Vec2 _res)
+void Gui::init(ngl::Vec2 _res, const std::string &_shader_name)
 {
-  init();
+  init(_shader_name);
   setResolution(_res);
 }
 
-void Gui::init()
+void Gui::init(const std::string &_shader_name)
 {
+  m_shader_name = _shader_name;
   wipeButtons();
   createTestButtons();
 }
@@ -21,6 +23,8 @@ void Gui::setResolution(ngl::Vec2 _res)
 {
   m_win_w = _res.m_x;
   m_win_h = _res.m_y;
+  ngl::ShaderLib::instance()->use(m_shader_name);
+  ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
 }
 
 void Gui::click()
