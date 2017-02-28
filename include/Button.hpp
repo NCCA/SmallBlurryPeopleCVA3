@@ -55,6 +55,11 @@ public:
   ///
   int getID();
   ///
+  /// \brief getPos get position of button
+  /// \return position of button as vec2
+  ///
+  ngl::Vec2 getPos();
+  ///
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();

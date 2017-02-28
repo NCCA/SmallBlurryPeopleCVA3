@@ -72,6 +72,11 @@ int Button::getID()
   return m_id;
 }
 
+ngl::Vec2 Button::getPos()
+{
+  return m_pos;
+}
+
 // static function
 void Button::resetIdCounter()
 {

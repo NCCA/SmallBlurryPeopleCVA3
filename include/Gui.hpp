@@ -24,6 +24,10 @@ public :
   ///
   void setResolution(ngl::Vec2 _res);
   ///
+  /// \brief initGL initialise gl values
+  ///
+  void initGL();
+  ///
   /// \brief click check if user has clicked inside any button area
   /// \param pos mouse position to compare buttons against
   ///
@@ -48,7 +52,7 @@ public :
   void addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size);
 
 
-
+  void updateButtonArrays();
 
 private :
   ///
@@ -75,6 +79,10 @@ private :
   /// \brief m_shader_name string denoting shader that buttons use
   ///
   std::string m_shader_name;
+
+  GLuint m_vao_id;
+
+  GLuint m_vbo_ids[1];
 };
 
 #endif//__GUI_HPP__

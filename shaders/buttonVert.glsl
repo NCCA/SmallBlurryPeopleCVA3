@@ -11,5 +11,5 @@ void main()
   vec2 uv;
   uv.x = inPosition.x;
   uv.y = inPosition.y;
-  gl_Position = vec4(uv, 1.0, 1.0);
+  gl_Position = vec4(uv, 0.0, 1.0);
 }
