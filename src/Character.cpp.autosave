@@ -60,10 +60,6 @@ void Character::setState()
 		{
 			if(findNearestEmptyTile() == true)
 			{
-				//m_path = findPath(m_target_id);
-				//std::cout<<"TARGET ID"<<m_grid->idToCoord(m_target_id)<<std::endl;
-				//std::cout<<"PATH"<<m_path.size()<<std::endl;
-
 				m_state_stack.push_back(State::MOVE);
 				m_state_stack.push_back(State::GET_WOOD);
 				m_state_stack.push_back(State::MOVE);
@@ -72,7 +68,7 @@ void Character::setState()
 			}
 			else
 			{
-				std::cout<<"NO TREE :("<<std::endl;
+				std::cout<<"CANT GET TO TREE :("<<std::endl;
 			}
 		}
 	//WILL NEED OPTION BETWEEN BUILDING AND MOVING
