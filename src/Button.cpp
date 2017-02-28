@@ -65,11 +65,23 @@ bool Button::isInside(ngl::Vec2 _pos)
 void Button::activate()
 {
   std::cout << "button pressed:" << m_id << std::endl;
+  std::cout << "WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << m_id << std::endl;
+  std::cout << "button pressed:" << m_id << std::endl;
 }
 
 int Button::getID()
 {
   return m_id;
+}
+
+ngl::Vec2 Button::getPos()
+{
+  return m_pos;
+}
+
+ngl::Vec2 Button::getSize()
+{
+  return m_size;
 }
 
 // static function

@@ -6,11 +6,16 @@ class fractalNoise:
   A class foir generating fractal noise patterns in 2d using simplex noise.
   The user can make calls to both fractal and simplex fiunctions, incase they
   only want a single leyer of noise
+
+  The simplex noise function was implemented from explanations and examples
+  found at http://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
   """
   def __init__(self, _seed):
     """
     initializer for the noise generator
-    _seed       the seed value used top generate the permutation table
+    _seed       the seed value used top generate the permutation table which
+                controlls the gradient vector direction for each vertex in the
+                grid
     """
     #set random engine seed
     rand.seed(_seed)
@@ -18,6 +23,7 @@ class fractalNoise:
     #permutation table
     self.p = [x for x in range(255)]
     rand.shuffle(self.p)
+
     #gradient table
     self.grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
                  [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
@@ -112,11 +118,13 @@ class fractalNoise:
     high:       maximum value of output
     return:     fractal noise value for the position (x, y) scaled to the range low-high
     """
+    #initializing values
     max_amp = 0
     amp = 1
     freq = scale
     noise = 0
 
+    #iterating over range of octaves and combining noise
     for i in range(octaves):
       noise += self.simplex(x * freq, y * freq) * amp
       max_amp += amp

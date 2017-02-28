@@ -14,7 +14,7 @@ in vec2 UV;
 
 void main()
 {
-    outColour = colour;
+		outColour = colour;
     outNormal = normal;
     outPosition = position;
     //outID = inID;

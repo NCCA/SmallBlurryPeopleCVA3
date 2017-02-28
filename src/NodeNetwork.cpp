@@ -45,7 +45,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     if(!open_nodes_available)
     {
       std::cout << "no path found between " << m_char_pos << " and " << m_target_pos << std::endl;
-      printNetwork();
+			//printNetwork();
       break;
     }
 

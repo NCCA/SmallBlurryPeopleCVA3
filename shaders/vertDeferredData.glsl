@@ -20,7 +20,7 @@ void main()
 
     normal = M * vec4(inNormal.xyz, 0.0);
     normal.w = 1.0;
-    position = M * inPosition;
+		position = M * inPosition;
     id = ID;
     UV = inUV;
 }
