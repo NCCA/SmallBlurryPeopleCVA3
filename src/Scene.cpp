@@ -121,7 +121,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadTexture("knight_d", "knight/knight_d.png");
 
     m_store.loadMesh("mountain", "mountain/mountain.obj");
-    m_store.loadTexture("mountain_d", "mountain/mountain.png");
+    m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
     m_store.loadMesh("tree", "tree/tree.obj");
@@ -368,8 +368,14 @@ void Scene::draw()
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
             }
+            if(t.getType() == TileType::MOUNTAINS)
+            {
+                drawAsset( "mountain", "mountain_d", "diffuse" );
+            }
             else if(t.getType() == TileType::HOUSE)
+            {
                 drawAsset( "house", "", "colour");
+            }
         }
 
     m_mainBuffer.unbind();
@@ -534,6 +540,12 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 ngl::Obj * k = m_store.getModel( "tree" );
                 loadMatricesToShader( m_transform.getMatrix(), mvp );
                 k->draw();
+            }
+            else if(t.getType() == TileType::MOUNTAINS)
+            {
+              ngl::Obj * k = m_store.getModel( "mountain" );
+              loadMatricesToShader( m_transform.getMatrix(), mvp );
+              k->draw();
             }
             else if(t.getType() == TileType::HOUSE)
             {
