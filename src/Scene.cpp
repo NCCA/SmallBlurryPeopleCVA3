@@ -120,6 +120,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadMesh("knight", "knight/knight.obj");
     m_store.loadTexture("knight_d", "knight/knight_d.png");
 
+    m_store.loadMesh("mountain", "mountain/mountain.obj");
+    m_store.loadTexture("mountain_d", "mountain/mountain.png");
+
     //playing with trees and houses and such
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
@@ -207,7 +210,7 @@ void Scene::createCharacter()
 }
 
 void Scene::update()
-{   
+{
     //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
     m_mouse_translation = ngl::Vec2(0,0);
 
@@ -254,11 +257,11 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
-		for(Character &character : m_characters)
-		{
-			if (character.isActive() == true)
-				character.update();
-		}
+    for(Character &character : m_characters)
+    {
+      if (character.isActive() == true)
+        character.update();
+    }
 
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 5.0f;
