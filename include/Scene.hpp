@@ -9,6 +9,7 @@
 #include "Grid.hpp"
 #include "Camera.hpp"
 #include "Character.hpp"
+#include "Inventory.hpp"
 
 #include "Framebuffer.hpp"
 
@@ -39,11 +40,14 @@ private:
 
     Camera m_cam;
     Grid m_grid;
+		Inventory m_world_inventory;
 
     /// @brief Vector of available names for characters
     std::vector<std::string> m_file_names;
     /// @brief Vector of character objects that have been created
     std::vector<Character> m_characters;
+
+		Character *m_active_char;
 
     ngl::Transformation m_transform;
 

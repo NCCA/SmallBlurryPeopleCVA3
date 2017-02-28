@@ -2,6 +2,7 @@
 #define __CHARACTER_HPP__
 
 #include "Grid.hpp"
+#include "Inventory.hpp"
 #include "ngl/Vec2.h"
 #include <QTime>
 #include <vector>
@@ -15,6 +16,7 @@
 enum class State
 {
 	GET_WOOD,
+	STORE_WOOD,
 	BUILD,
 	SLEEP,
 	FORAGE,
@@ -32,7 +34,9 @@ public:
   Character(Grid *_grid);
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
-	Character(Grid *_grid, std::string _name);
+	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
+
+	Character& operator=(const Character &rhs);
 	///
 	/// \brief default destructor
 	///
@@ -56,7 +60,7 @@ public:
   ///
 	/// \brief findPath, pathfinding function to get nodes for pathfinding
   ///
-	void findPath();
+	std::vector<ngl::Vec2> findPath(int _target_id);
   ///
 	/// \brief calcAimVec, calculate vector towards next point
 	/// \return
@@ -82,6 +86,11 @@ public:
 	/// \return m_id, character's id
 	///
 	int getID() {return m_id;}
+	///
+	/// \brief getPos, get character's position
+	/// \return m_pos, character's position
+	///
+	ngl::Vec2 getPos() {return m_pos;}
 	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
@@ -114,6 +123,10 @@ private:
 	/// \brief m_grid, grid pointer to reference for pathfinding
 	///
   Grid *m_grid;
+	///
+	/// \brief m_world_inventory, inventory in store houses around the map
+	///
+	Inventory *m_world_inventory;
   ///
 	/// \brief m_pos, character position
   ///
