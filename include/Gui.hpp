@@ -14,11 +14,11 @@ public :
   /// \brief init initialise or reset Gui with specific resolution
   /// \param _res resolution to initialise with
   ///
-  void init(ngl::Vec2 _res);
+  void init(ngl::Vec2 _res, const std::string &_shader_name);
   ///
   /// \brief init initialises or resets Gui without changing/setting resolution
   ///
-  void init();
+  void init(const std::string &_shader_name);
   ///
   /// \brief setResolution set the window width and window height
   ///
@@ -71,6 +71,10 @@ private :
   /// \brief m_win_h height of window
   ///
   int m_win_h;
+  ///
+  /// \brief m_shader_name string denoting shader that buttons use
+  ///
+  std::string m_shader_name;
 };
 
 #endif//__GUI_HPP__

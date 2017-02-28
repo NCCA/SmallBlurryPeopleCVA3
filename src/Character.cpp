@@ -13,12 +13,13 @@
 
 int Character::m_id_counter(0);
 
-Character::Character(Grid *_grid, std::string _name):
+Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name):
 	m_id(m_id_counter++),
 	m_name(_name),
 	m_active(true),
 	m_grid(_grid),
-	m_speed(1),
+	m_world_inventory(_world_inventory),
+	m_speed(0.1),
 	m_wood_inventory(0)
 {
 
@@ -47,7 +48,6 @@ Character::Character(Grid *_grid, std::string _name):
 	if (m_grid->coordToId(target) != m_grid->coordToId(m_pos))
 	{
 		setTarget(ngl::Vec2(19,25));
-		setState();
 	}
 	else
 		setActive(false);
@@ -66,6 +66,7 @@ void Character::setState()
 			m_state_stack.push_back(State::MOVE);
 			m_state_stack.push_back(State::GET_WOOD);
 			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::STORE_WOOD);
 			std::cout<<"TREE"<<std::endl;
 		}
 	//WILL NEED OPTION BETWEEN BUILDING AND MOVING
@@ -98,12 +99,6 @@ void Character::update()
 					if (move())
 					{
 						std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
-						GridTile target = m_grid->get(m_target_id);
-            if (target.getType() == TileType::STOREHOUSE && m_wood_inventory > 0)
-						{
-							m_wood_inventory-=1;
-							std::cout<<"WOOD DEPOSITED"<<std::endl;
-						}
 						//when the target has been reached, remove the state from the stack
 						m_state_stack.pop_front();
 						m_timer.restart();
@@ -125,11 +120,23 @@ void Character::update()
 
 						//finds nearest storage house and sets as target for storing wood
 						if(!findNearestStorage())
-							//remove MOVE state from stack as well, as can't find/move to storage house
+							//remove states from stack as well, as can't find/move to storage house
 							m_state_stack.clear();
 					}
 					break;
 				}
+				case(State::STORE_WOOD):
+				{
+					m_world_inventory->addWood(1);
+					m_wood_inventory -=1;
+					m_state_stack.pop_front();
+					m_timer.restart();
+					std::cout<<"WOOD DEPOSITED"<<std::endl;
+					std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
+					std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
+					break;
+				}
+
 				case(State::BUILD):
 				{
 					std::cout<<m_timer.elapsed()<<std::endl;
@@ -146,6 +153,7 @@ void Character::update()
 	}
 	else
 	{
+		//when stack cleared, character deactivated
 		setActive(false);
 	}
 }
@@ -184,11 +192,11 @@ void Character::draw()
 	std::cout << "character drawn" << std::endl;
 }
 
-void Character::findPath()
+std::vector<ngl::Vec2> Character::findPath(int _target_id)
 {
-	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(m_target_id));
+	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
 
-	m_path = network.findPath();
+	return network.findPath();
 
 }
 
@@ -215,15 +223,26 @@ void Character::setTarget(ngl::Vec2 _target_pos)
 {
 	// convert to tile id
 	setTarget(m_grid->coordToId(_target_pos));
+
 }
 
 void Character::setTarget(int _tile_id)
 {
-	if(_tile_id != m_target_id)
+	//if the chosen tile isnt equal to the target and isnt equal to the character's pos
+	if(_tile_id != m_target_id && _tile_id != m_grid->coordToId(m_pos))
 	{
 		m_target_id = _tile_id;
-		findPath();
+		m_path = findPath(m_target_id);
+		//if no path was found, deactivate character
+		if(m_path.size() <= 0)
+			setActive(false);
 	}
+	else
+		//deactivate character
+		setActive(false);
+
+	if(isActive())
+		setState();
 }
 
 bool Character::findNearestStorage()
@@ -236,6 +255,7 @@ bool Character::findNearestStorage()
 	{
 		for (int j=0; j<width; j++)
 		{
+			//go through grid and find storage houses
 			ngl::Vec2 coord = {j, i};
 			GridTile current_tile = m_grid->get(coord);
       if (current_tile.getType() == TileType::STOREHOUSE)
@@ -247,20 +267,25 @@ bool Character::findNearestStorage()
 
 	if (storage_houses.size() > 0)
 	{
-		float length = 100.0;
-		ngl::Vec2 target = {0,0};
+		m_target_id = m_grid->coordToId(storage_houses[0]);
+		std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
+		storage_houses.erase(storage_houses.begin());
 
-		for (auto &storage : storage_houses)
+		//find shortest distance to storage house, storage house becomes target
+		if(storage_houses.size() > 0)
 		{
-			ngl::Vec2 direction = storage - m_pos;
-			float current_length = direction.length();
-			if (current_length < length)
+			for (auto &storage : storage_houses)
 			{
-				length = current_length;
-				target = storage;
+				int id = m_grid->coordToId(storage);
+				std::vector<ngl::Vec2> path = findPath(id);
+				if (path.size() < shortest_path.size())
+				{
+					m_target_id = id;
+					shortest_path = path;
+				}
 			}
 		}
-		setTarget(target);
+		m_path = shortest_path;
 		return true;
 	}
 	else
