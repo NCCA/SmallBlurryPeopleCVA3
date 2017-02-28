@@ -15,8 +15,8 @@ int main()
 
     bool quit = false;
 
-    SDL_Rect rect;
-    SDL_GetDisplayBounds(0, &rect);
+    SDL_Rect rect = {100, 100, 1280, 720};
+    //SDL_GetDisplayBounds(0, &rect);
 
     SDL_Window *window=SDL_CreateWindow("window_test",
                                         SDL_WINDOWPOS_CENTERED,
