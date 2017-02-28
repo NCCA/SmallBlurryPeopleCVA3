@@ -101,7 +101,7 @@ void Character::update()
 		{
 				case(State::MOVE):
 				{
-					std::cout<<"character pos"<<m_pos<<std::endl;
+					//std::cout<<"character pos"<<m_pos<<std::endl;
 					if (move())
 					{
 						std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
@@ -134,13 +134,21 @@ void Character::update()
 				}
 				case(State::STORE_WOOD):
 				{
-					m_world_inventory->addWood(1);
-					m_wood_inventory -=1;
-					m_state_stack.pop_front();
-					m_timer.restart();
-					std::cout<<"WOOD DEPOSITED"<<std::endl;
-					std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
-					std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
+					if(m_timer.elapsed() >= 2000)
+					{
+						m_world_inventory->addWood(1);
+						m_wood_inventory -=1;
+						m_state_stack.pop_front();
+						m_timer.restart();
+						std::cout<<"WOOD DEPOSITED"<<std::endl;
+						std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
+						std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
+
+						findNearestEmptyTile();
+
+
+						m_timer.restart();
+					}
 					break;
 				}
 
