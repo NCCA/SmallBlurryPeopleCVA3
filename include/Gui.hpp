@@ -36,7 +36,7 @@ public :
   /// \brief mousePos update mouse position
   /// \param _pos current mouse position
   ///
-  void mousePos(ngl::Vec2 _pos);
+  bool mousePos(ngl::Vec2 _pos);
   ///
   /// \brief wipeButtons used to clear buttons, and button id counter is reset to 0
   ///
@@ -88,7 +88,7 @@ private :
 
   GLuint m_vao_id;
 
-  GLuint m_vbo_ids[1];
+  GLuint m_vbo_ids[2];
 };
 
 #endif//__GUI_HPP__

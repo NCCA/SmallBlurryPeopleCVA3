@@ -25,6 +25,8 @@ int main()
                                         rect.h,
                                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
                                         );
+    SDL_GetWindowSize(window, &rect.w, &rect.h);
+
     if(window == NULL)
     {
         std::cerr<<"Could not create SDL window \n";

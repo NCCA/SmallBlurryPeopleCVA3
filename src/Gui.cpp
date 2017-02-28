@@ -33,7 +33,7 @@ void Gui::setResolution(ngl::Vec2 _res)
 void Gui::initGL()
 {
   glGenVertexArrays(1, &m_vao_id);
-  glGenBuffers(1, m_vbo_ids);
+  glGenBuffers(2, m_vbo_ids);
   updateButtonArrays();
 }
 
@@ -45,7 +45,7 @@ void Gui::click()
   }
 }
 
-void Gui::mousePos(ngl::Vec2 _pos)
+bool Gui::mousePos(ngl::Vec2 _pos)
 {
   bool button_selected = false;
   for(Button &button : m_buttons)
@@ -60,6 +60,7 @@ void Gui::mousePos(ngl::Vec2 _pos)
   {
     m_selected_button_id = -1;
   }
+  return button_selected;
 }
 
 void Gui::wipeButtons()
@@ -70,7 +71,7 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100,100));
+  addButton(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(100, 100), ngl::Vec2(500, 500));
 }
 
 void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
@@ -81,17 +82,28 @@ void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset,
 void Gui::updateButtonArrays()
 {
   std::vector<ngl::Vec2> positions;
+  std::vector<ngl::Vec2> sizes;
   for(Button &button : m_buttons)
   {
     positions.push_back(button.getPos());
+    sizes.push_back(button.getSize());
   }
   glBindVertexArray(m_vao_id);
+
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[0]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
   // now fix this to the attribute buffer 0
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
   // enable this attribute (will be inPosition in the shader)
   glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[1]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * sizes.size(), &sizes[0], GL_STATIC_DRAW);
+  // now fix this to the attribute buffer 1
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  // enable this attribute (will be inPosition in the shader)
+  glEnableVertexAttribArray(1);
+
 
   glBindVertexArray(0);
 }
