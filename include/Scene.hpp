@@ -102,11 +102,6 @@ private:
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
     void setBufferLocation(GLuint _buffer, int _index, int _size);
 
-    ///
-    /// \brief passGuiGeo update button geometry and pass them through to openGL
-    ///
-    void passGuiGeo();
-
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
 

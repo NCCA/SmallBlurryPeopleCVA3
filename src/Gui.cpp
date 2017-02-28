@@ -1,6 +1,7 @@
 #include "Gui.hpp"
 #include "ngl/ShaderLib.h"
 #include "ngl/Vec2.h"
+#include "ngl/NGLStream.h"
 
 Gui::Gui()
 {
@@ -86,9 +87,20 @@ void Gui::updateButtonArrays()
   }
   glBindVertexArray(m_vao_id);
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &positions[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &positions[0], GL_STATIC_DRAW);
   // now fix this to the attribute buffer 0
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
   // enable this attribute (will be inPosition in the shader)
   glEnableVertexAttribArray(0);
+
+  glBindVertexArray(0);
+}
+
+void Gui::drawButtons()
+{
+  ngl::ShaderLib::instance()->use(m_shader_name);
+  glBindVertexArray(m_vao_id);
+  glDrawArrays(GL_POINTS, 0, m_buttons.size());
+  std::cout << m_buttons.size() << std::endl;
+  std::cout << "button1:" << m_buttons[0].getPos()[0]/m_win_w << std::endl;
 }

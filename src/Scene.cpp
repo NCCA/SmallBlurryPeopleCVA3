@@ -55,7 +55,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
-    createShader("button", "buttonVert", "buttonFrag");
+    createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -424,9 +424,9 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
     // ?
-    /*slib->use("sky");
-    glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);*/
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    Gui::instance()->drawButtons();
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
@@ -834,57 +834,4 @@ void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
     glEnableVertexAttribArray(_index);
     glBindBuffer(GL_ARRAY_BUFFER, _buffer);
     glVertexAttribPointer( _index, _size, GL_FLOAT, GL_FALSE, 0, 0 );
-}
-
-void Scene::passGuiGeo()
-{
-/*
-  m_buttonPosAndSizes.clear();
-  m_buttonColors.clear();
-  m_buttonSelectedClickedAction.clear();
-
-  for(Button &button : m_buttons){
-    for(int i=0; i<4; i++){
-      if(i<2) m_buttonPosAndSizes.push_back(button.m_pos[i]);
-      else m_buttonPosAndSizes.push_back(button.m_size[i-2]);
-      m_buttonColors.push_back(button.m_color[i]);
-    }
-    m_buttonSelectedClickedAction.push_back(button.m_selectedTime);
-    m_buttonSelectedClickedAction.push_back(button.m_clicked);
-    m_buttonSelectedClickedAction.push_back(float(button.m_action));
-  }
-
-  glBindVertexArray(m_vaoIDs[0]);
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_vboIDs[0]);
-  glBufferData(GL_ARRAY_BUFFER, m_buttonPosAndSizes.size() * sizeof(float), &(m_buttonPosAndSizes[0]), GL_STATIC_DRAW);
-  // now fix this to the attribute buffer 0
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-  // enable this attribute (will be inPosition in the shader)
-  glEnableVertexAttribArray(0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_vboIDs[1]);
-  glBufferData(GL_ARRAY_BUFFER, m_buttonColors.size() * sizeof(float), &(m_buttonColors[0]), GL_STATIC_DRAW);
-  // now fix this to the attribute buffer 0
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-  // enable and bind this attribute (will be inPosition in the shader)
-  glEnableVertexAttribArray(1);
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_vboIDs[2]);
-  glBufferData(GL_ARRAY_BUFFER, m_buttonSelectedClickedAction.size() * sizeof(float), &(m_buttonSelectedClickedAction[0]), GL_STATIC_DRAW);
-  // now fix this to the attribute buffer 0
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, 0, 0);
-  // enable and bind this attribute (will be inPosition in the shader)
-  glEnableVertexAttribArray(2);
-
-  //glBindBuffer(GL_ARRAY_BUFFER, m_vboIDs[3]);
-  //glBufferData(GL_ARRAY_BUFFER, m_buttonActions.size() * sizeof(float), &(m_buttonActions[0]), GL_STATIC_DRAW);
-  // now fix this to the attribute buffer 0
-  //glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
-  // enable and bind this attribute (will be inPosition in the shader)
-  //glEnableVertexAttribArray(3);
-
-  // unbund vertex array
-  glBindVertexArray(0);
-  */
 }
