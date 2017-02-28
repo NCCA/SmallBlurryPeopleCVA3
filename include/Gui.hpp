@@ -13,12 +13,9 @@ public :
   ///
   /// \brief init initialise or reset Gui with specific resolution
   /// \param _res resolution to initialise with
+  /// \param _shader_name name of gui shader
   ///
   void init(ngl::Vec2 _res, const std::string &_shader_name);
-  ///
-  /// \brief init initialises or resets Gui without changing/setting resolution
-  ///
-  void init(const std::string &_shader_name);
   ///
   /// \brief setResolution set the window width and window height
   ///

@@ -38,7 +38,7 @@ public:
   /// \brief updatePos update the button's position based on the offset and screen res
   /// \param screen_res resolution of the window
   ///
-  void updatePos(ngl::Vec2 window_res);
+  void updatePos(ngl::Vec2 _window_res);
   ///
   /// \brief isInside check if given position is inside the button, used for mouse position
   /// \param _pos position to check button position and size against

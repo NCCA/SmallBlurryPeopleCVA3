@@ -10,13 +10,8 @@ Gui::Gui()
 
 void Gui::init(ngl::Vec2 _res, const std::string &_shader_name)
 {
-  init(_shader_name);
-  setResolution(_res);
-}
-
-void Gui::init(const std::string &_shader_name)
-{
   m_shader_name = _shader_name;
+  setResolution(_res);
   wipeButtons();
   createTestButtons();
   initGL();
@@ -71,7 +66,7 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(100, 100), ngl::Vec2(500, 500));
+  addButton(XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 100));
 }
 
 void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
@@ -81,10 +76,12 @@ void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset,
 
 void Gui::updateButtonArrays()
 {
+  ngl::Vec2 res(m_win_w, m_win_h);
   std::vector<ngl::Vec2> positions;
   std::vector<ngl::Vec2> sizes;
   for(Button &button : m_buttons)
   {
+    button.updatePos(res);
     positions.push_back(button.getPos());
     sizes.push_back(button.getSize());
   }
@@ -113,6 +110,4 @@ void Gui::drawButtons()
   ngl::ShaderLib::instance()->use(m_shader_name);
   glBindVertexArray(m_vao_id);
   glDrawArrays(GL_POINTS, 0, m_buttons.size());
-  std::cout << m_buttons.size() << std::endl;
-  std::cout << "button1:" << m_buttons[0].getPos()[0]/m_win_w << std::endl;
 }

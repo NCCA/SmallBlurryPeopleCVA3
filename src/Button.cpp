@@ -14,7 +14,7 @@ Button::Button(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, 
   updatePos(_window_res);
 }
 
-void Button::updatePos(ngl::Vec2 window_res)
+void Button::updatePos(ngl::Vec2 _window_res)
 {
   int x_pos = 0;
   int y_pos = 0;
@@ -23,10 +23,10 @@ void Button::updatePos(ngl::Vec2 window_res)
     x_pos = m_offset.m_x;
     break;
   case XAlignment::CENTER:
-    x_pos = (window_res.m_x - m_size.m_x) / 2 + m_offset.m_x;
+    x_pos = (_window_res.m_x - m_size.m_x) / 2 + m_offset.m_x;
     break;
   case XAlignment::RIGHT:
-    x_pos = window_res.m_x + m_offset.m_x;
+    x_pos = _window_res.m_x - (m_offset.m_x + m_size.m_x);
     break;
   default:
     break;
@@ -37,15 +37,14 @@ void Button::updatePos(ngl::Vec2 window_res)
     y_pos = m_offset.m_y;
     break;
   case YAlignment::CENTER:
-    y_pos = (window_res.m_y - m_size.m_y) / 2 + m_offset.m_y;
+    y_pos = (_window_res.m_y - m_size.m_y) / 2 + m_offset.m_y;
     break;
   case YAlignment::BOTTOM:
-    y_pos = window_res.m_y + m_offset.m_y;
+    y_pos = _window_res.m_y + m_offset.m_y;
     break;
   default:
     break;
   }
-
   m_pos = ngl::Vec2(x_pos, y_pos);
 }
 
@@ -64,8 +63,6 @@ bool Button::isInside(ngl::Vec2 _pos)
 
 void Button::activate()
 {
-  std::cout << "button pressed:" << m_id << std::endl;
-  std::cout << "WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << m_id << std::endl;
   std::cout << "button pressed:" << m_id << std::endl;
 }
 
