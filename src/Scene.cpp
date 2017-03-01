@@ -197,13 +197,13 @@ void Scene::readNameFile()
 
 void Scene::createCharacter()
 {
-  int numberNames = m_file_names.size();
+    int numberNames = m_file_names.size();
 
-  std::random_device rnd;
-  std::mt19937 mt_rand(rnd());
-  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-  int name_chosen = nameNo(mt_rand);
-  m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
+    std::random_device rnd;
+    std::mt19937 mt_rand(rnd());
+    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+    int name_chosen = nameNo(mt_rand);
+    m_characters.push_back(Character(&m_grid, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -254,11 +254,11 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
-		for(Character &character : m_characters)
-		{
-			if (character.isActive() == true)
-				character.update();
-		}
+    for(Character &character : m_characters)
+    {
+        if (character.isActive() == true)
+            character.update();
+    }
 
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 5.0f;
@@ -722,10 +722,10 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
     // add geometry shader if string given
     if(!_geo.empty())
     {
-      slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
-      slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
-      slib->compileShader(_geo);
-      slib->attachShaderToProgram(_name, _geo);
+        slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
+        slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
+        slib->compileShader(_geo);
+        slib->attachShaderToProgram(_name, _geo);
     }
 
     slib->linkProgramObject(_name);
@@ -830,4 +830,91 @@ void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
     glEnableVertexAttribArray(_index);
     glBindBuffer(GL_ARRAY_BUFFER, _buffer);
     glVertexAttribPointer( _index, _size, GL_FLOAT, GL_FALSE, 0, 0 );
+}
+
+GLuint Scene::constructTerrain()
+{
+    typedef std::array<ngl::Vec3, 4> quad;
+
+    //Make quads.
+    std::vector< std::vector< quad > > quads;
+    for(int j = 0; j < m_grid.getH(); ++j)
+    {
+        //  3\--4
+        //  | \ |
+        //  1--\2
+        quads.push_back( std::vector< quad >() );
+        for(int i = 0; i < m_grid.getW(); ++i)
+        {
+            std::array< ngl::Vec3, 4 > quad = {
+                ngl::Vec3(i, 0, j),
+                ngl::Vec3(i + 1, 0, j),
+                ngl::Vec3(i, 0, j + 1),
+                ngl::Vec3(i + 1, 0, j + 1)
+            };
+
+            //ID dependant alteration.
+            GridTile tile = m_grid.get(i, j);
+            TileType type = tile.getType();
+            if(type == TileType::MOUNTAINS)
+                for(auto &vert : quad)
+                    vert.m_y = 100.0f + Utility::randFlt(-25.0f, 25.0f);
+            if(type == TileType::WATER)
+                for(auto &vert : quad)
+                    vert.m_y = -100.0f + Utility::randFlt(-25.0f, 25.0f);
+
+            quads[j].push_back( quad );
+        }
+    }
+
+    //Smooth everything
+    const int iterations = 12;
+    for(int i = 0; i < iterations; ++i)
+    {
+        //Average quads
+        for(size_t y = 0; y < quads.size(); ++y)
+            for(size_t x = 0; x < quads[y].size(); ++y)
+            {
+                float averageHeight = 0.0f;
+                for(auto &p : quads[x][y])
+                    averageHeight += p.m_y;
+                averageHeight /= 4.0f;
+
+                for(auto &p : quads[x][y])
+                {
+                    float diff = p.m_y - averageHeight;
+                    p.m_y += diff * 0.1f;
+                }
+            }
+
+        //Match edges
+        for(size_t y = 0; y < quads.size(); ++y)
+            for(size_t x = 0; x < quads[y].size(); ++y)
+            {
+                //Average-left
+                if(x > 0)
+                {
+                    quads[i - 1][j];
+                    quads[i][j][0].m_y
+                }
+
+                //Average-right
+                if(x < quads[y].size() - 1)
+                {
+
+                }
+
+                //Average-top
+                if(y > 0)
+                {
+
+                }
+
+                //Average-bottom
+                if(y < quads.size() - 1)
+                {
+
+                }
+            }
+    }
 }

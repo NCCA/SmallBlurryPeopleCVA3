@@ -116,6 +116,7 @@ private:
     /// @brief Tells me how big the screen is.
     ngl::Vec2 m_viewport;
 
+    /// @brief Takes data from the grid and turns the ids into shapes like mountains.
     GLuint constructTerrain();
 };
 
