@@ -26,4 +26,10 @@ float randFlt(const float _low, const float _high)
     return uni( randomDevice );
 }
 
+float average(std::vector<float> _values)
+{
+    float total = std::accumulate( _values.begin(), _values.end(), 0.0f );
+    return total / static_cast<float>(_values.size());
+}
+
 }

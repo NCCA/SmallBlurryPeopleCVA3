@@ -118,6 +118,25 @@ private:
 
     /// @brief Takes data from the grid and turns the ids into shapes like mountains.
     GLuint constructTerrain();
+
+    struct terrainVertex
+    {
+        ngl::Vec4 m_pos;
+        ngl::Vec3 m_norm;
+    };
+
+    struct terrainFace
+    {
+        //  2---3
+        //  |   |
+        //  0---1
+        std::array< terrainVertex, 4 > m_verts;
+    };
+
+    terrainFace terrainFaceToVertices(const size_t _x,
+                                      const size_t _y,
+                                      const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                      const std::vector<std::vector<ngl::Vec3>> &_faceNormals);
 };
 
 #endif//__SCENE_HPP__

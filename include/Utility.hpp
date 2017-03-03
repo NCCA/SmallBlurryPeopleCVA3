@@ -52,6 +52,15 @@ float radians(const float _degrees);
 float degrees(const float _radians);
 
 float randFlt(const float _min, const float _max);
+
+float average(std::vector<float> _values);
+
+template<typename T>
+T average(std::vector<T> _values)
+{
+    T total = std::accumulate( _values.begin(), _values.end(), T() );
+    return total / static_cast<float>(_values.size());
+}
 }
 
 #endif
