@@ -15,6 +15,7 @@ void Gui::init(ngl::Vec2 _res, const std::string &_shader_name)
   wipeButtons();
   createTestButtons();
   initGL();
+  m_mouse_down = false;
 }
 
 void Gui::setResolution(ngl::Vec2 _res)
@@ -129,8 +130,26 @@ void Gui::updateButtonArrays()
 
 void Gui::drawButtons()
 {
-  ngl::ShaderLib::instance()->use(m_shader_name);
-  ngl::ShaderLib::instance()->setRegisteredUniform("mouseOver", m_selected_button_id);
+  ngl::ShaderLib *slib = ngl::ShaderLib::instance();
+  slib->use(m_shader_name);
+  if(m_mouse_down)
+  {
+    slib->setRegisteredUniform("mouseOver", -1);
+  }
+  else
+  {
+    slib->setRegisteredUniform("mouseOver", m_selected_button_id);
+  }
   glBindVertexArray(m_vao_id);
   glDrawArrays(GL_POINTS, 0, m_buttons.size());
+}
+
+void Gui::mouseDown()
+{
+  m_mouse_down = true;
+}
+
+void Gui::mouseUp()
+{
+  m_mouse_down = false;
 }

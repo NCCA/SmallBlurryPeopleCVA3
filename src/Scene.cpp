@@ -618,6 +618,7 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
         m_mouse_rot_origin = _event.x;
         m_mouse_rot_active = true;
     }
+    Gui::instance()->mouseDown();
 }
 
 void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
@@ -638,11 +639,11 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     }
 
     //checks if the right button has been released and turns off flag
-    if (_event.button == SDL_BUTTON_RIGHT)
+    else if (_event.button == SDL_BUTTON_RIGHT)
     {
         m_mouse_rot_active = false;
     }
-
+    Gui::instance()->mouseUp();
 }
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
@@ -667,9 +668,11 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
     }
 }
 
-void Scene::mouseMotionEvent(const SDL_MouseMotionEvent &_event)
+void Scene::updateMousePos()
 {
-  Gui::instance()->mousePos(ngl::Vec2(_event.x, _event.y));
+  int mouse_coords[2] = {0,0};
+  SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+  Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
 }
 
 void Scene::windowEvent(const SDL_WindowEvent &_event)

@@ -56,6 +56,14 @@ public :
   /// \brief drawButtons draw buttons to screen
   ///
   void drawButtons();
+  ///
+  /// \brief mouseDown register mouse as clicked
+  ///
+  void mouseDown();
+  ///
+  /// \brief mouseUp register mouse as not clicked
+  ///
+  void mouseUp();
 
 private :
   ///
@@ -82,10 +90,18 @@ private :
   /// \brief m_shader_name string denoting shader that buttons use
   ///
   std::string m_shader_name;
-
+  ///
+  /// \brief m_vao_id geometry VAO for button points
+  ///
   GLuint m_vao_id;
-
+  ///
+  /// \brief m_vbo_ids VBOs for various button attributes
+  ///
   GLuint m_vbo_ids[3];
+  ///
+  /// \brief m_mouse_down whether mouse is pressed down or not
+  ///
+  bool m_mouse_down;
 };
 
 #endif//__GUI_HPP__
