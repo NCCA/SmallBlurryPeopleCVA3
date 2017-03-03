@@ -6,6 +6,6 @@ in vec4 position;
 
 void main()
 {
-    outPosition = vec4(position.xyz, 1.0);
+		outPosition = vec4(position.xyz/50, 1.0);
     //outID = inID;
 }

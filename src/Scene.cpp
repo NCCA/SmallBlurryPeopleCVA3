@@ -37,8 +37,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
 {
     m_viewport = _viewport;
 
-    m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
+		m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
+		m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
@@ -138,7 +138,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     data.reserve(original.size());
     //Convert format, add some cheeky randomisation
     for(auto &vert : original)
-        data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.01f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
+				data.push_back( ngl::Vec4(vert.m_x, vert.m_y, vert.m_z, 1.0f) );
 
     m_terrainVAO = createVAO( data );
     m_terrainVAOSize = data.size();
@@ -335,11 +335,11 @@ void Scene::draw()
     size_t index = 0;
     for(auto &box : boxes)
     {
-        std::cout << "Shadowpass for " << index << '\n';
+				//std::cout << "Shadowpass for " << index << '\n';
         shadowPass( box, index );
         index++;
     }
-    std::cout << '\n';
+		//std::cout << '\n';
 
     //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
@@ -468,7 +468,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
 
     for(int i = 0; i <= _divisions.size() - 2; ++i)
     {
-        std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
+				//std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
 
@@ -648,9 +648,9 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-    if(_event.y > 0 && m_mouse_zoom > 10)
+		if(_event.y > 0 && m_mouse_zoom > 10.5)
     {
-        if (m_mouse_pan > -5)
+				if (m_mouse_pan > -5)
         {
             m_mouse_pan -= 0.5;
         }
@@ -658,7 +658,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
     }
 
     else if(_event.y < 0 && m_mouse_zoom < 20)
-    {
+		{
         if(m_mouse_pan < 10)
         {
             m_mouse_pan += 0.5;
@@ -712,15 +712,17 @@ void Scene::mouseSelection()
   }
   else
   {
+    std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+
     m_pickBuffer.bind();
+
     //check character_id texture
     GLuint char_texID = getCharPickTexture();
     glBindTexture(GL_TEXTURE_2D, char_texID);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-
-    long unsigned int red = -1;
-    glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+    long unsigned int red;
+    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
     //change depending on number characters
     if(red >= 0 && red < m_characters.size())
     {
@@ -739,23 +741,31 @@ void Scene::mouseSelection()
     {
       //bind default texture
       glBindTexture(GL_TEXTURE_2D, 0);
+
       GLuint grid_texID = getTerrainPickTexture();
       glBindTexture(GL_TEXTURE_2D, grid_texID);
-      glReadBuffer(GL_COLOR_ATTACHMENT1);
+      glReadBuffer(GL_COLOR_ATTACHMENT0);
 
       std::array<unsigned char, 3> grid_coord;
-      glReadPixels(mouse_coords[0], mouse_coords[1], 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
 
-      if(grid_coord[0] != 0 &&
-         grid_coord[1] != 0 &&
-         grid_coord[2] != 0)
+      // x, window height - y - 1
+      glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
+
+      if(grid_coord[0] != 0 && grid_coord[2] != 0)
       {
         std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
-        if(m_active_char->isActive() == true)
+        int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
+        int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
+
+        std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
+
+        int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
+
+        if(m_characters[0].isActive() == true)
         {
-          ngl::Vec2 grid_ID {grid_coord[0], grid_coord[1]};
-          m_active_char->setTarget(grid_ID);
+          std::cout<<"STATE"<<std::endl;
+          m_characters[0].setTarget(target_id);
         }
 
       }

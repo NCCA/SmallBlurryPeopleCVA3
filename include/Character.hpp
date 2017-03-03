@@ -81,6 +81,8 @@ public:
 	/// \return a boolean determining whether a storage house was found
 	///
 	bool findNearestStorage();
+	bool findNearestEmptyTile();
+	bool findNearest(std::vector<ngl::Vec2> _coord_data);
 	///
 	/// \brief getID, get the unique character id
 	/// \return m_id, character's id
