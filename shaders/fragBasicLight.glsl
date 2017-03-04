@@ -85,7 +85,7 @@ void main()
         shadow += shadowSample(depth, sposition.xy + pixelstep, cascadeIndex);
 
         shadow /= 5.0;
-        mul -= shadow * 0.2;
+        mul -= shadow * 0.4;
     }
 
     /*vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
@@ -113,6 +113,6 @@ void main()
     if(moonmul > 0.0)
         fragColour.xyz *= moonColour;
 #endif
-    //fragColour = vec4(fragDepth);
+    //fragColour.rgb = texture(normal, UV).rgb;
     fragColour.a = 1.0;
 }

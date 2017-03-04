@@ -15,7 +15,7 @@ class AssetStore
 {
 public:
     AssetStore() = default;
-    ~AssetStore() = default;
+    ~AssetStore();
     AssetStore(const AssetStore &_store) = delete;
 
     //Getters for models and textures. These shouldn't really be needed,  as there

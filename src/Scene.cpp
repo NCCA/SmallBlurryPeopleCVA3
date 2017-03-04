@@ -117,13 +117,17 @@ Scene::Scene(ngl::Vec2 _viewport) :
     prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
     prim->createSphere( "sphere", 0.1, 12 );
 
-    m_store.loadMesh("knight", "knight/knight.obj");
-    m_store.loadTexture("knight_d", "knight/knight_d.png");
+    std::cout << "Loading assets...\n";
+    //m_store.loadMesh("knight", "knight/knight.obj");
+    //m_store.loadTexture("knight_d", "knight/knight_d.png");
 
     //playing with trees and houses and such
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
+
+    std::cout << "Constructing terrain...\n";
+    m_terrainVAO = constructTerrain();
 
     //Get as vec4s
     std::vector<ngl::Vec4> data;
@@ -133,8 +137,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     for(auto &vert : original)
         data.push_back( ngl::Vec4(vert.m_x, vert.m_y + 0.01f * (sin(vert.m_x) + cos(vert.m_z)), vert.m_z, 1.0f) );
 
-    m_terrainVAO = createVAO( data );
-    m_terrainVAOSize = data.size();
+    /*m_terrainVAO = createVAO( data );
+    m_terrainVAOSize = data.size();*/
 
     std::vector<ngl::Vec4> verts = {
         ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
@@ -297,7 +301,6 @@ void Scene::draw()
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
-
     m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -360,7 +363,7 @@ void Scene::draw()
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, 0.0f, j);
+            m_transform.setPosition(i, m_terrainHeight[i][j], j);
             if(t.getType() == TileType::TREES)
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
@@ -524,7 +527,7 @@ void Scene::shadowPass(bounds _box, size_t _index)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, 0.0f, j);
+            m_transform.setPosition(i, m_terrainHeight[i][j], j);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
             if(t.getType() == TileType::TREES)
             {
@@ -786,6 +789,25 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &
     return vao;
 }
 
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec3> &_normals, std::vector<ngl::Vec2> &_uvs)
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    //Generate a VBO
+    GLuint vertBuffer = createBuffer4f( _verts );
+    setBufferLocation( vertBuffer, 0, 4 );
+
+    GLuint normBuffer = createBuffer3f( _normals );
+    setBufferLocation( normBuffer, 2, 3 );
+
+    GLuint UVBuffer = createBuffer2f( _uvs );
+    setBufferLocation( UVBuffer, 1, 2 );
+
+    return vao;
+}
+
 GLuint Scene::createBuffer4f(std::vector<ngl::Vec4> _vec)
 {
     GLuint buffer;
@@ -834,23 +856,120 @@ void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
 
 GLuint Scene::constructTerrain()
 {
-    //Face centers to start.
+    std::cout << "constructTerrain start\n";
+
     std::vector<std::vector<ngl::Vec3>> faces;
     std::vector<std::vector<ngl::Vec3>> facenorms;
 
-    for(int j = 0; j < m_grid.getH(); ++j)
+    //Face centers to start.
+    for(int i = 0; i < m_grid.getW(); ++i)
     {
         faces.push_back( std::vector<ngl::Vec3>() );
-        for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
         {
             TileType t = m_grid.get(i, j).getType();
 
             ngl::Vec3 face (i, 0.0f, j);
             if(t == TileType::WATER)
-                face.m_y -= Utility::randFlt(1.0f, 5.0f);
+                face.m_y -= Utility::randFlt(0.0f, 4.0f);
             else if(t == TileType::MOUNTAINS)
-                face.m_y += Utility::randFlt(1.0f, 5.0f);
-            faces[j].push_back(face);
+                face.m_y += Utility::randFlt(0.0f, 4.0f);
+            faces[i].push_back(face);
+        }
+    }
+
+    //Smooth
+    const int iterations = 128;
+    const float hardness = 0.05f;
+    for(int it = 0; it < iterations; ++it)
+    {
+        for(int i = 1; i < m_grid.getW() - 1; ++i)
+        {
+            for(int j = 1; j < m_grid.getH() - 1; ++j)
+            {
+                float ay = 0.0f;
+                for(int y = -1; y <= 1; ++y)
+                    for(int x = -1; x <= 1; ++x)
+                        ay += faces[i + x][j + y].m_y;
+
+                ay /= 9.0f;
+
+                float dy = faces[i][j].m_y - ay;
+
+                faces[i][j].m_y -= hardness * dy;
+            }
+        }
+    }
+
+    //Store tile heights.
+    for(size_t i = 0; i < faces.size(); ++i)
+    {
+        m_terrainHeight.push_back( std::vector<float>() );
+        for(auto &vec : faces[i])
+        {
+            m_terrainHeight[i].push_back(vec.m_y);
+        }
+    }
+
+    //Calculate face normals
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        facenorms.push_back( std::vector<ngl::Vec3>() );
+        for(int j = 0; j < faces[i].size(); ++j)
+        {
+            ngl::Vec3 normal;
+
+            bool left = i > 0;
+            bool bottom = j > 0;
+            bool right = i < faces.size() - 1;
+            bool top = j < faces[i].size() - 1;
+
+            int count = 0;
+
+            //->
+            if(top and right)
+            {
+                ngl::Vec3 toTop = faces[i][j+1] - faces[i][j];
+                ngl::Vec3 toRight = faces[i+1][j] - faces[i][j];
+                ngl::Vec3 n = toTop.cross(toRight);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //V
+            if(right and bottom)
+            {
+                ngl::Vec3 toRight = faces[i+1][j] - faces[i][j];
+                ngl::Vec3 toBottom = faces[i][j-1] - faces[i][j];
+                ngl::Vec3 n = toRight.cross(toBottom);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //<-
+            if(bottom and left)
+            {
+                ngl::Vec3 toBottom = faces[i][j-1] - faces[i][j];
+                ngl::Vec3 toLeft = faces[i-1][j] - faces[i][j];
+                ngl::Vec3 n = toBottom.cross(toLeft);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //^
+            if(left and top)
+            {
+                ngl::Vec3 toLeft = faces[i-1][j] - faces[i][j];
+                ngl::Vec3 toTop = faces[i][j+1] - faces[i][j];
+                ngl::Vec3 n = toLeft.cross(toTop);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+
+            normal /= static_cast<float>(count);
+            normal.normalize();
+            facenorms[i].push_back( normal );
         }
     }
 
@@ -858,126 +977,58 @@ GLuint Scene::constructTerrain()
     std::vector<ngl::Vec3> normesh;
     std::vector<ngl::Vec2> uvmesh;
 
-    //Calculate normals per face.
-    //Cross product between vectors to surrounding faces, normalise, then average these vectors.
-    //When it comes to computing the vertex positions we can average the normals of the surrounding 4 faces to arrive at the vertex normal.
-    for(size_t y = 0; y < faces.size(); ++y)
+    for(int i = 0; i < faces.size(); ++i)
     {
-        facenorms.push_back( std::vector<ngl::Vec3>() );
-        for(size_t x = 0; x < faces[y].size(); ++x)
+        for(int j = 0; j < faces[i].size(); ++j)
         {
-            std::vector<ngl::Vec3> tests;
-            std::vector<ngl::Vec3> normals;
-            if(x > 0)
-                tests.push_back( faces[x - 1][y] - faces[x][y] );
-            if(x < faces[y].size() - 1)
-                tests.push_back( faces[x + 1][y] - faces[x][y] );
-            if(y > 0)
-                tests.push_back( faces[x][y - 1] - faces[x][y] );
-            if(y < faces.size())
-                tests.push_back( faces[x][y + 1] - faces[x][y] );
+            terrainFace f = terrainVerticesToFace(
+                        i,
+                        j,
+                        faces,
+                        facenorms
+                        );
 
-            for(size_t i = 0; i < tests.size() - 1; ++i)
-                normals.push_back( tests[i].cross( tests[i + 1] ) );
-            //Last to first.
-            if(tests.size() != 0)
-                normals.push_back( tests[tests.size() - 1].cross( tests[0] ) );
+            //t1
+            trimesh.push_back( f.m_verts[2].m_pos );
+            trimesh.push_back( f.m_verts[1].m_pos );
+            trimesh.push_back( f.m_verts[0].m_pos );
 
-            for(auto &vec : normals)
-                vec.normalize();
+            normesh.push_back( f.m_verts[2].m_norm );
+            normesh.push_back( f.m_verts[1].m_norm );
+            normesh.push_back( f.m_verts[0].m_norm );
 
-            ngl::Vec3 faceNorm = Utility::average( normals );
-            facenorms[y].push_back( faceNorm );
+            //t2
+            trimesh.push_back( f.m_verts[3].m_pos );
+            trimesh.push_back( f.m_verts[2].m_pos );
+            trimesh.push_back( f.m_verts[1].m_pos );
+
+            normesh.push_back( f.m_verts[3].m_norm );
+            normesh.push_back( f.m_verts[2].m_norm );
+            normesh.push_back( f.m_verts[1].m_norm );
         }
     }
 
-    //From this, construct triangle mesh.
-    for(size_t y = 0; y < faces.size(); ++y)
-        for(size_t x = 0; x < faces[y].size(); ++x)
-        {
-            std::vector<float> floatsToAverage;
-            std::vector<ngl::Vec3> normalsToAverage;
-
-            ngl::Vec4 bottomLeft (x, 0.0f, y, 1.0f);
-            ngl::Vec4 bottomRight (x + 1.0f, 0.0f, y, 1.0f);
-            ngl::Vec4 topLeft (x, 0.0f, y + 1.0f, 1.0f);
-            ngl::Vec4 topRight (x + 1.0f, 0.0f, y + 1.0f, 1.0f);
-
-            ngl::Vec3 bottomLeftNorm;
-            ngl::Vec3 bottomRightNorm;
-            ngl::Vec3 topLeftNorm;
-            ngl::Vec3 topRightNorm;
-
-            //Bottom left y coordinate.
-            floatsToAverage.push_back( faces[x][y].m_y );
-            if(x > 0)
-            {
-                floatsToAverage.push_back( faces[x - 1][y].m_y );
-                normalsToAverage.push_back( facenorms[x - 1][y] );
-            }
-            if(y > 0)
-            {
-                floatsToAverage.push_back( faces[x][y - 1].m_y );
-                normalsToAverage.push_back( faceNorms[x][y - 1] );
-            }
-            if(x > 0 and y > 0)
-            {
-                floatsToAverage.push_back( faces[x - 1][y - 1].m_y );
-                normalsToAverage.push_back( faceNorms[x - 1][y - 1] );
-            }
-            bottomLeft.m_y = Utility::average(floatsToAverage);
-            bottomLeftNorm = Utility::average( normalsToAverage );
-            floatsToAverage.clear();
-            normalsToAverage.clear();
-
-            //Bottom right y coordinate.
-            floatsToAverage.push_back( faces[x][y].m_y );
-            if(x < faces[y].size() - 1)
-                floatsToAverage.push_back( faces[x + 1][y].m_y );
-            if(y > 0)
-                floatsToAverage.push_back( faces[x][y - 1].m_y );
-            if(x < faces[y].size() - 1 and y > 0)
-                floatsToAverage.push_back( faces[x + 1][y - 1].m_y );
-            bottomRight.m_y = Utility::average(floatsToAverage);
-            floatsToAverage.clear();
-
-            //Top left y coordinate.
-            floatsToAverage.push_back( faces[x][y].m_y );
-            if(x > 0)
-                floatsToAverage.push_back( faces[x - 1][y].m_y );
-            if(y < faces.size() - 1)
-                floatsToAverage.push_back( faces[x][y + 1].m_y );
-            if(x > 0 and y < faces.size() - 1)
-                floatsToAverage.push_back( faces[x - 1][y + 1].m_y );
-            topLeft.m_y = Utility::average(floatsToAverage);
-            floatsToAverage.clear();
-
-            //Top right y coordinate.
-            floatsToAverage.push_back( faces[x][y].m_y );
-            if(x < faces[y].size() - 1)
-                floatsToAverage.push_back( faces[x + 1][y].m_y );
-            if(y < faces.size() - 1)
-                floatsToAverage.push_back( faces[x][y + 1].m_y );
-            if(x < faces[y].size() - 1 and y < faces.size() - 1)
-                floatsToAverage.push_back( faces[x + 1][y + 1].m_y );
-            topRight.m_y = Utility::average(floatsToAverage);
-            floatsToAverage.clear();
-
-            trimesh.push_back(topLeft);
-            trimesh.push_back(bottomRight);
-            trimesh.push_back(bottomLeft);
-
-            trimesh.push_back(topLeft);
-            trimesh.push_back(topRight);
-            trimesh.push_back(bottomRight);
-        }
-
     for(auto &vec : trimesh)
         uvmesh.push_back( ngl::Vec2(vec.m_x, vec.m_z) );
+
+    std::cout << "constructTerrain end with\n";
+
+    std::cout << trimesh.size() << " vertices\n" << normesh.size() << " normals\n" << uvmesh.size() << " uvs\n";
+
+    /*for(auto &i : trimesh)
+        std::cout << i << '\n';*/
+
+    //exit(EXIT_SUCCESS);
+    m_terrainVAOSize = trimesh.size();
+    return createVAO(
+                trimesh,
+                normesh,
+                uvmesh
+                );
 }
 
-Scene::terrainFace Scene::terrainFaceToVertices( const size_t _x,
-                                          const size_t _y,
+Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
+                                          const int _y,
                                           const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                           const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                           )
@@ -986,21 +1037,74 @@ Scene::terrainFace Scene::terrainFaceToVertices( const size_t _x,
     //  |   |
     //  0---1
     terrainFace face;
-    bool left = _x > 0;
-    bool right = _x < _facePositions[y].size() - 1;
-    bool bottom = _y > 0;
-    bool top = _y < _facePositions.size() - 1;
 
-    ngl::Vec4 face.m_verts[0].m_pos = ngl::Vec4(x, 0.0f, y, 1.0f);
-    ngl::Vec4 face.m_verts[1].m_pos = ngl::Vec4(x + 1.0f, 0.0f, y, 1.0f);
-    ngl::Vec4 face.m_verts[2].m_pos = ngl::Vec4(x, 0.0f, y + 1.0f, 1.0f);
-    ngl::Vec4 face.m_verts[3].m_pos = ngl::Vec4(x + 1.0f, 0.0f, y + 1.0f, 1.0f);
+    face.m_verts[0].m_pos = ngl::Vec4(_x, 0.0f, _y, 1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_x + 1.0f, 0.0f, _y, 1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_x, 0.0f, _y + 1.0f, 1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_x + 1.0f, 0.0f, _y + 1.0f, 1.0f);
 
-    std::vector<float> averageY;
-    std::vector<ngl::Vec3> averageNormal;
-    if(left)
+    std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
+
+    face.m_verts[0].m_pos.m_y = v0.first;
+    face.m_verts[1].m_pos.m_y = v1.first;
+    face.m_verts[2].m_pos.m_y = v2.first;
+    face.m_verts[3].m_pos.m_y = v3.first;
+
+    face.m_verts[0].m_norm = v0.second;
+    face.m_verts[1].m_norm = v1.second;
+    face.m_verts[2].m_norm = v2.second;
+    face.m_verts[3].m_norm = v3.second;
+
+    return face;
+}
+
+std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
+                                                        const int _y,
+                                                        const int _dirX,
+                                                        const int _dirY,
+                                                        const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                        const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                        )
+{
+    float yCoord = _facePositions[_x][_y].m_y;
+    ngl::Vec3 normal = _faceNormals[_x][_y];
+    size_t count = 1;
+
+    //Can we move in the horizontal direction?
+    bool horizontal = (_x + _dirX) > 0 and (_x + _dirX) < _facePositions[0].size() - 1;
+    //Can we move in the vertical direction?
+    bool vertical = (_y + _dirY) > 0 and (_y + _dirY) < _facePositions.size() - 1;
+
+    if(horizontal)
     {
-        averageY.push_back( _facePositions[_x - 1][_y].m_y );
-        averageNormal.push_back( _faceNormals[_x - 1][_y] );
+        yCoord += _facePositions[_x + _dirX][_y].m_y;
+        normal += _faceNormals[_x + _dirX][_y];
+        count++;
     }
+    std::cout << "p1\n";
+    if(vertical)
+    {
+        yCoord += _facePositions[_x][_y + _dirY].m_y;
+        normal += _faceNormals[_x][_y + _dirY];
+        count++;
+    }
+    std::cout << "p2\n";
+    if(vertical and horizontal)
+    {
+        yCoord += _facePositions[_x + _dirX][_y + _dirY].m_y;
+        normal += _faceNormals[_x + _dirX][_y + _dirY];
+        count++;
+    }
+    std::cout << "p3\n";
+
+    normal /= static_cast<float>(count);
+    normal.normalize();
+
+    return std::make_pair(
+                yCoord / static_cast<float>(count),
+                normal
+                );
 }
