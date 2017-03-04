@@ -6,6 +6,9 @@
 Framebuffer::~Framebuffer()
 {
     glDeleteFramebuffers(1, &m_framebuffer);
+
+    for(auto &tex : m_textures)
+        glDeleteTextures( 1, &tex.second );
 }
 
 void Framebuffer::initialise(int _w, int _h)

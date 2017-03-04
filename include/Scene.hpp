@@ -84,6 +84,9 @@ private:
     GLuint m_terrainVAO;
     /// @brief vert count of terrain mesh
     size_t m_terrainVAOSize;
+    /// @brief Height of each tile stored in here.
+    std::vector<std::vector<float>> m_terrainHeight;
+
     /// @brief a screen quad, used mostly for postprocessing
     GLuint m_screenQuad;
     /// @brief framebuffer to store data for the deferred rendering pipeline
@@ -110,6 +113,7 @@ private:
     void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "");
     GLuint createVAO(std::vector<ngl::Vec4> &_verts);
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs);
+    GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec3> &_normals, std::vector<ngl::Vec2> &_uvs);
     GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
     GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
@@ -128,6 +132,36 @@ private:
 
     /// @brief Tells me how big the screen is.
     ngl::Vec2 m_viewport;
+
+    /// @brief Takes data from the grid and turns the ids into shapes like mountains.
+    GLuint constructTerrain();
+
+    struct terrainVertex
+    {
+        ngl::Vec4 m_pos;
+        ngl::Vec3 m_norm;
+    };
+
+    struct terrainFace
+    {
+        //  2---3
+        //  |   |
+        //  0---1
+        std::array< terrainVertex, 4 > m_verts;
+    };
+
+    terrainFace terrainVerticesToFace(const int _x,
+                                      const int _y,
+                                      const std::vector<std::vector<ngl::Vec3> > &_facePositions,
+                                      const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
+
+    std::pair<float, ngl::Vec3> generateTerrainFaceData(const int _x,
+                                                            const int _y,
+                                                            const int _dirX,
+                                                            const int _dirY,
+                                                            const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                            const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                            );
 };
 
 #endif//__SCENE_HPP__
