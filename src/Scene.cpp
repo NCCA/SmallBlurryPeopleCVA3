@@ -52,6 +52,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
+    createShader("terrain", "vertDeferredData", "fragTerrain");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
@@ -91,6 +92,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadMesh("person", "person/person.obj");
     m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
     m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
+
+    m_store.loadTexture("grass", "terrain/grass.png");
+    m_store.loadTexture("rock", "terrain/rock.png");
 
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
@@ -359,8 +363,9 @@ void Scene::draw()
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    slib->use("colour");
-    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    slib->use("terrain");
+    bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
+    bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
 
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
@@ -398,6 +403,8 @@ void Scene::draw()
         ngl::Vec2 pos = character.getPos();
         ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
         m_transform.setPosition(new_pos);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
         drawAsset( "person", "", "colour");
     }
 
@@ -696,7 +703,7 @@ void Scene::windowEvent(const SDL_WindowEvent &_event)
 
         // PLUS CHANGE FRAMEBUFFERS?
 
-        Gui::instance()->setResolution(res);
+        //Gui::instance()->setResolution(res);
         break;
     default:
         break;
@@ -1036,7 +1043,7 @@ GLuint Scene::constructTerrain()
         {
             TileType t = m_grid.get(i, j).getType();
 
-            ngl::Vec3 face (i, 0.0f, j);
+            ngl::Vec3 face (i, Utility::randFlt(-2.0f,2.0f), j);
             if(t == TileType::WATER)
                 face.m_y -= Utility::randFlt(0.0f, 4.0f);
             else if(t == TileType::MOUNTAINS)
@@ -1047,7 +1054,7 @@ GLuint Scene::constructTerrain()
 
     //Smooth
     const int iterations = 128;
-    const float hardness = 0.05f;
+    const float hardness = 0.02f;
     for(int it = 0; it < iterations; ++it)
     {
         for(int i = 1; i < m_grid.getW() - 1; ++i)
@@ -1205,10 +1212,10 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     //  0---1
     terrainFace face;
 
-    face.m_verts[0].m_pos = ngl::Vec4(_x, 0.0f, _y, 1.0f);
-    face.m_verts[1].m_pos = ngl::Vec4(_x + 1.0f, 0.0f, _y, 1.0f);
-    face.m_verts[2].m_pos = ngl::Vec4(_x, 0.0f, _y + 1.0f, 1.0f);
-    face.m_verts[3].m_pos = ngl::Vec4(_x + 1.0f, 0.0f, _y + 1.0f, 1.0f);
+    face.m_verts[0].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y - 0.5f, 1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y - 0.5f, 1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y + 0.5f, 1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y + 0.5f, 1.0f);
 
     std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
     std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );

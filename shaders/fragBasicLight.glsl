@@ -32,7 +32,7 @@ vec2( -0.094184101, -0.92938870 ),
 vec2( 0.34495938, 0.29387760 )
 );
 
-vec3 moonColour = vec3(0.2, 0.3, 0.4);
+vec3 moonColour = vec3(0.1, 0.2, 0.5);
 
 uniform vec4 camPos;
 
@@ -51,26 +51,41 @@ void main()
         discard;
 #endif
     vec3 n = texture(normal, UV).xyz;
-    float sunmul = dot(n, sunDir) * sunInts;
-    float moonmul = dot(n, -sunDir) * moonInts;
+    float sunmul = clamp(dot(n, sunDir), 0.0, 1.0) * sunInts;
+    float moonmul = clamp(dot(n, -sunDir), 0.0, 1.0) * moonInts;
     float mul = sunmul + moonmul;
 
     mul = clamp(mul, 0.0, 1.0);
     //mul = 1.0;
 
-    float bias = 0.0005 * tan( acos( mul ) );
-    bias = clamp( bias, 0.0, 0.001);
+    float bias = 0.005 * tan( acos( mul ) );
+    //bias = clamp( bias, 0.0, 0.001);
 
     int cascadeIndex = -1;
     //TO-DO: Have a better way to compute depth. Maybe write to another buffer.
     float fragDepth = distance(camPos, texture(position, UV));
 
     if(fragDepth > cascades[0] && fragDepth < cascades[1])
+    {
+#if shadowbuffer == 2
+        fragColour.rgb = vec3(1.0, 0.0, 0.0); return;
+#endif
         cascadeIndex = 0;
-    else if(fragDepth > cascades[1] && fragDepth < cascades[2])
+    }
+    else if(fragDepth < cascades[2])
+    {
+#if shadowbuffer == 2
+        fragColour.rgb = vec3(0.0, 1.0, 0.0); return;
+#endif
         cascadeIndex = 1;
-    else if(fragDepth > cascades[2] && fragDepth < cascades[3])
+    }
+    else if(fragDepth < cascades[3])
+    {
+#if shadowbuffer == 2
+        fragColour.rgb = vec3(0.0, 0.0, 1.0); return;
+#endif
         cascadeIndex = 2;
+    }
 
     if(cascadeIndex != -1)
     {
