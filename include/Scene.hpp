@@ -45,18 +45,24 @@ public:
     ///
     void windowEvent(const SDL_WindowEvent &_event);
 
+    /// \brief Initialises all of the framebuffers. Separated into its own unit so it can be called when the viewport resizes.
+    void initialiseFramebuffers();
+
+    /// \brief All the messy code to resize the viewport. Updates shaders, framebuffers etc.
+    void resize(const ngl::Vec2 &_dim);
+
 private:
 
     Camera m_cam;
     Grid m_grid;
-		Inventory m_world_inventory;
+    Inventory m_world_inventory;
 
     /// @brief Vector of available names for characters
     std::vector<std::string> m_file_names;
     /// @brief Vector of character objects that have been created
     std::vector<Character> m_characters;
 
-		Character *m_active_char;
+    Character *m_active_char;
 
     ngl::Transformation m_transform;
 
@@ -156,12 +162,12 @@ private:
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
 
     std::pair<float, ngl::Vec3> generateTerrainFaceData(const int _x,
-                                                            const int _y,
-                                                            const int _dirX,
-                                                            const int _dirY,
-                                                            const std::vector<std::vector<ngl::Vec3>> &_facePositions,
-                                                            const std::vector<std::vector<ngl::Vec3>> &_faceNormals
-                                                            );
+                                                        const int _y,
+                                                        const int _dirX,
+                                                        const int _dirY,
+                                                        const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                        const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                        );
 };
 
 #endif//__SCENE_HPP__

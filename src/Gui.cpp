@@ -26,7 +26,7 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
-    updateButtonArrays();
+    //updateButtonArrays();
   }
 }
 
