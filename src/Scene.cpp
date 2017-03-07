@@ -322,6 +322,15 @@ void Scene::draw()
     slib->use("charPick");
 
     //Draw characters...
+    for(auto &ch : m_characters)
+    {
+        ngl::Vec2 pos = ch.getPos();
+        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
+        m_transform.setPosition(new_pos);
+        slib->setRegisteredUniform("id", ch.getID());
+        drawAsset( "person", "", "colour");
+    }
+
 
     m_pickBuffer.unbind();
 
