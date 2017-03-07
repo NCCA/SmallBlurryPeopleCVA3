@@ -57,7 +57,7 @@ public :
 
 
 
-  void addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size);
+  void addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size);
 
   ///
   /// \brief updateButtonArrays updates positions and passes them to openGL, useful for changing buttons or resizing screen

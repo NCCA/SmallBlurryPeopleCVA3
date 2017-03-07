@@ -37,13 +37,14 @@ class Button
 public:
   ///
   /// \brief Button default constructor, takes alignment information
+  /// \param _action functionality of the button
   /// \param _x_align which side the button is bound to, either left, right or center
   /// \param _y_align which level the button is bound to, either up, down or center
   /// \param _window_res window resolution for calculating postion from offset
   /// \param _offset button offset from given alignments
   /// \param _size size of the button
   ///
-  Button(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size);
+  Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size);
   ///
   /// \brief updatePos update the button's position based on the offset and screen res
   /// \param screen_res resolution of the window

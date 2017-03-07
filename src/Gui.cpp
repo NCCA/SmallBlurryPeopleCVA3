@@ -98,22 +98,22 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
-  addButton(XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
-  addButton(XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::BUILDHOUSE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
+  addButton(Action::BUILDHOUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
 
-  addButton(XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
-  addButton(XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(100, 50));
-  addButton(XAlignment::RIGHT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
+  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
+  addButton(Action::BUILDSTORE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(100, 50));
+  addButton(Action::BUILDSTORE, XAlignment::RIGHT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
 
-  addButton(XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
-  addButton(XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
-  addButton(XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::QUIT, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
+  addButton(Action::QUIT, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
 }
 
-void Gui::addButton(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
+void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
 {
-  m_buttons.push_back(Button(_x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size));
+  m_buttons.push_back(Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size));
 }
 
 void Gui::updateButtonArrays()
