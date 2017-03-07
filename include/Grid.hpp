@@ -22,13 +22,15 @@ public:
   /// @brief default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser
   Grid();
 
+  /// @brief updateScript loads the specified script and runs it to create a new map
+  /// @param _script_path is the file path to the python script
   void updateScript(std::string _script_path);
 
   void printTrees();
   void printTypes();
 
   /// @brief getTriangles
-  /// @return
+  /// @return a vector of ngl vector 3's where each 3 specify a triangle to be drawn
   std::vector<ngl::Vec3> getTriangles();
 
   /// @brief returns the tile at the specified width and height coordinate.
@@ -82,6 +84,9 @@ public:
   /// @return int height of grid
   int getH();
 
+  int getMountainHeight();
+  int getWaterLevel();
+
 private:
   /// @brief runs the given python script to generate a map
   /// @param [in] the script that will set values in m_map
@@ -102,6 +107,9 @@ private:
   std::vector<GridTile> m_tiles;
 
   std::string m_script;
+
+  int m_mountain_height = 0;
+  int m_water_level = 0;
 };
 
 #endif//__GRID_HPP__
