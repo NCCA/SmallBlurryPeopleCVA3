@@ -22,10 +22,10 @@ vec3 airColour = vec3(
 
 int stepCount = 24;
 
-float nmul = 1.0;
-float amul = 1.0;
+float nmul = 1.2;
+float amul = 1.1;
 
-float npow = 1.0;
+float npow = 1.1;
 float apow = 1.0;
 
 uniform float surfaceHeight;

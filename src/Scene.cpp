@@ -72,7 +72,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     initialiseFramebuffers();
 
-    m_shadowMat.assign(1, ngl::Mat4());
+    m_shadowMat.assign(3, ngl::Mat4());
 
     ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
@@ -96,6 +96,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     m_store.loadTexture("grass", "terrain/grass.png");
     m_store.loadTexture("rock", "terrain/rock.png");
+    m_store.loadTexture("snow", "terrain/snow.png");
 
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
@@ -128,6 +129,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
                 normals,
                 uvs
                 );
+
+    GLint MaxPatchVertices = 0;
+    glGetIntegerv(GL_MAX_PATCH_VERTICES, &MaxPatchVertices);
+    std::cout << "Max supported patch vertices " << MaxPatchVertices << '\n';
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
 
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
     glEnable(GL_MULTISAMPLE);
@@ -265,20 +271,22 @@ void Scene::update()
     ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.05f;
     trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.05f;
     trans -= m_cam.getPivot();
-    trans.m_y = 0.0f;
+
+    ngl::Vec3 cxy = m_cam.getPos();
+    int x = clamp(std::round(cxy.m_x),0,m_grid.getW());
+    int y = clamp(std::round(cxy.m_z),0,m_grid.getH());
+    cxy.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+
+    trans.m_y = -cxy.m_y;
+
+    m_camTargPos = trans;
+    m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
-    m_cam.movePivot(trans);
+    m_cam.movePivot(m_camCurPos);
 
     m_cam.calculateViewMat();
-
-    //Make camera hover relative to terrain height.
-    /*ngl::Vec3 cxy = m_cam.getPos();
-    cxy.m_y = m_grid.get(ngl::Vec2(cxy.m_x, cxy.m_z)).getHeight();
-    m_cam.movePivot( ngl::Vec3(0.0f, cxy.m_y, 0.0f) );
-
-    m_cam.calculateViewMat();*/
 
     for(Character &character : m_characters)
     {
@@ -297,7 +305,6 @@ void Scene::update()
     t.setRotation( m_sunAngle );
     m_sunDir = t.getMatrix().getForwardVector();
     m_sunDir.normalize();
-
 }
 
 //I'm sorry this function is so long :(
@@ -335,12 +342,10 @@ void Scene::draw()
         ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
         m_transform.setPosition(new_pos);
         slib->setRegisteredUniform("id", ch.getID());
-        drawAsset( "person", "", "colour");
+        drawAsset( "person", "", "");
     }
 
-
     m_pickBuffer.unbind();
-
     //---------------------------//
     //  SHADOW PASS  //
     //---------------------------//
@@ -382,6 +387,10 @@ void Scene::draw()
     slib->use("terrain");
     bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
     bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
+    bindTextureToShader("terrain", m_store.getTexture("snow"), "snow", 2);
+
+    slib->setRegisteredUniform( "waterlevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
+    slib->setRegisteredUniform( "snowline", m_grid.getMountainHeight() / m_terrainHeightDivider);
 
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
@@ -395,7 +404,7 @@ void Scene::draw()
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_terrainHeight[i][j], j);
+            m_transform.setPosition(i, m_grid.get(i,j).getHeight() / m_terrainHeightDivider, j);
             if(t.getType() == TileType::TREES)
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
@@ -451,7 +460,7 @@ void Scene::draw()
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", powf( clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f), 0.1f ) );
+    slib->setRegisteredUniform( "sunInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
     slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
     slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
@@ -489,7 +498,7 @@ void Scene::draw()
     m_transform.reset();
     m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
     m_transform.setRotation(90.0f, 0.0f, 0.0f);
-    m_transform.setPosition(0.0f, m_grid.getWaterLevel(), 0.0f);
+    m_transform.setPosition(0.0f, m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
@@ -550,6 +559,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
 
 void Scene::shadowPass(bounds _box, size_t _index)
 {
+
     ngl::Vec3 s = m_sunDir;
     //Flip if the moon is up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
@@ -572,18 +582,6 @@ void Scene::shadowPass(bounds _box, size_t _index)
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
-    /*ngl::Mat4 P = ngl::ortho(
-                -32, 32,
-                -32, 32,
-                -32, 32
-                );
-
-    ngl::Mat4 V = ngl::lookAt(
-                s,
-                ngl::Vec3(0.0f, 0.0f, 0.0f),
-                ngl::Vec3(0.0f, 1.0f, 0.0f)
-                );*/
-
     m_shadowMat[_index] = V * P;
 
     m_shadowBuffer.bind();
@@ -601,7 +599,7 @@ void Scene::shadowPass(bounds _box, size_t _index)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_terrainHeight[i][j], j);
+            m_transform.setPosition(i, m_grid.get(i,j).getHeight()/m_terrainHeightDivider, j);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
             if(t.getType() == TileType::TREES)
             {
@@ -918,7 +916,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
     m->draw();
 }
 
-void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo)
+void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo, const std::string _tessctrl, const std::string _tesseval)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
@@ -942,6 +940,23 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
         slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
         slib->compileShader(_geo);
         slib->attachShaderToProgram(_name, _geo);
+    }
+
+    // add tesselation source, if present
+    if(!_tessctrl.empty())
+    {
+        slib->attachShader(_tessctrl, ngl::ShaderType::TESSCONTROL);
+        slib->loadShaderSource(_tessctrl, "shaders/" + _tessctrl + ".glsl");
+        slib->compileShader(_tessctrl);
+        slib->attachShaderToProgram(_name, _tessctrl);
+    }
+
+    if(!_tesseval.empty())
+    {
+        slib->attachShader(_tesseval, ngl::ShaderType::TESSEVAL);
+        slib->loadShaderSource(_tesseval, "shaders/" + _tesseval + ".glsl");
+        slib->compileShader(_tesseval);
+        slib->attachShaderToProgram(_name, _tesseval);
     }
 
     slib->linkProgramObject(_name);
@@ -1080,14 +1095,14 @@ GLuint Scene::constructTerrain()
         faces.push_back( std::vector<ngl::Vec3>() );
         for(int j = 0; j < m_grid.getH(); ++j)
         {
-            float height = m_grid.get(i, j).getHeight();
+            float height = m_grid.get(i, j).getHeight() / m_terrainHeightDivider;
             ngl::Vec3 face (i, height, j);
             faces[i].push_back(face);
         }
     }
 
     //Smooth
-    const int iterations = 128;
+    /*const int iterations = 128;
     const float hardness = 0.02f;
     for(int it = 0; it < iterations; ++it)
     {
@@ -1107,17 +1122,7 @@ GLuint Scene::constructTerrain()
                 faces[i][j].m_y -= hardness * dy;
             }
         }
-    }
-
-    //Store tile heights.
-    for(size_t i = 0; i < faces.size(); ++i)
-    {
-        m_terrainHeight.push_back( std::vector<float>() );
-        for(auto &vec : faces[i])
-        {
-            m_terrainHeight[i].push_back(vec.m_y);
-        }
-    }
+    }*/
 
     //Calculate face normals
     for(int i = 0; i < faces.size(); ++i)
