@@ -48,8 +48,8 @@ gen = n.fractalNoise(4)
 #setting up variables that will be passed to the game
 map_width = 50
 map_height = 50
-map_data = [tileTypes["NONE"] for i in range(map_width * map_height)]
-
+map_data = [[tileTypes["NONE"], 0] for i in range(map_width * map_height)]
+print map_data[0]
 #setting up noise function values
 octaves = 8
 persistence = 0.4
@@ -68,14 +68,14 @@ water_height = 90
 for x in range(map_width):
   for y in range(map_height):
     noise = int(gen.fractal(x, y, octaves, persistence, freq, min, max))
-
+    map_data[x + map_width * y][1] = noise
     #setting terrain types
     if noise > peak_height:
-      map_data[x + map_width * y] = tileTypes["MOUNTAINS"]
+      map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
     elif noise > mountain_height:
-      map_data[x + map_width * y] = tileTypes["MOUNTAINS"]
+      map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
     elif noise < water_height:
-      map_data[x + map_width * y] = tileTypes["WATER"]
+      map_data[x + map_width * y][0] = tileTypes["WATER"]
 
     #adding trees
     if noise in range(tree_band[0], tree_band[1]):
@@ -84,10 +84,12 @@ for x in range(map_width):
       bp = noise - tree_band[0]
       td = (1 - bp/float(bw)) * float(tree_density_scale)
       if r < td:
-        map_data[x + map_width * y] = tileTypes["TREES"]
+        map_data[x + map_width * y][0] = tileTypes["TREES"]
 
 #scattering some random stoerehouses
 for i in range(10):
   x_rand = rand.randint(0, map_width)
   y_rand = rand.randint(0, map_height)
-  map_data[x_rand + map_width * y_rand] = tileTypes["STOREHOUSE"]
+  map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
+
+print map_data[0]
