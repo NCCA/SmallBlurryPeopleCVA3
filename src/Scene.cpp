@@ -29,7 +29,8 @@ const int shadowResolution = 4096;
 Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
-    m_mouse_zoom(10.0f),
+    m_mouse_zoom_cur(10.0f),
+    m_mouse_zoom_targ(10.0f),
     m_mouse_pan(1.0f),
     m_mouse_translation(0.0f,0.0f),
     m_mouse_rotation(0.0f),
@@ -38,7 +39,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
+    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom_cur));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
@@ -57,13 +58,19 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
-    createShader("water", "vertMVPUVN", "fragWater", "geoWater");
+    createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+
+    slib->use("water");
+    GLint tlvl = 0;
+    glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
+    slib->setRegisteredUniform("maxTessLevel", tlvl);
+    std::cout << "Max water tesselation level set to " << tlvl << '\n';
 
     //reads file with list of names
     readNameFile();
@@ -133,7 +140,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     GLint MaxPatchVertices = 0;
     glGetIntegerv(GL_MAX_PATCH_VERTICES, &MaxPatchVertices);
     std::cout << "Max supported patch vertices " << MaxPatchVertices << '\n';
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
 
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
     glEnable(GL_MULTISAMPLE);
@@ -262,7 +269,7 @@ void Scene::update()
     }
 
     //Set initial position (should really make this function more intuitive).
-    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom));
+    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur));
 
     //Clear all transformations from previous update.
     m_cam.clearTransforms();
@@ -281,6 +288,7 @@ void Scene::update()
 
     m_camTargPos = trans;
     m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
+    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
@@ -434,8 +442,10 @@ void Scene::draw()
     }
 
     m_mainBuffer.unbind();
-    m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
-    //glClearColor(1.0,0.0,0.0,1.0);
+
+    //This gives opengl error 1282. I guess you can't specify draw buffers for the back buffer?
+    //m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
@@ -453,6 +463,7 @@ void Scene::draw()
     slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
 
     //---------------------------//
     //          LIGHTING         //
@@ -493,6 +504,8 @@ void Scene::draw()
     glEnable(GL_DEPTH_TEST);
 
     slib->use("water");
+    slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x);
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
@@ -500,7 +513,8 @@ void Scene::draw()
     m_transform.setRotation(90.0f, 0.0f, 0.0f);
     m_transform.setPosition(0.0f, m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f);
     loadMatricesToShader();
-    glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDrawArraysEXT(GL_PATCHES, 0, 3);
     glBindVertexArray(0);
 
     //---------------------------//
@@ -701,22 +715,22 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-    if(_event.y > 0 && m_mouse_zoom > 10.5)
+    if(_event.y > 0 && m_mouse_zoom_targ > 10.5)
     {
         if (m_mouse_pan > -5)
         {
             m_mouse_pan -= 0.5;
         }
-        m_mouse_zoom -= 0.5;
+        m_mouse_zoom_targ -= 0.5;
     }
 
-    else if(_event.y < 0 && m_mouse_zoom < 20)
+    else if(_event.y < 0 && m_mouse_zoom_targ < 20)
     {
         if(m_mouse_pan < 10)
         {
             m_mouse_pan += 0.5;
         }
-        m_mouse_zoom += 0.5;
+        m_mouse_zoom_targ += 0.5;
     }
 }
 

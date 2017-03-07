@@ -73,8 +73,10 @@ private:
     bool m_mouse_trans_active;
     /// @brief sets if mouse is being used to rotate the scene
     bool m_mouse_rot_active;
+    /// @brief target zoom of the camera
+    float m_mouse_zoom_targ;
     /// @brief current zoom of the camera
-    float m_mouse_zoom;
+    float m_mouse_zoom_cur;
     /// @brief current pan of the camera
     float m_mouse_pan;
 

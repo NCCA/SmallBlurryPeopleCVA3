@@ -32,7 +32,7 @@ vec2( -0.094184101, -0.92938870 ),
 vec2( 0.34495938, 0.29387760 )
 );
 
-vec3 moonColour = vec3(0.1, 0.2, 0.5);
+vec3 moonColour = vec3(0.3, 0.6, 0.8);
 
 uniform vec4 camPos;
 
