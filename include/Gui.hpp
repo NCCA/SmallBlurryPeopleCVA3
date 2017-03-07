@@ -6,6 +6,9 @@
 #include "ngl/Vec2.h"
 #include "Button.hpp"
 
+///
+/// \brief The Gui class contains button positions and managing their use
+///
 class Gui : public ngl::Singleton<Gui>
 {
   friend class Singleton<Gui>;

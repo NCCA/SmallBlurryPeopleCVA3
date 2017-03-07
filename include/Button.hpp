@@ -2,6 +2,7 @@
 #define __BUTTON_HPP__
 
 #include "ngl/Vec2.h"
+
 ///
 /// \brief The XAlignment enum for denoting which side a button "sticks" to
 ///

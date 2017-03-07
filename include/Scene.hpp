@@ -54,6 +54,9 @@ public:
 private:
 
     Camera m_cam;
+    ngl::Vec3 m_camCurPos;
+    ngl::Vec3 m_camTargPos;
+
     Grid m_grid;
     Inventory m_world_inventory;
 
@@ -86,12 +89,14 @@ private:
 
     /// @brief stores textures and meshes
     AssetStore m_store;
+
+    const float m_terrainHeightDivider = 16.0f;
     /// @brief terrain base mesh
     GLuint m_terrainVAO;
     /// @brief vert count of terrain mesh
     size_t m_terrainVAOSize;
-    /// @brief Height of each tile stored in here.
-    std::vector<std::vector<float>> m_terrainHeight;
+    /// @brief Unit square VAO
+    GLuint m_unitSquareVAO;
 
     /// @brief a screen quad, used mostly for postprocessing
     GLuint m_screenQuad;
@@ -116,7 +121,7 @@ private:
     void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
 
-    void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "");
+    void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "", const std::string _tessctrl = "", const std::string _tesseval = "");
     GLuint createVAO(std::vector<ngl::Vec4> &_verts);
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs);
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec3> &_normals, std::vector<ngl::Vec2> &_uvs);
