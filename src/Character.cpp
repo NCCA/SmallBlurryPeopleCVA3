@@ -341,5 +341,6 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 
 void Character::build(BuildingType _building)
 {
+	//Start building the building type at current position
 	std::cout << "building YAY" << std::endl;
 }

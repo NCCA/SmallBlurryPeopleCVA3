@@ -16,8 +16,6 @@ int main()
 
     SDL_Event event;
 
-    bool quit = false;
-
     SDL_Rect rect = {100, 100, 1280, 720};
     //SDL_GetDisplayBounds(0, &rect);
 
@@ -69,7 +67,7 @@ int main()
     p->init();
     Scene scene (ngl::Vec2(rect.w, rect.h));
 
-    while(!quit)
+    while(scene.isActive())
     {
         while(SDL_PollEvent(&event))
         {
@@ -119,7 +117,7 @@ int main()
             {*/
             switch(event.type)
             {
-            case SDL_QUIT : quit = true; break;
+            case SDL_QUIT : scene.quit(); break;
             case SDL_MOUSEBUTTONDOWN : scene.mousePressEvent(event.button); break;
             case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
             case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;

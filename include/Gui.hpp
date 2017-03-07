@@ -7,6 +7,7 @@
 #include "ngl/Vec2.h"
 #include "Button.hpp"
 #include "Commands.hpp"
+#include "Scene.hpp"
 
 ///
 /// \brief The Gui class contains button positions and managing their use
@@ -20,7 +21,7 @@ public :
   /// \param _res resolution to initialise with
   /// \param _shader_name name of gui shader
   ///
-  void init(ngl::Vec2 _res, const std::string &_shader_name);
+  void init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name);
   ///
   /// \brief setResolution set the window width and window height
   ///
@@ -82,6 +83,10 @@ private :
   /// \brief Gui private default constructor due to singleton pattern
   ///
   Gui();
+  ///
+  /// \brief m_scene pointer to scene
+  ///
+  Scene *m_scene;
   ///
   /// \brief m_buttons vector of buttons contained in the Gui
   ///

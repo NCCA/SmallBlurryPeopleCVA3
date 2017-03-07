@@ -8,8 +8,9 @@ Gui::Gui()
 
 }
 
-void Gui::init(ngl::Vec2 _res, const std::string &_shader_name)
+void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
 {
+  m_scene = _scene;
   m_shader_name = _shader_name;
   setResolution(_res);
   wipeButtons();
@@ -39,10 +40,9 @@ void Gui::initGL()
 
 void Gui::click()
 {
-  //put in function
-
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
+    std::cout << "clicked button " << m_selected_button_id << std::endl;
     std::shared_ptr<Command> command(generateCommand(m_buttons[m_selected_button_id]));
     if(command.get())
     {
@@ -57,8 +57,14 @@ std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
   Action action = _button.getAction();
   switch (action)
   {
-  case Action::BUILD:
+  case Action::BUILDHOUSE:
       command.reset(new BuildCommand(m_active_character, BuildingType::HOUSE));
+    break;
+  case Action::BUILDSTORE:
+      command.reset(new BuildCommand(m_active_character, BuildingType::STOREHOUSE));
+    break;
+  case Action::QUIT:
+      command.reset(new QuitCommand(m_scene));
     break;
   default:
     break;

@@ -22,6 +22,15 @@ public:
     ~Scene() = default;
     void draw();
     void update();
+    ///
+    /// \brief quit close the program
+    ///
+    void quit();
+    ///
+    /// \brief isActive check whether program should still be running
+    /// \return m_active to see if program should quit if it's false
+    ///
+    bool isActive();
 
     /// @brief Checks which mouse button has been pressed and sets relevenat mouse state to active
     /// @param _event, SDL mouse event structure
@@ -52,6 +61,10 @@ public:
     void resize(const ngl::Vec2 &_dim);
 
 private:
+    ///
+    /// \brief m_active whether scene is still active (if user has not quit)
+    ///
+    bool m_active;
 
     Camera m_cam;
     ngl::Vec3 m_camCurPos;

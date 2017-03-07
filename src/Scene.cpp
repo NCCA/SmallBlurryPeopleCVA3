@@ -27,6 +27,7 @@ float clamp(float _in, float _lo, float _hi)
 const int shadowResolution = 4096;
 
 Scene::Scene(ngl::Vec2 _viewport) :
+    m_active(true),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_mouse_zoom(10.0f),
@@ -146,7 +147,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Gui *gui = Gui::instance();
-    gui->init(_viewport, "button");
+    gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
 }
 
@@ -511,6 +512,16 @@ void Scene::draw()
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Scene::quit()
+{
+  m_active = false;
+}
+
+bool Scene::isActive()
+{
+  return m_active;
 }
 
 std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
