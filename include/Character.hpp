@@ -103,6 +103,11 @@ public:
 	/// \return m_active, the boolean stored in the character determining if it is active or not
 	///
 	bool isActive() {return m_active;}
+	///
+	/// \brief build tell character to start building on current square
+	/// \param _building type of building to build
+	///
+	void build(BuildingType _building);
 
 private:
 	///

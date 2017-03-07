@@ -2,9 +2,11 @@
 #define __GUI_HPP__
 
 #include <vector>
+#include <memory>
 #include "ngl/Singleton.h"
 #include "ngl/Vec2.h"
 #include "Button.hpp"
+#include "Commands.hpp"
 
 ///
 /// \brief The Gui class contains button positions and managing their use
@@ -32,6 +34,11 @@ public :
   /// \param pos mouse position to compare buttons against
   ///
   void click();
+  ///
+  /// \brief generateCommand create a command to be executed
+  /// \return command to be executed
+  ///
+  std::shared_ptr<Command> generateCommand(const Button &_button);
   ///
   /// \brief mousePos update mouse position
   /// \param _pos current mouse position

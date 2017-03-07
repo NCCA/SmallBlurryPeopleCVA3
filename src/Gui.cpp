@@ -26,7 +26,7 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
-    //updateButtonArrays();
+    updateButtonArrays();
   }
 }
 
@@ -39,10 +39,30 @@ void Gui::initGL()
 
 void Gui::click()
 {
+  //put in function
+
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
-    m_buttons[m_selected_button_id].activate();
+    std::shared_ptr<Command> command(generateCommand(m_buttons[m_selected_button_id]));
+    if(command.get())
+    {
+      command.get()->execute();
+    }
   }
+}
+
+std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
+{
+  std::shared_ptr<Command> command(nullptr);
+  Action action = _button.getAction();
+  switch (action) {
+  case Action::BUILD:
+
+    break;
+  default:
+    break;
+  }
+  return command;
 }
 
 bool Gui::mousePos(ngl::Vec2 _pos)
@@ -105,21 +125,21 @@ void Gui::updateButtonArrays()
   glBindVertexArray(m_vao_id);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &positions[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &(positions[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 0
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * sizes.size(), &sizes[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * sizes.size(), &(sizes[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 1
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[2]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * ids.size(), &ids[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * ids.size(), &(ids[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 2
   glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
 

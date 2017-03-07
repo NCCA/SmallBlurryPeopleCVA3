@@ -61,9 +61,9 @@ bool Button::isInside(ngl::Vec2 _pos)
   return is_inside;
 }
 
-void Button::activate()
+Action Button::getAction() const
 {
-  std::cout << "button pressed:" << m_id << std::endl;
+  return m_action;
 }
 
 int Button::getID()
