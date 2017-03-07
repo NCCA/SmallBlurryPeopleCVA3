@@ -57,6 +57,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
+    createShader("water", "vertMVPUVN", "fragWater", "geoWater");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -99,17 +100,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
 
-    //Get as vec4s
-    std::vector<ngl::Vec4> data;
-    std::vector<ngl::Vec3> original = m_grid.getTriangles();
-    data.reserve(original.size());
-    //Convert format, add some cheeky randomisation
-    for(auto &vert : original)
-        data.push_back( ngl::Vec4(vert.m_x, vert.m_y, vert.m_z, 1.0f) );
-
-    /*m_terrainVAO = createVAO( data );
-    m_terrainVAOSize = data.size();*/
-
     std::vector<ngl::Vec4> verts = {
         ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
         ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
@@ -126,6 +116,16 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     m_screenQuad = createVAO(
                 verts,
+                uvs
+                );
+
+    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f)};
+    std::vector<ngl::Vec3> normals = {ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f)};
+    uvs = {ngl::Vec2(0.0f, 0.0f), ngl::Vec2(1.0f, 0.0f), ngl::Vec2(0.0f, 1.0f), ngl::Vec2(1.0f, 1.0f)};
+
+    m_unitSquareVAO = createVAO(
+                verts,
+                normals,
                 uvs
                 );
 
@@ -439,7 +439,7 @@ void Scene::draw()
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
-    //       LIGHTING      //
+    //          LIGHTING         //
     //---------------------------//
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
@@ -463,6 +463,29 @@ void Scene::draw()
     m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //---------------------------//
+    //      FORWARD-SHADING      //
+    //---------------------------//
+
+    //Copy depth buffer from main buffer to back buffer.
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    glEnable(GL_DEPTH_TEST);
+
+    slib->use("water");
+
+    glBindVertexArray(m_unitSquareVAO);
+    m_transform.reset();
+    m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
+    m_transform.setRotation(90.0f, 0.0f, 0.0f);
+    //m_transform.setPosition(m_grid.getW() / 2.0f, 0.0f, m_grid.getH() / 2.0f);
+    loadMatricesToShader();
+    glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 
     //---------------------------//
     //          BUTTONS          //
@@ -1052,7 +1075,7 @@ GLuint Scene::constructTerrain()
         {
             TileType t = m_grid.get(i, j).getType();
 
-            ngl::Vec3 face (i, Utility::randFlt(-2.0f,2.0f), j);
+            ngl::Vec3 face (i, Utility::randFlt(0.1f,1.0f), j);
             if(t == TileType::WATER)
                 face.m_y -= Utility::randFlt(0.0f, 4.0f);
             else if(t == TileType::MOUNTAINS)
@@ -1267,21 +1290,18 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
         normal += _faceNormals[_x + _dirX][_y];
         count++;
     }
-    std::cout << "p1\n";
     if(vertical)
     {
         yCoord += _facePositions[_x][_y + _dirY].m_y;
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
-    std::cout << "p2\n";
     if(vertical and horizontal)
     {
         yCoord += _facePositions[_x + _dirX][_y + _dirY].m_y;
         normal += _faceNormals[_x + _dirX][_y + _dirY];
         count++;
     }
-    std::cout << "p3\n";
 
     normal /= static_cast<float>(count);
     normal.normalize();

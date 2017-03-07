@@ -92,6 +92,8 @@ private:
     size_t m_terrainVAOSize;
     /// @brief Height of each tile stored in here.
     std::vector<std::vector<float>> m_terrainHeight;
+    /// @brief Unit square VAO
+    GLuint m_unitSquareVAO;
 
     /// @brief a screen quad, used mostly for postprocessing
     GLuint m_screenQuad;
