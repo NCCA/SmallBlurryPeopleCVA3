@@ -319,6 +319,9 @@ void Scene::draw()
 
     slib->use("terrainPick");
 
+		ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
+		slib->setRegisteredUniform("dimensions", grid_size);
+
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
@@ -797,6 +800,7 @@ void Scene::mouseSelection()
 
         long unsigned int red;
         glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+				std::cout<<"RED"<<red<<std::endl;
         //change depending on number characters
         if(red >= 0 && red < m_characters.size())
         {
@@ -829,8 +833,8 @@ void Scene::mouseSelection()
             {
                 std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
-                int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
-                int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
+								int grid_coord_x = floor((grid_coord[0]/255.0) * m_grid.getW());
+								int grid_coord_y = floor((grid_coord[2]/255.0) * m_grid.getH());
 
                 std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
 
