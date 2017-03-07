@@ -11,6 +11,7 @@ Button::Button(XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, 
   m_x_align(_x_align),
   m_y_align(_y_align)
 {
+  m_action = Action::BUILD;
   updatePos(_window_res);
 }
 

@@ -55,9 +55,10 @@ std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
 {
   std::shared_ptr<Command> command(nullptr);
   Action action = _button.getAction();
-  switch (action) {
+  switch (action)
+  {
   case Action::BUILD:
-
+      command.reset(new BuildCommand(m_active_character, BuildingType::HOUSE));
     break;
   default:
     break;
@@ -172,4 +173,9 @@ void Gui::mouseDown()
 void Gui::mouseUp()
 {
   m_mouse_down = false;
+}
+
+void Gui::setActiveCharacter(Character *_character)
+{
+  m_active_character = _character;
 }

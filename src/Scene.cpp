@@ -795,6 +795,9 @@ void Scene::mouseSelection()
             {
                 if (character.getID() == red)
                 {
+                  // needs changing, maybe probably because vector addresses can change?
+                    Gui::instance()->setActiveCharacter(&character);
+                  //
                     m_active_char = &character;
                     if(character.isActive() == false)
                         character.setActive(true);

@@ -75,6 +75,8 @@ public :
   ///
   void mouseUp();
 
+  void setActiveCharacter(Character *_character);
+
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern
@@ -112,6 +114,10 @@ private :
   /// \brief m_mouse_down whether mouse is pressed down or not
   ///
   bool m_mouse_down;
+  ///
+  /// \brief m_active_character pointer to currently selected character
+  ///
+  Character *m_active_character;
 };
 
 #endif//__GUI_HPP__
