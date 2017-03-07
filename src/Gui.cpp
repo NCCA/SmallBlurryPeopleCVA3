@@ -42,6 +42,7 @@ void Gui::click()
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
     m_buttons[m_selected_button_id].activate();
+    return button.getAction;
   }
 }
 
