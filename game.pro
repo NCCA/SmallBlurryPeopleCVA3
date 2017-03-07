@@ -10,7 +10,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Camera.cpp \
          $$PWD/src/Grid.cpp \
          $$PWD/src/Character.cpp \
-				 $$PWD/src/Inventory.cpp \
+         $$PWD/src/Inventory.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
          $$PWD/src/imgui/*.cpp \
@@ -21,14 +21,15 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Gui.cpp \
          #$$PWD/src/Ui.cpp \
          $$PWD/src/Button.cpp \
-         $$PWD/src/Utility.cpp
+         $$PWD/src/Utility.cpp \
+         $$PWD/src/Preferences.cpp
 
 
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
          $$PWD/include/Grid.hpp \
          $$PWD/include/Character.hpp \
-				 $$PWD/include/Inventory.hpp \
+         $$PWD/include/Inventory.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
          $$PWD/include/imgui/*.h \
@@ -39,7 +40,8 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Gui.hpp \
          #$$PWD/include/Ui.hpp \
          $$PWD/include/Button.hpp \
-         $$PWD/include/Utility.hpp
+         $$PWD/include/Utility.hpp \
+         $$PWD/include/Preferences.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
@@ -56,7 +58,8 @@ OTHER_FILES += README.md \
                $$PWD/shaders/*.glsl \
                $$PWD/python/*.py \
                $$PWD/python/noise/*.py \
-               $$PWD/names/*.txt
+               $$PWD/names/*.txt \
+               $$PWD/preferences.conf
 
 #This means I can build this on windows.
 win32 {

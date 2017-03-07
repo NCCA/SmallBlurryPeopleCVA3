@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <iostream>
+#include <memory>
 #include <ngl/NGLInit.h>
 
 #include "imgui.h"
@@ -7,6 +8,8 @@
 
 #include "Scene.hpp"
 #include "Grid.hpp"
+#include "Preferences.hpp"
+
 int main()
 {
     SDL_Init(SDL_INIT_VIDEO);
@@ -61,6 +64,9 @@ int main()
     // Setup ImGui binding
     /*ImGuiImplSdlInit(window);
     ImGuiIO& io = ImGui::GetIO();*/
+
+    Preferences* p = Preferences::instance();
+    p->init();
     Scene scene (ngl::Vec2(rect.w, rect.h));
 
     while(!quit)
@@ -132,7 +138,8 @@ int main()
 
     }
     //ImGuiImplSdlShutdown();
-
+    //for when we want to start saving preferences
+    //p->save();
     SDL_Quit();
     return EXIT_SUCCESS;
 
