@@ -273,6 +273,13 @@ void Scene::update()
 
     m_cam.calculateViewMat();
 
+    //Make camera hover relative to terrain height.
+    /*ngl::Vec3 cxy = m_cam.getPos();
+    cxy.m_y = m_grid.get(ngl::Vec2(cxy.m_x, cxy.m_z)).getHeight();
+    m_cam.movePivot( ngl::Vec3(0.0f, cxy.m_y, 0.0f) );
+
+    m_cam.calculateViewMat();*/
+
     for(Character &character : m_characters)
     {
         if (character.isActive() == true)
@@ -482,7 +489,7 @@ void Scene::draw()
     m_transform.reset();
     m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
     m_transform.setRotation(90.0f, 0.0f, 0.0f);
-    //m_transform.setPosition(m_grid.getW() / 2.0f, 0.0f, m_grid.getH() / 2.0f);
+    m_transform.setPosition(0.0f, m_grid.getWaterLevel(), 0.0f);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
@@ -1073,13 +1080,8 @@ GLuint Scene::constructTerrain()
         faces.push_back( std::vector<ngl::Vec3>() );
         for(int j = 0; j < m_grid.getH(); ++j)
         {
-            TileType t = m_grid.get(i, j).getType();
-
-            ngl::Vec3 face (i, Utility::randFlt(0.1f,1.0f), j);
-            if(t == TileType::WATER)
-                face.m_y -= Utility::randFlt(0.0f, 4.0f);
-            else if(t == TileType::MOUNTAINS)
-                face.m_y += Utility::randFlt(0.0f, 4.0f);
+            float height = m_grid.get(i, j).getHeight();
+            ngl::Vec3 face (i, height, j);
             faces[i].push_back(face);
         }
     }
