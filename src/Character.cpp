@@ -337,5 +337,9 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 		std::cout<<"NO FOUNDY :((((((((((((((("<<std::endl;
 		return false;
 	}
+}
 
+void Character::build(BuildingType _building)
+{
+	std::cout << "building YAY" << std::endl;
 }

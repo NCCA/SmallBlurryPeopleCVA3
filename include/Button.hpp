@@ -21,6 +21,13 @@ enum class YAlignment{
   BOTTOM
 };
 ///
+/// \brief The Action enum for what the buttons does
+///
+enum class Action{
+  BUILD
+};
+
+///
 /// \brief The Button class defines a button with a position that can be activated if clicked
 ///
 class Button
@@ -47,9 +54,9 @@ public:
   ///
   bool isInside(ngl::Vec2 _pos);
   ///
-  /// \brief activate activate the functionality of the button
+  /// \brief getAction get command from button
   ///
-  void activate();
+  Action getAction() const;
   ///
   /// \brief getID get the button id
   /// \return id of the button
@@ -69,7 +76,6 @@ public:
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();
-
 private:
   ///
   /// \brief m_id_counter keeps track of number of buttons
@@ -99,6 +105,10 @@ private:
   /// \brief m_y_align alignment of button top/center/bottom
   ///
   YAlignment m_y_align;
+  ///
+  /// \brief m_action action that button does upon activation
+  ///
+  Action m_action;
 };
 
 #endif//__BUTTON_HPP__

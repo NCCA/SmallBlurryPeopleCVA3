@@ -39,10 +39,30 @@ void Gui::initGL()
 
 void Gui::click()
 {
+  //put in function
+
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
-    m_buttons[m_selected_button_id].activate();
+    std::shared_ptr<Command> command(generateCommand(m_buttons[m_selected_button_id]));
+    if(command.get())
+    {
+      command.get()->execute();
+    }
   }
+}
+
+std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
+{
+  std::shared_ptr<Command> command(nullptr);
+  Action action = _button.getAction();
+  switch (action) {
+  case Action::BUILD:
+
+    break;
+  default:
+    break;
+  }
+  return command;
 }
 
 bool Gui::mousePos(ngl::Vec2 _pos)
