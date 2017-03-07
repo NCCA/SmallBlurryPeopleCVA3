@@ -44,7 +44,6 @@ std::pair<ngl::Vec3, ngl::Vec3> enclose(const T &_pts)
         bounds.second.m_y = std::max(bounds.second.m_y, pt.m_y);
         bounds.second.m_z = std::max(bounds.second.m_z, pt.m_z);
     }
-
     return bounds;
 }
 
@@ -61,6 +60,17 @@ T average(std::vector<T> _values)
     T total = std::accumulate( _values.begin(), _values.end(), T() );
     return total / static_cast<float>(_values.size());
 }
+
+template<typename T>
+T clamp(T _in, T _lo, T _hi)
+{
+    if(_in < _lo)
+        return _lo;
+    if(_in > _hi)
+        return _hi;
+    return _in;
+}
+
 }
 
 #endif

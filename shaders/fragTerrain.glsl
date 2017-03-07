@@ -9,6 +9,10 @@ uniform vec4 colour;
 
 uniform sampler2D grass;
 uniform sampler2D rock;
+uniform sampler2D snow;
+
+uniform float waterlevel;
+uniform float snowline;
 
 in vec4 normal;
 in vec4 position;
@@ -93,12 +97,13 @@ float cnoise(vec3 P){
 
 vec3 grassColour = vec3(0.4, 0.8, 0.2);
 vec3 rockColour = vec3(0.6, 0.5, 0.4);
+vec3 snowColour = vec3(0.8, 0.8, 0.85);
 
 void main()
 {
     float grassMul = dot(normal.xyz, vec3(0.0, 1.0, 0.0));
     grassMul = clamp(grassMul, 0.0, 1.0);
-    grassMul = pow(grassMul, 8.0);
+    grassMul = pow(grassMul, 12.0);
 
     float depth = gl_FragCoord.z / gl_FragCoord.w;
     depth = clamp(depth / 32.0, 0.01, 1.0);
@@ -108,23 +113,34 @@ void main()
     shade += vec3(0.75);
     shade = clamp(shade, vec3(0.0), vec3(1.0));
 
-    vec3 grassMix = mix(
+    vec3 grassDepthMix = mix(
                 texture(grass, UV).xyz,
                 grassColour,
                 depth
                 );
 
-    vec3 rockMix = mix(
+    vec3 rockDepthMix = mix(
                 texture(rock, UV).xyz,
                 rockColour,
                 depth
                 );
 
+    vec3 snowDepthMix = mix(
+                texture(snow, UV).xyz,
+                snowColour,
+                depth
+                );
+
     vec3 col = mix(
-                rockMix,
-                grassMix,
+                rockDepthMix,
+                grassDepthMix,
                 vec3(grassMul)
                 );
+
+    if(position.y < waterlevel)
+        col = rockDepthMix;
+    else if(position.y > snowline)
+        col = snowDepthMix;
 
     outColour.xyz = shade * col;
     outColour.a = 1.0;
