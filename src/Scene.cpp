@@ -34,7 +34,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_pan(1.0f),
     m_mouse_translation(0.0f,0.0f),
     m_mouse_rotation(0.0f),
-    m_mouse_prev_pos(0.0f, 0.0f)
+    m_mouse_prev_pos(0.0f, 0.0f),
+    m_sunAngle(90.0f, 0.0f, 5.0f)
 {
     m_viewport = _viewport;
 
@@ -127,7 +128,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
                 uvs
                 );
 
-    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f)};
+    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f)};
     std::vector<ngl::Vec3> normals = {ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f)};
     uvs = {ngl::Vec2(0.0f, 0.0f), ngl::Vec2(1.0f, 0.0f), ngl::Vec2(0.0f, 1.0f), ngl::Vec2(1.0f, 1.0f)};
 
@@ -140,7 +141,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     GLint MaxPatchVertices = 0;
     glGetIntegerv(GL_MAX_PATCH_VERTICES, &MaxPatchVertices);
     std::cout << "Max supported patch vertices " << MaxPatchVertices << '\n';
-    glPatchParameteri(GL_PATCH_VERTICES, 3);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
 
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
     glEnable(GL_MULTISAMPLE);
@@ -304,7 +305,7 @@ void Scene::update()
 
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 5.0f;
-    m_sunAngle.m_x += 0.1f;
+    m_sunAngle.m_x += 0.01f;
     if(m_sunAngle.m_x > 360.0f)
         m_sunAngle.m_x = 0.0f;
     //std::cout << m_sunAngle.m_x << '\n';
@@ -505,7 +506,7 @@ void Scene::draw()
 
     slib->use("water");
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x);
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
@@ -514,7 +515,7 @@ void Scene::draw()
     m_transform.setPosition(0.0f, m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f);
     loadMatricesToShader();
 
-    glDrawArraysEXT(GL_PATCHES, 0, 3);
+    glDrawArraysEXT(GL_PATCHES, 0, 4);
     glBindVertexArray(0);
 
     //---------------------------//

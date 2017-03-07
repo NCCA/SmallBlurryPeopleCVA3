@@ -8,5 +8,5 @@ in vec2 uv_fs;
 
 void main()
 {
-    fragColour = vec4(0.0f, 0.0f, 1.0f, 0.5f);
+    fragColour = vec4(0.1f, 0.2f, 0.35f, 0.5f);
 }
