@@ -4,6 +4,12 @@
 
 #include "AssetStore.hpp"
 
+AssetStore::~AssetStore()
+{
+    for(auto &tex : m_textures)
+        glDeleteTextures( 1, &tex.second );
+}
+
 ngl::Obj * AssetStore::getModel(const std::string &_id)
 {
     auto it = m_meshes.find( _id );
@@ -22,6 +28,7 @@ GLuint AssetStore::getTexture(const std::string &_id)
 
 void AssetStore::loadMesh(const std::string &_id, const std::string &_path)
 {
+    std::cout << "Loading mesh from " << _path << '\n';
     ngl::Obj * mesh = new ngl::Obj( g_resourceLocation + "geometry/" + _path );
     if(mesh == nullptr)
     {
@@ -36,6 +43,7 @@ void AssetStore::loadMesh(const std::string &_id, const std::string &_path)
 
 void AssetStore::loadTexture(const std::string &_id, const std::string &_path)
 {
+    std::cout << "Loading texture from " << _path << '\n';
     SDL_Surface * surf = IMG_Load((g_resourceLocation + "textures/" + _path).c_str());
     GLuint tex;
     if(surf != nullptr)

@@ -54,8 +54,10 @@ void Grid::runCurrentScript()
   //extract width and height and map data
   m_w = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_width"));
   m_h = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_height"));
+  m_mountain_height = PyInt_AsLong(PyDict_GetItemString(py_dict, "mountain_height"));
+  m_water_level = PyInt_AsLong(PyDict_GetItemString(py_dict, "water_height"));
   py_map = PyDict_GetItemString(py_dict, "map_data");
-
+  std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
   //create an empty grid with each tile's id set
   for (int i = 0; i < m_w * m_h; i++)
   {
@@ -65,9 +67,11 @@ void Grid::runCurrentScript()
   //get grid values from the script
   for(int i = 0; i <  m_w * m_h; i++)
   {
-    TileType t = (TileType)PyInt_AsLong(PyList_GetItem(py_map, i));
-    //int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    TileType t = (TileType)PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
+    int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
     m_tiles[i].setType(t);
+    m_tiles[i].setHeight(height);
+    std::cout << height << std::endl;
     if (t == TileType::TREES)
     {
       m_tiles[i].setNumTrees(9);
@@ -247,6 +251,16 @@ int Grid::getW()
 int Grid::getH()
 {
   return m_h;
+}
+
+int Grid::getMountainHeight()
+{
+  return m_mountain_height;
+}
+
+int Grid::getWaterLevel()
+{
+  return m_water_level;
 }
 
 

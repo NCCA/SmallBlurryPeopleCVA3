@@ -26,7 +26,7 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
-    updateButtonArrays();
+    //updateButtonArrays();
   }
 }
 
@@ -42,7 +42,6 @@ void Gui::click()
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
     m_buttons[m_selected_button_id].activate();
-    return button.getAction;
   }
 }
 

@@ -37,8 +37,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
 {
     m_viewport = _viewport;
 
-		m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-		m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
+    m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
+    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
@@ -52,10 +52,12 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
+    createShader("terrain", "vertDeferredData", "fragTerrain");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
+    createShader("water", "vertMVPUVN", "fragWater", "geoWater");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -68,6 +70,82 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //creates a character with a random name
     createCharacter();
 
+    initialiseFramebuffers();
+
+    m_shadowMat.assign(1, ngl::Mat4());
+
+    ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
+
+    prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
+    prim->createSphere( "sphere", 0.1, 12 );
+
+    std::cout << "Loading assets...\n";
+    //m_store.loadMesh("knight", "knight/knight.obj");
+    //m_store.loadTexture("knight_d", "knight/knight_d.png");
+
+    m_store.loadMesh("mountain", "mountain/mountain.obj");
+    m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
+
+    //playing with trees and houses and such
+    m_store.loadMesh("tree", "tree/tree.obj");
+    m_store.loadTexture("tree_d", "tree/tree_d.png");
+    m_store.loadMesh("house", "house/house.obj");
+    m_store.loadMesh("person", "person/person.obj");
+    m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
+    m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
+
+    m_store.loadTexture("grass", "terrain/grass.png");
+    m_store.loadTexture("rock", "terrain/rock.png");
+
+    std::cout << "Constructing terrain...\n";
+    m_terrainVAO = constructTerrain();
+
+    std::vector<ngl::Vec4> verts = {
+        ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
+        ngl::Vec4(1.0, 1.0, 0.0f, 1.0f),
+        ngl::Vec4(-1.0, 1.0, 0.0f, 1.0f)
+    };
+
+    std::vector<ngl::Vec2> uvs = {
+        ngl::Vec2(0.0, 0.0),
+        ngl::Vec2(1.0, 0.0),
+        ngl::Vec2(1.0, 1.0),
+        ngl::Vec2(0.0, 1.0)
+    };
+
+    m_screenQuad = createVAO(
+                verts,
+                uvs
+                );
+
+    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f)};
+    std::vector<ngl::Vec3> normals = {ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f)};
+    uvs = {ngl::Vec2(0.0f, 0.0f), ngl::Vec2(1.0f, 0.0f), ngl::Vec2(0.0f, 1.0f), ngl::Vec2(1.0f, 1.0f)};
+
+    m_unitSquareVAO = createVAO(
+                verts,
+                normals,
+                uvs
+                );
+
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Gui *gui = Gui::instance();
+    gui->init(_viewport, "button");
+    std::cout << "Scene constructor complete.\n";
+}
+
+void Scene::initialiseFramebuffers()
+{
     //Graphics stuff.
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
@@ -110,71 +188,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
         exit(EXIT_FAILURE);
     }
     m_shadowBuffer.unbind();
-
-    m_shadowMat.assign(1, ngl::Mat4());
-
-    ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
-
-    prim->createTrianglePlane("plane",14,14,80,80,ngl::Vec3(0,1,0));
-    prim->createSphere( "sphere", 0.1, 12 );
-
-    m_store.loadMesh("knight", "knight/knight.obj");
-    m_store.loadTexture("knight_d", "knight/knight_d.png");
-
-    m_store.loadMesh("mountain", "mountain/mountain.obj");
-    m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
-
-    //playing with trees and houses and such
-    m_store.loadMesh("tree", "tree/tree.obj");
-    m_store.loadTexture("tree_d", "tree/tree_d.png");
-    m_store.loadMesh("house", "house/house.obj");
-    m_store.loadMesh("person", "person/person.obj");
-    m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
-    m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
-
-    //Get as vec4s
-    std::vector<ngl::Vec4> data;
-    std::vector<ngl::Vec3> original = m_grid.getTriangles();
-    data.reserve(original.size());
-    //Convert format, add some cheeky randomisation
-    for(auto &vert : original)
-				data.push_back( ngl::Vec4(vert.m_x, vert.m_y, vert.m_z, 1.0f) );
-
-    m_terrainVAO = createVAO( data );
-    m_terrainVAOSize = data.size();
-
-    std::vector<ngl::Vec4> verts = {
-        ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
-        ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
-        ngl::Vec4(1.0, 1.0, 0.0f, 1.0f),
-        ngl::Vec4(-1.0, 1.0, 0.0f, 1.0f)
-    };
-
-    std::vector<ngl::Vec2> uvs = {
-        ngl::Vec2(0.0, 0.0),
-        ngl::Vec2(1.0, 0.0),
-        ngl::Vec2(1.0, 1.0),
-        ngl::Vec2(0.0, 1.0)
-    };
-
-    m_screenQuad = createVAO(
-                verts,
-                uvs
-                );
-
-    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
-    glEnable(GL_MULTISAMPLE);
-    //glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    Gui *gui = Gui::instance();
-    gui->init(_viewport, "button");
-    std::cout << "Scene constructor complete.\n";
 }
 
 void Scene::readNameFile()
@@ -204,12 +217,12 @@ void Scene::readNameFile()
 
 void Scene::createCharacter()
 {
-  int numberNames = m_file_names.size();
-  std::random_device rnd;
-  std::mt19937 mt_rand(rnd());
-  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-  int name_chosen = nameNo(mt_rand);
-  m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+    int numberNames = m_file_names.size();
+    std::random_device rnd;
+    std::mt19937 mt_rand(rnd());
+    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+    int name_chosen = nameNo(mt_rand);
+    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
@@ -262,8 +275,8 @@ void Scene::update()
 
     for(Character &character : m_characters)
     {
-      if (character.isActive() == true)
-        character.update();
+        if (character.isActive() == true)
+            character.update();
     }
 
     //m_sunAngle.m_x = 150.0f;
@@ -303,13 +316,21 @@ void Scene::draw()
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
-
     m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     slib->use("charPick");
 
     //Draw characters...
+    for(auto &ch : m_characters)
+    {
+        ngl::Vec2 pos = ch.getPos();
+        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
+        m_transform.setPosition(new_pos);
+        slib->setRegisteredUniform("id", ch.getID());
+        drawAsset( "person", "", "colour");
+    }
+
 
     m_pickBuffer.unbind();
 
@@ -335,11 +356,11 @@ void Scene::draw()
     size_t index = 0;
     for(auto &box : boxes)
     {
-				//std::cout << "Shadowpass for " << index << '\n';
+        //std::cout << "Shadowpass for " << index << '\n';
         shadowPass( box, index );
         index++;
     }
-		//std::cout << '\n';
+    //std::cout << '\n';
 
     //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
@@ -351,8 +372,9 @@ void Scene::draw()
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    slib->use("colour");
-    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    slib->use("terrain");
+    bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
+    bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
 
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
@@ -366,7 +388,7 @@ void Scene::draw()
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, 0.0f, j);
+            m_transform.setPosition(i, m_terrainHeight[i][j], j);
             if(t.getType() == TileType::TREES)
             {
                 drawAsset( "tree", "tree_d", "diffuse" );
@@ -387,10 +409,12 @@ void Scene::draw()
 
     for(auto &character : m_characters)
     {
-      ngl::Vec2 pos = character.getPos();
-      ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-      m_transform.setPosition(new_pos);
-      drawAsset( "person", "", "colour");
+        ngl::Vec2 pos = character.getPos();
+        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
+        m_transform.setPosition(new_pos);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+        drawAsset( "person", "", "colour");
     }
 
     m_mainBuffer.unbind();
@@ -415,7 +439,7 @@ void Scene::draw()
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
-    //       LIGHTING      //
+    //          LIGHTING         //
     //---------------------------//
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
@@ -439,6 +463,29 @@ void Scene::draw()
     m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //---------------------------//
+    //      FORWARD-SHADING      //
+    //---------------------------//
+
+    //Copy depth buffer from main buffer to back buffer.
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    glEnable(GL_DEPTH_TEST);
+
+    slib->use("water");
+
+    glBindVertexArray(m_unitSquareVAO);
+    m_transform.reset();
+    m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
+    m_transform.setRotation(90.0f, 0.0f, 0.0f);
+    //m_transform.setPosition(m_grid.getW() / 2.0f, 0.0f, m_grid.getH() / 2.0f);
+    loadMatricesToShader();
+    glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 
     //---------------------------//
     //          BUTTONS          //
@@ -468,7 +515,7 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
 
     for(int i = 0; i <= _divisions.size() - 2; ++i)
     {
-				//std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
+        //std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
 
@@ -547,7 +594,7 @@ void Scene::shadowPass(bounds _box, size_t _index)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, 0.0f, j);
+            m_transform.setPosition(i, m_terrainHeight[i][j], j);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
             if(t.getType() == TileType::TREES)
             {
@@ -557,9 +604,9 @@ void Scene::shadowPass(bounds _box, size_t _index)
             }
             else if(t.getType() == TileType::MOUNTAINS)
             {
-              ngl::Obj * k = m_store.getModel( "mountain" );
-              loadMatricesToShader( m_transform.getMatrix(), mvp );
-              k->draw();
+                ngl::Obj * k = m_store.getModel( "mountain" );
+                loadMatricesToShader( m_transform.getMatrix(), mvp );
+                k->draw();
             }
             else if(t.getType() == TileType::HOUSE)
             {
@@ -577,13 +624,13 @@ void Scene::shadowPass(bounds _box, size_t _index)
 
     for(auto &character : m_characters)
     {
-      ngl::Vec2 pos = character.getPos();
-      m_transform.setPosition(pos[0],0.0f,pos[1]);
-      ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+        ngl::Vec2 pos = character.getPos();
+        m_transform.setPosition(pos[0],0.0f,pos[1]);
+        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-      ngl::Obj * k = m_store.getModel( "person" );
-      loadMatricesToShader( m_transform.getMatrix(), mvp );
-      k->draw();
+        ngl::Obj * k = m_store.getModel( "person" );
+        loadMatricesToShader( m_transform.getMatrix(), mvp );
+        k->draw();
     }
 
 
@@ -649,9 +696,9 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-		if(_event.y > 0 && m_mouse_zoom > 10.5)
+    if(_event.y > 0 && m_mouse_zoom > 10.5)
     {
-				if (m_mouse_pan > -5)
+        if (m_mouse_pan > -5)
         {
             m_mouse_pan -= 0.5;
         }
@@ -659,7 +706,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
     }
 
     else if(_event.y < 0 && m_mouse_zoom < 20)
-		{
+    {
         if(m_mouse_pan < 10)
         {
             m_mouse_pan += 0.5;
@@ -670,118 +717,135 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::updateMousePos()
 {
-  int mouse_coords[2] = {0,0};
-  SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
-  Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
+    int mouse_coords[2] = {0,0};
+    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+    Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
 }
 
 void Scene::windowEvent(const SDL_WindowEvent &_event)
 {
-  ngl::Vec2 res;
-  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-  switch (_event.event) {
-  case SDL_WINDOWEVENT_SIZE_CHANGED:
-    res = ngl::Vec2(_event.data1, _event.data2);
+    ngl::Vec2 res;
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    switch (_event.event) {
+    case SDL_WINDOWEVENT_SIZE_CHANGED:
+        res = ngl::Vec2(_event.data1, _event.data2);
 
-    //????
-    m_viewport = res;
+        resize(res);
+        //????
+
+        // PLUS CHANGE FRAMEBUFFERS?
+
+        //Gui::instance()->setResolution(res);
+        break;
+    default:
+        break;
+    }
+}
+
+void Scene::resize(const ngl::Vec2 &_dim)
+{
+    std::cout << "Resizing viewport to " << _dim.m_x << ", " << _dim.m_y << '\n';
+    m_viewport = _dim;
     m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
     m_cam.calculateProjectionMat();
     m_cam.calculateViewMat();
-    slib->setRegisteredUniform("iResolution", m_viewport);
+
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
+
     slib->use("deferredLight");
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
-    // PLUS CHANGE FRAMEBUFFERS?
 
-    Gui::instance()->setResolution(res);
-    break;
-  default:
-    break;
-  }
+    m_mainBuffer = Framebuffer();
+    m_pickBuffer = Framebuffer();
+    m_shadowBuffer = Framebuffer();
+
+    initialiseFramebuffers();
+    std::cout << "Viewport resized.\n";
 }
 
 void Scene::mouseSelection()
 {
-  std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
-  Gui *gui = Gui::instance();
-  int mouse_coords[2] = {0,0};
-  SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
-
-  if(gui->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1])))
-  {
-    gui->click();
-  }
-  else
-  {
     std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+    Gui *gui = Gui::instance();
+    int mouse_coords[2] = {0,0};
+    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
 
-    m_pickBuffer.bind();
-
-    //check character_id texture
-    GLuint char_texID = getCharPickTexture();
-    glBindTexture(GL_TEXTURE_2D, char_texID);
-    glReadBuffer(GL_COLOR_ATTACHMENT1);
-
-    long unsigned int red;
-    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-    //change depending on number characters
-    if(red >= 0 && red < m_characters.size())
+    if(gui->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1])))
     {
-      for (Character &character : m_characters)
-      {
-        if (character.getID() == red)
-        {
-          m_active_char = &character;
-          if(character.isActive() == false)
-            character.setActive(true);
-        }
-      }
+        gui->click();
     }
-    //check grid_id texture
     else
     {
-      //bind default texture
-      glBindTexture(GL_TEXTURE_2D, 0);
+        std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
 
-      GLuint grid_texID = getTerrainPickTexture();
-      glBindTexture(GL_TEXTURE_2D, grid_texID);
-      glReadBuffer(GL_COLOR_ATTACHMENT0);
+        m_pickBuffer.bind();
 
-      std::array<unsigned char, 3> grid_coord;
+        //check character_id texture
+        GLuint char_texID = getCharPickTexture();
+        glBindTexture(GL_TEXTURE_2D, char_texID);
+        glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-      // x, window height - y - 1
-      glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
-
-      if(grid_coord[0] != 0 && grid_coord[2] != 0)
-      {
-        std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
-
-        int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
-        int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
-
-        std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
-
-        int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
-
-        if(m_characters[0].isActive() == true)
+        long unsigned int red;
+        glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+        //change depending on number characters
+        if(red >= 0 && red < m_characters.size())
         {
-          std::cout<<"STATE"<<std::endl;
-          m_characters[0].setTarget(target_id);
+            for (Character &character : m_characters)
+            {
+                if (character.getID() == red)
+                {
+                    m_active_char = &character;
+                    if(character.isActive() == false)
+                        character.setActive(true);
+                }
+            }
+        }
+        //check grid_id texture
+        else
+        {
+            //bind default texture
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            GLuint grid_texID = getTerrainPickTexture();
+            glBindTexture(GL_TEXTURE_2D, grid_texID);
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+            std::array<unsigned char, 3> grid_coord;
+
+            // x, window height - y - 1
+            glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
+
+            if(grid_coord[0] != 0 && grid_coord[2] != 0)
+            {
+                std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
+
+                int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
+                int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
+
+                std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
+
+                int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
+
+                if(m_characters[0].isActive() == true)
+                {
+                    std::cout<<"STATE"<<std::endl;
+                    m_characters[0].setTarget(target_id);
+                }
+
+            }
+            else
+            {
+                //if grid_coord == {0,0,0}
+                std::cout<<"NO GRID CLICK D:"<<std::endl;
+            }
         }
 
-      }
-      else
-      {
-        //if grid_coord == {0,0,0}
-        std::cout<<"NO GRID CLICK D:"<<std::endl;
-      }
+        glReadBuffer(GL_NONE);
+        m_pickBuffer.unbind();
     }
-
-    glReadBuffer(GL_NONE);
-    m_pickBuffer.unbind();
-  }
 }
 
 void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)
@@ -867,10 +931,10 @@ void Scene::createShader(const std::string _name, const std::string _vert, const
     // add geometry shader if string given
     if(!_geo.empty())
     {
-      slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
-      slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
-      slib->compileShader(_geo);
-      slib->attachShaderToProgram(_name, _geo);
+        slib->attachShader(_geo, ngl::ShaderType::GEOMETRY);
+        slib->loadShaderSource(_geo, "shaders/" + _geo + ".glsl");
+        slib->compileShader(_geo);
+        slib->attachShaderToProgram(_name, _geo);
     }
 
     slib->linkProgramObject(_name);
@@ -931,6 +995,25 @@ GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &
     return vao;
 }
 
+GLuint Scene::createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec3> &_normals, std::vector<ngl::Vec2> &_uvs)
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    //Generate a VBO
+    GLuint vertBuffer = createBuffer4f( _verts );
+    setBufferLocation( vertBuffer, 0, 4 );
+
+    GLuint normBuffer = createBuffer3f( _normals );
+    setBufferLocation( normBuffer, 2, 3 );
+
+    GLuint UVBuffer = createBuffer2f( _uvs );
+    setBufferLocation( UVBuffer, 1, 2 );
+
+    return vao;
+}
+
 GLuint Scene::createBuffer4f(std::vector<ngl::Vec4> _vec)
 {
     GLuint buffer;
@@ -975,4 +1058,256 @@ void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
     glEnableVertexAttribArray(_index);
     glBindBuffer(GL_ARRAY_BUFFER, _buffer);
     glVertexAttribPointer( _index, _size, GL_FLOAT, GL_FALSE, 0, 0 );
+}
+
+GLuint Scene::constructTerrain()
+{
+    std::cout << "constructTerrain start\n";
+
+    std::vector<std::vector<ngl::Vec3>> faces;
+    std::vector<std::vector<ngl::Vec3>> facenorms;
+
+    //Face centers to start.
+    for(int i = 0; i < m_grid.getW(); ++i)
+    {
+        faces.push_back( std::vector<ngl::Vec3>() );
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            TileType t = m_grid.get(i, j).getType();
+
+            ngl::Vec3 face (i, Utility::randFlt(0.1f,1.0f), j);
+            if(t == TileType::WATER)
+                face.m_y -= Utility::randFlt(0.0f, 4.0f);
+            else if(t == TileType::MOUNTAINS)
+                face.m_y += Utility::randFlt(0.0f, 4.0f);
+            faces[i].push_back(face);
+        }
+    }
+
+    //Smooth
+    const int iterations = 128;
+    const float hardness = 0.02f;
+    for(int it = 0; it < iterations; ++it)
+    {
+        for(int i = 1; i < m_grid.getW() - 1; ++i)
+        {
+            for(int j = 1; j < m_grid.getH() - 1; ++j)
+            {
+                float ay = 0.0f;
+                for(int y = -1; y <= 1; ++y)
+                    for(int x = -1; x <= 1; ++x)
+                        ay += faces[i + x][j + y].m_y;
+
+                ay /= 9.0f;
+
+                float dy = faces[i][j].m_y - ay;
+
+                faces[i][j].m_y -= hardness * dy;
+            }
+        }
+    }
+
+    //Store tile heights.
+    for(size_t i = 0; i < faces.size(); ++i)
+    {
+        m_terrainHeight.push_back( std::vector<float>() );
+        for(auto &vec : faces[i])
+        {
+            m_terrainHeight[i].push_back(vec.m_y);
+        }
+    }
+
+    //Calculate face normals
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        facenorms.push_back( std::vector<ngl::Vec3>() );
+        for(int j = 0; j < faces[i].size(); ++j)
+        {
+            ngl::Vec3 normal;
+
+            bool left = i > 0;
+            bool bottom = j > 0;
+            bool right = i < faces.size() - 1;
+            bool top = j < faces[i].size() - 1;
+
+            int count = 0;
+
+            //->
+            if(top and right)
+            {
+                ngl::Vec3 toTop = faces[i][j+1] - faces[i][j];
+                ngl::Vec3 toRight = faces[i+1][j] - faces[i][j];
+                ngl::Vec3 n = toTop.cross(toRight);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //V
+            if(right and bottom)
+            {
+                ngl::Vec3 toRight = faces[i+1][j] - faces[i][j];
+                ngl::Vec3 toBottom = faces[i][j-1] - faces[i][j];
+                ngl::Vec3 n = toRight.cross(toBottom);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //<-
+            if(bottom and left)
+            {
+                ngl::Vec3 toBottom = faces[i][j-1] - faces[i][j];
+                ngl::Vec3 toLeft = faces[i-1][j] - faces[i][j];
+                ngl::Vec3 n = toBottom.cross(toLeft);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+            //^
+            if(left and top)
+            {
+                ngl::Vec3 toLeft = faces[i-1][j] - faces[i][j];
+                ngl::Vec3 toTop = faces[i][j+1] - faces[i][j];
+                ngl::Vec3 n = toLeft.cross(toTop);
+                n.normalize();
+                normal += n;
+                count++;
+            }
+
+            normal /= static_cast<float>(count);
+            normal.normalize();
+            facenorms[i].push_back( normal );
+        }
+    }
+
+    std::vector<ngl::Vec4> trimesh;
+    std::vector<ngl::Vec3> normesh;
+    std::vector<ngl::Vec2> uvmesh;
+
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        for(int j = 0; j < faces[i].size(); ++j)
+        {
+            terrainFace f = terrainVerticesToFace(
+                        i,
+                        j,
+                        faces,
+                        facenorms
+                        );
+
+            //t1
+            trimesh.push_back( f.m_verts[2].m_pos );
+            trimesh.push_back( f.m_verts[1].m_pos );
+            trimesh.push_back( f.m_verts[0].m_pos );
+
+            normesh.push_back( f.m_verts[2].m_norm );
+            normesh.push_back( f.m_verts[1].m_norm );
+            normesh.push_back( f.m_verts[0].m_norm );
+
+            //t2
+            trimesh.push_back( f.m_verts[3].m_pos );
+            trimesh.push_back( f.m_verts[2].m_pos );
+            trimesh.push_back( f.m_verts[1].m_pos );
+
+            normesh.push_back( f.m_verts[3].m_norm );
+            normesh.push_back( f.m_verts[2].m_norm );
+            normesh.push_back( f.m_verts[1].m_norm );
+        }
+    }
+
+    for(auto &vec : trimesh)
+        uvmesh.push_back( ngl::Vec2(vec.m_x, vec.m_z) );
+
+    std::cout << "constructTerrain end with\n";
+
+    std::cout << trimesh.size() << " vertices\n" << normesh.size() << " normals\n" << uvmesh.size() << " uvs\n";
+
+    /*for(auto &i : trimesh)
+        std::cout << i << '\n';*/
+
+    //exit(EXIT_SUCCESS);
+    m_terrainVAOSize = trimesh.size();
+    return createVAO(
+                trimesh,
+                normesh,
+                uvmesh
+                );
+}
+
+Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
+                                                 const int _y,
+                                                 const std::vector<std::vector<ngl::Vec3> > &_facePositions,
+                                                 const std::vector<std::vector<ngl::Vec3> > &_faceNormals
+                                                 )
+{
+    //  2---3
+    //  |   |
+    //  0---1
+    terrainFace face;
+
+    face.m_verts[0].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y - 0.5f, 1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y - 0.5f, 1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y + 0.5f, 1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y + 0.5f, 1.0f);
+
+    std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
+    std::pair<float, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
+
+    face.m_verts[0].m_pos.m_y = v0.first;
+    face.m_verts[1].m_pos.m_y = v1.first;
+    face.m_verts[2].m_pos.m_y = v2.first;
+    face.m_verts[3].m_pos.m_y = v3.first;
+
+    face.m_verts[0].m_norm = v0.second;
+    face.m_verts[1].m_norm = v1.second;
+    face.m_verts[2].m_norm = v2.second;
+    face.m_verts[3].m_norm = v3.second;
+
+    return face;
+}
+
+std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
+                                                           const int _y,
+                                                           const int _dirX,
+                                                           const int _dirY,
+                                                           const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                           const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                           )
+{
+    float yCoord = _facePositions[_x][_y].m_y;
+    ngl::Vec3 normal = _faceNormals[_x][_y];
+    size_t count = 1;
+
+    //Can we move in the horizontal direction?
+    bool horizontal = (_x + _dirX) > 0 and (_x + _dirX) < _facePositions[0].size() - 1;
+    //Can we move in the vertical direction?
+    bool vertical = (_y + _dirY) > 0 and (_y + _dirY) < _facePositions.size() - 1;
+
+    if(horizontal)
+    {
+        yCoord += _facePositions[_x + _dirX][_y].m_y;
+        normal += _faceNormals[_x + _dirX][_y];
+        count++;
+    }
+    if(vertical)
+    {
+        yCoord += _facePositions[_x][_y + _dirY].m_y;
+        normal += _faceNormals[_x][_y + _dirY];
+        count++;
+    }
+    if(vertical and horizontal)
+    {
+        yCoord += _facePositions[_x + _dirX][_y + _dirY].m_y;
+        normal += _faceNormals[_x + _dirX][_y + _dirY];
+        count++;
+    }
+
+    normal /= static_cast<float>(count);
+    normal.normalize();
+
+    return std::make_pair(
+                yCoord / static_cast<float>(count),
+                normal
+                );
 }

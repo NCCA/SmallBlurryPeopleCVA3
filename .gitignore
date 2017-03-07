@@ -30,6 +30,7 @@
 #extra
 *.pro.user.*
 *.pro.user
+*.pyc
 game
 CMakeCache.txt
 CMakeFiles

@@ -22,6 +22,7 @@ public:
     void clear();
     void unbind();
     GLuint get(const std::string _id) {return m_textures[_id];}
+    GLuint getID() {return m_framebuffer;}
 private:
     GLuint genTexture(int _width, int _height, GLint _format, GLint _internalFormat, GLint _type);
     //Keeps track of textures.

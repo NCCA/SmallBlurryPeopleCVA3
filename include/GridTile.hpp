@@ -37,6 +37,10 @@ public:
 
   void setType(TileType _t);
 
+  int getHeight();
+
+  void setHeight(int _height);
+
   /// @brief returns the number of trees
   int getNumTrees();
 
@@ -49,6 +53,7 @@ public:
 private:
   int m_id;
   TileType m_type = TileType::NONE;
+  int m_height;
   int m_trees = 0;
 };
 

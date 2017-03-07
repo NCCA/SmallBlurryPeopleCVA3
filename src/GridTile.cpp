@@ -24,6 +24,16 @@ void GridTile::setType(TileType _t)
   m_type = _t;
 }
 
+int GridTile::getHeight()
+{
+  return m_height;
+}
+
+void GridTile::setHeight(int _height)
+{
+  m_height = _height;
+}
+
 int GridTile::getNumTrees()
 {
   return m_trees;
