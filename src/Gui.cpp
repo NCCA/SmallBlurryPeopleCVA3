@@ -26,7 +26,7 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
-    //updateButtonArrays();
+    updateButtonArrays();
   }
 }
 
@@ -105,21 +105,21 @@ void Gui::updateButtonArrays()
   glBindVertexArray(m_vao_id);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &positions[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * positions.size(), &(positions[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 0
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[1]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * sizes.size(), &sizes[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(ngl::Vec2) * sizes.size(), &(sizes[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 1
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[2]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * ids.size(), &ids[0], GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * ids.size(), &(ids[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 2
   glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
 

@@ -19,9 +19,9 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/AssetStore.cpp \
          $$PWD/src/Framebuffer.cpp \
          $$PWD/src/Gui.cpp \
-         #$$PWD/src/Ui.cpp \
          $$PWD/src/Button.cpp \
-         $$PWD/src/Utility.cpp
+         $$PWD/src/Utility.cpp \
+         $$PWD/src/Commands.cpp
 
 
 HEADERS+=$$PWD/include/Scene.hpp \
@@ -37,9 +37,9 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/AssetStore.hpp \
          $$PWD/include/Framebuffer.hpp \
          $$PWD/include/Gui.hpp \
-         #$$PWD/include/Ui.hpp \
          $$PWD/include/Button.hpp \
-         $$PWD/include/Utility.hpp
+         $$PWD/include/Utility.hpp \
+         $$PWD/include/Commands.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)

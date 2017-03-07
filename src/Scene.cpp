@@ -367,7 +367,6 @@ void Scene::draw()
         shadowPass( box, index );
         index++;
     }
-    //std::cout << '\n';
 
     //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
@@ -431,7 +430,7 @@ void Scene::draw()
     glDisable(GL_DEPTH_TEST);
 
     //---------------------------//
-    //          SKY           //
+    //            SKY            //
     //---------------------------//
     glBindVertexArray(m_screenQuad);
 
@@ -664,6 +663,7 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
         m_mouse_prev_pos[0] = _event.x;
         m_mouse_prev_pos[1] = _event.y;
         m_mouse_trans_active=true;
+        Gui::instance()->mouseDown();
     }
 
     //checks if the right button has been pressed down and flags start
@@ -672,7 +672,6 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
         m_mouse_rot_origin = _event.x;
         m_mouse_rot_active = true;
     }
-    Gui::instance()->mouseDown();
 }
 
 void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
@@ -690,6 +689,7 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
         m_mouse_prev_pos.set(0.0f, 0.0f);
         m_mouse_trans_active = false;
+        Gui::instance()->mouseUp();
     }
 
     //checks if the right button has been released and turns off flag
@@ -697,7 +697,6 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     {
         m_mouse_rot_active = false;
     }
-    Gui::instance()->mouseUp();
 }
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
@@ -736,13 +735,7 @@ void Scene::windowEvent(const SDL_WindowEvent &_event)
     switch (_event.event) {
     case SDL_WINDOWEVENT_SIZE_CHANGED:
         res = ngl::Vec2(_event.data1, _event.data2);
-
         resize(res);
-        //????
-
-        // PLUS CHANGE FRAMEBUFFERS?
-
-        //Gui::instance()->setResolution(res);
         break;
     default:
         break;
@@ -751,31 +744,33 @@ void Scene::windowEvent(const SDL_WindowEvent &_event)
 
 void Scene::resize(const ngl::Vec2 &_dim)
 {
-    std::cout << "Resizing viewport to " << _dim.m_x << ", " << _dim.m_y << '\n';
-    m_viewport = _dim;
-    m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
-    m_cam.calculateProjectionMat();
-    m_cam.calculateViewMat();
+  std::cout << "Resizing viewport to " << _dim.m_x << ", " << _dim.m_y << '\n';
+  m_viewport = _dim;
+  m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
+  m_cam.calculateProjectionMat();
+  m_cam.calculateViewMat();
 
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    slib->use("sky");
-    slib->setRegisteredUniform("viewport", m_viewport);
+  slib->use("sky");
+  slib->setRegisteredUniform("viewport", m_viewport);
 
-    slib->use("deferredLight");
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+  slib->use("deferredLight");
+  slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
 
-    m_mainBuffer = Framebuffer();
-    m_pickBuffer = Framebuffer();
-    m_shadowBuffer = Framebuffer();
 
-    initialiseFramebuffers();
-    std::cout << "Viewport resized.\n";
+  m_mainBuffer = Framebuffer();
+  m_pickBuffer = Framebuffer();
+  m_shadowBuffer = Framebuffer();
+
+  initialiseFramebuffers();
+  Gui::instance()->setResolution(_dim);
+  std::cout << "Viewport resized.\n";
 }
 
 void Scene::mouseSelection()
 {
-    std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
+    std::cout<<"CALLED MOUSE SELECTION\n"<<std::endl;
     Gui *gui = Gui::instance();
     int mouse_coords[2] = {0,0};
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
@@ -786,8 +781,6 @@ void Scene::mouseSelection()
     }
     else
     {
-        std::cout<<"--------CALLED MOUSE SELECTION----------------"<<std::endl;
-
         m_pickBuffer.bind();
 
         //check character_id texture
