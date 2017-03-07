@@ -51,15 +51,16 @@ void main()
         discard;
 #endif
     vec3 n = texture(normal, UV).xyz;
-    float sunmul = clamp(dot(n, sunDir), 0.0, 1.0) * sunInts;
-    float moonmul = clamp(dot(n, -sunDir), 0.0, 1.0) * moonInts;
+    float sunmul = clamp(dot(n, sunDir), 0.0, 1.0);
+    float moonmul = clamp(dot(n, -sunDir), 0.0, 1.0);
     float mul = sunmul + moonmul;
-
     mul = clamp(mul, 0.0, 1.0);
-    //mul = 1.0;
-
     float bias = 0.005 * tan( acos( mul ) );
-    //bias = clamp( bias, 0.0, 0.001);
+    bias = clamp( bias, 0.0, 0.001);
+
+    sunmul = clamp(dot(n, sunDir), 0.0, 1.0) * sunInts;
+    moonmul = clamp(dot(n, -sunDir), 0.0, 1.0) * moonInts;
+    mul = sunmul + moonmul;
 
     int cascadeIndex = -1;
     //TO-DO: Have a better way to compute depth. Maybe write to another buffer.
@@ -100,7 +101,7 @@ void main()
         shadow += shadowSample(depth, sposition.xy + pixelstep, cascadeIndex);
 
         shadow /= 5.0;
-        mul -= shadow * 0.4;
+        mul -= shadow;
     }
 
     /*vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
@@ -128,6 +129,5 @@ void main()
     if(moonmul > 0.0)
         fragColour.xyz *= moonColour;
 #endif
-    //fragColour.rgb = texture(normal, UV).rgb;
     fragColour.a = 1.0;
 }
