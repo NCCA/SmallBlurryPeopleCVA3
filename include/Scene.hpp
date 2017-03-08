@@ -108,6 +108,8 @@ private:
     Framebuffer m_pickBuffer;
     /// @brief buffer to store depth for shadowing
     Framebuffer m_shadowBuffer;
+    /// @brief buffer to storedisplacement map, currently for water only.
+    Framebuffer m_displacementBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();

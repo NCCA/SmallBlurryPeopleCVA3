@@ -1,23 +1,14 @@
 #version 410 core
 
+#define PI 3.14159
+
 layout(location = 0) out vec4 outColour;
-layout(location = 1) out vec4 outNormal;
-layout(location = 2) out vec4 outPosition;
-layout(location = 3) out vec4 outDepth;
-
-uniform vec4 colour;
-
-uniform sampler2D grass;
-uniform sampler2D rock;
-uniform sampler2D snow;
-
-uniform float waterlevel;
-uniform float snowline;
 
 in vec4 normal;
 in vec4 position;
-flat in int inID;
 in vec2 UV;
+
+uniform float iGlobalTime;
 
 //Noise functions from https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 //  Classic Perlin 3D Noise
@@ -95,72 +86,17 @@ float cnoise(vec3 P){
     return 2.2 * n_xyz;
 }
 
-vec3 grassColour = vec3(0.4, 0.8, 0.2);
-vec3 rockColour = vec3(0.6, 0.5, 0.4);
-vec3 snowColour = vec3(0.8, 0.8, 0.85);
-
 void main()
 {
-    float grassMul = dot(normal.xyz, vec3(0.0, 1.0, 0.0));
-    grassMul = clamp(grassMul, 0.0, 1.0);
-    grassMul = pow(grassMul, 12.0);
+    float pux = PI * UV.x;
+    float puy = PI * UV.y;
+    float height = 0.1 * sin(pux * 32.0 + iGlobalTime) + 0.0 * sin(puy * 128.0 + iGlobalTime);
 
-    float depth = gl_FragCoord.z / gl_FragCoord.w;
-    depth = clamp(depth / 32.0, 0.01, 1.0);
+    float mini_noise = cnoise( vec3((UV * 512.0), iGlobalTime / 4.0) );
+    float macro_noise = cnoise( vec3((UV * 16.0), iGlobalTime / 8.0) );
 
-    vec3 shade = vec3(cnoise(position.xyz));
-    shade /= vec3(4.0);
-    shade += vec3(0.75);
-    shade = clamp(shade, vec3(0.0), vec3(1.0));
+    //height += 0.01 * mini_noise + 0.04 * macro_noise;
 
-    //Depth fade mixing
-    vec3 grassDepthMix = mix(
-                texture(grass, UV).xyz,
-                grassColour,
-                depth
-                );
-
-    vec3 rockDepthMix = mix(
-                texture(rock, UV).xyz,
-                rockColour,
-                depth
-                );
-
-    vec3 snowDepthMix = mix(
-                texture(snow, UV).xyz,
-                snowColour,
-                depth
-                );
-
-    //Snow and water level mixing
-    vec3 hcol = mix(
-                grassDepthMix,
-                rockDepthMix,
-                clamp((waterlevel - position.y) * grassMul * 8.0, 0.0, 1.0)
-                );
-
-    hcol = mix(
-                hcol,
-                snowDepthMix,
-                clamp((position.y - snowline) * 8.0, 0.0, 1.0)
-            );
-
-    //Normal direction mixing
-    vec3 ncol = mix(
-                rockDepthMix,
-                hcol,
-                vec3(grassMul)
-                );
-
-    /*if(position.y < waterlevel)
-        col = rockDepthMix;
-    else if(position.y > snowline)
-        col = snowDepthMix;*/
-
-    outColour.xyz = shade * ncol;
+    outColour = vec4(height);
     outColour.a = 1.0;
-    outNormal = normal;
-    outPosition = position;
-    outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
-    outDepth.a = 1.0;
 }

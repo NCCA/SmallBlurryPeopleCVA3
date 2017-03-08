@@ -25,6 +25,7 @@ float clamp(float _in, float _lo, float _hi)
 }
 
 const int shadowResolution = 4096;
+const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
@@ -60,6 +61,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
+    createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -72,6 +74,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -164,10 +167,10 @@ void Scene::initialiseFramebuffers()
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
+    m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
     m_mainBuffer.addDepthAttachment( "depth" );
     if(!m_mainBuffer.checkComplete())
     {
@@ -202,6 +205,16 @@ void Scene::initialiseFramebuffers()
         exit(EXIT_FAILURE);
     }
     m_shadowBuffer.unbind();
+
+    std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
+    m_displacementBuffer.initialise(waterResolution, waterResolution);
+    m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
+    if(!m_displacementBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_displacementBuffer.unbind();
 }
 
 void Scene::readNameFile()
@@ -465,7 +478,6 @@ void Scene::draw()
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
-
     //---------------------------//
     //          LIGHTING         //
     //---------------------------//
@@ -482,15 +494,36 @@ void Scene::draw()
     for( int i = 0; i < cascadeDistances.size(); ++i )
         slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-    //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
+    m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 3 );
-    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 4 );
-    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
+    m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
+    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
+    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
+    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //---------------------------//
+    //       DISAPLACEMENT       //
+    //---------------------------//
+    m_displacementBuffer.bind();
+    m_displacementBuffer.activeColourAttachments();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(0, 0, waterResolution, waterResolution);
+
+    glBindVertexArray(m_screenQuad);
+
+    slib->use("waterDisplacement");
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    m_displacementBuffer.unbind();
+
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
     //      FORWARD-SHADING      //
@@ -507,15 +540,27 @@ void Scene::draw()
     slib->use("water");
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+    id = slib->getProgramID("water");
+
+    m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
-    m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
-    m_transform.setRotation(90.0f, 0.0f, 0.0f);
-    m_transform.setPosition(0.0f, m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f);
-    loadMatricesToShader();
 
-    glDrawArraysEXT(GL_PATCHES, 0, 4);
+    //Unit size of each water tile.
+    int scale = 10;
+    for(int i = 0; i < m_grid.getW(); i += scale)
+    {
+        for(int j = 0; j < m_grid.getH(); j += scale)
+        {
+            m_transform.setScale(scale, scale, 1.0f);
+            m_transform.setRotation(90.0f, 0.0f, 0.0f);
+            m_transform.setPosition(i, m_grid.getWaterLevel() / m_terrainHeightDivider, j);
+            loadMatricesToShader();
+            glDrawArraysEXT(GL_PATCHES, 0, 4);
+        }
+    }
+
     glBindVertexArray(0);
 
     //---------------------------//
@@ -892,8 +937,8 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
 
     if(loc == -1)
     {
-        //std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
-        //return;
+        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+        return;
     }
     glUniform1i(loc, _target);
 

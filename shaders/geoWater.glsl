@@ -3,8 +3,8 @@
 layout ( triangles ) in;
 layout ( triangle_strip, max_vertices = 4 ) out;
 
-in vec3 normal[];
-in vec2 UV[];
+in vec3 normal_gs[];
+in vec2 uv[];
 
 out vec3 normalOut[4];
 out vec2 UVout[4];

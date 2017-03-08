@@ -3,6 +3,7 @@
 layout(location = 0) out vec4 outColour;
 layout(location = 1) out vec4 outNormal;
 layout(location = 2) out vec4 outPosition;
+layout(location = 3) out vec4 outDepth;
 //layout(location = 3) out int outID;
 
 uniform vec4 colour;
@@ -17,5 +18,6 @@ void main()
     outColour = colour;
     outNormal = normal;
     outPosition = position;
+    outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
     //outID = inID;
 }

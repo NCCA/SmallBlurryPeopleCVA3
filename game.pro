@@ -10,7 +10,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Camera.cpp \
          $$PWD/src/Grid.cpp \
          $$PWD/src/Character.cpp \
-				 $$PWD/src/Inventory.cpp \
+         $$PWD/src/Inventory.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
          $$PWD/src/imgui/*.cpp \

@@ -13,6 +13,7 @@ uniform sampler2D diffuse;
 uniform sampler2D normal;
 uniform sampler2D position;
 uniform sampler2D shadowDepths[NUM_CASCADES];
+uniform sampler2D linearDepth;
 
 layout (location = 0) out vec4 fragColour;
 
@@ -33,6 +34,8 @@ vec2( 0.34495938, 0.29387760 )
 );
 
 vec3 moonColour = vec3(0.3, 0.6, 0.8);
+
+vec3 fogColour = vec3(0.9, 0.9, 0.94);
 
 uniform vec4 camPos;
 
@@ -104,19 +107,6 @@ void main()
         mul -= shadow;
     }
 
-    /*vec4 sposition = shadowMatrix[0] * vec4(texture(position, UV).xyz, 1.0);
-
-    float depth = sposition.z - bias;
-
-    float shadow = shadowSample(depth, sposition.xy, 0);
-    shadow += shadowSample(depth, sposition.xy - pixelstep, 0);
-    shadow += shadowSample(depth, sposition.xy + vec2(pixelstep.x, -pixelstep.y), 0);
-    shadow += shadowSample(depth, sposition.xy + vec2(-pixelstep.x, pixelstep.y), 0);
-    shadow += shadowSample(depth, sposition.xy + pixelstep, 0);
-
-    shadow /= 5.0;
-    mul -= shadow * 0.2;*/
-
     mul = max(mul, 0.05);
 
 #if shadowbuffer == 1
@@ -127,7 +117,14 @@ void main()
 
 #if shadowbuffer == 0
     if(moonmul > 0.0)
+    {
         fragColour.xyz *= moonColour;
+    }
 #endif
+
+    float a = clamp(texture(linearDepth, UV).r / 128.0, 0.0, 1.0);
+    fragColour.xyz = mix(fragColour.xyz, fogColour, a);
+    //fragColour.xyz = vec3(texture(linearDepth, UV).r);
+
     fragColour.a = 1.0;
 }
