@@ -74,7 +74,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
 
     //reads file with list of names
     readNameFile();

@@ -88,14 +88,14 @@ float cnoise(vec3 P){
 
 void main()
 {
-    float pux = PI * UV.x;
-    float puy = PI * UV.y;
-    float height = 0.1 * sin(pux * 32.0 + iGlobalTime) + 0.0 * sin(puy * 128.0 + iGlobalTime);
+    float pux = 2.0 * PI * UV.x;
+    float puy = 2.0 * PI * UV.y;
+    float height = 0.05 * sin(pux * 4.0 + iGlobalTime) + 0.01 * sin(puy + iGlobalTime);
 
     float mini_noise = cnoise( vec3((UV * 512.0), iGlobalTime / 4.0) );
     float macro_noise = cnoise( vec3((UV * 16.0), iGlobalTime / 8.0) );
 
-    //height += 0.01 * mini_noise + 0.04 * macro_noise;
+    height += 0.002 * mini_noise + 0.04 * macro_noise;
 
     outColour = vec4(height);
     outColour.a = 1.0;
