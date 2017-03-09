@@ -540,6 +540,8 @@ void Scene::draw()
     slib->use("water");
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+    slib->setRegisteredUniform("lightDir", m_sunDir);
+    slib->setRegisteredUniform("camPos", m_cam.getPos());
     id = slib->getProgramID("water");
 
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );

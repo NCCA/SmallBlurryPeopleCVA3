@@ -7,7 +7,10 @@ in vec3 normal_fs;
 in vec2 uv_fs;
 
 uniform sampler2D displacement;
+uniform sampler2D terrainPos;
 uniform vec2 pixelstep;
+uniform vec3 lightDir;
+uniform vec3 camPos;
 
 void main()
 {
@@ -40,9 +43,20 @@ void main()
     nav /= 4.0;
 
     vec3 normal = normalize( nav );
-    fragColour = vec4(0.1f, 0.2f, 0.35f, 0.5f);
-    fragColour = vec4(normal, 1.0);
+
+    float mul = dot(normal, lightDir);
+    mul += 1.0;
+    mul /= 2.0;
+
+    vec3 eyeVec = normalize(camPos - position_fs.xyz);
+    vec3 reflection = normalize(reflect(lightDir, normal));
+    float smul = clamp(dot(eyeVec, reflection), 0.0, 1.0);
+    smul = pow( smul, 2.0 );
+
+    fragColour.xyz = vec3(0.1, 0.2, 0.35) * mul;
+    fragColour.xyz += vec3(smul);
+    fragColour.a = 0.15 * (-abs(mul) + 1.0) + 0.85;
+    //fragColour = vec4(normal, 1.0);
     //fragColour = vec4(texture(displacement, uv_fs).r * 16.0);
     //fragColour = vec4(uv_fs.x, uv_fs.y, 0.0, 1.0);
-    fragColour.a = 1.0;
 }
