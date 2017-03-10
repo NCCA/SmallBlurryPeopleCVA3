@@ -25,21 +25,24 @@ float clamp(float _in, float _lo, float _hi)
 }
 
 const int shadowResolution = 4096;
+const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_active(true),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
-    m_mouse_zoom(10.0f),
+    m_mouse_zoom_cur(10.0f),
+    m_mouse_zoom_targ(10.0f),
     m_mouse_pan(1.0f),
     m_mouse_translation(0.0f,0.0f),
     m_mouse_rotation(0.0f),
-    m_mouse_prev_pos(0.0f, 0.0f)
+    m_mouse_prev_pos(0.0f, 0.0f),
+    m_sunAngle(90.0f, 0.0f, 5.0f)
 {
     m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom));
+    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom_cur));
     m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
@@ -58,13 +61,23 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
-    createShader("water", "vertMVPUVN", "fragWater", "geoWater");
+    createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
+    createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
+
+    slib->use("water");
+    GLint tlvl = 0;
+    glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
+    slib->setRegisteredUniform("maxTessLevel", tlvl);
+    std::cout << "Max water tesselation level set to " << tlvl << '\n';
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("viewport", m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -121,7 +134,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
                 uvs
                 );
 
-    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f)};
+    verts = {ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f), ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 1.0f, 0.0f, 1.0f), ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f)};
     std::vector<ngl::Vec3> normals = {ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f), ngl::Vec3(0.0f, 0.0f, 1.0f)};
     uvs = {ngl::Vec2(0.0f, 0.0f), ngl::Vec2(1.0f, 0.0f), ngl::Vec2(0.0f, 1.0f), ngl::Vec2(1.0f, 1.0f)};
 
@@ -157,10 +170,10 @@ void Scene::initialiseFramebuffers()
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-
     m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
+    m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
     m_mainBuffer.addDepthAttachment( "depth" );
     if(!m_mainBuffer.checkComplete())
     {
@@ -195,6 +208,16 @@ void Scene::initialiseFramebuffers()
         exit(EXIT_FAILURE);
     }
     m_shadowBuffer.unbind();
+
+    std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
+    m_displacementBuffer.initialise(waterResolution, waterResolution);
+    m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
+    if(!m_displacementBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_displacementBuffer.unbind();
 }
 
 void Scene::readNameFile()
@@ -263,7 +286,7 @@ void Scene::update()
     }
 
     //Set initial position (should really make this function more intuitive).
-    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom));
+    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur));
 
     //Clear all transformations from previous update.
     m_cam.clearTransforms();
@@ -282,6 +305,7 @@ void Scene::update()
 
     m_camTargPos = trans;
     m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
+    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
@@ -297,7 +321,7 @@ void Scene::update()
 
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 5.0f;
-    m_sunAngle.m_x += 0.1f;
+    m_sunAngle.m_x += 0.01f;
     if(m_sunAngle.m_x > 360.0f)
         m_sunAngle.m_x = 0.0f;
     //std::cout << m_sunAngle.m_x << '\n';
@@ -434,8 +458,10 @@ void Scene::draw()
     }
 
     m_mainBuffer.unbind();
-    m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
-    //glClearColor(1.0,0.0,0.0,1.0);
+
+    //This gives opengl error 1282. I guess you can't specify draw buffers for the back buffer?
+    //m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
 
@@ -470,15 +496,36 @@ void Scene::draw()
     for( int i = 0; i < cascadeDistances.size(); ++i )
         slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-    //m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
+    m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 3 );
-    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 4 );
-    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 5 );
+    m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
+    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
+    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
+    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //---------------------------//
+    //       DISAPLACEMENT       //
+    //---------------------------//
+    m_displacementBuffer.bind();
+    m_displacementBuffer.activeColourAttachments();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(0, 0, waterResolution, waterResolution);
+
+    glBindVertexArray(m_screenQuad);
+
+    slib->use("waterDisplacement");
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    m_displacementBuffer.unbind();
+
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
     //      FORWARD-SHADING      //
@@ -493,14 +540,32 @@ void Scene::draw()
     glEnable(GL_DEPTH_TEST);
 
     slib->use("water");
+    slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+    slib->setRegisteredUniform("lightDir", m_sunDir);
+    slib->setRegisteredUniform("camPos", m_cam.getPos());
+    id = slib->getProgramID("water");
+
+    m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
+    m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
-    m_transform.setScale(m_grid.getW(), m_grid.getH(), 1.0f);
-    m_transform.setRotation(90.0f, 0.0f, 0.0f);
-    m_transform.setPosition(0.0f, m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f);
-    loadMatricesToShader();
-    glDrawArraysEXT(GL_TRIANGLE_STRIP, 0, 4);
+
+    //Unit size of each water tile.
+    int scale = 10;
+    for(int i = 0; i < m_grid.getW(); i += scale)
+    {
+        for(int j = 0; j < m_grid.getH(); j += scale)
+        {
+            m_transform.setScale(scale, scale, 1.0f);
+            m_transform.setRotation(90.0f, 0.0f, 0.0f);
+            m_transform.setPosition(i, m_grid.getWaterLevel() / m_terrainHeightDivider, j);
+            loadMatricesToShader();
+            glDrawArraysEXT(GL_PATCHES, 0, 4);
+        }
+    }
+
     glBindVertexArray(0);
 
     //---------------------------//
@@ -516,12 +581,12 @@ void Scene::draw()
 
 void Scene::quit()
 {
-  m_active = false;
+    m_active = false;
 }
 
 bool Scene::isActive()
 {
-  return m_active;
+    return m_active;
 }
 
 std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
@@ -711,22 +776,22 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-    if(_event.y > 0 && m_mouse_zoom > 10.5)
+    if(_event.y > 0 && m_mouse_zoom_targ > 10.5)
     {
         if (m_mouse_pan > -5)
         {
             m_mouse_pan -= 0.5;
         }
-        m_mouse_zoom -= 0.5;
+        m_mouse_zoom_targ -= 0.5;
     }
 
-    else if(_event.y < 0 && m_mouse_zoom < 20)
+    else if(_event.y < 0 && m_mouse_zoom_targ < 20)
     {
         if(m_mouse_pan < 10)
         {
             m_mouse_pan += 0.5;
         }
-        m_mouse_zoom += 0.5;
+        m_mouse_zoom_targ += 0.5;
     }
 }
 
@@ -753,28 +818,36 @@ void Scene::windowEvent(const SDL_WindowEvent &_event)
 
 void Scene::resize(const ngl::Vec2 &_dim)
 {
-  std::cout << "Resizing viewport to " << _dim.m_x << ", " << _dim.m_y << '\n';
-  m_viewport = _dim;
-  m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
-  m_cam.calculateProjectionMat();
-  m_cam.calculateViewMat();
+    std::cout << "Resizing viewport to " << _dim.m_x << ", " << _dim.m_y << '\n';
+    m_viewport = _dim;
+    m_cam.setAspect( m_viewport.m_x / m_viewport.m_y );
+    m_cam.calculateProjectionMat();
+    m_cam.calculateViewMat();
 
-  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-  slib->use("sky");
-  slib->setRegisteredUniform("viewport", m_viewport);
+    slib->use("sky");
+    slib->setRegisteredUniform("viewport", m_viewport);
 
-  slib->use("deferredLight");
-  slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->use("deferredLight");
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
+    slib->use("water");
+    GLint tlvl = 0;
+    glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
+    slib->setRegisteredUniform("maxTessLevel", tlvl);
+    std::cout << "Max water tesselation level set to " << tlvl << '\n';
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("viewport", m_viewport);
 
-  m_mainBuffer = Framebuffer();
-  m_pickBuffer = Framebuffer();
-  m_shadowBuffer = Framebuffer();
+    m_mainBuffer = Framebuffer();
+    m_pickBuffer = Framebuffer();
+    m_shadowBuffer = Framebuffer();
 
-  initialiseFramebuffers();
-  Gui::instance()->setResolution(_dim);
-  std::cout << "Viewport resized.\n";
+    initialiseFramebuffers();
+    Gui::instance()->setResolution(_dim);
+    std::cout << "Viewport resized.\n";
 }
 
 void Scene::mouseSelection()
@@ -806,9 +879,9 @@ void Scene::mouseSelection()
             {
                 if (character.getID() == red)
                 {
-                  // needs changing, maybe probably because vector addresses can change?
+                    // needs changing, maybe probably because vector addresses can change?
                     Gui::instance()->setActiveCharacter(&character);
-                  //
+                    //
                     m_active_char = &character;
                     if(character.isActive() == false)
                         character.setActive(true);
@@ -884,8 +957,8 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
 
     if(loc == -1)
     {
-        //std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
-        //return;
+        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+        return;
     }
     glUniform1i(loc, _target);
 
