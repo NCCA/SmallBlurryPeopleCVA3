@@ -14,6 +14,7 @@ uniform vec2 pixelstep;
 uniform vec3 lightDir;
 uniform vec3 camPos;
 uniform vec2 viewport;
+uniform vec3 directionalLightCol;
 
 //Noise functions from https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 //  Classic Perlin 3D Noise
@@ -134,8 +135,8 @@ void main()
     float smul = clamp(dot(eyeVec, reflection), 0.0, 1.0);
     smul = pow( smul, 4.0 );
 
-    fragColour.xyz = vec3(0.1, 0.2, 0.35) * mul;
-    fragColour.xyz += vec3(smul);
+    fragColour.xyz = vec3(0.1, 0.2, 0.35) * directionalLightCol * mul;
+    fragColour.xyz += directionalLightCol * smul;
     fragColour.a = 0.5 * (-abs(mul) + 1.0) + 0.5;
     float d = distance(position_fs, texture(terrainPos, UV));
     fragColour.a += d / 8.0;
@@ -144,7 +145,7 @@ void main()
     float dmul = clamp(cnoise(position_fs.xyz * 32.0), 0.25, 1.0);
     dmul *= 1.0 / (waterDepth * 32.0);
 
-    fragColour.xyz = mix(fragColour.xyz, vec3(1.0), clamp(dmul, 0.0, 1.0));
+    fragColour.xyz = mix(fragColour.xyz, directionalLightCol, clamp(dmul, 0.0, 1.0));
 
 
     //fragColour.xyz = vec3(distance(position_fs, texture(terrainPos, UV)) / 4.0);

@@ -21,6 +21,7 @@ uniform vec3 sunDir;
 uniform float sunInts;
 uniform float moonInts;
 uniform float waterLevel;
+uniform vec3 directionalLightCol;
 
 uniform mat4 shadowMatrix[NUM_CASCADES];
 
@@ -117,10 +118,7 @@ void main()
 #endif
 
 #if shadowbuffer == 0
-    if(moonmul > 0.0)
-    {
-        fragColour.xyz *= moonColour;
-    }
+    fragColour.xyz *= directionalLightCol;
 #endif
 
     float a = clamp(texture(linearDepth, UV).r / 128.0, 0.0, 1.0);
@@ -128,10 +126,10 @@ void main()
     //fragColour.xyz = vec3(texture(linearDepth, UV).r);
 
     if(camPos.y < waterLevel)
-        fragColour.xyz *= vec3(0.1, 0.2, 0.35);
+        fragColour.xyz *= vec3(0.1, 0.2, 0.35) * directionalLightCol;
 
     float d = clamp(waterLevel - texture(position, UV).y, 0.0, 1.0);
-    fragColour.xyz = mix(fragColour.xyz, fragColour.xyz * vec3(0.1, 0.2, 0.35), d);
+    fragColour.xyz = mix(fragColour.xyz, fragColour.xyz * directionalLightCol * vec3(0.1, 0.2, 0.35), d);
 
 
     fragColour.a = 1.0;

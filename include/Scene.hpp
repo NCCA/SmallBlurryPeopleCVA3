@@ -155,6 +155,7 @@ private:
 
     ngl::Vec3 m_sunAngle;
     ngl::Vec3 m_sunDir;
+    ngl::Vec3 m_directionalLightCol;
 
     std::vector<ngl::Mat4> m_shadowMat;
 
