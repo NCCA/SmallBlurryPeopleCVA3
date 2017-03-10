@@ -505,6 +505,7 @@ void Scene::draw()
     slib->setRegisteredUniform("sunDir", m_sunDir );
     slib->setRegisteredUniform( "sunInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
     slib->setRegisteredUniform( "moonInts", clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
     slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
