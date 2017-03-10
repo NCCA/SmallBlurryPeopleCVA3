@@ -60,4 +60,5 @@ void main()
     position_fs.w = 1.0;
 
     gl_Position = MVP * position_fs;
+    position_fs = M * position_fs;
 }

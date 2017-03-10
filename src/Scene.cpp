@@ -68,6 +68,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     slib->use("deferredLight");
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
     slib->use("water");
     GLint tlvl = 0;
@@ -75,6 +76,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("viewport", m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -545,6 +547,7 @@ void Scene::draw()
     id = slib->getProgramID("water");
 
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
+    m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
@@ -824,6 +827,15 @@ void Scene::resize(const ngl::Vec2 &_dim)
 
     slib->use("deferredLight");
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
+    slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
+
+    slib->use("water");
+    GLint tlvl = 0;
+    glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
+    slib->setRegisteredUniform("maxTessLevel", tlvl);
+    std::cout << "Max water tesselation level set to " << tlvl << '\n';
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("viewport", m_viewport);
 
     m_mainBuffer = Framebuffer();
     m_pickBuffer = Framebuffer();
