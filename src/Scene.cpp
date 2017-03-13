@@ -342,7 +342,7 @@ void Scene::update()
     float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
     float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
 
-    m_directionalLightCol = t_midday * ngl::Vec3(1.0f, 1.0f, 1.0f) +
+    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
             t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
             t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
 

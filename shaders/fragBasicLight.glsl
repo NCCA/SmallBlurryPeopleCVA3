@@ -38,8 +38,6 @@ vec2( 0.34495938, 0.29387760 )
 
 vec3 moonColour = vec3(0.3, 0.6, 0.8);
 
-vec3 fogColour = vec3(0.9, 0.9, 0.94);
-
 uniform vec4 camPos;
 
 
@@ -200,7 +198,7 @@ void main()
 #endif
 
     float a = clamp(texture(linearDepth, UV).r / 128.0, 0.0, 1.0);
-    fragColour.xyz = mix(fragColour.xyz, fogColour, a);
+    fragColour.xyz = mix(fragColour.xyz, directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
     //fragColour.xyz = vec3(texture(linearDepth, UV).r);
 
     if(camPos.y < waterLevel)
@@ -210,8 +208,9 @@ void main()
     fragColour.xyz = mix(fragColour.xyz, fragColour.xyz * directionalLightCol * vec3(0.1, 0.2, 0.35), d);
 
     float wigglyLightMul = (1.1 - d) * (d * d);
-    vec3 wiggles = vec3(1.0) - abs(cnoise(texture(position, UV).xyz * 4.0 + vec3(0.0, iGlobalTime * 0.25, 0.0)));
+    vec3 wiggles = vec3(1.0) - abs(cnoise(texture(position, UV).xyz * 8.0 + vec3(0.0, iGlobalTime * 0.25, 0.0)));
     wiggles = pow(wiggles, vec3(4.0));
+    wiggles = clamp(wiggles, 0.0, 1.0);
     fragColour.xyz += wigglyLightMul * wiggles * directionalLightCol;
 
     fragColour.a = 1.0;

@@ -93,9 +93,9 @@ void main()
     float height = 0.02 * sin(pux * 4.0 + iGlobalTime) + 0.001 * sin(puy + iGlobalTime);
 
     float mini_noise = cnoise( vec3((UV * 512.0), iGlobalTime / 4.0) );
-    float macro_noise = cnoise( vec3((UV * 16.0), iGlobalTime / 8.0) );
+    float macro_noise = cnoise( vec3((UV * 8.0), iGlobalTime / 8.0) );
 
-    height += 0.0001 * mini_noise + 0.01 * macro_noise;
+    height += 0.0001 * mini_noise + 0.05 * macro_noise;
 
     outColour = vec4(height);
     outColour.a = 1.0;

@@ -130,12 +130,16 @@ void main()
     mul += 1.0;
     mul /= 2.0;
 
+    //Surface to cam
     vec3 eyeVec = normalize(camPos - position_fs.xyz);
-    //vec3 halfVec = normalize(lightDir - eyeVec);
-    vec3 reflection = reflect(lightDir, normal);
-    //float smul = clamp(dot(eyeVec, reflection), 0.0, 1.0);
+    //Lightdir is direction to light
+    vec3 reflection = normalize(reflect(lightDir, normal));
+    reflection.y = 1.0 - reflection.y;
+    //reflection.z = -reflection.z;
+    reflection = normalize( reflection );
+    //Dot with surface->eye
     float smul = max( dot(eyeVec, reflection), 0.0 );
-    smul = pow( smul, 8.0 );
+    smul = pow( smul, 16.0 );
 
     fragColour.xyz = vec3(0.1, 0.2, 0.35) * directionalLightCol * mul;
     fragColour.xyz += directionalLightCol * smul;
@@ -151,7 +155,7 @@ void main()
 
     //fragColour.xyz = vec3(distance(position_fs, texture(terrainPos, UV)) / 4.0);
     //fragColour.xyz = position_fs.xyz;
-    //fragColour.xyz = normal;
+    //fragColour.xyz = vec3(smul);
     //fragColour.a = 1.0;
 
     fragColour.a = clamp(fragColour.a, 0.0, 1.0);
