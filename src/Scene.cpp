@@ -37,7 +37,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_translation(0.0f,0.0f),
     m_mouse_rotation(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f),
-    m_sunAngle(90.0f, 0.0f, 5.0f)
+    m_sunAngle(90.0f, 0.0f, 5.0f),
+    m_day(80)
 {
     m_viewport = _viewport;
 
@@ -320,11 +321,17 @@ void Scene::update()
     }
 
     //m_sunAngle.m_x = 150.0f;
-    m_sunAngle.m_z = 5.0f;
+    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
     m_sunAngle.m_x += 0.01f;
     if(m_sunAngle.m_x > 360.0f)
+    {
+        m_day++;
         m_sunAngle.m_x = 0.0f;
+        //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+    }
     //std::cout << m_sunAngle.m_x << '\n';
+
+    m_season = (m_day % 365) / 365.0f;
 
     ngl::Transformation t;
     t.setRotation( m_sunAngle );
@@ -430,8 +437,12 @@ void Scene::draw()
     bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
     bindTextureToShader("terrain", m_store.getTexture("snow"), "snow", 2);
 
-    slib->setRegisteredUniform( "waterlevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
-    slib->setRegisteredUniform( "snowline", m_grid.getMountainHeight() / m_terrainHeightDivider);
+    float waterLevel = m_grid.getWaterLevel() / m_terrainHeightDivider;
+    slib->setRegisteredUniform( "waterlevel", waterLevel);
+    float snowLevel = m_grid.getMountainHeight() / m_terrainHeightDivider;
+    float difference = snowLevel - waterLevel;
+    float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
+    slib->setRegisteredUniform( "snowline", snow);
 
     m_transform.reset();
     glBindVertexArray(m_terrainVAO);
@@ -527,7 +538,7 @@ void Scene::draw()
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
-    //       DISAPLACEMENT       //
+    //       DISPLACEMENT       //
     //---------------------------//
     m_displacementBuffer.bind();
     m_displacementBuffer.activeColourAttachments();

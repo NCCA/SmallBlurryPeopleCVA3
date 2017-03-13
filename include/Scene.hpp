@@ -156,6 +156,10 @@ private:
     ngl::Vec3 m_sunAngle;
     ngl::Vec3 m_sunDir;
     ngl::Vec3 m_directionalLightCol;
+    //Tracks days since the start of the game.
+    int m_day;
+    /// @brief 0 = January 1st, 1 = December 31st.
+    float m_season;
 
     std::vector<ngl::Mat4> m_shadowMat;
 
