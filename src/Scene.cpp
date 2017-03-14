@@ -24,9 +24,6 @@ float clamp(float _in, float _lo, float _hi)
     return _in;
 }
 
-const int shadowResolution = 4096;
-const int waterResolution = 1024;
-
 Scene::Scene(ngl::Vec2 _viewport) :
     m_active(true),
     m_mouse_trans_active(false),
@@ -40,6 +37,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80)
 {
+    m_prefs = Preferences::instance();
     m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
@@ -77,7 +75,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
 
     //reads file with list of names
@@ -195,8 +193,8 @@ void Scene::initialiseFramebuffers()
     }
     m_pickBuffer.unbind();
 
-    std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
-    m_shadowBuffer.initialise( shadowResolution, shadowResolution );
+    std::cout << "Initalising shadow framebuffer to " << m_prefs->getShadowMapRes() << " by " << m_prefs->getShadowMapRes() << '\n';
+    m_shadowBuffer.initialise(m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
     glDrawBuffer( GL_NONE );
     glReadBuffer( GL_NONE );
     for(int i = 0; i < 3; ++i)
@@ -210,12 +208,12 @@ void Scene::initialiseFramebuffers()
     }
     m_shadowBuffer.unbind();
 
-    std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
-    m_displacementBuffer.initialise(waterResolution, waterResolution);
+    std::cout << "Initalising displacement framebuffer to " << m_prefs->getWaterMapRes() << " by " << m_prefs->getWaterMapRes() << '\n';
+    m_displacementBuffer.initialise(m_prefs->getWaterMapRes(), m_prefs->getWaterMapRes());
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
     if(!m_displacementBuffer.checkComplete())
     {
-        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << m_prefs->getWaterMapRes() <<  '\n';
         exit(EXIT_FAILURE);
     }
     m_displacementBuffer.unbind();
@@ -322,7 +320,7 @@ void Scene::update()
 
     //m_sunAngle.m_x = 150.0f;
     m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-    m_sunAngle.m_x += 0.01f;
+    m_sunAngle.m_x += m_prefs->getTimeScale();
     if(m_sunAngle.m_x > 360.0f)
     {
         m_day++;
@@ -375,6 +373,9 @@ void Scene::draw()
 
     slib->use("terrainPick");
 
+		ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
+		slib->setRegisteredUniform("dimensions", grid_size);
+
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
@@ -387,9 +388,8 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-        ngl::Vec2 pos = ch.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
+				ngl::Vec3 pos = ch.getPos();
+				m_transform.setPosition(pos);
         slib->setRegisteredUniform("id", ch.getID());
         drawAsset( "person", "", "");
     }
@@ -403,7 +403,7 @@ void Scene::draw()
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
 
-    glViewport(0, 0, shadowResolution, shadowResolution);
+    glViewport(0, 0, m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
@@ -477,11 +477,11 @@ void Scene::draw()
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				m_transform.setPosition(pos);
+				slib->use("colour");
+				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
         drawAsset( "person", "", "colour");
     }
 
@@ -544,7 +544,7 @@ void Scene::draw()
     m_displacementBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glViewport(0, 0, waterResolution, waterResolution);
+    glViewport(0, 0, m_prefs->getWaterMapRes(), m_prefs->getWaterMapRes());
 
     glBindVertexArray(m_screenQuad);
 
@@ -736,8 +736,10 @@ void Scene::shadowPass(bounds _box, size_t _index)
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        m_transform.setPosition(pos[0],0.0f,pos[1]);
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				//std::cout<<"HEIGHT: "<<pos.m_y<<std::endl;
+				m_transform.setPosition(pos);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = m_store.getModel( "person" );
@@ -870,7 +872,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
 
     m_mainBuffer = Framebuffer();
@@ -904,6 +906,7 @@ void Scene::mouseSelection()
 
         long unsigned int red;
         glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+				std::cout<<"RED"<<red<<std::endl;
         //change depending on number characters
         if(red >= 0 && red < m_characters.size())
         {
@@ -939,8 +942,8 @@ void Scene::mouseSelection()
             {
                 std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
-                int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
-                int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
+								int grid_coord_x = floor((grid_coord[0]/255.0) * m_grid.getW());
+								int grid_coord_y = floor((grid_coord[2]/255.0) * m_grid.getH());
 
                 std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
 

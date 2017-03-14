@@ -87,6 +87,8 @@ public:
   int getMountainHeight();
   int getWaterLevel();
 
+  float getInterpolatedHeight(float _x, float _y);
+
 private:
   /// @brief runs the given python script to generate a map
   /// @param [in] the script that will set values in m_map

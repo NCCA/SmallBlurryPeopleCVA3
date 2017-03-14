@@ -17,6 +17,8 @@ enum class State
 {
 	GET_WOOD,
 	STORE_WOOD,
+	GET_FISH,
+	STORE_FISH,
 	BUILD,
 	SLEEP,
 	FORAGE,
@@ -92,7 +94,7 @@ public:
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position
 	///
-	ngl::Vec2 getPos() {return m_pos;}
+	ngl::Vec3 getPos();
 	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
@@ -137,7 +139,7 @@ private:
   ///
 	/// \brief m_pos, character position
   ///
-  ngl::Vec2 m_pos;
+	ngl::Vec2 m_pos;
   ///
 	/// \brief m_target_id, id of target tile on grid
   ///
@@ -162,6 +164,9 @@ private:
 	/// \brief m_wood_inventory, the amount of wood a character has
 	///
 	int m_wood_inventory;
+	/// \brief m_fish_inventory, the amount of fish a character has
+	///
+	int m_fish_inventory;
 	///
 	/// \brief m_chopping_speed, how long it takes the character to chop wood
 	///
@@ -170,6 +175,14 @@ private:
 	/// \brief m_building_speed, how long it takes the character to build a house
 	///
 	int m_building_speed;
+	///
+	/// \brief m_fishing_speed, how long it takes the character to catch a fish
+	///
+	int m_fishing_speed;
+	///
+	/// \brief m_fishing_catch, likeyhood of catching a fish
+	///
+	int m_fishing_catch;
 };
 
 #endif//__CHARACTER_HPP__
