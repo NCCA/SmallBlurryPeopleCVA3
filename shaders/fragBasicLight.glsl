@@ -1,4 +1,3 @@
-
 #version 410 core
 
 #define shadowbuffer 0
@@ -187,13 +186,8 @@ void main()
 
     mul = max(mul, 0.05);
 
-#if shadowbuffer == 1
-    fragColour.xyz = vec3(texture(shadowDepths[1], UV).r);
-#else
-    fragColour.xyz *= mul;
-#endif
-
 #if shadowbuffer == 0
+    fragColour.xyz *= mul;
     fragColour.xyz *= directionalLightCol;
 #endif
 
@@ -212,6 +206,10 @@ void main()
     wiggles = pow(wiggles, vec3(4.0));
     wiggles = clamp(wiggles, 0.0, 1.0);
     fragColour.xyz += wigglyLightMul * wiggles * directionalLightCol;
+
+#if shadowbuffer == 1
+    fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
+#endif
 
     fragColour.a = 1.0;
 }

@@ -74,9 +74,7 @@ ngl::Mat4 Camera::rotationMatrix(float _pitch, float _yaw, float _roll)
     ngl::Mat4 r;
 
     p.rotateX( _pitch );
-
     y.rotateY( _yaw );
-
     r.rotateZ( _roll );
 
     return y * p * r;
@@ -105,19 +103,21 @@ std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)
     float ev = _end * vertical;
 
     //Near plane
-    cascade[0] = ngl::Vec3( -sh, sv, _start ); //Top left
-    cascade[1] = ngl::Vec3( sh, sv, _start ); //Top right
-    cascade[2] = ngl::Vec3( -sh, -sv, _start ); //Bottom left
-    cascade[3] = ngl::Vec3( sh, -sv, _start ); //Bottom right
+    cascade[0] = ngl::Vec3( -sh, sv, -_start ); //Top left
+    cascade[1] = ngl::Vec3( sh, sv, -_start ); //Top right
+    cascade[2] = ngl::Vec3( -sh, -sv, -_start ); //Bottom left
+    cascade[3] = ngl::Vec3( sh, -sv, -_start ); //Bottom right
 
     //Far plane
-    cascade[4] = ngl::Vec3( -eh, ev, _end ); //Top left
-    cascade[5] = ngl::Vec3( eh, ev, _end ); //Top right
-    cascade[6] = ngl::Vec3( -eh, -ev, _end ); //Bottom left.
-    cascade[7] = ngl::Vec3( eh, -ev, _end ); //Bottom right
+    cascade[4] = ngl::Vec3( -eh, ev, -_end ); //Top left
+    cascade[5] = ngl::Vec3( eh, ev, -_end ); //Top right
+    cascade[6] = ngl::Vec3( -eh, -ev, -_end ); //Bottom left.
+    cascade[7] = ngl::Vec3( eh, -ev, -_end ); //Bottom right
 
     //Project from view space to world space
-    ngl::Mat4 iv = m_V.inverse();
+    ngl::Mat4 iv = m_V;
+    iv = iv.transpose();
+    iv = iv.inverse();
 
     for(auto &i : cascade)
     {

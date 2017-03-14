@@ -32,4 +32,14 @@ float average(std::vector<float> _values)
     return total / static_cast<float>(_values.size());
 }
 
+bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt)
+{
+    return _pt.m_x > _box.first.m_x and
+            _pt.m_y > _box.first.m_y and
+            _pt.m_z > _box.first.m_z and
+            _pt.m_x < _box.second.m_x and
+            _pt.m_y < _box.second.m_y and
+            _pt.m_z < _box.second.m_z;
+}
+
 }

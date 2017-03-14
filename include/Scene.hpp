@@ -150,8 +150,8 @@ private:
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
 
-    std::vector< bounds > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
-    void shadowPass( bounds _box, size_t _index );
+    std::pair<std::vector<bounds>, std::vector<bounds> > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
+    void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
 
     ngl::Vec3 m_sunAngle;
     ngl::Vec3 m_sunDir;
@@ -195,6 +195,16 @@ private:
                                                         const std::vector<std::vector<ngl::Vec3>> &_facePositions,
                                                         const std::vector<std::vector<ngl::Vec3>> &_faceNormals
                                                         );
+
+    /// @brief Rather than looping through the grid every frame, and drawing based on tile id, I extract out the positions of the meshes that need
+    /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
+    /// improve the design at a later date.
+    std::vector< std::vector<ngl::Vec3> > m_meshPositions;
+
+    //Use these to draw debug points to the screen. Should be deleted/hidden at some point.
+    GLuint m_debugVAO;
+    GLuint m_debugVBO;
+    std::vector<ngl::Vec4> m_debugPoints;
 };
 
 #endif//__SCENE_HPP__

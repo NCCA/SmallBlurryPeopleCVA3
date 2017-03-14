@@ -64,6 +64,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -163,6 +164,21 @@ Scene::Scene(ngl::Vec2 _viewport) :
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
+
+    m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            int index = static_cast<int>( m_grid.get(i, j).getType() );
+            m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                      i,
+                                                      m_grid.get(i, j).getHeight() / m_terrainHeightDivider,
+                                                      j
+                                                      ));
+        }
+
+    glGenVertexArrays(1, &m_debugVAO);
+    glGenBuffers(1, &m_debugVBO);
 }
 
 void Scene::initialiseFramebuffers()
@@ -185,7 +201,7 @@ void Scene::initialiseFramebuffers()
 
     std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
-    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT0 );
     m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
     m_pickBuffer.addDepthAttachment( "depth" );
     if(!m_pickBuffer.checkComplete())
@@ -359,6 +375,8 @@ void Scene::update()
 //I'm sorry this function is so long :(
 void Scene::draw()
 {
+    m_debugPoints.clear();
+
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     glClearColor(0.0,0.0,0.0,0.0);
 
@@ -395,6 +413,7 @@ void Scene::draw()
     }
 
     m_pickBuffer.unbind();
+
     //---------------------------//
     //  SHADOW PASS  //
     //---------------------------//
@@ -409,16 +428,16 @@ void Scene::draw()
     std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
     //cascadeDistances = {0.01f, 16.0f};
 
-    std::vector< std::pair< ngl::Vec3, ngl::Vec3 > > boxes = generateOrthoShadowMatrices( cascadeDistances );
+    auto boxes = generateOrthoShadowMatrices( cascadeDistances );
 
     //Render a pass from each AABB
     slib->use("shadowDepth");
 
     size_t index = 0;
-    for(auto &box : boxes)
+    for(size_t i = 0; i < boxes.first.size(); ++i)
     {
         //std::cout << "Shadowpass for " << index << '\n';
-        shadowPass( box, index );
+        shadowPass( boxes.first[i], boxes.second[i], i );
         index++;
     }
 
@@ -452,26 +471,26 @@ void Scene::draw()
 
     slib->use("diffuse");
 
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
         {
-            GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_grid.get(i,j).getHeight() / m_terrainHeightDivider, j);
-            if(t.getType() == TileType::TREES)
+            m_transform.setPosition(vec);
+            switch( i )
             {
+            case static_cast<int>(TileType::TREES):
                 drawAsset( "tree", "tree_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::MOUNTAINS)
-            {
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
                 drawAsset( "mountain", "mountain_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::STOREHOUSE)
-            {
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
                 drawAsset( "storehouse", "storehouse_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::HOUSE)
-            {
+                break;
+            case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "", "colour");
+                break;
+            default:
+                break;
             }
         }
 
@@ -562,7 +581,7 @@ void Scene::draw()
     //---------------------------//
 
     //Copy depth buffer from main buffer to back buffer.
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+    /*glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
@@ -598,7 +617,7 @@ void Scene::draw()
         }
     }
 
-    glBindVertexArray(0);
+    glBindVertexArray(0);*/
 
     //---------------------------//
     //          BUTTONS          //
@@ -607,8 +626,58 @@ void Scene::draw()
     glClear(GL_DEPTH_BUFFER_BIT);
     Gui::instance()->drawButtons();
 
+    //---------------------------//
+    //         DEBUG DRAW        //
+    //---------------------------//
+    glBindVertexArray(m_screenQuad);
+
+    for(int i = 0; i < 3; ++i)
+    {
+        m_transform.reset();
+        m_transform.setPosition(-0.75 + 0.55 * i, -0.75, 0.0);
+        m_transform.setScale(0.25, 0.25, 1.0);
+
+        slib->use("debugTexture");
+        m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
+        slib->setRegisteredUniform( "M", m_transform.getMatrix() );
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+    }
+
+    slib->use("colour");
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+
+    for(auto &p : m_debugPoints)
+        p.m_w = 1.0;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec4) * m_debugPoints.size(),
+                 &m_debugPoints[0].m_x,
+            GL_STATIC_DRAW
+            );
+
+    glBindVertexArray(m_debugVAO);
+    setBufferLocation(m_debugVBO, 0, 4);
+
+    m_transform.reset();
+    loadMatricesToShader();
+    glDrawArraysEXT(GL_LINE_STRIP, 0, m_debugPoints.size());
+
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    for(auto &b : boxes.first)
+    {
+        ngl::BBox bo (b.first.m_x, b.second.m_x,
+                      b.first.m_y, b.second.m_y,
+                      b.first.m_z, b.second.m_z);
+        loadMatricesToShader();
+        bo.draw();
+    }
+
+
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+
 }
 
 void Scene::quit()
@@ -621,14 +690,16 @@ bool Scene::isActive()
     return m_active;
 }
 
-std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
+//First = world space aabbs
+//Second = light space aabbs
+std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
 {
     ngl::Vec3 s = m_sunDir;
     //Flip if the moon is up.
-    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
         s = -s;
-    ngl::Mat4 V = ngl::lookAt(
-                s,
+    ngl::Mat4 lightView = ngl::lookAt(
+                -s,
                 ngl::Vec3(0.0f, 0.0f, 0.0f),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
@@ -642,6 +713,21 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
 
+    for(auto &c : cascades)
+    {
+        m_debugPoints.push_back(c[0]);
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[3]);
+        m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[0]);
+    }
+
+    std::pair< std::vector< bounds >, std::vector< bounds > > boxes;
+
+    //Store the world space AABB enclosing the cascade
+    for(auto &c : cascades)
+        boxes.first.push_back( Utility::enclose(c) );
+
     //These cascades are in world space. We must convert them into light space.
     for(auto &c : cascades)
     {
@@ -649,43 +735,46 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
         for(auto &vert : c)
         {
             ngl::Vec4 vert4 (vert.m_x, vert.m_y, vert.m_z, 1.0f);
-            vert4 = V * vert4;
+            vert4 = lightView * vert4;
             vert = ngl::Vec3( vert4.m_x, vert4.m_y, vert4.m_z );
-            //std::cout << "Post trans " << vert << '\n';
         }
         //std::cout << '\n';
     }
 
-    //Create AABBs enclosing each cascade section
-    std::vector< std::pair<ngl::Vec3, ngl::Vec3> > boxes;
+    //Create light space AABBs enclosing each cascade section
     for(auto &c : cascades)
-        boxes.push_back( Utility::enclose(c) );
+        boxes.second.push_back( Utility::enclose(c) );
 
     return boxes;
 }
 
-void Scene::shadowPass(bounds _box, size_t _index)
+void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 {
-
     ngl::Vec3 s = m_sunDir;
     //Flip if the moon is up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
 
     //Box dimensions
-    ngl::Vec3 dim = _box.second - _box.first;
+    ngl::Vec3 ldim = _lightbox.second - _lightbox.first;
     //Box position
-    //ngl::Vec3 mid = (_box.first + _box.second) / 2.0f;
+    ngl::Vec3 mid = (_lightbox.first + _lightbox.second) / 2.0f;
+
+    /*ngl::Mat4 P = ngl::ortho(
+                -ldim.m_x, ldim.m_x,
+                -ldim.m_y, ldim.m_y,
+                -ldim.m_z, ldim.m_z
+                );*/
 
     ngl::Mat4 P = ngl::ortho(
-                -dim.m_x, dim.m_x,
-                -dim.m_y, dim.m_y,
-                -dim.m_z, dim.m_z
+                _lightbox.first.m_x, _lightbox.second.m_x,
+                _lightbox.first.m_y, _lightbox.second.m_y,
+                _lightbox.first.m_z, _lightbox.second.m_z
                 );
 
     ngl::Mat4 V = ngl::lookAt(
-                s + m_cam.getPos(),
-                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                -s,
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
@@ -702,35 +791,31 @@ void Scene::shadowPass(bounds _box, size_t _index)
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
         {
-            GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_grid.get(i,j).getHeight()/m_terrainHeightDivider, j);
+            //TO-DO fix
+            /*if(!Utility::pointInBox(reformedWorldBox, vec))
+                continue;*/
+            m_transform.setPosition(vec);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
-            if(t.getType() == TileType::TREES)
+            loadMatricesToShader( m_transform.getMatrix(), mvp );
+            switch( i )
             {
-                ngl::Obj * k = m_store.getModel( "tree" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::MOUNTAINS)
-            {
-                ngl::Obj * k = m_store.getModel( "mountain" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::HOUSE)
-            {
-                ngl::Obj * k = m_store.getModel( "house" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::STOREHOUSE)
-            {
-                ngl::Obj * k = m_store.getModel( "storehouse" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
+            case static_cast<int>(TileType::TREES):
+                m_store.getModel( "tree" )->draw();
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
+                m_store.getModel( "mountain" )->draw();
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                m_store.getModel( "storehouse" )->draw();
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                m_store.getModel( "house" )->draw();
+                break;
+            default:
+                break;
             }
         }
 
@@ -977,6 +1062,21 @@ void Scene::loadMatricesToShader()
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     ngl::Mat4 M = m_transform.getMatrix();
     ngl::Mat4 MVP = M * m_cam.getVP();
+
+    //TO-DO delete
+    ngl::Mat4 pro = ngl::perspective(
+                60.0f,
+                m_cam.getAspect(),
+                0.01,
+                1024.0
+                );
+    ngl::Mat4 vu = ngl::lookAt(
+                ngl::Vec3(1.0f, 128.0f, 0.0f),
+                ngl::Vec3(),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+    MVP = M * vu * pro;
+
     slib->setRegisteredUniform( "M", M );
     slib->setRegisteredUniform( "MVP", MVP );
 }
