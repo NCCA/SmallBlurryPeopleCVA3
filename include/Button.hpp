@@ -24,6 +24,7 @@ enum class YAlignment{
 /// \brief The Action enum for what the buttons does
 ///
 enum class Action{
+  PASSIVE,
   QUIT,
   BUILDHOUSE,
   BUILDSTORE

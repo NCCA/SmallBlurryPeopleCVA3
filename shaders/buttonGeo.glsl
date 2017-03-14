@@ -22,7 +22,7 @@ void main()
   EmitVertex();
 
   fragUV = vec2(0.0, 1.0);
-  gl_Position = gl_in[0].gl_Position + vec4(0.0, buttonSize[0].y, 0.0, 0.0);
+  gl_Position = gl_in[0].gl_Position + vec4(0.0, -buttonSize[0].y, 0.0, 0.0);
   EmitVertex();
 
   fragUV = vec2(1.0, 0.0);
@@ -30,7 +30,7 @@ void main()
   EmitVertex();
 
   fragUV = vec2(1.0, 1.0);
-  gl_Position = gl_in[0].gl_Position + vec4(buttonSize[0].x, buttonSize[0].y, 0.0, 0.0);
+  gl_Position = gl_in[0].gl_Position + vec4(buttonSize[0].x, -buttonSize[0].y, 0.0, 0.0);
   EmitVertex();
 
   EndPrimitive();

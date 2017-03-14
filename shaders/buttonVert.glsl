@@ -22,7 +22,6 @@ void main()
 
   screenSize.x = inSize.x / vResolution.x * 2;
   screenSize.y = inSize.y / vResolution.y * 2;
-  screenSize.y *= -1;
 
   buttonPos = screenPos;
   buttonSize = screenSize;

@@ -25,6 +25,7 @@ void Gui::setResolution(ngl::Vec2 _res)
   m_win_h = _res.m_y;
   ngl::ShaderLib::instance()->use(m_shader_name);
   ngl::ShaderLib::instance()->setRegisteredUniform("vResolution", ngl::Vec2(m_win_w, m_win_h));
+  ngl::ShaderLib::instance()->setRegisteredUniform("fResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
     updateButtonArrays();
@@ -57,14 +58,17 @@ std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
   Action action = _button.getAction();
   switch (action)
   {
+  //case Action::PASSIVE:
+  //    command.reset(new PassiveCommand(0));
+  //  break;
+  case Action::QUIT:
+      command.reset(new QuitCommand(m_scene));
+    break;
   case Action::BUILDHOUSE:
       command.reset(new BuildCommand(m_active_character, BuildingType::HOUSE));
     break;
   case Action::BUILDSTORE:
       command.reset(new BuildCommand(m_active_character, BuildingType::STOREHOUSE));
-    break;
-  case Action::QUIT:
-      command.reset(new QuitCommand(m_scene));
     break;
   default:
     break;
@@ -83,7 +87,7 @@ bool Gui::mousePos(ngl::Vec2 _pos)
       button_selected = true;
     }
   }
-  if(!button_selected)
+  if(!button_selected || m_buttons[m_selected_button_id].getAction() == Action::PASSIVE)
   {
     m_selected_button_id = -1;
   }
@@ -98,17 +102,17 @@ void Gui::wipeButtons()
 
 void Gui::createTestButtons()
 {
-  addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
-  addButton(Action::BUILDHOUSE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
-  addButton(Action::BUILDHOUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(80, 50));
+  addButton(Action::BUILDHOUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
 
-  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
-  addButton(Action::BUILDSTORE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(100, 50));
-  addButton(Action::BUILDSTORE, XAlignment::RIGHT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(100, 50));
+  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(80, 50));
+  addButton(Action::BUILDSTORE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(80, 50));
+  addButton(Action::BUILDSTORE, XAlignment::RIGHT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(80, 50));
 
-  addButton(Action::QUIT, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 10), ngl::Vec2(100, 50));
-  addButton(Action::QUIT, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(100, 50));
+  addButton(Action::QUIT, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 10), ngl::Vec2(80, 50));
+  addButton(Action::QUIT, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
 }
 
 void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
