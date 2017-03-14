@@ -341,9 +341,8 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-        ngl::Vec2 pos = ch.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
+				ngl::Vec3 pos = ch.getPos();
+				m_transform.setPosition(pos);
         slib->setRegisteredUniform("id", ch.getID());
         drawAsset( "person", "", "");
     }
@@ -428,11 +427,11 @@ void Scene::draw()
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				m_transform.setPosition(pos);
+				slib->use("colour");
+				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
         drawAsset( "person", "", "colour");
     }
 
@@ -632,8 +631,10 @@ void Scene::shadowPass(bounds _box, size_t _index)
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        m_transform.setPosition(pos[0],0.0f,pos[1]);
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				//std::cout<<"HEIGHT: "<<pos.m_y<<std::endl;
+				m_transform.setPosition(pos);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = m_store.getModel( "person" );

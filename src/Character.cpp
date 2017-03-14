@@ -47,6 +47,7 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	m_pos = ngl::Vec2(19,25);
 	m_target_id = m_grid->coordToId(m_pos);
 
+
 	//check if chosen grid tile is current position tile
 
 
@@ -243,8 +244,8 @@ bool Character::move()
     {
       aim_vec *= m_speed;
     }
-    dist_moved += aim_vec.length();
-    m_pos += aim_vec;
+		dist_moved += aim_vec.length();
+		m_pos += aim_vec;
   }
 
 	if(m_path.size() <= 0)
@@ -402,4 +403,13 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 		return false;
 	}
 
+}
+
+ngl::Vec3 Character::getPos()
+{
+	ngl::Vec2 new_pos = {int(m_pos[0]), int(m_pos[1])};
+	GridTile current_tile = m_grid->get(new_pos);
+	int height = current_tile.getHeight();
+
+	return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }

@@ -94,7 +94,7 @@ public:
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position
 	///
-	ngl::Vec2 getPos() {return m_pos;}
+	ngl::Vec3 getPos();
 	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
@@ -134,7 +134,7 @@ private:
   ///
 	/// \brief m_pos, character position
   ///
-  ngl::Vec2 m_pos;
+	ngl::Vec2 m_pos;
   ///
 	/// \brief m_target_id, id of target tile on grid
   ///
