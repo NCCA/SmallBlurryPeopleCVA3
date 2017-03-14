@@ -30,6 +30,14 @@ void Preferences::parseFile(std::string _file_name)
                   [bind(&Preferences::parseAA, boost::ref(*this), _1)];
   srule reflections = ("REFLECTIONS" >> *(spt::anychar_p))
                       [bind(&Preferences::parseReflections, boost::ref(*this), _1)];
+  srule time_scale = ("TIME_SCALE" >> *(spt::anychar_p))
+      [bind(&Preferences::parseTimeScale, boost::ref(*this), _1)];
+  srule shadow_map_res = ("SHADOW_MAP_RES" >> *(spt::anychar_p))
+      [bind(&Preferences::parseShadowMapRes, boost::ref(*this), _1)];
+  srule water_map_res = ("WATER_MAP_RES" >> *(spt::anychar_p))
+      [bind(&Preferences::parseWaterMapRes, boost::ref(*this), _1)];
+  srule character_speed = ("CHARACTER_SPEED" >> *(spt::anychar_p))
+      [bind(&Preferences::parseCharacterSpeed, boost::ref(*this), _1)];
 
   std::ifstream fileIn(_file_name.c_str());
   if (fileIn.is_open()){
@@ -44,7 +52,11 @@ void Preferences::parseFile(std::string _file_name)
                  dop|
                  shadows |
                  aa |
-                 reflections,
+                 reflections |
+                 time_scale |
+                 shadow_map_res |
+                 water_map_res |
+                 character_speed,
                  spt::space_p);
     }
   }
@@ -60,6 +72,10 @@ void Preferences::save()
   preferences << "SHADOWS: " << (int)m_shadows << "\n";
   preferences << "AA: " << (int)m_aa << "\n";
   preferences << "REFLECTIONS: " << (int)m_reflections << "\n";
+  preferences << "TIME_SCALE: " << m_time_scale << "\n";
+  preferences << "SHADOW_MAP_RES: " << m_shadow_map_res << "\n";
+  preferences << "WATER_MAP_RES: " << m_water_map_res << "\n";
+  preferences << "CHARACTER_SPEED: " << m_character_speed << "\n";
   preferences << "MAP_SCRIPT_PATH: " << m_map_script_path << "\n";
   preferences.close();
 }
@@ -147,4 +163,52 @@ void Preferences::parseReflections(const char *_begin)
 bool Preferences::getReflections()
 {
   return m_reflections;
+}
+
+void Preferences::parseTimeScale(const char *_begin)
+{
+  srule rule = "TIME_SCALE:" >>
+                spt::real_p[spt::assign_a(m_time_scale)];
+  parse(_begin, rule, spt::space_p);
+}
+
+float Preferences::getTimeScale()
+{
+  return m_time_scale;
+}
+
+void Preferences::parseShadowMapRes(const char *_begin)
+{
+  srule rule = "SHADOW_MAP_RES:" >>
+                spt::int_p[spt::assign_a(m_shadow_map_res)];
+  parse(_begin, rule, spt::space_p);
+}
+
+int Preferences::getShadowMapRes()
+{
+  return m_shadow_map_res;
+}
+
+void Preferences::parseWaterMapRes(const char *_begin)
+{
+  srule rule = "WATER_MAP_RES:" >>
+                spt::int_p[spt::assign_a(m_water_map_res)];
+  parse(_begin, rule, spt::space_p);
+}
+
+int Preferences::getWaterMapRes()
+{
+  return m_water_map_res;
+}
+
+void Preferences::parseCharacterSpeed(const char *_begin)
+{
+  srule rule = "CHARACTER_SPEED:" >>
+                spt::real_p[spt::assign_a(m_character_speed)];
+  parse(_begin, rule, spt::space_p);
+}
+
+float Preferences::getCharacterSpeed()
+{
+  return m_character_speed;
 }
