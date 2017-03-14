@@ -2,6 +2,7 @@
 
 #include "Node.hpp"
 #include "NodeNetwork.hpp"
+#include "Preferences.hpp"
 
 #include "Utility.hpp"
 
@@ -26,6 +27,9 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	m_fish_inventory(0),
 	m_called(0)
 {
+
+	Preferences* p = Preferences::instance();
+	m_speed = p->getCharacterSpeed();
 	//timer for actions
 	m_timer.start();
 
@@ -40,15 +44,17 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	//probability of catching a fish
 	m_fishing_catch = Utility::randInt(1,5);
 
-	m_pos = ngl::Vec2(19,25);
-	m_target_id = m_grid->coordToId(m_pos);
-
+  m_pos = ngl::Vec2(19,25);
+  m_target_id = m_grid->coordToId(m_pos);
 }
 
 void Character::setState()
 {
 	m_state_stack.clear();
-	m_speed = 0.05;
+	//reset speed
+	Preferences* p = Preferences::instance();
+	m_speed = p->getCharacterSpeed();
+
 	m_called = 0;
 
 	GridTile target = m_grid->get(m_target_id);
@@ -101,7 +107,7 @@ void Character::setIdleState()
 	if (m_called == 0)
 	{
 		m_idle_target_id = m_target_id;
-		m_speed -= 0.04;
+		m_speed -= 0.07;
 	}
 
 	ngl::Vec2 idle_pos = m_grid->idToCoord(m_idle_target_id);
@@ -119,9 +125,8 @@ void Character::setIdleState()
 		int y = Utility::randInt(y_min_range, y_max_range);
 		valid = setTarget(ngl::Vec2(x,y));
 	}
-	std::cout<<m_pos<<std::endl;
-	m_state_stack.push_back(State::MOVE);
 
+	m_state_stack.push_back(State::MOVE);
 	m_called++;
 }
 
@@ -139,7 +144,6 @@ void Character::update()
 				if (move())
 				{
 					//when the target has been reached, remove the state from the stack
-					std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
 					m_state_stack.pop_front();
 					m_timer.restart();
 				}
@@ -152,7 +156,6 @@ void Character::update()
 				if(m_timer.elapsed() >= 1000 * m_chopping_speed)
 				{
 					m_wood_inventory += 1;
-					std::cout<<m_timer.elapsed()<<std::endl;
 					std::cout<<"GOT WOOD"<<std::endl;
 
 					///change type from TREE to NONE
@@ -196,7 +199,6 @@ void Character::update()
 					if(int(rand->randomPositiveNumber(10)) % m_fishing_catch == 0)
 					{
 						m_fish_inventory += 1;
-						std::cout<<m_timer.elapsed()<<std::endl;
 						std::cout<<"GOT FISH"<<std::endl;
 						//when recieved fish, remove state from stack
 						m_state_stack.pop_front();
@@ -321,22 +323,22 @@ bool Character::move()
     {
       aim_vec *= m_speed;
     }
-		dist_moved += aim_vec.length();
-		m_pos += aim_vec;
+    dist_moved += aim_vec.length();
+    m_pos += aim_vec;
   }
 
-	if(m_path.size() <= 0)
-	{
-		return true;
-	}
-	else return false;
+  if(m_path.size() <= 0)
+  {
+    return true;
+  }
+  else return false;
 }
 
 std::vector<ngl::Vec2> Character::findPath(int _target_id)
 {
-	NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
+  NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
 
-	return network.findPath();
+  return network.findPath();
 
 }
 
@@ -362,7 +364,6 @@ bool Character::setTarget(ngl::Vec2 _target_pos)
 {
 	// convert to tile id
 	return setTarget(m_grid->coordToId(_target_pos));
-
 }
 
 bool Character::setTarget(int _tile_id)
@@ -389,110 +390,108 @@ bool Character::setTarget(int _tile_id)
 		//setActive(false);
 		return false;
 	}
-
 }
 
 bool Character::findNearestStorage()
 {
-	std::vector<ngl::Vec2> storage_houses;
-	int height = m_grid->getH();
-	int width = m_grid->getW();
+  std::vector<ngl::Vec2> storage_houses;
+  int height = m_grid->getH();
+  int width = m_grid->getW();
 
-	for (int i=0; i< height; i++)
-	{
-		for (int j=0; j<width; j++)
-		{
-			//go through grid and find storage houses
-			ngl::Vec2 coord = {j, i};
-			GridTile current_tile = m_grid->get(coord);
+  for (int i=0; i< height; i++)
+  {
+    for (int j=0; j<width; j++)
+    {
+      //go through grid and find storage houses
+      ngl::Vec2 coord = {j, i};
+      GridTile current_tile = m_grid->get(coord);
       if (current_tile.getType() == TileType::STOREHOUSE)
       {
         storage_houses.push_back(coord);
-			}
-		}
-	}
-	return findNearest(storage_houses);
+      }
+    }
+  }
+  return findNearest(storage_houses);
 }
 
 bool Character::findNearestEmptyTile()
 {
-	std::vector<ngl::Vec2> neighbours;
-	ngl::Vec2 target = m_grid->idToCoord(m_target_id);
+  std::vector<ngl::Vec2> neighbours;
+  ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
-	ngl::Vec2 right = {target[0]+1, target[1]};
-	GridTile neighbour = m_grid->get(right);
-	if(neighbour.getType() == TileType::NONE)
-		neighbours.push_back(right);
+  ngl::Vec2 right = {target[0]+1, target[1]};
+  GridTile neighbour = m_grid->get(right);
+  if(neighbour.getType() == TileType::NONE)
+    neighbours.push_back(right);
 
-	ngl::Vec2 left = {target[0]-1, target[1]};
-	neighbour = m_grid->get(left);
-	if(neighbour.getType() == TileType::NONE)
-		neighbours.push_back(left);
+  ngl::Vec2 left = {target[0]-1, target[1]};
+  neighbour = m_grid->get(left);
+  if(neighbour.getType() == TileType::NONE)
+    neighbours.push_back(left);
 
-	ngl::Vec2 up = {target[0], target[1]+1};
-	neighbour = m_grid->get(up);
-	if(neighbour.getType() == TileType::NONE)
-		neighbours.push_back(up);
+  ngl::Vec2 up = {target[0], target[1]+1};
+  neighbour = m_grid->get(up);
+  if(neighbour.getType() == TileType::NONE)
+    neighbours.push_back(up);
 
-	ngl::Vec2 down = {target[0], target[1]-1};
-	neighbour = m_grid->get(down);
-	if(neighbour.getType() == TileType::NONE)
-		neighbours.push_back(down);
+  ngl::Vec2 down = {target[0], target[1]-1};
+  neighbour = m_grid->get(down);
+  if(neighbour.getType() == TileType::NONE)
+    neighbours.push_back(down);
 
-	return findNearest(neighbours);
+  return findNearest(neighbours);
 
 }
 
 
 bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 {
-	if (_coord_data.size() > 0)
-	{
-		m_target_id = m_grid->coordToId(_coord_data[0]);
-		std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
-		_coord_data.erase(_coord_data.begin());
+  if (_coord_data.size() > 0)
+  {
+    m_target_id = m_grid->coordToId(_coord_data[0]);
+    std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
+    _coord_data.erase(_coord_data.begin());
 
-		//find shortest distance to storage house, storage house becomes target
-		if(_coord_data.size() > 0)
-		{
-			for (auto coord : _coord_data)
-			{
-				int id = m_grid->coordToId(coord);
-				std::vector<ngl::Vec2> path = findPath(id);
-				if (shortest_path.size() == 0 && path.size() > shortest_path.size())
-				{
-					m_target_id = id;
-					shortest_path = path;
-				}
-				else if (path.size() < shortest_path.size() && path.size()!= 0)
-				{
-					m_target_id = id;
-					std::cout<<"TARGET_COORD_"<<m_grid->idToCoord(m_target_id)<<std::endl;
-					shortest_path = path;
-				}
-			}
-		}
-		m_path = shortest_path;
-		return true;
-	}
-	else
-	{
-		std::cout<<"NO FOUNDY :((((((((((((((("<<std::endl;
-		return false;
-	}
+    //find shortest distance to storage house, storage house becomes target
+    if(_coord_data.size() > 0)
+    {
+      for (auto coord : _coord_data)
+      {
+        int id = m_grid->coordToId(coord);
+        std::vector<ngl::Vec2> path = findPath(id);
+        if (shortest_path.size() == 0 && path.size() > shortest_path.size())
+        {
+          m_target_id = id;
+          shortest_path = path;
+        }
+        else if (path.size() < shortest_path.size() && path.size()!= 0)
+        {
+          m_target_id = id;
+          shortest_path = path;
+        }
+      }
+    }
+    m_path = shortest_path;
+    return true;
+  }
+  else
+  {
+    std::cout<<"NO FOUNDY :((((((((((((((("<<std::endl;
+    return false;
+  }
 }
 
 void Character::build(BuildingType _building)
 {
-	//Start building the building type at current position
-	std::cout << "building YAY" << std::endl;
+  //Start building the building type at current position
+  std::cout << "building YAY" << std::endl;
 }
 
 ngl::Vec3 Character::getPos()
 {
-	ngl::Vec2 new_pos = {int(m_pos[0]), int(m_pos[1])};
-	GridTile current_tile = m_grid->get(new_pos);
-	int height = current_tile.getHeight();
-
-	return ngl::Vec3(m_pos[0], height, m_pos[1]);
+  ngl::Vec2 new_pos = {int(m_pos[0]), int(m_pos[1])};
+  GridTile current_tile = m_grid->get(new_pos);
+  //int height = current_tile.getHeight();
+  float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
+  return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }

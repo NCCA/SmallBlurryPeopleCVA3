@@ -14,6 +14,42 @@ public:
   virtual void execute() = 0;
 };
 ///
+/// \brief The PassiveCommand class for buttons which have no function, so cannot be clicked
+///
+class PassiveCommand : public Command
+{
+public:
+  ///
+  /// \brief PassiveCommand basic constructor
+  ///
+  PassiveCommand(int x);
+  ~PassiveCommand();
+  ///
+  /// \brief execute function does nothing
+  ///
+  virtual void execute();
+};
+///
+/// \brief The QuitCommand class for quitting the game
+///
+class QuitCommand : public Command
+{
+public:
+  ///
+  /// \brief QuitCommand constructor takes scene so it knows what to send "quit" message to
+  /// \param _scene scene which button refers to
+  ///
+  QuitCommand(Scene *_scene);
+  ~QuitCommand();
+  ///
+  /// \brief execute quits the given scene
+  ///
+  virtual void execute();
+private:
+  Scene *m_scene;
+};
+
+///
 /// \brief The BuildCommand class used to tell character to build a given building type
 ///
 class BuildCommand : public Command
@@ -39,16 +75,6 @@ private:
   /// \brief m_building type of building wanted
   ///
   BuildingType m_building;
-};
-
-class QuitCommand : public Command
-{
-public:
-  QuitCommand(Scene *_scene);
-  ~QuitCommand();
-  virtual void execute();
-private:
-  Scene *m_scene;
 };
 
 #endif//__COMMANDS_HPP__

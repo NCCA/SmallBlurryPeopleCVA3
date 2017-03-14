@@ -1,21 +1,17 @@
 #include "Commands.hpp"
 
 //------------------------------------------------------------//
-// Build Command
+// Passive Command
 //------------------------------------------------------------//
 
-BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
-  m_character(_character),
-  m_building(_building)
+PassiveCommand::PassiveCommand(int x)
+{x+= 1;}
+
+PassiveCommand::~PassiveCommand()
 {}
 
-BuildCommand::~BuildCommand()
+void PassiveCommand::execute()
 {}
-
-void BuildCommand::execute()
-{
-  m_character->build(m_building);
-}
 
 //------------------------------------------------------------//
 // Quit Command
@@ -31,4 +27,21 @@ QuitCommand::~QuitCommand()
 void QuitCommand::execute()
 {
   m_scene->quit();
+}
+
+//------------------------------------------------------------//
+// Build Command
+//------------------------------------------------------------//
+
+BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
+  m_character(_character),
+  m_building(_building)
+{}
+
+BuildCommand::~BuildCommand()
+{}
+
+void BuildCommand::execute()
+{
+  m_character->build(m_building);
 }

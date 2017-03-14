@@ -31,6 +31,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80)
 {
+    m_prefs = Preferences::instance();
     m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
@@ -68,7 +69,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
 
     //reads file with list of names
@@ -420,7 +421,7 @@ void Scene::draw()
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
 
-    glViewport(0, 0, shadowResolution, shadowResolution);
+    glViewport(0, 0, m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
@@ -561,7 +562,7 @@ void Scene::draw()
     m_displacementBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glViewport(0, 0, waterResolution, waterResolution);
+    glViewport(0, 0, m_prefs->getWaterMapRes(), m_prefs->getWaterMapRes());
 
     glBindVertexArray(m_screenQuad);
 
@@ -891,7 +892,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / waterResolution);
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
 
     m_mainBuffer = Framebuffer();
