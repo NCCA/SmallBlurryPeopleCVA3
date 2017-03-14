@@ -2,6 +2,7 @@
 
 #include "Node.hpp"
 #include "NodeNetwork.hpp"
+#include "Preferences.hpp"
 
 #include "ngl/Random.h"
 #include "ngl/NGLStream.h"
@@ -23,6 +24,8 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_wood_inventory(0)
 {
 
+  Preferences* p = Preferences::instance();
+  m_speed = p->getCharacterSpeed();
   //timer for actions
   m_timer.start();
 
