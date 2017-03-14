@@ -10,6 +10,7 @@
 #include "Camera.hpp"
 #include "Character.hpp"
 #include "Inventory.hpp"
+#include "Preferences.hpp"
 
 #include "Framebuffer.hpp"
 
@@ -65,6 +66,8 @@ private:
     /// \brief m_active whether scene is still active (if user has not quit)
     ///
     bool m_active;
+
+    Preferences* m_prefs;
 
     Camera m_cam;
     ngl::Vec3 m_camCurPos;

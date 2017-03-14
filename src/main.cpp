@@ -65,6 +65,7 @@ int main()
 
     Preferences* p = Preferences::instance();
     p->init();
+    std::cout << "PREFERENCES: " << p->getCharacterSpeed() << std::endl;
     Scene scene (ngl::Vec2(rect.w, rect.h));
 
     while(scene.isActive())

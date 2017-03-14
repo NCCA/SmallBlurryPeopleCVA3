@@ -17,8 +17,8 @@ Grid::Grid():
 {
   Preferences *p = Preferences::instance();
   updateScript(p->getMapScriptPath());
-  printTypes();
-  printTrees();
+  //printTypes();
+  //printTrees();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -59,7 +59,7 @@ void Grid::runCurrentScript()
   m_mountain_height = PyInt_AsLong(PyDict_GetItemString(py_dict, "mountain_height"));
   m_water_level = PyInt_AsLong(PyDict_GetItemString(py_dict, "water_height"));
   py_map = PyDict_GetItemString(py_dict, "map_data");
-  std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
+  //std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
   //create an empty grid with each tile's id set
   for (int i = 0; i < m_w * m_h; i++)
   {
