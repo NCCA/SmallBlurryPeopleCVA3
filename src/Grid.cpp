@@ -265,5 +265,24 @@ int Grid::getWaterLevel()
   return m_water_level;
 }
 
+float Grid::getInterpolatedHeight(float _x, float _y)
+{
+  float x0 = floor(_x);
+  float x1 = x0 + 1;
+  float y0 = floor(_y);
+  float y1 = y0 + 1;
+
+  float h0 = m_tiles[x0 + m_w * y0].getHeight();
+  float h1 = m_tiles[x1 + m_w * y0].getHeight();
+  float h2 = m_tiles[x0 + m_w * y1].getHeight();
+  float h3 = m_tiles[x1 + m_w * y1].getHeight();
+
+  float h4 = h0 * (x1 - _x) + h1 * (_x - x0);
+  float h5 = h2 * (x1 - _x) + h3 * (_x - x0);
+  float h6 = h4 * (y1 - _y) + h5 * (_y - y0);
+
+  return h6;
+}
+
 
 
