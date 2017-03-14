@@ -59,6 +59,9 @@ public:
 
     /// \brief All the messy code to resize the viewport. Updates shaders, framebuffers etc.
     void resize(const ngl::Vec2 &_dim);
+		
+		/// \brief Centre camera on the active character
+		void centreCamera();
 
 private:
     ///
@@ -86,7 +89,9 @@ private:
     bool m_mouse_trans_active;
     /// @brief sets if mouse is being used to rotate the scene
     bool m_mouse_rot_active;
-    /// @brief target zoom of the camera
+		/// @brief sets if centering camera on character
+		bool m_centre_camera;
+		/// @brief target zoom of the camera
     float m_mouse_zoom_targ;
     /// @brief current zoom of the camera
     float m_mouse_zoom_cur;

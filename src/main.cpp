@@ -59,10 +59,6 @@ int main()
 
     ngl::NGLInit::instance();
 
-    // Setup ImGui binding
-    /*ImGuiImplSdlInit(window);
-    ImGuiIO& io = ImGui::GetIO();*/
-
     Preferences* p = Preferences::instance();
     p->init();
     Scene scene (ngl::Vec2(rect.w, rect.h));
@@ -71,50 +67,6 @@ int main()
     {
         while(SDL_PollEvent(&event))
         {
-            /*ImGuiImplSdlProcessEvent(&event);
-            ImGuiImplSdlNewFrame(window);
-
-            ImGui::Begin("Main Menu", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
-
-            ImGui::SetCursorPosY(0);*/
-
-            /*const char* names[scene.character_names.size()];
-                        for (size_t i = 0; i< scene.character_names.size(); i++)
-                        {
-                            names[i]= scene.character_names[i].c_str();
-                        }
-                        static int current_character_name = -1;
-                        //current_character_name stores current element of char *array that has been selected
-                        bool character_chosen = ImGui::Combo("character_select", &current_character_name, names, (sizeof(names)/sizeof(char*)));
-
-            ImGui::SetCursorPosY( 64 );
-            bool savePressed = ImGui::Button("Save", {128, 64});
-            ImGui::SetCursorPosY( 128 );
-            bool loadPressed = ImGui::Button("Load", {128, 64});
-                        ImGui::SetCursorPossY( 186 );
-            bool quitPressed = ImGui::Button("Quit", {128, 64});
-
-
-            ImGui::Begin("Character stats", 0, {128, 300}, 0.0f, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-            ImGui::SetCursorPosY(20);
-            ImGui::TextColored({1.0f, 1.0f, 1.0f, 1.0f},"hunger");
-
-            ImGui::SetCursorPosY(40);
-            float hunger = 0.1;
-            ImGui::ProgressBar(hunger);
-
-                        if(character_chosen)
-                        {
-
-                        }
-                        if(quitPressed)
-                                quit = true;
-                        */
-
-            //ImGui::End();
-
-            /*if(!io.WantCaptureMouse)
-            {*/
             switch(event.type)
             {
             case SDL_QUIT : scene.quit(); break;
@@ -122,20 +74,26 @@ int main()
             case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
             case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
             case SDL_WINDOWEVENT : scene.windowEvent(event.window); break;
+
+						case SDL_KEYDOWN:
+						{
+							switch(event.key.keysym.sym)
+							{
+								case SDLK_SPACE : scene.centreCamera(); break;
+								default:break;
+							}
+						}
             default : break;
             }
-            /*}*/
         }
         scene.updateMousePos();
 
         scene.update();
         scene.draw();
-        //ImGui::Render();
 
         SDL_GL_SwapWindow(window);
 
     }
-    //ImGuiImplSdlShutdown();
     //for when we want to start saving preferences
     //p->save();
     SDL_Quit();

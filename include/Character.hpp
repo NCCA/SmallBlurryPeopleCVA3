@@ -15,15 +15,17 @@
 
 enum class State
 {
-	GET_WOOD,
+	CHOP_WOOD,
 	STORE_WOOD,
-	GET_FISH,
+	FISH,
 	STORE_FISH,
+	COLLECT,
+	GET_WOOD,
 	BUILD,
 	SLEEP,
 	FORAGE,
 	MOVE,
-	IDLE
+	WAIT
 };
 
 /// \class Character
@@ -37,8 +39,6 @@ public:
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
 	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
-
-	Character& operator=(const Character &rhs);
 	///
 	/// \brief default destructor
 	///
@@ -47,6 +47,10 @@ public:
 	/// \brief setState, creates state stack for the character to execute
 	///
 	void setState();
+	///
+	/// \brief setIdleState, randomly moves character while not active
+	///
+	void setIdleState();
 	///
 	/// \brief update, updates character based on its current state
 	///
@@ -72,12 +76,12 @@ public:
 	/// \brief setTarget, set a new target position based on a position
 	/// \param _target_pos, the position to pathfind to
   ///
-  void setTarget(ngl::Vec2 _target_pos);
+	bool setTarget(ngl::Vec2 _target_pos);
   ///
 	/// \brief setTarget, set a new target based on the grid tile id
 	/// \param _tile_id, the tile id to pathfind to
   ///
-	void setTarget(int _tile_id);
+	bool setTarget(int _tile_id);
 	///
 	/// \brief findNearestStorage, finds the storage house closest to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found
@@ -144,6 +148,10 @@ private:
 	/// \brief m_target_id, id of target tile on grid
   ///
   int m_target_id;
+	///
+	/// \brief m_final_target_id, id of target character ends on after sequence
+	///
+	int m_final_target_id;
   ///
 	/// \brief m_speed, max speed of character
   ///
@@ -176,13 +184,11 @@ private:
 	///
 	int m_building_speed;
 	///
-	/// \brief m_fishing_speed, how long it takes the character to catch a fish
-	///
-	int m_fishing_speed;
-	///
 	/// \brief m_fishing_catch, likeyhood of catching a fish
 	///
 	int m_fishing_catch;
+	int m_called;
+	int m_idle_target_id;
 };
 
 #endif//__CHARACTER_HPP__

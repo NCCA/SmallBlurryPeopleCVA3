@@ -51,8 +51,11 @@ float radians(const float _degrees);
 float degrees(const float _radians);
 
 float randFlt(const float _min, const float _max);
+int randInt(const int _min, const int _max);
 
 float average(std::vector<float> _values);
+
+float clamp(float _in, float _lo, float _hi);
 
 template<typename T>
 T average(std::vector<T> _values)
@@ -70,6 +73,7 @@ T clamp(T _in, T _lo, T _hi)
         return _hi;
     return _in;
 }
+
 
 }
 
