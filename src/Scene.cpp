@@ -375,6 +375,9 @@ void Scene::draw()
 
     slib->use("terrainPick");
 
+		ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
+		slib->setRegisteredUniform("dimensions", grid_size);
+
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
@@ -387,9 +390,8 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-        ngl::Vec2 pos = ch.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
+				ngl::Vec3 pos = ch.getPos();
+				m_transform.setPosition(pos);
         slib->setRegisteredUniform("id", ch.getID());
         drawAsset( "person", "", "");
     }
@@ -477,11 +479,11 @@ void Scene::draw()
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        ngl::Vec3 new_pos = {pos[0],0.0f,pos[1]};
-        m_transform.setPosition(new_pos);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				m_transform.setPosition(pos);
+				slib->use("colour");
+				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
         drawAsset( "person", "", "colour");
     }
 
@@ -736,8 +738,10 @@ void Scene::shadowPass(bounds _box, size_t _index)
 
     for(auto &character : m_characters)
     {
-        ngl::Vec2 pos = character.getPos();
-        m_transform.setPosition(pos[0],0.0f,pos[1]);
+				ngl::Vec3 pos = character.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				//std::cout<<"HEIGHT: "<<pos.m_y<<std::endl;
+				m_transform.setPosition(pos);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = m_store.getModel( "person" );
@@ -904,6 +908,7 @@ void Scene::mouseSelection()
 
         long unsigned int red;
         glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
+				std::cout<<"RED"<<red<<std::endl;
         //change depending on number characters
         if(red >= 0 && red < m_characters.size())
         {
@@ -939,8 +944,8 @@ void Scene::mouseSelection()
             {
                 std::cout<<int(grid_coord[0])<<","<<int(grid_coord[1])<<","<<int(grid_coord[2])<<": GRID_COORDS"<<std::endl;
 
-                int grid_coord_x = floor((grid_coord[0]/255.0) * 50);
-                int grid_coord_y = floor((grid_coord[2]/255.0) * 50);
+								int grid_coord_x = floor((grid_coord[0]/255.0) * m_grid.getW());
+								int grid_coord_y = floor((grid_coord[2]/255.0) * m_grid.getH());
 
                 std::cout<<grid_coord_x<<", "<<grid_coord_y<<": GRID_COORDS"<<std::endl;
 

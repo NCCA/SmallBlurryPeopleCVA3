@@ -38,8 +38,15 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	std::uniform_int_distribution<int> building_speed(10,15);
 	m_building_speed = building_speed(mt_rand);
 
+	std::uniform_int_distribution<int> fishing_speed(5,10);
+	m_fishing_speed = fishing_speed(mt_rand);
+
+	std::uniform_int_distribution<int> fishing_catch(1,5);
+	m_fishing_catch = fishing_catch(mt_rand);
+
 	m_pos = ngl::Vec2(19,25);
 	m_target_id = m_grid->coordToId(m_pos);
+
 
 	//check if chosen grid tile is current position tile
 
@@ -51,34 +58,43 @@ void Character::setState()
 	GridTile target = m_grid->get(m_target_id);
 
   if (target.getType() == TileType::TREES)
+	{
+		if(findNearestEmptyTile() == true)
 		{
-			if(findNearestEmptyTile() == true)
-			{
-				m_state_stack.push_back(State::MOVE);
-				m_state_stack.push_back(State::GET_WOOD);
-				m_state_stack.push_back(State::MOVE);
-				m_state_stack.push_back(State::STORE_WOOD);
-				m_state_stack.push_back(State::MOVE);
-				std::cout<<"TREE"<<std::endl;
-			}
-			else
-			{
-				std::cout<<"NO TREE :("<<std::endl;
-			}
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::GET_WOOD);
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::STORE_WOOD);
+			m_state_stack.push_back(State::MOVE);
+			std::cout<<"TREE"<<std::endl;
 		}
+		else
+		{
+			std::cout<<"NO TREE :("<<std::endl;
+		}
+	}
+	else if (target.getType() == TileType::WATER)
+	{
+		m_state_stack.push_back(State::MOVE);
+		m_state_stack.push_back(State::GET_FISH);
+		m_state_stack.push_back(State::MOVE);
+		m_state_stack.push_back(State::STORE_FISH);
+		m_state_stack.push_back(State::MOVE);
+		std::cout<<"WATER"<<std::endl;
+	}
 	//WILL NEED OPTION BETWEEN BUILDING AND MOVING
   else if (target.getType() == TileType::STOREHOUSE)
-		{
-		//SHOULD COLLECT THINGS FROM STORE HOUSE?
-			m_state_stack.push_back(State::MOVE);
-			m_state_stack.push_back(State::BUILD);
-			std::cout<<"BUILDING"<<std::endl;
-		}
-	else
-    {
-			m_state_stack.push_back(State::MOVE);
-			std::cout<<"MOVE"<<std::endl;
-		}
+	{
+	//SHOULD COLLECT THINGS FROM STORE HOUSE?
+		m_state_stack.push_back(State::MOVE);
+		m_state_stack.push_back(State::BUILD);
+		std::cout<<"BUILDING"<<std::endl;
+	}
+	else if (target.getType() == TileType::NONE)
+	{
+		m_state_stack.push_back(State::MOVE);
+		std::cout<<"MOVE"<<std::endl;
+	}
 }
 
 void Character::update()
@@ -90,69 +106,118 @@ void Character::update()
 		State current_state = m_state_stack[0];
 		switch(current_state)
 		{
-				case(State::MOVE):
+			case(State::MOVE):
+			{
+				//std::cout<<"character pos"<<m_pos<<std::endl;
+				if (move())
 				{
-					//std::cout<<"character pos"<<m_pos<<std::endl;
-					if (move())
-					{
-						std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
-						//when the target has been reached, remove the state from the stack
-						m_state_stack.pop_front();
-						m_timer.restart();
-					}
-					break;
+					std::cout<<"TARGET HAS BEEN REACHED"<<std::endl;
+					//when the target has been reached, remove the state from the stack
+					m_state_stack.pop_front();
+					m_timer.restart();
 				}
-				case(State::GET_WOOD):
-				{
-					//when chopping speed has been reached, gain a piece of wood
-					if(m_timer.elapsed() >= 1000 * m_chopping_speed)
-					{
-						m_wood_inventory += 1;
-						std::cout<<m_timer.elapsed()<<std::endl;
-						std::cout<<"GOT WOOD"<<std::endl;
-						//when recieved piece of wood, remove the state from the stack
-						m_state_stack.pop_front();
-						m_timer.restart();
+				break;
+			}
 
-						//finds nearest storage house and sets as target for storing wood
-						if(!findNearestStorage())
-							//remove states from stack as well, as can't find/move to storage house
-							m_state_stack.clear();
-					}
-					break;
-				}
-				case(State::STORE_WOOD):
+			case(State::GET_WOOD):
+			{
+				//when chopping speed has been reached, gain a piece of wood
+				if(m_timer.elapsed() >= 1000 * m_chopping_speed)
 				{
-					if(m_timer.elapsed() >= 1000)
+					m_wood_inventory += 1;
+					std::cout<<m_timer.elapsed()<<std::endl;
+					std::cout<<"GOT WOOD"<<std::endl;
+					//when recieved piece of wood, remove the state from the stack
+					m_state_stack.pop_front();
+					m_timer.restart();
+
+					//finds nearest storage house and sets as target for storing wood
+					if(!findNearestStorage())
+						//remove states from stack as well, as can't find/move to storage house
+						m_state_stack.clear();
+				}
+				break;
+			}
+
+			case(State::STORE_WOOD):
+			{
+				if(m_timer.elapsed() >= 1000)
+				{
+					m_world_inventory->addWood(1);
+					m_wood_inventory -=1;
+					m_state_stack.pop_front();
+					m_timer.restart();
+					std::cout<<"WOOD DEPOSITED"<<std::endl;
+					std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
+					std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
+
+					//if made it to storage house, should be able to find empty tile
+					findNearestEmptyTile();
+					m_timer.restart();
+				}
+				break;
+			}
+
+			case(State::GET_FISH):
+			{
+				//when chopping speed has been reached, gain a piece of wood
+				if(m_timer.elapsed() >= 1000 * m_fishing_speed)
+				{
+					m_fish_inventory += 1;
+					std::cout<<m_timer.elapsed()<<std::endl;
+					std::cout<<"GOT WOOD"<<std::endl;
+					//when recieved piece of wood, remove the state from the stack
+					m_state_stack.pop_front();
+					m_timer.restart();
+
+					//finds nearest storage house and sets as target for storing wood
+					if(!findNearestStorage())
+						//remove states from stack as well, as can't find/move to storage house
+						m_state_stack.clear();
+				}
+				break;
+			}
+
+			case(State::STORE_FISH):
+			{
+				if(m_timer.elapsed() >= 1000)
+				{
+					ngl::Random *rand = ngl::Random::instance();
+					if(int(rand->randomPositiveNumber(10)) % m_fishing_catch == 0)
 					{
-						m_world_inventory->addWood(1);
-						m_wood_inventory -=1;
+						m_world_inventory->addFish(1);
+						m_fish_inventory -=1;
 						m_state_stack.pop_front();
 						m_timer.restart();
-						std::cout<<"WOOD DEPOSITED"<<std::endl;
-						std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
-						std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
+						std::cout<<"FISH DEPOSITED"<<std::endl;
+						std::cout<<m_name<<"'s fish inventory: "<<m_fish_inventory<<std::endl;
+						std::cout<<"storage inventory: "<<m_world_inventory->getFishInventory()<<std::endl;
 
 						//if made it to storage house, should be able to find empty tile
 						findNearestEmptyTile();
-
-						m_timer.restart();
 					}
-					break;
-				}
-
-				case(State::BUILD):
-				{
-					std::cout<<m_timer.elapsed()<<std::endl;
-					//CHECK FOR CHARACTER INVENTORY OR STORE HOUSE?
-					if(m_timer.elapsed() >= 1000 * m_building_speed)
+					else
 					{
-						std::cout<<"BUILT"<<std::endl;
-						m_state_stack.pop_back();
-						m_timer.restart();
+						std::cout<<"FISH NOT CAUGHT"<<std::endl;
+						m_state_stack.clear();
 					}
-					break;
+					m_timer.restart();
 				}
+				break;
+			}
+
+			case(State::BUILD):
+			{
+				std::cout<<m_timer.elapsed()<<std::endl;
+				//CHECK FOR CHARACTER INVENTORY OR STORE HOUSE?
+				if(m_timer.elapsed() >= 1000 * m_building_speed)
+				{
+					std::cout<<"BUILT"<<std::endl;
+					m_state_stack.pop_back();
+					m_timer.restart();
+				}
+				break;
+			}
 		}
 	}
 	else
@@ -179,8 +244,8 @@ bool Character::move()
     {
       aim_vec *= m_speed;
     }
-    dist_moved += aim_vec.length();
-    m_pos += aim_vec;
+		dist_moved += aim_vec.length();
+		m_pos += aim_vec;
   }
 
 	if(m_path.size() <= 0)
@@ -343,4 +408,13 @@ void Character::build(BuildingType _building)
 {
 	//Start building the building type at current position
 	std::cout << "building YAY" << std::endl;
+}
+
+ngl::Vec3 Character::getPos()
+{
+	ngl::Vec2 new_pos = {int(m_pos[0]), int(m_pos[1])};
+	GridTile current_tile = m_grid->get(new_pos);
+	int height = current_tile.getHeight();
+
+	return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
