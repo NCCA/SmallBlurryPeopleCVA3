@@ -36,6 +36,8 @@ public:
     /// @brief Returns the world space position of the pivot.
     ngl::Vec3 getPivot() const {return m_pivot;}
 
+    float getAspect() const {return m_aspect;}
+
     /// @brief Set aspect ratio (x / y).
     void setAspect(const float _aspect) {m_aspect = _aspect;}
     /// @brief Set horizontal (?) field of view.

@@ -56,12 +56,12 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
     slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
     slib->use("water");
@@ -94,6 +94,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
+    m_store.loadMesh("debugSphere", "sphere.obj");
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
@@ -155,6 +156,21 @@ Scene::Scene(ngl::Vec2 _viewport) :
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
+
+    m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            int index = static_cast<int>( m_grid.get(i, j).getType() );
+            m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                      i,
+                                                      m_grid.get(i, j).getHeight() / m_terrainHeightDivider,
+                                                      j
+                                                      ));
+        }
+
+    glGenVertexArrays(1, &m_debugVAO);
+    glGenBuffers(1, &m_debugVBO);
 }
 
 void Scene::initialiseFramebuffers()
@@ -375,6 +391,8 @@ void Scene::update()
 //I'm sorry this function is so long :(
 void Scene::draw()
 {
+    m_debugPoints.clear();
+
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     glClearColor(0.0,0.0,0.0,0.0);
 
@@ -413,6 +431,7 @@ void Scene::draw()
     }
 
     m_pickBuffer.unbind();
+
     //---------------------------//
     //  SHADOW PASS  //
     //---------------------------//
@@ -424,19 +443,19 @@ void Scene::draw()
     glViewport(0, 0, m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
 
     //The intervals at which we will draw into shadow buffers.
-    std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
+    std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
     //cascadeDistances = {0.01f, 16.0f};
 
-    std::vector< std::pair< ngl::Vec3, ngl::Vec3 > > boxes = generateOrthoShadowMatrices( cascadeDistances );
+    auto boxes = generateOrthoShadowMatrices( cascadeDistances );
 
     //Render a pass from each AABB
     slib->use("shadowDepth");
 
     size_t index = 0;
-    for(auto &box : boxes)
+    for(size_t i = 0; i < boxes.first.size(); ++i)
     {
         //std::cout << "Shadowpass for " << index << '\n';
-        shadowPass( box, index );
+        shadowPass( boxes.first[i], boxes.second[i], i );
         index++;
     }
 
@@ -470,26 +489,26 @@ void Scene::draw()
 
     slib->use("diffuse");
 
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
         {
-            GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_grid.get(i,j).getHeight() / m_terrainHeightDivider, j);
-            if(t.getType() == TileType::TREES)
+            m_transform.setPosition(vec);
+            switch( i )
             {
+            case static_cast<int>(TileType::TREES):
                 drawAsset( "tree", "tree_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::MOUNTAINS)
-            {
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
                 drawAsset( "mountain", "mountain_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::STOREHOUSE)
-            {
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
                 drawAsset( "storehouse", "storehouse_d", "diffuse" );
-            }
-            else if(t.getType() == TileType::HOUSE)
-            {
+                break;
+            case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "", "colour");
+                break;
+            default:
+                break;
             }
         }
 
@@ -579,13 +598,13 @@ void Scene::draw()
     //      FORWARD-SHADING      //
     //---------------------------//
 
+    glEnable(GL_DEPTH_TEST);
+
     //Copy depth buffer from main buffer to back buffer.
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-    glEnable(GL_DEPTH_TEST);
 
     slib->use("water");
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
@@ -625,8 +644,65 @@ void Scene::draw()
     glClear(GL_DEPTH_BUFFER_BIT);
     Gui::instance()->drawButtons();
 
+    //---------------------------//
+    //         DEBUG DRAW        //
+    //---------------------------//
+
+    //It'd be good to have some kind of m_debugViewMode to control this section.
+
+    /*glBindVertexArray(m_screenQuad);
+
+    for(int i = 0; i < 3; ++i)
+    {
+        m_transform.reset();
+        m_transform.setPosition(-0.75 + 0.55 * i, -0.75, 0.0);
+        m_transform.setScale(0.25, 0.25, 1.0);
+
+        slib->use("debugTexture");
+        m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
+        slib->setRegisteredUniform( "M", m_transform.getMatrix() );
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+    }
+
+    slib->use("colour");
+    for(auto &p : m_debugPoints)
+        p.m_w = 1.0;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_debugVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec4) * m_debugPoints.size(),
+                 &m_debugPoints[0].m_x,
+            GL_STATIC_DRAW
+            );
+
+    glBindVertexArray(m_debugVAO);
+    setBufferLocation(m_debugVBO, 0, 4);
+
+    m_transform.reset();
+    loadMatricesToShader();
+
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    glDrawArraysEXT(GL_LINES, 0, m_debugPoints.size() / 2);
+    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    glDrawArraysEXT(GL_LINES, m_debugPoints.size() / 2, m_debugPoints.size() / 2);
+
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    /*for(auto &b : boxes.first)
+    {
+        ngl::BBox bo (b.first.m_x, b.second.m_x,
+                      b.first.m_y, b.second.m_y,
+                      b.first.m_z, b.second.m_z);
+        loadMatricesToShader();
+        bo.draw();
+    }
+
+    m_transform.setPosition(m_cam.getPivot());
+    drawAsset("debugSphere", "", "colour");*/
+
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+
 }
 
 void Scene::quit()
@@ -639,15 +715,18 @@ bool Scene::isActive()
     return m_active;
 }
 
-std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
+//First = world space aabbs
+//Second = light space aabbs
+std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoShadowMatrices(const std::vector<float> &_divisions)
 {
     ngl::Vec3 s = m_sunDir;
     //Flip if the moon is up.
-    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
         s = -s;
-    ngl::Mat4 V = ngl::lookAt(
-                s,
+
+    ngl::Mat4 lightView = ngl::lookAt(
                 ngl::Vec3(0.0f, 0.0f, 0.0f),
+                s,
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
@@ -660,6 +739,46 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
 
+    for(int i = 0; i < 2; ++i)
+    {
+        auto &c = cascades[i];
+        m_debugPoints.push_back(c[0]);
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[3]);
+        m_debugPoints.push_back(c[3]);
+        m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[0]);
+
+        m_debugPoints.push_back(c[4]);
+        m_debugPoints.push_back(c[5]);
+        m_debugPoints.push_back(c[5]);
+        m_debugPoints.push_back(c[7]);
+        m_debugPoints.push_back(c[7]);
+        m_debugPoints.push_back(c[6]);
+        m_debugPoints.push_back(c[6]);
+        m_debugPoints.push_back(c[4]);
+
+        m_debugPoints.push_back(c[0]);
+        m_debugPoints.push_back(c[4]);
+
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[5]);
+
+        m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[6]);
+
+        m_debugPoints.push_back(c[3]);
+        m_debugPoints.push_back(c[7]);
+    }
+
+    std::pair< std::vector< bounds >, std::vector< bounds > > boxes;
+
+    //Store the world space AABB enclosing the cascade
+    for(auto &c : cascades)
+        boxes.first.push_back( Utility::enclose(c) );
+
     //These cascades are in world space. We must convert them into light space.
     for(auto &c : cascades)
     {
@@ -667,48 +786,109 @@ std::vector< bounds > Scene::generateOrthoShadowMatrices(const std::vector<float
         for(auto &vert : c)
         {
             ngl::Vec4 vert4 (vert.m_x, vert.m_y, vert.m_z, 1.0f);
-            vert4 = V * vert4;
+            vert4 = vert4 * lightView;
             vert = ngl::Vec3( vert4.m_x, vert4.m_y, vert4.m_z );
-            //std::cout << "Post trans " << vert << '\n';
         }
         //std::cout << '\n';
     }
 
-    //Create AABBs enclosing each cascade section
-    std::vector< std::pair<ngl::Vec3, ngl::Vec3> > boxes;
+    //Create light space AABBs enclosing each cascade section
     for(auto &c : cascades)
-        boxes.push_back( Utility::enclose(c) );
+        boxes.second.push_back( Utility::enclose(c) );
+
+    //for(auto &b : boxes.second)
+    for(int i = 0; i < 2; ++i)
+    {
+        auto &b = boxes.second[i];
+        ngl::BBox bo (b.first.m_x, b.second.m_x,
+                      b.first.m_y, b.second.m_y,
+                      b.first.m_z, b.second.m_z
+                      );
+
+        ngl::Vec3 * verts = bo.getVertexArray();
+        ngl::Mat4 ilv = lightView.inverse();
+
+        for(int i = 0; i < 8; ++i)
+        {
+            verts[i] = verts[i] * ilv;
+        }
+
+        m_debugPoints.push_back(verts[0]);
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[0]);
+
+        m_debugPoints.push_back(verts[4]);
+        m_debugPoints.push_back(verts[5]);
+        m_debugPoints.push_back(verts[5]);
+        m_debugPoints.push_back(verts[6]);
+        m_debugPoints.push_back(verts[6]);
+        m_debugPoints.push_back(verts[7]);
+        m_debugPoints.push_back(verts[7]);
+        m_debugPoints.push_back(verts[4]);
+
+        m_debugPoints.push_back(verts[0]);
+        m_debugPoints.push_back(verts[4]);
+
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[5]);
+
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[6]);
+
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[7]);
+    }
 
     return boxes;
 }
 
-void Scene::shadowPass(bounds _box, size_t _index)
+void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 {
-
     ngl::Vec3 s = m_sunDir;
-    //Flip if the moon is up.
-    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+    //Flip if the sun is pointing up.
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
         s = -s;
 
-    //Box dimensions
-    ngl::Vec3 dim = _box.second - _box.first;
-    //Box position
-    //ngl::Vec3 mid = (_box.first + _box.second) / 2.0f;
+    //Center
+    ngl::Vec3 pos = -(_lightbox.first + _lightbox.second) / 2.0f;
+    //Half-dimension
+    ngl::Vec3 dim = (_lightbox.second - _lightbox.first) / 2.0f;
 
-    ngl::Mat4 P = ngl::ortho(
+    ngl::Mat4 project = ngl::ortho(
                 -dim.m_x, dim.m_x,
                 -dim.m_y, dim.m_y,
                 -dim.m_z, dim.m_z
                 );
 
-    ngl::Mat4 V = ngl::lookAt(
-                s + m_cam.getPos(),
-                ngl::Vec3(0.0f, 0.0f, 0.0f) + m_cam.getPos(),
+    ngl::Mat4 lightPos = ngl::Mat4();
+    lightPos.translate( pos.m_x, pos.m_y, pos.m_z );
+
+    ngl::Mat4 lightDir = ngl::lookAt(
+                ngl::Vec3(),
+                s,
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
-    m_shadowMat[_index] = V * P;
+    ngl::Mat4 view = lightDir * lightPos;
 
+    /*ngl::Mat4 P = ngl::ortho(
+                _lightbox.first.m_x, _lightbox.second.m_x,
+                _lightbox.first.m_y, _lightbox.second.m_y,
+                _lightbox.first.m_z, _lightbox.second.m_z
+                );
+
+    ngl::Mat4 V = ngl::lookAt(
+                ngl::Vec3(0.0f, 0.0f, 0.0f),
+                s,
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );*/
+
+    m_shadowMat[_index] = view * project;
     m_shadowBuffer.bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowBuffer.get( "depth[" + std::to_string(_index) + "]" ), 0);
     glClear( GL_DEPTH_BUFFER_BIT );
@@ -720,35 +900,31 @@ void Scene::shadowPass(bounds _box, size_t _index)
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
         {
-            GridTile t = m_grid.get(i, j);
-            m_transform.setPosition(i, m_grid.get(i,j).getHeight()/m_terrainHeightDivider, j);
+            //TO-DO fix
+            if(!Utility::pointInBox(_worldbox, vec))
+                continue;
+            m_transform.setPosition(vec);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
-            if(t.getType() == TileType::TREES)
+            loadMatricesToShader( m_transform.getMatrix(), mvp );
+            switch( i )
             {
-                ngl::Obj * k = m_store.getModel( "tree" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::MOUNTAINS)
-            {
-                ngl::Obj * k = m_store.getModel( "mountain" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::HOUSE)
-            {
-                ngl::Obj * k = m_store.getModel( "house" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
-            }
-            else if(t.getType() == TileType::STOREHOUSE)
-            {
-                ngl::Obj * k = m_store.getModel( "storehouse" );
-                loadMatricesToShader( m_transform.getMatrix(), mvp );
-                k->draw();
+            case static_cast<int>(TileType::TREES):
+                m_store.getModel( "tree" )->draw();
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
+                m_store.getModel( "mountain" )->draw();
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                m_store.getModel( "storehouse" )->draw();
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                m_store.getModel( "house" )->draw();
+                break;
+            default:
+                break;
             }
         }
 
@@ -884,7 +1060,6 @@ void Scene::resize(const ngl::Vec2 &_dim)
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
     slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
     slib->use("water");
@@ -996,6 +1171,22 @@ void Scene::loadMatricesToShader()
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     ngl::Mat4 M = m_transform.getMatrix();
     ngl::Mat4 MVP = M * m_cam.getVP();
+
+    //Top down camera debug view
+    //Filthy hack
+    /*ngl::Mat4 pro = ngl::perspective(
+                80.0f,
+                m_cam.getAspect(),
+                0.1,
+                1024.0
+                );
+    ngl::Mat4 vu = ngl::lookAt(
+                ngl::Vec3(sinf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f, 32.0f, cosf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f),
+                ngl::Vec3(25.0f, 0.0f, 25.0f),
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );*/
+    //MVP = M * vu * pro;
+
     slib->setRegisteredUniform( "M", M );
     slib->setRegisteredUniform( "MVP", MVP );
 }
@@ -1013,7 +1204,7 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
     }
     glUniform1i(loc, _target);
 
-    glActiveTexture(GL_TEXTURE0+_target);
+    glActiveTexture(GL_TEXTURE0 + _target);
     glBindTexture(GL_TEXTURE_2D, _tex);
 }
 

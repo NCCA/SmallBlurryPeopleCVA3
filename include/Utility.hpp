@@ -74,6 +74,7 @@ T clamp(T _in, T _lo, T _hi)
     return _in;
 }
 
+bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt);
 
 }
 

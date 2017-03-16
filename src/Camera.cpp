@@ -23,9 +23,6 @@ void Camera::calculateViewMat()
                 m_up
                 );
 
-    /*for(auto i = m_transformationStack.rbegin(); i < m_transformationStack.rend(); ++i)
-        m_V *= (*i);*/
-
     m_V *= m_cameraTransformation;
     m_V *= m_pivotTransformation;
 
@@ -74,12 +71,11 @@ ngl::Mat4 Camera::rotationMatrix(float _pitch, float _yaw, float _roll)
     ngl::Mat4 r;
 
     p.rotateX( _pitch );
-
     y.rotateY( _yaw );
-
     r.rotateZ( _roll );
 
-    return y * p * r;
+    ngl::Mat4 ret = y * p * r;
+    return ret;
 }
 
 ngl::Mat4 Camera::translationMatrix(const ngl::Vec3 &_vec)
@@ -94,10 +90,16 @@ std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)
     std::array<ngl::Vec3, 8> cascade;
 
     //Distance from the look vector, on the right vector
-    float horizontal = tanf( Utility::radians(m_fov) / 2.0f );
+    float horizontal = tanf( Utility::radians(m_fov) / 1.0f );
 
-    float verticalFOV = m_fov / m_aspect;
-    float vertical = tanf( Utility::radians(verticalFOV) / 2.0f );
+    //float verticalFOV = m_fov / m_aspect;
+
+    float verticalFOV = 2.0f * atan( tanf(Utility::radians(m_fov) / 2.0f) / m_aspect );
+
+    float vertical = tanf(verticalFOV);
+
+    _start = -_start;
+    _end = -_end;
 
     float sh = _start * horizontal;
     float sv = _start * vertical;
@@ -117,12 +119,14 @@ std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)
     cascade[7] = ngl::Vec3( eh, -ev, _end ); //Bottom right
 
     //Project from view space to world space
-    ngl::Mat4 iv = m_V.inverse();
+    ngl::Mat4 iv = m_V;
+    //iv = iv.transpose();
+    iv = iv.inverse();
 
     for(auto &i : cascade)
     {
         ngl::Vec4 i4 = ngl::Vec4( i.m_x, i.m_y, i.m_z, 1.0f );
-        i4 = iv * i4;
+        i4 = i4 * iv;
         i = ngl::Vec3( i4.m_x, i4.m_y, i4.m_z );
     }
 
