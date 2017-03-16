@@ -154,6 +154,7 @@ private:
     void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
 
     ngl::Vec3 m_sunAngle;
+    //The direction the sun is pointing (not unit vector TO the light).
     ngl::Vec3 m_sunDir;
     ngl::Vec3 m_directionalLightCol;
     //Tracks days since the start of the game.

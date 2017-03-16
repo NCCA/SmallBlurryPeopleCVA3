@@ -25,16 +25,6 @@ uniform float iGlobalTime;
 
 uniform mat4 shadowMatrix[NUM_CASCADES];
 
-//UV per pixel 1/viewport
-uniform vec2 pixelstep;
-
-vec2 poissonDisk[4] = vec2[](
-        vec2( -0.94201624, -0.39906216 ),
-vec2( 0.94558609, -0.76890725 ),
-vec2( -0.094184101, -0.92938870 ),
-vec2( 0.34495938, 0.29387760 )
-);
-
 vec3 moonColour = vec3(0.3, 0.6, 0.8);
 
 uniform vec4 camPos;
@@ -116,9 +106,9 @@ float cnoise(vec3 P){
     return 2.2 * n_xyz;
 }
 
-float shadowSample(float depth, vec2 smpl, int index)
+float shadowSample(float depth, vec2 smpl, ivec2 offset, int index)
 {  
-    if(depth > texture(shadowDepths[index], smpl).r)
+    if(depth > textureOffset(shadowDepths[index], smpl, offset).r)
         return 1.0f;
     return 0.0;
 }
@@ -174,11 +164,11 @@ void main()
 
         float depth = sposition.z - bias;
 
-        float shadow = shadowSample(depth, sposition.xy, cascadeIndex);
-        shadow += shadowSample(depth, sposition.xy - pixelstep, cascadeIndex);
-        shadow += shadowSample(depth, sposition.xy + vec2(pixelstep.x, -pixelstep.y), cascadeIndex);
-        shadow += shadowSample(depth, sposition.xy + vec2(-pixelstep.x, pixelstep.y), cascadeIndex);
-        shadow += shadowSample(depth, sposition.xy + pixelstep, cascadeIndex);
+        float shadow = shadowSample(depth, sposition.xy, ivec2(0, 0), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy, ivec2(0, 1), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy, ivec2(1, 0), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy, ivec2(0, -1), cascadeIndex);
+        shadow += shadowSample(depth, sposition.xy, ivec2(-1, 0), cascadeIndex);
 
         shadow /= 5.0;
         mul -= shadow;

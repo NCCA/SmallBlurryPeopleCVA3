@@ -24,7 +24,7 @@ float clamp(float _in, float _lo, float _hi)
     return _in;
 }
 
-const int shadowResolution = 4096;
+const int shadowResolution = 8192;
 const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
@@ -70,7 +70,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
     slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
     slib->use("water");
@@ -103,6 +102,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
+    m_store.loadMesh("debugSphere", "sphere.obj");
     m_store.loadMesh("tree", "tree/tree.obj");
     m_store.loadTexture("tree_d", "tree/tree_d.png");
     m_store.loadMesh("house", "house/house.obj");
@@ -288,7 +288,7 @@ void Scene::update()
         ngl::Vec2 mouse_distance (mousePos[0], mousePos[1]);
         mouse_distance -= m_mouse_trans_origin;
 
-        m_mouse_translation = mouse_distance;
+        m_mouse_translation = 4.0f * mouse_distance;
         m_mouse_trans_origin = ngl::Vec2( mousePos[0], mousePos[1] );
     }
     //rotates
@@ -314,15 +314,15 @@ void Scene::update()
     trans -= m_cam.getPivot();
 
     ngl::Vec3 cxy = m_cam.getPos();
-    int x = clamp(std::round(cxy.m_x),0,m_grid.getW());
-    int y = clamp(std::round(cxy.m_z),0,m_grid.getH());
+    int x = clamp(std::round(cxy.m_x),0,m_grid.getW() - 1);
+    int y = clamp(std::round(cxy.m_z),0,m_grid.getH() - 1);
     cxy.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
 
     trans.m_y = -cxy.m_y;
 
     m_camTargPos = trans;
-    m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
-    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
+    m_camCurPos += (m_camTargPos - m_camCurPos) / 16.0f;
+    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 16.0f;
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
@@ -425,7 +425,7 @@ void Scene::draw()
     glViewport(0, 0, shadowResolution, shadowResolution);
 
     //The intervals at which we will draw into shadow buffers.
-    std::vector<float> cascadeDistances = {0.01f, 16.0f, 64.0f, 256.0f};
+    std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
     //cascadeDistances = {0.01f, 16.0f};
 
     auto boxes = generateOrthoShadowMatrices( cascadeDistances );
@@ -580,13 +580,13 @@ void Scene::draw()
     //      FORWARD-SHADING      //
     //---------------------------//
 
+    glEnable(GL_DEPTH_TEST);
+
     //Copy depth buffer from main buffer to back buffer.
-    /*glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-    glEnable(GL_DEPTH_TEST);
 
     slib->use("water");
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
@@ -617,14 +617,14 @@ void Scene::draw()
         }
     }
 
-    glBindVertexArray(0);*/
+    glBindVertexArray(0);
 
     //---------------------------//
     //          BUTTONS          //
     //---------------------------//
     // ?
-    glClear(GL_DEPTH_BUFFER_BIT);
-    Gui::instance()->drawButtons();
+    //glClear(GL_DEPTH_BUFFER_BIT);
+    //Gui::instance()->drawButtons();
 
     //---------------------------//
     //         DEBUG DRAW        //
@@ -645,8 +645,6 @@ void Scene::draw()
     }
 
     slib->use("colour");
-    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 1.0f, 1.0f));
-
     for(auto &p : m_debugPoints)
         p.m_w = 1.0;
 
@@ -662,18 +660,24 @@ void Scene::draw()
 
     m_transform.reset();
     loadMatricesToShader();
-    glDrawArraysEXT(GL_LINE_STRIP, 0, m_debugPoints.size());
+
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    glDrawArraysEXT(GL_LINES, 0, m_debugPoints.size() / 2);
+    slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    glDrawArraysEXT(GL_LINES, m_debugPoints.size() / 2, m_debugPoints.size() / 2);
 
     slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    for(auto &b : boxes.first)
+    /*for(auto &b : boxes.first)
     {
         ngl::BBox bo (b.first.m_x, b.second.m_x,
                       b.first.m_y, b.second.m_y,
                       b.first.m_z, b.second.m_z);
         loadMatricesToShader();
         bo.draw();
-    }
+    }*/
 
+    m_transform.setPosition(m_cam.getPivot());
+    drawAsset("debugSphere", "", "colour");
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
@@ -698,9 +702,10 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
     //Flip if the moon is up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
         s = -s;
+
     ngl::Mat4 lightView = ngl::lookAt(
-                -s,
                 ngl::Vec3(0.0f, 0.0f, 0.0f),
+                s,
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
 
@@ -713,13 +718,38 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
 
-    for(auto &c : cascades)
+    for(int i = 0; i < 2; ++i)
     {
+        auto &c = cascades[i];
         m_debugPoints.push_back(c[0]);
         m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[3]);
         m_debugPoints.push_back(c[3]);
         m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[2]);
         m_debugPoints.push_back(c[0]);
+
+        m_debugPoints.push_back(c[4]);
+        m_debugPoints.push_back(c[5]);
+        m_debugPoints.push_back(c[5]);
+        m_debugPoints.push_back(c[7]);
+        m_debugPoints.push_back(c[7]);
+        m_debugPoints.push_back(c[6]);
+        m_debugPoints.push_back(c[6]);
+        m_debugPoints.push_back(c[4]);
+
+        m_debugPoints.push_back(c[0]);
+        m_debugPoints.push_back(c[4]);
+
+        m_debugPoints.push_back(c[1]);
+        m_debugPoints.push_back(c[5]);
+
+        m_debugPoints.push_back(c[2]);
+        m_debugPoints.push_back(c[6]);
+
+        m_debugPoints.push_back(c[3]);
+        m_debugPoints.push_back(c[7]);
     }
 
     std::pair< std::vector< bounds >, std::vector< bounds > > boxes;
@@ -735,7 +765,7 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
         for(auto &vert : c)
         {
             ngl::Vec4 vert4 (vert.m_x, vert.m_y, vert.m_z, 1.0f);
-            vert4 = lightView * vert4;
+            vert4 = vert4 * lightView;
             vert = ngl::Vec3( vert4.m_x, vert4.m_y, vert4.m_z );
         }
         //std::cout << '\n';
@@ -745,28 +775,87 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
     for(auto &c : cascades)
         boxes.second.push_back( Utility::enclose(c) );
 
+    //for(auto &b : boxes.second)
+    for(int i = 0; i < 2; ++i)
+    {
+        auto &b = boxes.second[i];
+        ngl::BBox bo (b.first.m_x, b.second.m_x,
+                      b.first.m_y, b.second.m_y,
+                      b.first.m_z, b.second.m_z
+                      );
+
+        ngl::Vec3 * verts = bo.getVertexArray();
+        ngl::Mat4 ilv = lightView.inverse();
+
+        for(int i = 0; i < 8; ++i)
+        {
+            verts[i] = verts[i] * ilv;
+        }
+
+        m_debugPoints.push_back(verts[0]);
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[0]);
+
+        m_debugPoints.push_back(verts[4]);
+        m_debugPoints.push_back(verts[5]);
+        m_debugPoints.push_back(verts[5]);
+        m_debugPoints.push_back(verts[6]);
+        m_debugPoints.push_back(verts[6]);
+        m_debugPoints.push_back(verts[7]);
+        m_debugPoints.push_back(verts[7]);
+        m_debugPoints.push_back(verts[4]);
+
+        m_debugPoints.push_back(verts[0]);
+        m_debugPoints.push_back(verts[4]);
+
+        m_debugPoints.push_back(verts[1]);
+        m_debugPoints.push_back(verts[5]);
+
+        m_debugPoints.push_back(verts[2]);
+        m_debugPoints.push_back(verts[6]);
+
+        m_debugPoints.push_back(verts[3]);
+        m_debugPoints.push_back(verts[7]);
+    }
+
     return boxes;
 }
 
 void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 {
     ngl::Vec3 s = m_sunDir;
-    //Flip if the moon is up.
-    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+    //Flip if the sun is pointing up.
+    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
         s = -s;
 
-    //Box dimensions
-    ngl::Vec3 ldim = _lightbox.second - _lightbox.first;
-    //Box position
-    ngl::Vec3 mid = (_lightbox.first + _lightbox.second) / 2.0f;
+    //Center
+    ngl::Vec3 pos = (_lightbox.first + _lightbox.second) / 2.0f;
+    //Half-dimension
+    ngl::Vec3 dim = (_lightbox.second - _lightbox.first) / 2.0f;
+
+    ngl::Mat4 project = ngl::ortho(
+                -dim.m_x, dim.m_x,
+                -dim.m_y, dim.m_y,
+                -dim.m_z, dim.m_z
+                );
+
+    ngl::Mat4 lightPos = ngl::Mat4();
+    lightPos.translate( pos.m_x, pos.m_y, pos.m_z );
+
+    ngl::Mat4 lightDir = ngl::lookAt(
+                ngl::Vec3(),
+                s,
+                ngl::Vec3(0.0f, 1.0f, 0.0f)
+                );
+
+    ngl::Mat4 view = lightDir * lightPos;
 
     /*ngl::Mat4 P = ngl::ortho(
-                -ldim.m_x, ldim.m_x,
-                -ldim.m_y, ldim.m_y,
-                -ldim.m_z, ldim.m_z
-                );*/
-
-    ngl::Mat4 P = ngl::ortho(
                 _lightbox.first.m_x, _lightbox.second.m_x,
                 _lightbox.first.m_y, _lightbox.second.m_y,
                 _lightbox.first.m_z, _lightbox.second.m_z
@@ -774,12 +863,11 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     ngl::Mat4 V = ngl::lookAt(
                 ngl::Vec3(0.0f, 0.0f, 0.0f),
-                -s,
+                s,
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
-                );
+                );*/
 
-    m_shadowMat[_index] = V * P;
-
+    m_shadowMat[_index] = view * project;
     m_shadowBuffer.bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowBuffer.get( "depth[" + std::to_string(_index) + "]" ), 0);
     glClear( GL_DEPTH_BUFFER_BIT );
@@ -795,8 +883,8 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         for(auto &vec : m_meshPositions[i])
         {
             //TO-DO fix
-            /*if(!Utility::pointInBox(reformedWorldBox, vec))
-                continue;*/
+            if(!Utility::pointInBox(_worldbox, vec))
+                continue;
             m_transform.setPosition(vec);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
             loadMatricesToShader( m_transform.getMatrix(), mvp );
@@ -947,7 +1035,6 @@ void Scene::resize(const ngl::Vec2 &_dim)
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(0.5f, 0.5f) / m_viewport);
     slib->setRegisteredUniform("waterLevel", m_grid.getWaterLevel() / m_terrainHeightDivider);
 
     slib->use("water");
@@ -1065,14 +1152,14 @@ void Scene::loadMatricesToShader()
 
     //TO-DO delete
     ngl::Mat4 pro = ngl::perspective(
-                60.0f,
+                80.0f,
                 m_cam.getAspect(),
-                0.01,
+                0.1,
                 1024.0
                 );
     ngl::Mat4 vu = ngl::lookAt(
-                ngl::Vec3(1.0f, 128.0f, 0.0f),
-                ngl::Vec3(),
+                ngl::Vec3(sinf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f, 32.0f, cosf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f),
+                ngl::Vec3(25.0f, 0.0f, 25.0f),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
     MVP = M * vu * pro;
@@ -1094,7 +1181,7 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
     }
     glUniform1i(loc, _target);
 
-    glActiveTexture(GL_TEXTURE0+_target);
+    glActiveTexture(GL_TEXTURE0 + _target);
     glBindTexture(GL_TEXTURE_2D, _tex);
 }
 
