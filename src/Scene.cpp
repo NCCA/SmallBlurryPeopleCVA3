@@ -24,7 +24,7 @@ float clamp(float _in, float _lo, float _hi)
     return _in;
 }
 
-const int shadowResolution = 8192;
+const int shadowResolution = 4096;
 const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
@@ -713,7 +713,7 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
     std::vector< std::array<ngl::Vec3, 8> > cascades;
 
     for(int i = 0; i <= _divisions.size() - 2; ++i)
-    {
+    {lightDir
         //std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
     }
@@ -834,7 +834,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         s = -s;
 
     //Center
-    ngl::Vec3 pos = (_lightbox.first + _lightbox.second) / 2.0f;
+    ngl::Vec3 pos = -(_lightbox.first + _lightbox.second) / 2.0f;
     //Half-dimension
     ngl::Vec3 dim = (_lightbox.second - _lightbox.first) / 2.0f;
 
@@ -1162,7 +1162,7 @@ void Scene::loadMatricesToShader()
                 ngl::Vec3(25.0f, 0.0f, 25.0f),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
                 );
-    MVP = M * vu * pro;
+    //MVP = M * vu * pro;
 
     slib->setRegisteredUniform( "M", M );
     slib->setRegisteredUniform( "MVP", MVP );
