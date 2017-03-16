@@ -10,6 +10,8 @@ in vec2 uv_fs;
 
 uniform sampler2D displacement;
 uniform sampler2D terrainPos;
+uniform sampler2D waterReflection;
+
 uniform vec2 pixelstep;
 uniform vec3 lightDir;
 uniform vec3 camPos;
@@ -157,6 +159,8 @@ void main()
     //fragColour.xyz = position_fs.xyz;
     //fragColour.xyz = vec3(smul);
     //fragColour.a = 1.0;
+
+    fragColour = texture(waterReflection, uv_fs);
 
     fragColour.a = clamp(fragColour.a, 0.0, 1.0);
 }

@@ -21,7 +21,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_active(true),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
-		m_centre_camera(false),
+    m_centre_camera(false),
     m_mouse_zoom_cur(10.0f),
     m_mouse_zoom_targ(10.0f),
     m_mouse_pan(1.0f),
@@ -46,9 +46,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
-		createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
-		createShader("colour", "vertDeferredData", "fragBasicColour");
-		createShader("charPick", "vertDeferredData", "fragPickChar");
+    createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
+    createShader("colour", "vertDeferredData", "fragBasicColour");
+    createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
@@ -145,7 +145,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
     glEnable(GL_MULTISAMPLE);
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_BLEND);
@@ -175,217 +175,228 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
 void Scene::initialiseFramebuffers()
 {
-	//Graphics stuff.
-	//Framebuffers
-	std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
-	m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-	m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
-	m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
-	m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
-	m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
-	m_mainBuffer.addDepthAttachment( "depth" );
-	if(!m_mainBuffer.checkComplete())
-	{
-		std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-		exit(EXIT_FAILURE);
-	}
-	m_mainBuffer.unbind();
+    //Graphics stuff.
+    //Framebuffers
+    std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
+    m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
+    m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
+    m_mainBuffer.addDepthAttachment( "depth" );
+    if(!m_mainBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_mainBuffer.unbind();
 
-	std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
-	m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
-	m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
-	m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
-	m_pickBuffer.addDepthAttachment( "depth" );
-	if(!m_pickBuffer.checkComplete())
-	{
-		std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-		exit(EXIT_FAILURE);
-	}
-	m_pickBuffer.unbind();
+    std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
+    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
+    m_pickBuffer.addDepthAttachment( "depth" );
+    if(!m_pickBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_pickBuffer.unbind();
 
-	std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
-	m_shadowBuffer.initialise( shadowResolution, shadowResolution );
-	glDrawBuffer( GL_NONE );
-	glReadBuffer( GL_NONE );
-	for(int i = 0; i < 3; ++i)
-	{
-		m_shadowBuffer.addTexture("depth[" + std::to_string(i) + "]", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
-	}
-	if(!m_shadowBuffer.checkComplete())
-	{
-		std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-		exit(EXIT_FAILURE);
-	}
-	m_shadowBuffer.unbind();
+    std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
+    m_shadowBuffer.initialise( shadowResolution, shadowResolution );
+    glDrawBuffer( GL_NONE );
+    glReadBuffer( GL_NONE );
+    for(int i = 0; i < 3; ++i)
+    {
+        m_shadowBuffer.addTexture("depth[" + std::to_string(i) + "]", GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT );
+    }
+    if(!m_shadowBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_shadowBuffer.unbind();
 
-	std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
-	m_displacementBuffer.initialise(waterResolution, waterResolution);
-	m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
-	if(!m_displacementBuffer.checkComplete())
-	{
-		std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-		exit(EXIT_FAILURE);
-	}
-	m_displacementBuffer.unbind();
+    std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
+    m_displacementBuffer.initialise(waterResolution, waterResolution);
+    m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
+    if(!m_displacementBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_displacementBuffer.unbind();
+
+    std::cout << "Initalising post effects framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
+    m_postEffectsBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
+    m_postEffectsBuffer.addTexture("reflection", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0);
+    m_postEffectsBuffer.addDepthAttachment("depth");
+    if(!m_postEffectsBuffer.checkComplete())
+    {
+        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
+        exit(EXIT_FAILURE);
+    }
+    m_postEffectsBuffer.unbind();
 }
 
 void Scene::readNameFile()
 {
-	std::ifstream namesFile;
-	namesFile.open("names/game_names.txt");
+    std::ifstream namesFile;
+    namesFile.open("names/game_names.txt");
 
-	if(!namesFile.is_open())
-	{
-			std::cerr<<"Couldnt open file\n";
-			exit(EXIT_FAILURE);
-	}
+    if(!namesFile.is_open())
+    {
+        std::cerr<<"Couldnt open file\n";
+        exit(EXIT_FAILURE);
+    }
 
-	int lineNo = 0;
-	std::string lineBuffer;
-	while (!namesFile.eof())
-	{
-			std::getline(namesFile, lineBuffer, '\n');
-			if(lineBuffer.size() != 0)
-			{
-					m_file_names.push_back(lineBuffer);
-					lineNo++;
-			}
-	}
-	namesFile.close();
+    int lineNo = 0;
+    std::string lineBuffer;
+    while (!namesFile.eof())
+    {
+        std::getline(namesFile, lineBuffer, '\n');
+        if(lineBuffer.size() != 0)
+        {
+            m_file_names.push_back(lineBuffer);
+            lineNo++;
+        }
+    }
+    namesFile.close();
 }
 
 void Scene::createCharacter()
 {
-	int numberNames = m_file_names.size();
-	std::random_device rnd;
-	std::mt19937 mt_rand(rnd());
-	std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-	int name_chosen = nameNo(mt_rand);
-	m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+    int numberNames = m_file_names.size();
+    std::random_device rnd;
+    std::mt19937 mt_rand(rnd());
+    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+    int name_chosen = nameNo(mt_rand);
+    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
 {
-	//If this is not zeroed first, the camera will keep sliding about after we release the lmb.
-	m_mouse_translation = ngl::Vec2(0,0);
+    //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
+    m_mouse_translation = ngl::Vec2(0,0);
 
-	//translates
-	if(m_mouse_trans_active)
-	{
-		//Get mouse pos.
-		int mousePos[2] = {0, 0};
-		SDL_GetMouseState( &mousePos[0], &mousePos[1] );
+    //translates
+    if(m_mouse_trans_active)
+    {
+        //Get mouse pos.
+        int mousePos[2] = {0, 0};
+        SDL_GetMouseState( &mousePos[0], &mousePos[1] );
 
-		//Compute distance to mouse origin
-		ngl::Vec2 mouse_distance (mousePos[0], mousePos[1]);
-		mouse_distance -= m_mouse_trans_origin;
+        //Compute distance to mouse origin
+        ngl::Vec2 mouse_distance (mousePos[0], mousePos[1]);
+        mouse_distance -= m_mouse_trans_origin;
 
-		m_mouse_translation = mouse_distance;
-		m_mouse_trans_origin = ngl::Vec2( mousePos[0], mousePos[1] );
-	}
-	//rotates
-	else if(m_mouse_rot_active)
-	{
-		int mouse_origin = 0;
-		int mouse_distance = 0;
-		SDL_GetMouseState(&mouse_origin, nullptr);
-		mouse_distance = mouse_origin - m_mouse_rot_origin;
-		m_mouse_rotation += (float) 0.075f * mouse_distance;
-		m_mouse_rot_origin = mouse_origin;
-	}
+        m_mouse_translation = mouse_distance;
+        m_mouse_trans_origin = ngl::Vec2( mousePos[0], mousePos[1] );
+    }
+    //rotates
+    else if(m_mouse_rot_active)
+    {
+        int mouse_origin = 0;
+        int mouse_distance = 0;
+        SDL_GetMouseState(&mouse_origin, nullptr);
+        mouse_distance = mouse_origin - m_mouse_rot_origin;
+        m_mouse_rotation += (float) 0.075f * mouse_distance;
+        m_mouse_rot_origin = mouse_origin;
+    }
 
-	//Set initial position (should really make this function more intuitive).
-	m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur));
+    //Set initial position (should really make this function more intuitive).
+    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur));
 
-	//Clear all transformations from previous update.
-	m_cam.clearTransforms();
+    //Clear all transformations from previous update.
+    m_cam.clearTransforms();
 
-	//Construct translation *change* using right and forward vectors.
-	ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.05f;
-	trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.05f;
-	trans -= m_cam.getPivot();
+    //Construct translation *change* using right and forward vectors.
+    ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.05f;
+    trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.05f;
+    trans -= m_cam.getPivot();
 
-	ngl::Vec3 cxyz = m_cam.getPos();
-	int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW());
-	int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH());
-	cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+    ngl::Vec3 cxyz = m_cam.getPos();
+    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+    cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
 
-	trans.m_y = -cxyz.m_y;
+    trans.m_y = -cxyz.m_y;
 
-	m_camTargPos = trans;
-	m_camCurPos += (m_camTargPos - m_camCurPos) / 4.0f;
-	m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
+    m_camTargPos = trans;
+    m_camCurPos += (m_camTargPos - m_camCurPos) / 4.0f;
+    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
 
-	m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
+    m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
 
-	if(m_centre_camera == true)
-	{
-		for (Character &character : m_characters)
-		{
-			if (character.isActive())
-			{
-/////////////////////////////////////////////////////////////////////////////////////////////////
-				ngl::Vec3 new_pivot;
-				new_pivot.m_y = -character.getPos().m_y / m_terrainHeightDivider;
-				new_pivot.m_x = -character.getPos().m_x;
-				new_pivot.m_z = -character.getPos().m_z;
-				m_cam.movePivot(new_pivot);
+    if(m_centre_camera == true)
+    {
+        for (Character &character : m_characters)
+        {
+            if (character.isActive())
+            {
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                ngl::Vec3 new_pivot;
+                new_pivot.m_y = -character.getPos().m_y / m_terrainHeightDivider;
+                new_pivot.m_x = -character.getPos().m_x;
+                new_pivot.m_z = -character.getPos().m_z;
+                m_cam.movePivot(new_pivot);
 
-				ngl::Vec3 cxy = m_cam.getPos();
-				int x = Utility::clamp(std::round(cxy.m_x),0,m_grid.getW());
-				int y = Utility::clamp(std::round(cxy.m_z),0,m_grid.getH());
-				cxy.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
-				m_cam.moveCamera(cxy);
-/////////////////////////////////////////////////////////////////////////////////////
-			}
-		}
-	}
-	else
-	{
-		m_cam.movePivot(m_camCurPos);
-	}
+                ngl::Vec3 cxy = m_cam.getPos();
+                int x = Utility::clamp(std::round(cxy.m_x),0,m_grid.getW());
+                int y = Utility::clamp(std::round(cxy.m_z),0,m_grid.getH());
+                cxy.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+                m_cam.moveCamera(cxy);
+                /////////////////////////////////////////////////////////////////////////////////////
+            }
+        }
+    }
+    else
+    {
+        m_cam.movePivot(m_camCurPos);
+    }
 
     m_cam.calculateViewMat();
 
-	for(Character &character : m_characters)
-	{
-		character.update();
-	}
+    for(Character &character : m_characters)
+    {
+        character.update();
+    }
 
-	//m_sunAngle.m_x = 150.0f;
-	m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-	m_sunAngle.m_x += 0.01f;
-	if(m_sunAngle.m_x > 360.0f)
-	{
-		m_day++;
-		m_sunAngle.m_x = 0.0f;
-		//std::cout << "Day " << m_day << " Season " << m_season << '\n';
-	}
-	//std::cout << m_sunAngle.m_x << '\n';
+    //m_sunAngle.m_x = 150.0f;
+    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
+    m_sunAngle.m_x += 0.01f;
+    if(m_sunAngle.m_x > 360.0f)
+    {
+        m_day++;
+        m_sunAngle.m_x = 0.0f;
+        //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+    }
+    //std::cout << m_sunAngle.m_x << '\n';
 
-	m_season = (m_day % 365) / 365.0f;
+    m_season = (m_day % 365) / 365.0f;
 
-	ngl::Transformation t;
-	t.setRotation( m_sunAngle );
-	m_sunDir = t.getMatrix().getForwardVector();
-	m_sunDir.normalize();
+    ngl::Transformation t;
+    t.setRotation( m_sunAngle );
+    m_sunDir = t.getMatrix().getForwardVector();
+    m_sunDir.normalize();
 
-	//1 = Midday
-	//0 = Sunrise/sunset
-	//-1 = Midnight
-	float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
-	//Map to range 0.5PI to -0.5PI
-	a *= M_PI / 2.0;
+    //1 = Midday
+    //0 = Sunrise/sunset
+    //-1 = Midnight
+    float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
+    //Map to range 0.5PI to -0.5PI
+    a *= M_PI / 2.0;
 
-	float t_midday = 0.5f * sin(a) + 0.5f;
-	float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
-	float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
+    float t_midday = 0.5f * sin(a) + 0.5f;
+    float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
+    float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
 
-	m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
-					t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-					t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
+            t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
+            t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
 
-	m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+    m_directionalLightCol /= t_midday + t_midnight + t_sundown;
 }
 
 //I'm sorry this function is so long :(
@@ -409,8 +420,8 @@ void Scene::draw()
 
     slib->use("terrainPick");
 
-		ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
-		slib->setRegisteredUniform("dimensions", grid_size);
+    ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
+    slib->setRegisteredUniform("dimensions", grid_size);
 
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -424,8 +435,8 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-				ngl::Vec3 pos = ch.getPos();
-				m_transform.setPosition(pos);
+        ngl::Vec3 pos = ch.getPos();
+        m_transform.setPosition(pos);
         slib->setRegisteredUniform("id", ch.getID());
         drawAsset( "person", "", "");
     }
@@ -463,29 +474,67 @@ void Scene::draw()
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
-    // RAW DATA PASS //
+    //         REFLECTIONS       //
     //---------------------------//
     m_mainBuffer.bind();
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    slib->use("terrain");
-    bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
-    bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
-    bindTextureToShader("terrain", m_store.getTexture("snow"), "snow", 2);
+    ngl::Mat4 camFlip;
+    camFlip.scale(1.0f, -1.0f, 1.0f);
+    //Flip camera upside down.
+    m_cam.transformPivot(camFlip);
+    m_cam.calculateViewMat();
 
-    float waterLevel = m_grid.getWaterLevel() / m_terrainHeightDivider;
-    slib->setRegisteredUniform( "waterlevel", waterLevel);
-    float snowLevel = m_grid.getMountainHeight() / m_terrainHeightDivider;
-    float difference = snowLevel - waterLevel;
-    float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
-    slib->setRegisteredUniform( "snowline", snow);
+    drawTerrain();
 
+    m_postEffectsBuffer.bind();
+    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    drawSky();
+
+    slib->use("deferredLight");
+    GLuint id = slib->getProgramID("deferredLight");
+    slib->setRegisteredUniform("sunDir", m_sunDir );
+    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
+    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+    slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
+    slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
+    slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
+    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+
+    slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
+    for( int i = 0; i < cascadeDistances.size(); ++i )
+        slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
+
+    m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
+    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+    m_mainBuffer.bindTexture(id, "normal", "normal", 1);
+    m_mainBuffer.bindTexture(id, "position", "position", 2);
+    m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
+    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
+    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
+    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    m_postEffectsBuffer.unbind();
+
+    //Flip camera right way up.
+    m_cam.transformPivot(camFlip);
+    m_cam.calculateViewMat();
+
+    //---------------------------//
+    // RAW DATA PASS //
+    //---------------------------//
     m_transform.reset();
-    glBindVertexArray(m_terrainVAO);
-    loadMatricesToShader();
-    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
-    glBindVertexArray(0);
+    m_mainBuffer.bind();
+    m_mainBuffer.activeColourAttachments();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    drawTerrain();
 
     slib->use("diffuse");
 
@@ -514,11 +563,11 @@ void Scene::draw()
 
     for(auto &character : m_characters)
     {
-				ngl::Vec3 pos = character.getPos();
-				pos.m_y /= m_terrainHeightDivider;
-				m_transform.setPosition(pos);
-				slib->use("colour");
-				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+        ngl::Vec3 pos = character.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
         drawAsset( "person", "", "colour");
     }
 
@@ -533,26 +582,16 @@ void Scene::draw()
     //---------------------------//
     //            SKY            //
     //---------------------------//
-    glBindVertexArray(m_screenQuad);
-
-    slib->use("sky");
-    slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
-    slib->setRegisteredUniform("iP", m_cam.getP().inverse());
-    slib->setRegisteredUniform("camPos", m_cam.getPos());
-    slib->setRegisteredUniform( "sunDir", m_sunDir );
-
-    slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+    drawSky();
 
     //---------------------------//
     //          LIGHTING         //
     //---------------------------//
     slib->use("deferredLight");
-    GLuint id = slib->getProgramID("deferredLight");
+    id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
-		slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
-		slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
+    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
@@ -617,6 +656,7 @@ void Scene::draw()
 
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
     m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
+    m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
 
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
@@ -648,7 +688,7 @@ void Scene::draw()
     //         DEBUG DRAW        //
     //---------------------------//
 
-    //It'd be good to have some kind of m_debugViewMode to control this section.
+    //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
     /*glBindVertexArray(m_screenQuad);
 
@@ -703,6 +743,44 @@ void Scene::draw()
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
 
+}
+
+void Scene::drawSky()
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+
+    glBindVertexArray(m_screenQuad);
+
+    slib->use("sky");
+    slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
+    slib->setRegisteredUniform("iP", m_cam.getP().inverse());
+    slib->setRegisteredUniform("camPos", m_cam.getPos());
+    slib->setRegisteredUniform( "sunDir", m_sunDir );
+
+    slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+}
+
+void Scene::drawTerrain()
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    slib->use("terrain");
+    bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
+    bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
+    bindTextureToShader("terrain", m_store.getTexture("snow"), "snow", 2);
+
+    float waterLevel = m_grid.getWaterLevel() / m_terrainHeightDivider;
+    slib->setRegisteredUniform( "waterlevel", waterLevel);
+    float snowLevel = m_grid.getMountainHeight() / m_terrainHeightDivider;
+    float difference = snowLevel - waterLevel;
+    float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
+    slib->setRegisteredUniform( "snowline", snow);
+
+    glBindVertexArray(m_terrainVAO);
+    loadMatricesToShader();
+    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+    glBindVertexArray(0);
 }
 
 void Scene::quit()
@@ -930,10 +1008,10 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     for(auto &character : m_characters)
     {
-				ngl::Vec3 pos = character.getPos();
-				pos.m_y /= m_terrainHeightDivider;
-				//std::cout<<"HEIGHT: "<<pos.m_y<<std::endl;
-				m_transform.setPosition(pos);
+        ngl::Vec3 pos = character.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        //std::cout<<"HEIGHT: "<<pos.m_y<<std::endl;
+        m_transform.setPosition(pos);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = m_store.getModel( "person" );
@@ -956,26 +1034,26 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
 void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
 {
-	//checks if the left button has been pressed down and flags start
-	if(_event.button == SDL_BUTTON_LEFT)
-	{
-		m_centre_camera = false;
-		m_mouse_trans_origin[0] = _event.x;
-		m_mouse_trans_origin[1] = _event.y;
-		//records position of mouse on press
-		m_mouse_prev_pos[0] = _event.x;
-		m_mouse_prev_pos[1] = _event.y;
-		m_mouse_trans_active=true;
-		Gui::instance()->mouseDown();
-	}
+    //checks if the left button has been pressed down and flags start
+    if(_event.button == SDL_BUTTON_LEFT)
+    {
+        m_centre_camera = false;
+        m_mouse_trans_origin[0] = _event.x;
+        m_mouse_trans_origin[1] = _event.y;
+        //records position of mouse on press
+        m_mouse_prev_pos[0] = _event.x;
+        m_mouse_prev_pos[1] = _event.y;
+        m_mouse_trans_active=true;
+        Gui::instance()->mouseDown();
+    }
 
-	//checks if the right button has been pressed down and flags start
-	else if(_event.button == SDL_BUTTON_RIGHT)
-	{
-		m_centre_camera = false;
-		m_mouse_rot_origin = _event.x;
-		m_mouse_rot_active = true;
-	}
+    //checks if the right button has been pressed down and flags start
+    else if(_event.button == SDL_BUTTON_RIGHT)
+    {
+        m_centre_camera = false;
+        m_mouse_rot_origin = _event.x;
+        m_mouse_rot_active = true;
+    }
 }
 
 void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
@@ -1097,11 +1175,11 @@ void Scene::mouseSelection()
         //check character_id texture
         GLuint char_texID = getCharPickTexture();
         glBindTexture(GL_TEXTURE_2D, char_texID);
-				glReadBuffer(GL_COLOR_ATTACHMENT1);
+        glReadBuffer(GL_COLOR_ATTACHMENT1);
 
         long unsigned int red;
         glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
-				std::cout<<"RED"<<red<<std::endl;
+        std::cout<<"RED"<<red<<std::endl;
         //change depending on number characters
         if(red >= 0 && red < m_characters.size())
         {
@@ -1130,20 +1208,20 @@ void Scene::mouseSelection()
 
             std::array<unsigned char, 3> grid_coord;
 
-						// x, window height - y
+            // x, window height - y
             glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &grid_coord[0]);
 
             if(grid_coord[0] != 0 && grid_coord[2] != 0)
             {
-								int grid_coord_x = floor((grid_coord[0]/255.0) * m_grid.getW());
-								int grid_coord_y = floor((grid_coord[2]/255.0) * m_grid.getH());
+                int grid_coord_x = floor((grid_coord[0]/255.0) * m_grid.getW());
+                int grid_coord_y = floor((grid_coord[2]/255.0) * m_grid.getH());
 
                 int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
 
                 if(m_characters[0].isActive() == true)
                 {
-									if(m_characters[0].setTarget(target_id))
-										m_characters[0].setState();
+                    if(m_characters[0].setTarget(target_id))
+                        m_characters[0].setState();
                 }
 
             }
@@ -1533,13 +1611,13 @@ GLuint Scene::constructTerrain()
             normesh.push_back( f.m_verts[0].m_norm );
 
             //t2
-            trimesh.push_back( f.m_verts[3].m_pos );
-            trimesh.push_back( f.m_verts[2].m_pos );
             trimesh.push_back( f.m_verts[1].m_pos );
+            trimesh.push_back( f.m_verts[2].m_pos );
+            trimesh.push_back( f.m_verts[3].m_pos );
 
-            normesh.push_back( f.m_verts[3].m_norm );
-            normesh.push_back( f.m_verts[2].m_norm );
             normesh.push_back( f.m_verts[1].m_norm );
+            normesh.push_back( f.m_verts[2].m_norm );
+            normesh.push_back( f.m_verts[3].m_norm );
         }
     }
 
@@ -1643,12 +1721,12 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
 
 void Scene::centreCamera()
 {
-	for (Character &character : m_characters)
-	{
-		if (character.isActive())
-		{
-			m_centre_camera = true;
-		}
-	}
-	
+    for (Character &character : m_characters)
+    {
+        if (character.isActive())
+        {
+            m_centre_camera = true;
+        }
+    }
+
 }

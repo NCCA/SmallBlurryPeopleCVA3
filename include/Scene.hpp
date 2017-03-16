@@ -22,6 +22,11 @@ public:
     Scene(ngl::Vec2 _viewport);
     ~Scene() = default;
     void draw();
+    /// \brief draws the sky
+    void drawSky();
+    /// \brief draws the terrain
+    void drawTerrain();
+
     void update();
     ///
     /// \brief quit close the program
@@ -129,8 +134,10 @@ private:
     Framebuffer m_pickBuffer;
     /// @brief buffer to store depth for shadowing
     Framebuffer m_shadowBuffer;
-    /// @brief buffer to storedisplacement map, currently for water only.
+    /// @brief buffer to store displacement map, currently for water only.
     Framebuffer m_displacementBuffer;
+    /// @brief This buffer will store textures for post effects (DOF, reflections).
+    Framebuffer m_postEffectsBuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();
