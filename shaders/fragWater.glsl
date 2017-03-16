@@ -6,7 +6,10 @@ layout (location = 0) out vec4 fragColour;
 
 in vec4 position_fs;
 in vec3 normal_fs;
+in vec2 tile_uv_fs;
 in vec2 uv_fs;
+
+uniform mat4 MV;
 
 uniform sampler2D displacement;
 uniform sampler2D terrainPos;
@@ -100,18 +103,18 @@ void main()
 
     //Calculate normal from displacement.
     float heights[4];
-    heights[0] = textureOffset(displacement, uv_fs, ivec2(0, 1)).r;
-    heights[1] = textureOffset(displacement, uv_fs, ivec2(1, 0)).r;
-    heights[2] = textureOffset(displacement, uv_fs, ivec2(0, -1)).r;
-    heights[3] = textureOffset(displacement, uv_fs, ivec2(-1, 0)).r;
+    heights[0] = textureOffset(displacement, tile_uv_fs, ivec2(0, 1)).r;
+    heights[1] = textureOffset(displacement, tile_uv_fs, ivec2(1, 0)).r;
+    heights[2] = textureOffset(displacement, tile_uv_fs, ivec2(0, -1)).r;
+    heights[3] = textureOffset(displacement, tile_uv_fs, ivec2(-1, 0)).r;
 
-    vec3 center = vec3(uv_fs.xy, texture(displacement, uv_fs).r);
+    vec3 center = vec3(tile_uv_fs.xy, texture(displacement, tile_uv_fs).r);
 
     //y/z to be swizzled later.
-    vec3 top = vec3((uv_fs + vec2(0.0, pixelstep.y)), heights[0]) - center;
-    vec3 right = vec3((uv_fs + vec2(pixelstep.x, 0.0)), heights[1]) - center;
-    vec3 bottom = vec3((uv_fs + vec2(0.0, -pixelstep.y)), heights[2]) - center;
-    vec3 left = vec3((uv_fs + vec2(pixelstep.x, 0.0)), heights[3]) - center;
+    vec3 top = vec3((tile_uv_fs + vec2(0.0, pixelstep.y)), heights[0]) - center;
+    vec3 right = vec3((tile_uv_fs + vec2(pixelstep.x, 0.0)), heights[1]) - center;
+    vec3 bottom = vec3((tile_uv_fs + vec2(0.0, -pixelstep.y)), heights[2]) - center;
+    vec3 left = vec3((tile_uv_fs + vec2(pixelstep.x, 0.0)), heights[3]) - center;
 
     bottom.x = -bottom.x;
     left.x = -left.x;
@@ -155,12 +158,19 @@ void main()
 
     fragColour.xyz = mix(fragColour.xyz, directionalLightCol, clamp(dmul, 0.0, 1.0));
 
-    //fragColour.xyz = vec3(distance(position_fs, texture(terrainPos, UV)) / 4.0);
-    //fragColour.xyz = position_fs.xyz;
-    //fragColour.xyz = vec3(smul);
-    //fragColour.a = 1.0;
+    //Reflections
+    //Sourced from http://ivanleben.blogspot.co.uk/2008/03/water-reflections-with-opengl.html
+    vec3 flatNormal = normal - dot(normal, vec3(0.0, 1.0, 0.0)) * vec3(0.0, 1.0, 0.0);
+    //Project into eye space
+    vec3 eyeFlatNormal = (MV * vec4(flatNormal.xyz, 0.0)).xyz;
+    //Normalise!
+    vec2 reflectOffset = normalize( eyeFlatNormal.xy ) * length(flatNormal) * 0.025;
+    vec3 reflColour = texture(waterReflection, UV + reflectOffset).xyz;
 
-    fragColour = texture(waterReflection, uv_fs);
+    float reflMul = clamp( dot(eyeVec, normal), 0.0, 1.0);
+    fragColour.xyz = mix(reflColour, fragColour.xyz, reflMul);
+
+    //fragColour.xyz = texture(waterReflection, UV).xyz;
 
     fragColour.a = clamp(fragColour.a, 0.0, 1.0);
 }

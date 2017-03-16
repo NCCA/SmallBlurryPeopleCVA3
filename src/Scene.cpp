@@ -14,6 +14,9 @@
 
 #include <ngl/AABB.h>
 
+//This should be the same as the size of the map, for now.
+const ngl::Vec2 waterDimensions (50.0f, 50.0f);
+
 const int shadowResolution = 4096;
 const int waterResolution = 1024;
 
@@ -476,13 +479,18 @@ void Scene::draw()
     //---------------------------//
     //         REFLECTIONS       //
     //---------------------------//
+    glCullFace(GL_FRONT);
+    m_transform.reset();
+
     m_mainBuffer.bind();
     m_mainBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ngl::Mat4 camFlip;
     camFlip.scale(1.0f, -1.0f, 1.0f);
+
     //Flip camera upside down.
+    m_cam.movePivot(ngl::Vec3(0.0f, 2.0f * m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f));
     m_cam.transformPivot(camFlip);
     m_cam.calculateViewMat();
 
@@ -491,15 +499,25 @@ void Scene::draw()
     m_postEffectsBuffer.bind();
     m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glCullFace(GL_BACK);
 
     drawSky();
+
+    //Flip camera right way up.
+    m_cam.transformPivot(camFlip);
+    m_cam.movePivot(ngl::Vec3(0.0f, -2.0f * m_grid.getWaterLevel() / m_terrainHeightDivider, 0.0f));
+    m_cam.calculateViewMat();
+
+    //Light reflections
+    glBindVertexArray(m_screenQuad);
 
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
     slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
     slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+    slib->setRegisteredUniform( "iGlobalTime", m_sunAngle.m_x * 8.0f );
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
     slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
@@ -520,11 +538,11 @@ void Scene::draw()
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
-    m_postEffectsBuffer.unbind();
+    glBindVertexArray(0);
 
-    //Flip camera right way up.
-    m_cam.transformPivot(camFlip);
-    m_cam.calculateViewMat();
+    glEnable(GL_DEPTH_TEST);
+
+    m_postEffectsBuffer.unbind();
 
     //---------------------------//
     // RAW DATA PASS //
@@ -651,6 +669,7 @@ void Scene::draw()
     slib->setRegisteredUniform("lightDir", m_sunDir);
     slib->setRegisteredUniform("camPos", m_cam.getPos());
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
+    slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
     id = slib->getProgramID("water");
 
@@ -670,6 +689,7 @@ void Scene::draw()
             m_transform.setScale(scale, scale, 1.0f);
             m_transform.setRotation(90.0f, 0.0f, 0.0f);
             m_transform.setPosition(i, m_grid.getWaterLevel() / m_terrainHeightDivider, j);
+            slib->setRegisteredUniform("MV", m_transform.getMatrix() * m_cam.getV());
             loadMatricesToShader();
             glDrawArraysEXT(GL_PATCHES, 0, 4);
         }
