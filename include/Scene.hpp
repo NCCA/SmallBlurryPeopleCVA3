@@ -26,6 +26,10 @@ public:
     void drawSky();
     /// \brief draws the terrain
     void drawTerrain();
+    /// \brief draws the meshes
+    void drawMeshes();
+    /// \brief draws the meshes, but culls each mesh which falls out of all of the _frustumBoxes.
+    void drawMeshes(const std::vector<bounds> &_frustumBoxes);
 
     void update();
     ///
@@ -65,9 +69,9 @@ public:
 
     /// \brief All the messy code to resize the viewport. Updates shaders, framebuffers etc.
     void resize(const ngl::Vec2 &_dim);
-		
-		/// \brief Centre camera on the active character
-		void centreCamera();
+
+    /// \brief Centre camera on the active character
+    void centreCamera();
 
 private:
     ///
@@ -80,6 +84,8 @@ private:
     Camera m_cam;
     ngl::Vec3 m_camCurPos;
     ngl::Vec3 m_camTargPos;
+    float m_curFocalDepth;
+    float m_targFocalDepth;
 
     Grid m_grid;
     Inventory m_world_inventory;
@@ -97,9 +103,9 @@ private:
     bool m_mouse_trans_active;
     /// @brief sets if mouse is being used to rotate the scene
     bool m_mouse_rot_active;
-		/// @brief sets if centering camera on character
-		bool m_centre_camera;
-		/// @brief target zoom of the camera
+    /// @brief sets if centering camera on character
+    bool m_centre_camera;
+    /// @brief target zoom of the camera
     float m_mouse_zoom_targ;
     /// @brief current zoom of the camera
     float m_mouse_zoom_cur;

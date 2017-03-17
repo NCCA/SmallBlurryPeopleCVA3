@@ -60,4 +60,15 @@ bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt)
             _pt.m_z < _box.second.m_z;
 }
 
+bool boxIntersectBox(std::pair<ngl::Vec3, ngl::Vec3> _a, std::pair<ngl::Vec3, ngl::Vec3> _b)
+{
+    return !(_b.first.m_x > _a.second.m_x or
+             _b.second.m_x < _a.first.m_x or
+             _b.first.m_y > _a.second.m_y or
+             _b.second.m_y < _a.first.m_y or
+             _b.first.m_z > _a.second.m_z or
+             _b.second.m_z < _a.first.m_z
+             );
+}
+
 }

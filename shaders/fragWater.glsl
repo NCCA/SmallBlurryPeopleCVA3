@@ -3,6 +3,7 @@
 #define STEP_DIST 0.05
 
 layout (location = 0) out vec4 fragColour;
+layout (location = 1) out vec4 outDepth;
 
 in vec4 position_fs;
 in vec3 normal_fs;
@@ -118,7 +119,6 @@ void main()
 
     bottom.x = -bottom.x;
     left.x = -left.x;
-    //right.z = -right.z;
 
     vec3 normals[4];
     normals[0] = normalize( cross( top.xzy,       right.xzy ) );
@@ -135,6 +135,8 @@ void main()
     mul += 1.0;
     mul /= 2.0;
 
+
+    ///Specular///
     //Surface to cam
     vec3 eyeVec = normalize(camPos - position_fs.xyz);
     //Lightdir is direction to light
@@ -144,33 +146,40 @@ void main()
     reflection = normalize( reflection );
     //Dot with surface->eye
     float smul = max( dot(eyeVec, reflection), 0.0 );
-    smul = pow( smul, 16.0 );
+    smul = pow( smul, 32.0 );
 
-    fragColour.xyz = vec3(0.1, 0.2, 0.35) * directionalLightCol * mul;
+    fragColour.xyz = vec3(0.15, 0.2, 0.22) * directionalLightCol * mul;
     fragColour.xyz += directionalLightCol * smul;
-    fragColour.a = 0.5 * (-abs(mul) + 1.0) + 0.5;
-    float d = distance(position_fs, texture(terrainPos, UV));
-    fragColour.a += d / 8.0;
 
-    float waterDepth = max(position_fs.y - texture(terrainPos, UV).y, 0.001);
-    float dmul = clamp(cnoise(position_fs.xyz * 32.0), 0.25, 1.0);
-    dmul *= 1.0 / (waterDepth * 32.0);
 
-    fragColour.xyz = mix(fragColour.xyz, directionalLightCol, clamp(dmul, 0.0, 1.0));
-
-    //Reflections
+    ///Reflections///
     //Sourced from http://ivanleben.blogspot.co.uk/2008/03/water-reflections-with-opengl.html
     vec3 flatNormal = normal - dot(normal, vec3(0.0, 1.0, 0.0)) * vec3(0.0, 1.0, 0.0);
     //Project into eye space
     vec3 eyeFlatNormal = (MV * vec4(flatNormal.xyz, 0.0)).xyz;
     //Normalise!
     vec2 reflectOffset = normalize( eyeFlatNormal.xy ) * length(flatNormal) * 0.025;
-    vec3 reflColour = texture(waterReflection, UV + reflectOffset).xyz;
+    vec3 reflColour = texture(waterReflection, UV + reflectOffset).xyz * 0.8;
 
-    float reflMul = clamp( dot(eyeVec, normal), 0.0, 1.0);
-    fragColour.xyz = mix(reflColour, fragColour.xyz, reflMul);
+    float reflMul = clamp( dot(eyeVec, normal), 0.0, 1.0 );
+    reflMul = 0.5 - reflMul;
+    reflMul = clamp(reflMul, 0.0, 1.0);
+    fragColour.xyz = mix(fragColour.xyz, reflColour, reflMul);
 
-    //fragColour.xyz = texture(waterReflection, UV).xyz;
 
+    ///Alpha///
+    fragColour.a = reflMul;
+    float d = distance(position_fs, texture(terrainPos, UV));
+    fragColour.a += d / 2.0;
     fragColour.a = clamp(fragColour.a, 0.0, 1.0);
+
+
+    ///Foam///
+    float waterDepth = max(position_fs.y - texture(terrainPos, UV).y, 0.001);
+    float dmul = clamp(cnoise(position_fs.xyz * 32.0), 0.25, 1.0);
+    dmul *= 1.0 / (waterDepth * 32.0);
+    fragColour = mix(fragColour, vec4(directionalLightCol.xyz, 1.0), clamp(dmul, 0.0, 1.0));
+
+
+    outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
 }

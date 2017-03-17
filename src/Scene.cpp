@@ -32,7 +32,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_rotation(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
-    m_day(80)
+    m_day(80),
+    m_curFocalDepth(0.0f)
 {
     m_prefs = Preferences::instance();
     m_viewport = _viewport;
@@ -59,6 +60,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
 
     slib->use("sky");
@@ -74,6 +76,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
+
+    slib->use("bokeh");
+    slib->setRegisteredUniform("bgl_dim", m_viewport);
 
     //reads file with list of names
     readNameFile();
@@ -196,7 +201,7 @@ void Scene::initialiseFramebuffers()
 
     std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
-    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT0 );
     m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
     m_pickBuffer.addDepthAttachment( "depth" );
     if(!m_pickBuffer.checkComplete())
@@ -234,6 +239,8 @@ void Scene::initialiseFramebuffers()
     std::cout << "Initalising post effects framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_postEffectsBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
     m_postEffectsBuffer.addTexture("reflection", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0);
+    m_postEffectsBuffer.addTexture("sceneColour", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_postEffectsBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT2 );
     m_postEffectsBuffer.addDepthAttachment("depth");
     if(!m_postEffectsBuffer.checkComplete())
     {
@@ -315,8 +322,8 @@ void Scene::update()
     m_cam.clearTransforms();
 
     //Construct translation *change* using right and forward vectors.
-    ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.05f;
-    trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.05f;
+    ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.25f;
+    trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.25f;
     trans -= m_cam.getPivot();
 
     ngl::Vec3 cxyz = m_cam.getPos();
@@ -327,7 +334,7 @@ void Scene::update()
     trans.m_y = -cxyz.m_y;
 
     m_camTargPos = trans;
-    m_camCurPos += (m_camTargPos - m_camCurPos) / 4.0f;
+    m_camCurPos += (m_camTargPos - m_camCurPos) / 16.0f;
     m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
 
     m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
@@ -400,6 +407,26 @@ void Scene::update()
             t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
 
     m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+
+    //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
+    m_pickBuffer.bind();
+    GLuint grid_texID = getTerrainPickTexture();
+    glBindTexture(GL_TEXTURE_2D, grid_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+    int mouse_coords[2] = {0,0};
+    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+    std::array<float, 4> grid_coord;
+
+    // x, window height - y
+    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+
+    ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
+    m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
+
+    m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
+    m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
+    std::cout << m_curFocalDepth << '\n';
 }
 
 //I'm sorry this function is so long :(
@@ -422,9 +449,6 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     slib->use("terrainPick");
-
-    ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
-    slib->setRegisteredUniform("dimensions", grid_size);
 
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -458,7 +482,6 @@ void Scene::draw()
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
-    //cascadeDistances = {0.01f, 16.0f};
 
     auto boxes = generateOrthoShadowMatrices( cascadeDistances );
 
@@ -473,7 +496,6 @@ void Scene::draw()
         index++;
     }
 
-    //glCullFace(GL_BACK);
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
@@ -495,6 +517,8 @@ void Scene::draw()
     m_cam.calculateViewMat();
 
     drawTerrain();
+
+    drawMeshes();
 
     m_postEffectsBuffer.bind();
     m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
@@ -554,40 +578,7 @@ void Scene::draw()
 
     drawTerrain();
 
-    slib->use("diffuse");
-
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
-        for(auto &vec : m_meshPositions[i])
-        {
-            m_transform.setPosition(vec);
-            switch( i )
-            {
-            case static_cast<int>(TileType::TREES):
-                drawAsset( "tree", "tree_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::MOUNTAINS):
-                drawAsset( "mountain", "mountain_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "", "colour");
-                break;
-            default:
-                break;
-            }
-        }
-
-    for(auto &character : m_characters)
-    {
-        ngl::Vec3 pos = character.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
-        drawAsset( "person", "", "colour");
-    }
+    drawMeshes(boxes.first);
 
     m_mainBuffer.unbind();
 
@@ -605,6 +596,10 @@ void Scene::draw()
     //---------------------------//
     //          LIGHTING         //
     //---------------------------//
+    m_postEffectsBuffer.bind();
+    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+    glClear(GL_COLOR_BUFFER_BIT);
+
     slib->use("deferredLight");
     id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
@@ -631,6 +626,21 @@ void Scene::draw()
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
+    m_postEffectsBuffer.unbind();
+
+    //---------------------------//
+    //    DEFERRED BLUR PASS     //
+    //---------------------------//
+    slib->use("bokeh");
+
+    id = slib->getProgramID("bokeh");
+    m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+    m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+    slib->setRegisteredUniform("focalDepth", m_curFocalDepth);
+
+    glBindVertexArray(m_screenQuad);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
     //---------------------------//
     //       DISPLACEMENT       //
     //---------------------------//
@@ -652,14 +662,16 @@ void Scene::draw()
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
-    //      FORWARD-SHADING      //
+    //      FORWARD SHADING      //
     //---------------------------//
-
+    m_postEffectsBuffer.bind();
+    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
     //Copy depth buffer from main buffer to back buffer.
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
     glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
@@ -686,9 +698,21 @@ void Scene::draw()
     {
         for(int j = 0; j < m_grid.getH(); j += scale)
         {
+            ngl::Vec3 pos (i, m_grid.getWaterLevel() / m_terrainHeightDivider, j);
+            bounds waterBounds;
+            waterBounds.first = pos + ngl::Vec3(-scale, -1.0f, -scale);
+            waterBounds.second = pos + ngl::Vec3(scale, 1.0f, scale);
+
+            bool br = false;
+            for(auto &b : boxes.first)
+                br = (br or Utility::boxIntersectBox(b, waterBounds));
+
+            if(!br)
+                continue;
+
             m_transform.setScale(scale, scale, 1.0f);
             m_transform.setRotation(90.0f, 0.0f, 0.0f);
-            m_transform.setPosition(i, m_grid.getWaterLevel() / m_terrainHeightDivider, j);
+            m_transform.setPosition(pos);
             slib->setRegisteredUniform("MV", m_transform.getMatrix() * m_cam.getV());
             loadMatricesToShader();
             glDrawArraysEXT(GL_PATCHES, 0, 4);
@@ -696,6 +720,20 @@ void Scene::draw()
     }
 
     glBindVertexArray(0);
+
+    m_postEffectsBuffer.unbind();
+
+    //---------------------------//
+    //     FORWARD BLUR PASS     //
+    //---------------------------//
+    slib->use("bokeh");
+
+    id = slib->getProgramID("bokeh");
+    m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+    m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+
+    glBindVertexArray(m_screenQuad);
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //---------------------------//
     //          BUTTONS          //
@@ -748,7 +786,7 @@ void Scene::draw()
     glDrawArraysEXT(GL_LINES, m_debugPoints.size() / 2, m_debugPoints.size() / 2);
 
     slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-    /*for(auto &b : boxes.first)
+    for(auto &b : boxes.first)
     {
         ngl::BBox bo (b.first.m_x, b.second.m_x,
                       b.first.m_y, b.second.m_y,
@@ -801,6 +839,92 @@ void Scene::drawTerrain()
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
+}
+
+void Scene::drawMeshes()
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+
+    slib->use("diffuse");
+
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
+        {
+            m_transform.setPosition(vec);
+            switch( i )
+            {
+            case static_cast<int>(TileType::TREES):
+                drawAsset( "tree", "tree_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
+                drawAsset( "mountain", "mountain_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                drawAsset( "house", "", "colour");
+                break;
+            default:
+                break;
+            }
+        }
+
+    for(auto &character : m_characters)
+    {
+        ngl::Vec3 pos = character.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+        drawAsset( "person", "", "colour");
+    }
+}
+
+void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+
+    slib->use("diffuse");
+
+    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+        for(auto &vec : m_meshPositions[i])
+        {
+            bool br = false;
+            for(auto &fb : _frustumBoxes)
+                br = (br or Utility::pointInBox(fb, vec));
+            if(!br)
+                continue;
+
+            m_transform.setPosition(vec);
+            switch( i )
+            {
+            case static_cast<int>(TileType::TREES):
+                drawAsset( "tree", "tree_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::MOUNTAINS):
+                drawAsset( "mountain", "mountain_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                drawAsset( "house", "", "colour");
+                break;
+            default:
+                break;
+            }
+        }
+
+    for(auto &character : m_characters)
+    {
+        ngl::Vec3 pos = character.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+        drawAsset( "person", "", "colour");
+    }
 }
 
 void Scene::quit()
@@ -1113,7 +1237,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
         m_mouse_zoom_targ -= 0.5;
     }
 
-    else if(_event.y < 0 && m_mouse_zoom_targ < 20)
+    else if(_event.y < 0 && m_mouse_zoom_targ < 40)
     {
         if(m_mouse_pan < 10)
         {
@@ -1168,9 +1292,13 @@ void Scene::resize(const ngl::Vec2 &_dim)
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
     slib->setRegisteredUniform("viewport", m_viewport);
 
+    slib->use("bokeh");
+    slib->setRegisteredUniform("bgl_dim", m_viewport);
+
     m_mainBuffer = Framebuffer();
     m_pickBuffer = Framebuffer();
     m_shadowBuffer = Framebuffer();
+    m_postEffectsBuffer = Framebuffer();
 
     initialiseFramebuffers();
     Gui::instance()->setResolution(_dim);
@@ -1282,8 +1410,8 @@ void Scene::loadMatricesToShader()
                 ngl::Vec3(sinf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f, 32.0f, cosf(Utility::radians(m_sunAngle.m_x) * 16.0f) * 32.0f),
                 ngl::Vec3(25.0f, 0.0f, 25.0f),
                 ngl::Vec3(0.0f, 1.0f, 0.0f)
-                );*/
-    //MVP = M * vu * pro;
+                );
+    MVP = M * vu * pro;*/
 
     slib->setRegisteredUniform( "M", M );
     slib->setRegisteredUniform( "MVP", MVP );
@@ -1671,6 +1799,7 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     //  0---1
     terrainFace face;
 
+    //Generate xy positions
     face.m_verts[0].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y - 0.5f, 1.0f);
     face.m_verts[1].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y - 0.5f, 1.0f);
     face.m_verts[2].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y + 0.5f, 1.0f);
@@ -1730,6 +1859,7 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
         count++;
     }
 
+    //Normalise normal
     normal /= static_cast<float>(count);
     normal.normalize();
 
