@@ -105,7 +105,7 @@ void Gui::createTestButtons()
 {
   addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
   addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(80, 50));
-  addButton(Action::BUILDHOUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
+  addButton(Action::PASSIVE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
 
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(80, 50));
   addButton(Action::BUILDSTORE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(80, 50));

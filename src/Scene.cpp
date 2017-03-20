@@ -9,6 +9,7 @@
 #include "Scene.hpp"
 #include "Gui.hpp"
 #include "Utility.hpp"
+#include "Commands.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -1234,23 +1235,62 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-    if(_event.y > 0 && m_mouse_zoom_targ > 1.0)
+    if(_event.y > 0 )
     {
-        if (m_mouse_pan_targ > 2)
-        {
-            m_mouse_pan_targ -= 0.5;
-        }
-        m_mouse_zoom_targ -= 0.5;
+      zoomIn();
     }
 
-    else if(_event.y < 0 && m_mouse_zoom_targ < 25)
+    else if(_event.y < 0)
     {
-        if(m_mouse_pan_targ < 30)
-        {
-            m_mouse_pan_targ += 0.5;
-        }
-        m_mouse_zoom_targ += 0.5;
+      zoomOut();
     }
+}
+
+void Scene::zoomIn()
+{
+  if(m_mouse_zoom_targ > 1.0)
+  {
+    if (m_mouse_pan_targ > 2)
+    {
+        m_mouse_pan_targ -= 0.5;
+    }
+    m_mouse_zoom_targ -= 0.5;
+  }
+}
+
+void Scene::zoomOut()
+{
+  if(m_mouse_zoom_targ < 25)
+  {
+    if(m_mouse_pan_targ < 30)
+    {
+        m_mouse_pan_targ += 0.5;
+    }
+    m_mouse_zoom_targ += 0.5;
+  }
+}
+
+void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
+{
+	std::shared_ptr<Command> command(nullptr);
+	switch(_event.keysym.sym)
+	{
+		case SDLK_SPACE : command.reset(new CentreCameraCommand(this)); break;
+
+		default:break;
+	}
+	if(command.get())
+	{
+		command.get()->execute();
+	}
+}
+
+void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
+{
+	switch(_event.keysym.sym)
+	{
+		default:break;
+	}
 }
 
 void Scene::updateMousePos()
@@ -1882,7 +1922,6 @@ void Scene::centreCamera()
             m_centre_camera = true;
         }
     }
-
 }
 
 Character *Scene::getActiveCharacter()

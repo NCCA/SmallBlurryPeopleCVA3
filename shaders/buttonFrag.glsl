@@ -13,12 +13,11 @@ in vec2 fragSize;
 in vec2 fragUV;
 in float fragMousedOver;
 
-float border_size = 7;
-vec3 border_color = vec3(1,1,0);
+const float border_size = 7;
+const vec3 border_color = vec3(1,1,0);
+const vec3 button_selected = vec3(0.1, 0.2, 0.2);
 vec3 button_color = vec3(0.7, 0.1, 0.0);
 vec3 button_highlight = vec3(0.9, 0.7, 0.4);
-
-vec3 button_selected = vec3(0.1, 0.2, 0.2);
 
 void main()
 {
@@ -49,11 +48,7 @@ void main()
     s = mix(button_highlight, button_color, fragUV.y);
   }
 
-  s = texture2D(icons, fragUV).xyz;
-  //if(s.x > 0)
-  //{
-  //  s = vec3(0,0,1);
-  //}
+  s *= texture2D(icons, fragUV).xyz;
 
   outColour = vec4(s, 1.0);
 }

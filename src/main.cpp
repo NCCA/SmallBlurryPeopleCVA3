@@ -75,15 +75,9 @@ int main()
             case SDL_MOUSEBUTTONUP : scene.mouseReleaseEvent(event.button); break;
             case SDL_MOUSEWHEEL : scene.wheelEvent(event.wheel); break;
             case SDL_WINDOWEVENT : scene.windowEvent(event.window); break;
+            case SDL_KEYDOWN : scene.keyDownEvent(event.key); break;
+            case SDL_KEYUP : scene.keyUpEvent(event.key); break;
 
-						case SDL_KEYDOWN:
-						{
-							switch(event.key.keysym.sym)
-							{
-								case SDLK_SPACE : scene.centreCamera(); break;
-								default:break;
-							}
-						}
             default : break;
             }
         }

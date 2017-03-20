@@ -45,3 +45,19 @@ void BuildCommand::execute()
 {
   m_character->build(m_building);
 }
+
+//------------------------------------------------------------//
+// Centre Camera Command
+//------------------------------------------------------------//
+
+CentreCameraCommand::CentreCameraCommand(Scene *_scene) :
+  m_scene(_scene)
+{}
+
+CentreCameraCommand::~CentreCameraCommand()
+{}
+
+void CentreCameraCommand::execute()
+{
+  m_scene->centreCamera();
+}

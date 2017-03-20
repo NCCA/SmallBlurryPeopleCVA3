@@ -54,6 +54,27 @@ public:
     /// @brief Sets the mouse pan according to the mouse wheel
     /// @param _event, SDL mouse event structure
     void wheelEvent(const SDL_MouseWheelEvent &_event);
+
+    ///
+    /// \brief zoomIn move the camera in
+    ///
+    void zoomIn();
+    ///
+    /// \brief zoomOut move the camera out
+    ///
+    void zoomOut();
+
+    ///
+    /// \brief keyDownEvent called when a key is pressed
+    /// \param _event SDL keyboard event structure
+    ///
+    void keyDownEvent(const SDL_KeyboardEvent &_event);
+    ///
+    /// \brief keyUpEvent called when a key is released
+    /// \param _event SDL keyboard event structure
+    ///
+    void keyUpEvent(const SDL_KeyboardEvent &_event);
+
     ///
     /// \brief updateMousePos check where mouse is for gui
     ///

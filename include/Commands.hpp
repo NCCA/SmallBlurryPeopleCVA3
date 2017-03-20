@@ -77,4 +77,24 @@ private:
   BuildingType m_building;
 };
 
+///
+/// \brief The CentreCameraCommand class sends command to scene to reset camera
+///
+class CentreCameraCommand : public Command
+{
+public:
+  ///
+  /// \brief CentreCameraCommand constructor for centre camera command
+  /// \param _scene scene to send instruction to
+  ///
+  CentreCameraCommand(Scene *_scene);
+  ~CentreCameraCommand();
+  ///
+  /// \brief execute send command to scene to centre the camera
+  ///
+  virtual void execute();
+private:
+  Scene *m_scene;
+};
+
 #endif//__COMMANDS_HPP__
