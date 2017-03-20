@@ -29,7 +29,7 @@ GLuint AssetStore::getTexture(const std::string &_id)
 void AssetStore::loadMesh(const std::string &_id, const std::string &_path)
 {
     std::cout << "Loading mesh from " << _path << '\n';
-    ngl::Obj * mesh = new ngl::Obj( g_resourceLocation + "geometry/" + _path );
+    ngl::Obj * mesh = new ngl::Obj(g_resourceLocation + "geometry/" + _path);
     if(mesh == nullptr)
     {
         std::cerr << "Uh oh! Mesh from " << g_resourceLocation + "geometry/" + _path <<  " could not be loaded. Aborting...";
@@ -38,7 +38,7 @@ void AssetStore::loadMesh(const std::string &_id, const std::string &_path)
     mesh->createVAO();
 
     //m_meshes now responsible for deleting mesh
-    m_meshes.insert( std::make_pair( _id, std::unique_ptr<ngl::Obj>(mesh) ) );
+    m_meshes.insert(std::make_pair(_id, std::unique_ptr<ngl::Obj>(mesh)));
 }
 
 void AssetStore::loadTexture(const std::string &_id, const std::string &_path)

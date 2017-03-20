@@ -2,7 +2,7 @@
 #include "ngl/ShaderLib.h"
 #include "ngl/Vec2.h"
 #include "ngl/NGLStream.h"
-
+#include "AssetStore.hpp"
 Gui::Gui()
 {
 
@@ -37,6 +37,7 @@ void Gui::initGL()
   glGenVertexArrays(1, &m_vao_id);
   glGenBuffers(3, m_vbo_ids);
   updateButtonArrays();
+  AssetStore::instance()->loadTexture("icons", "buttons/icons.png");
 }
 
 void Gui::click()
@@ -65,10 +66,10 @@ std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
       command.reset(new QuitCommand(m_scene));
     break;
   case Action::BUILDHOUSE:
-      command.reset(new BuildCommand(m_active_character, BuildingType::HOUSE));
+      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
     break;
   case Action::BUILDSTORE:
-      command.reset(new BuildCommand(m_active_character, BuildingType::STOREHOUSE));
+      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
     break;
   default:
     break;
@@ -162,7 +163,11 @@ void Gui::updateButtonArrays()
 void Gui::drawButtons()
 {
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
+  AssetStore *store = AssetStore::instance();
+
   slib->use(m_shader_name);
+  bindTextureToShader(store->getTexture("icons"), "icons", 0);
+
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
@@ -185,7 +190,21 @@ void Gui::mouseUp()
   m_mouse_down = false;
 }
 
-void Gui::setActiveCharacter(Character *_character)
+void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _target)
 {
-  m_active_character = _character;
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    GLint id = slib->getProgramID("button");
+    GLint loc = glGetUniformLocation(id, _uniform);
+
+    if(loc == -1)
+    {
+        std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
+        std::cerr << m_shader_name << std::endl;
+        std::cerr << id << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    glUniform1i(loc, _target);
+
+    glActiveTexture(GL_TEXTURE0 + _target);
+    glBindTexture(GL_TEXTURE_2D, _tex);
 }

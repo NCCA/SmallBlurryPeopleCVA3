@@ -72,7 +72,11 @@ public:
 
     /// \brief Centre camera on the active character
     void centreCamera();
-
+    ///
+    /// \brief getActiveCharacter get the active character in the scene
+    /// \return a pointer to the active character
+    ///
+    Character *getActiveCharacter();
 private:
     ///
     /// \brief m_active whether scene is still active (if user has not quit)
@@ -122,9 +126,6 @@ private:
     float m_mouse_rot_origin;
     /// @brief stores mouse position when pressed down to check if mouse has moved at release
     ngl::Vec2 m_mouse_prev_pos;
-
-    /// @brief stores textures and meshes
-    AssetStore m_store;
 
     const float m_terrainHeightDivider = 16.0f;
     /// @brief terrain base mesh
