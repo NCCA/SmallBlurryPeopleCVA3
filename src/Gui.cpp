@@ -65,10 +65,10 @@ std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
       command.reset(new QuitCommand(m_scene));
     break;
   case Action::BUILDHOUSE:
-      command.reset(new BuildCommand(m_active_character, BuildingType::HOUSE));
+      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
     break;
   case Action::BUILDSTORE:
-      command.reset(new BuildCommand(m_active_character, BuildingType::STOREHOUSE));
+      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
     break;
   default:
     break;
@@ -163,6 +163,7 @@ void Gui::drawButtons()
 {
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
   slib->use(m_shader_name);
+
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
@@ -183,9 +184,4 @@ void Gui::mouseDown()
 void Gui::mouseUp()
 {
   m_mouse_down = false;
-}
-
-void Gui::setActiveCharacter(Character *_character)
-{
-  m_active_character = _character;
 }

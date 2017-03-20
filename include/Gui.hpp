@@ -76,8 +76,6 @@ public :
   ///
   void mouseUp();
 
-  void setActiveCharacter(Character *_character);
-
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

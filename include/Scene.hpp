@@ -72,6 +72,11 @@ public:
 
     /// \brief Centre camera on the active character
     void centreCamera();
+    ///
+    /// \brief getActiveCharacter get the active character in the scene
+    /// \return a pointer to the active character
+    ///
+    Character *getActiveCharacter();
 
 private:
     ///

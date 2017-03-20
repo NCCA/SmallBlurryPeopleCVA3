@@ -6,6 +6,8 @@ layout(location = 0) out vec4 outColour;
 
 uniform vec2 fResolution;
 
+uniform sampler2D icons;
+
 in vec2 fragPos;
 in vec2 fragSize;
 in vec2 fragUV;
@@ -45,6 +47,12 @@ void main()
   if(box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2) <= 0)
   {
     s = mix(button_highlight, button_color, fragUV.y);
+  }
+
+  s = texture2D(icons, fragUV).xyz;
+  if(s.x > 0)
+  {
+    s = vec3(0,0,1);
   }
 
   outColour = vec4(s, 1.0);
