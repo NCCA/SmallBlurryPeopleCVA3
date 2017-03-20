@@ -4,13 +4,13 @@
 int Button::m_id_counter(0);
 
 Button::Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size) :
-  m_action(_action),
   m_id(m_id_counter++),
   m_offset(_offset),
   m_pos(0,0),
   m_size(_size),
   m_x_align(_x_align),
-  m_y_align(_y_align)
+  m_y_align(_y_align),
+  m_action(_action)
 {
   updatePos(_window_res);
 }

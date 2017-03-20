@@ -4,10 +4,7 @@
 // Passive Command
 //------------------------------------------------------------//
 
-PassiveCommand::PassiveCommand(int x)
-{x+= 1;}
-
-PassiveCommand::~PassiveCommand()
+PassiveCommand::PassiveCommand()
 {}
 
 void PassiveCommand::execute()
@@ -19,9 +16,6 @@ void PassiveCommand::execute()
 
 QuitCommand::QuitCommand(Scene *_scene) :
   m_scene(_scene)
-{}
-
-QuitCommand::~QuitCommand()
 {}
 
 void QuitCommand::execute()
@@ -38,9 +32,6 @@ BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
   m_building(_building)
 {}
 
-BuildCommand::~BuildCommand()
-{}
-
 void BuildCommand::execute()
 {
   m_character->build(m_building);
@@ -54,10 +45,35 @@ CentreCameraCommand::CentreCameraCommand(Scene *_scene) :
   m_scene(_scene)
 {}
 
-CentreCameraCommand::~CentreCameraCommand()
-{}
 
 void CentreCameraCommand::execute()
 {
   m_scene->centreCamera();
+}
+
+//------------------------------------------------------------//
+// Pause Command
+//------------------------------------------------------------//
+
+PauseCommand::PauseCommand(Scene *_scene) :
+  m_scene(_scene)
+{}
+
+void PauseCommand::execute()
+{
+  m_scene->togglePause();
+}
+
+//------------------------------------------------------------//
+// Zoom Command
+//------------------------------------------------------------//
+
+ZoomCommand::ZoomCommand(Scene *_scene, int _direction) :
+  m_scene(_scene),
+  m_direction(_direction)
+{}
+
+void ZoomCommand::execute()
+{
+  m_scene->zoom(m_direction);
 }

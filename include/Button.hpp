@@ -2,7 +2,7 @@
 #define __BUTTON_HPP__
 
 #include "ngl/Vec2.h"
-
+#include "Commands.hpp"
 ///
 /// \brief The XAlignment enum for denoting which side a button "sticks" to
 ///
@@ -19,15 +19,6 @@ enum class YAlignment{
   TOP,
   CENTER,
   BOTTOM
-};
-///
-/// \brief The Action enum for what the buttons does
-///
-enum class Action{
-  PASSIVE,
-  QUIT,
-  BUILDHOUSE,
-  BUILDSTORE
 };
 
 ///

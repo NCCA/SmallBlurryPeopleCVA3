@@ -39,7 +39,13 @@ public :
   /// \brief generateCommand create a command to be executed
   /// \return command to be executed
   ///
-  std::shared_ptr<Command> generateCommand(const Button &_button);
+  std::shared_ptr<Command> generateCommand(Action _action);
+  ///
+  /// \brief executeAction generate a command and execute it
+  /// \param _action action to execute
+  /// \return 0 for no errors, 1 for nothing executed
+  ///
+  int executeAction(Action _action);
   ///
   /// \brief mousePos update mouse position
   /// \param _pos current mouse position
@@ -50,9 +56,14 @@ public :
   ///
   void wipeButtons();
   ///
-  /// \brief createTestButtons create a set of buttons for debugging
+  /// \brief createSceneButtons creates the set of default buttons for the scene
   ///
-  void createTestButtons();
+  void createSceneButtons();
+  ///
+  /// \brief createPauseButtons create the set of buttons for the pause menu
+  ///
+  void createPauseButtons();
+
 
 
 

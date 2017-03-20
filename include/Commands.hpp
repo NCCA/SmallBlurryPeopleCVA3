@@ -4,6 +4,21 @@
 #include "Character.hpp"
 #include "Scene.hpp"
 
+
+///
+/// \brief The Action enum for what the buttons does
+///
+enum class Action{
+  PASSIVE,
+  QUIT,
+  BUILDHOUSE,
+  BUILDSTORE,
+  CENTRECAMERA,
+  PAUSE,
+  ZOOMIN,
+  ZOOMOUT
+};
+
 ///
 /// \brief The Command class utility class for creating level of indirection between buttons and actions they perform, base class is abstract
 ///
@@ -22,8 +37,8 @@ public:
   ///
   /// \brief PassiveCommand basic constructor
   ///
-  PassiveCommand(int x);
-  ~PassiveCommand();
+  PassiveCommand();
+  ~PassiveCommand() = default;
   ///
   /// \brief execute function does nothing
   ///
@@ -40,7 +55,7 @@ public:
   /// \param _scene scene which button refers to
   ///
   QuitCommand(Scene *_scene);
-  ~QuitCommand();
+  ~QuitCommand() = default;
   ///
   /// \brief execute quits the given scene
   ///
@@ -61,7 +76,7 @@ public:
   /// \param _building building wanted
   ///
   BuildCommand(Character *_character, BuildingType _building);
-  ~BuildCommand();
+  ~BuildCommand() = default;
   ///
   /// \brief execute tells character to build given building
   ///
@@ -88,13 +103,64 @@ public:
   /// \param _scene scene to send instruction to
   ///
   CentreCameraCommand(Scene *_scene);
-  ~CentreCameraCommand();
+  ~CentreCameraCommand() = default;
   ///
   /// \brief execute send command to scene to centre the camera
   ///
   virtual void execute();
 private:
+  ///
+  /// \brief m_scene the scene to tell to centre the camera
+  ///
   Scene *m_scene;
+};
+
+///
+/// \brief The PauseCommand class sends command to scene to toggle pause
+///
+class PauseCommand : public Command
+{
+public:
+  ///
+  /// \brief PauseCommand constructor for centre camera command
+  /// \param _scene scene to send instruction to
+  ///
+  PauseCommand(Scene *_scene);
+  ~PauseCommand() = default;
+  ///
+  /// \brief execute send command to scene to toggle pause
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_scene the scene to toggle pause
+  ///
+  Scene *m_scene;
+};
+
+class ZoomCommand : public Command
+{
+public:
+  ///
+  /// \brief ZoomCommand constructor for zoom command
+  /// \param _scene scene to send instruction to
+  /// \param _direction
+  ///
+  ZoomCommand(Scene *_scene, int _direction);
+  ~ZoomCommand() = default;
+  ///
+  /// \brief execute send command to scene to zoom
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_scene the scene to zoom
+  ///
+  Scene *m_scene;
+  ///
+  /// \brief m_direction the direction to zoom in
+  ///
+  int m_direction;
 };
 
 #endif//__COMMANDS_HPP__

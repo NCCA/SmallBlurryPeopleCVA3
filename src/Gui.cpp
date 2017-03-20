@@ -13,9 +13,8 @@ void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
   m_scene = _scene;
   m_shader_name = _shader_name;
   setResolution(_res);
-  wipeButtons();
-  createTestButtons();
   initGL();
+  createSceneButtons();
   m_mouse_down = false;
 }
 
@@ -36,7 +35,6 @@ void Gui::initGL()
 {
   glGenVertexArrays(1, &m_vao_id);
   glGenBuffers(3, m_vbo_ids);
-  updateButtonArrays();
   AssetStore::instance()->loadTexture("icons", "buttons/icons.png");
 }
 
@@ -45,36 +43,61 @@ void Gui::click()
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
     std::cout << "clicked button " << m_selected_button_id << std::endl;
-    std::shared_ptr<Command> command(generateCommand(m_buttons[m_selected_button_id]));
-    if(command.get())
-    {
-      command.get()->execute();
-    }
+    executeAction(m_buttons[m_selected_button_id].getAction());
   }
 }
 
-std::shared_ptr<Command> Gui::generateCommand(const Button &_button)
+std::shared_ptr<Command> Gui::generateCommand(Action _action)
 {
   std::shared_ptr<Command> command(nullptr);
-  Action action = _button.getAction();
-  switch (action)
+  switch (_action)
   {
-  //case Action::PASSIVE:
-  //    command.reset(new PassiveCommand(0));
-  //  break;
+  case Action::PASSIVE:
+    command.reset(new PassiveCommand);
+    break;
   case Action::QUIT:
-      command.reset(new QuitCommand(m_scene));
+    command.reset(new QuitCommand(m_scene));
     break;
   case Action::BUILDHOUSE:
-      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
+    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
     break;
   case Action::BUILDSTORE:
-      command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
+    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
+    break;
+  case Action::CENTRECAMERA:
+    command.reset(new CentreCameraCommand(m_scene));
+    break;
+  case Action::PAUSE:
+    command.reset(new PauseCommand(m_scene));
+    break;
+  case Action::ZOOMIN:
+    command.reset(new ZoomCommand(m_scene, 1));
+    break;
+  case Action::ZOOMOUT:
+    command.reset(new ZoomCommand(m_scene, -1));
     break;
   default:
     break;
   }
   return command;
+}
+
+int Gui::executeAction(Action _action)
+{
+  std::shared_ptr<Command> command(generateCommand(_action));
+  if(command.get())
+  {
+    // command generation successful
+
+    command.get()->execute();
+    return 0;
+  }
+  else
+  {
+    // no command corresponds to given action
+
+    return 1;
+  }
 }
 
 bool Gui::mousePos(ngl::Vec2 _pos)
@@ -101,19 +124,19 @@ void Gui::wipeButtons()
   Button::resetIdCounter();
 }
 
-void Gui::createTestButtons()
+void Gui::createSceneButtons()
 {
-  addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(0, 10), ngl::Vec2(80, 50));
-  addButton(Action::PASSIVE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
+  wipeButtons();
 
-  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(80, 50));
-  addButton(Action::BUILDSTORE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(80, 50));
-  addButton(Action::BUILDSTORE, XAlignment::RIGHT, YAlignment::CENTER, ngl::Vec2(10, 0), ngl::Vec2(80, 50));
+  addButton(Action::PAUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
+  updateButtonArrays();
+}
 
-  addButton(Action::QUIT, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 10), ngl::Vec2(80, 50));
-  addButton(Action::QUIT, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(80, 50));
+void Gui::createPauseButtons()
+{
+  wipeButtons();
+  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(10, 100), ngl::Vec2(120, 40));
+  updateButtonArrays();
 }
 
 void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)

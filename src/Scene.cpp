@@ -289,6 +289,8 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
+  if(!m_paused)
+  {
     //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
     m_mouse_translation = ngl::Vec2(0,0);
 
@@ -430,6 +432,7 @@ void Scene::update()
 
     m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
     m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
+  }
 }
 
 //I'm sorry this function is so long :(
@@ -1234,54 +1237,43 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
+
+    zoom(_event.y);
+}
+
+void Scene::zoom(int _direction)
+{
+  if(!m_paused)
+  {
     //pans camera up and down
-    if(_event.y > 0 )
+    if(_direction > 0 && m_mouse_zoom_targ > 1.0)
     {
-      zoomIn();
+      if (m_mouse_pan_targ > 2)
+      {
+          m_mouse_pan_targ -= 0.5;
+      }
+      m_mouse_zoom_targ -= 0.5;
     }
 
-    else if(_event.y < 0)
+    else if(_direction < 0 && m_mouse_zoom_targ < 25)
     {
-      zoomOut();
+      if(m_mouse_pan_targ < 30)
+      {
+          m_mouse_pan_targ += 0.5;
+      }
+      m_mouse_zoom_targ += 0.5;
     }
-}
-
-void Scene::zoomIn()
-{
-  if(m_mouse_zoom_targ > 1.0)
-  {
-    if (m_mouse_pan_targ > 2)
-    {
-        m_mouse_pan_targ -= 0.5;
-    }
-    m_mouse_zoom_targ -= 0.5;
-  }
-}
-
-void Scene::zoomOut()
-{
-  if(m_mouse_zoom_targ < 25)
-  {
-    if(m_mouse_pan_targ < 30)
-    {
-        m_mouse_pan_targ += 0.5;
-    }
-    m_mouse_zoom_targ += 0.5;
   }
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	std::shared_ptr<Command> command(nullptr);
+	Gui *gui = Gui::instance();
 	switch(_event.keysym.sym)
 	{
-		case SDLK_SPACE : command.reset(new CentreCameraCommand(this)); break;
-
-		default:break;
-	}
-	if(command.get())
-	{
-		command.get()->execute();
+	case SDLK_SPACE : gui->executeAction(Action::CENTRECAMERA); break;
+	case SDLK_ESCAPE : gui->executeAction(Action::PAUSE); break;
+	default : break;
 	}
 }
 
@@ -1289,7 +1281,7 @@ void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
 	switch(_event.keysym.sym)
 	{
-		default:break;
+	default:break;
 	}
 }
 
@@ -1927,4 +1919,20 @@ void Scene::centreCamera()
 Character *Scene::getActiveCharacter()
 {
   return m_active_char;
+}
+
+void Scene::togglePause()
+{
+  Gui *gui = Gui::instance();
+  std::cout << "pause toggled" << std::endl;
+  if(m_paused)
+  {
+    m_paused = false;
+    gui->createSceneButtons();
+  }
+  else
+  {
+    m_paused = true;
+    gui->createPauseButtons();
+  }
 }

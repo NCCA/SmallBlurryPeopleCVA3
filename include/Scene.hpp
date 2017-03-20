@@ -54,15 +54,11 @@ public:
     /// @brief Sets the mouse pan according to the mouse wheel
     /// @param _event, SDL mouse event structure
     void wheelEvent(const SDL_MouseWheelEvent &_event);
-
     ///
-    /// \brief zoomIn move the camera in
+    /// \brief zoom move the camera in or out
+    /// \param _direction direction, positive to zoom in, negative to zoom out
     ///
-    void zoomIn();
-    ///
-    /// \brief zoomOut move the camera out
-    ///
-    void zoomOut();
+    void zoom(int _direction);
 
     ///
     /// \brief keyDownEvent called when a key is pressed
@@ -98,6 +94,11 @@ public:
     /// \return a pointer to the active character
     ///
     Character *getActiveCharacter();
+    ///
+    /// \brief togglePause switch between paused and unpaused mode
+    ///
+    void togglePause();
+
 private:
     ///
     /// \brief m_active whether scene is still active (if user has not quit)
@@ -251,6 +252,8 @@ private:
     GLuint m_debugVAO;
     GLuint m_debugVBO;
     std::vector<ngl::Vec4> m_debugPoints;
+
+    bool m_paused;
 };
 
 #endif//__SCENE_HPP__
