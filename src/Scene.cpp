@@ -36,6 +36,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_curFocalDepth(0.0f)
 {
     m_prefs = Preferences::instance();
+    AssetStore *store = AssetStore::instance();
     m_viewport = _viewport;
 
     m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
@@ -98,21 +99,21 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //m_store.loadMesh("knight", "knight/knight.obj");
     //m_store.loadTexture("knight_d", "knight/knight_d.png");
 
-    m_store.loadMesh("mountain", "mountain/mountain.obj");
-    m_store.loadTexture("mountain_d", "mountain/mountain_diff.png");
+    store->loadMesh("mountain", "mountain/mountain.obj");
+    store->loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
-    m_store.loadMesh("debugSphere", "sphere.obj");
-    m_store.loadMesh("tree", "tree/tree.obj");
-    m_store.loadTexture("tree_d", "tree/tree_d.png");
-    m_store.loadMesh("house", "house/house.obj");
-    m_store.loadMesh("person", "person/person.obj");
-    m_store.loadMesh("storehouse", "storeHouse/storeHouse.obj");
-    m_store.loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
+    store->loadMesh("debugSphere", "sphere.obj");
+    store->loadMesh("tree", "tree/tree.obj");
+    store->loadTexture("tree_d", "tree/tree_d.png");
+    store->loadMesh("house", "house/house.obj");
+    store->loadMesh("person", "person/person.obj");
+    store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
+    store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
 
-    m_store.loadTexture("grass", "terrain/grass.png");
-    m_store.loadTexture("rock", "terrain/rock.png");
-    m_store.loadTexture("snow", "terrain/snow.png");
+    store->loadTexture("grass", "terrain/grass.png");
+    store->loadTexture("rock", "terrain/rock.png");
+    store->loadTexture("snow", "terrain/snow.png");
 
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
@@ -738,7 +739,7 @@ void Scene::draw()
     //---------------------------//
     //          BUTTONS          //
     //---------------------------//
-    // ?
+
     glClear(GL_DEPTH_BUFFER_BIT);
     Gui::instance()->drawButtons();
 
@@ -823,10 +824,11 @@ void Scene::drawSky()
 void Scene::drawTerrain()
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    AssetStore *store = AssetStore::instance();
     slib->use("terrain");
-    bindTextureToShader("terrain", m_store.getTexture("grass"), "grass", 0);
-    bindTextureToShader("terrain", m_store.getTexture("rock"), "rock", 1);
-    bindTextureToShader("terrain", m_store.getTexture("snow"), "snow", 2);
+    bindTextureToShader("terrain", store->getTexture("grass"), "grass", 0);
+    bindTextureToShader("terrain", store->getTexture("rock"), "rock", 1);
+    bindTextureToShader("terrain", store->getTexture("snow"), "snow", 2);
 
     float waterLevel = m_grid.getWaterLevel() / m_terrainHeightDivider;
     slib->setRegisteredUniform( "waterlevel", waterLevel);
@@ -1071,6 +1073,7 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
 
 void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 {
+    AssetStore *store = AssetStore::instance();
     ngl::Vec3 s = m_sunDir;
     //Flip if the sun is pointing up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
@@ -1134,16 +1137,16 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
             switch( i )
             {
             case static_cast<int>(TileType::TREES):
-                m_store.getModel( "tree" )->draw();
+                store->getModel( "tree" )->draw();
                 break;
             case static_cast<int>(TileType::MOUNTAINS):
-                m_store.getModel( "mountain" )->draw();
+                store->getModel( "mountain" )->draw();
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-                m_store.getModel( "storehouse" )->draw();
+                store->getModel( "storehouse" )->draw();
                 break;
             case static_cast<int>(TileType::HOUSE):
-                m_store.getModel( "house" )->draw();
+                store->getModel( "house" )->draw();
                 break;
             default:
                 break;
@@ -1158,7 +1161,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         m_transform.setPosition(pos);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-        ngl::Obj * k = m_store.getModel( "person" );
+        ngl::Obj * k = store->getModel( "person" );
         loadMatricesToShader( m_transform.getMatrix(), mvp );
         k->draw();
     }
@@ -1420,7 +1423,6 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     GLint spid = slib->getProgramID( _shaderID );
     GLint loc = glGetUniformLocation(spid, _uniform);
-
     if(loc == -1)
     {
         std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
@@ -1434,13 +1436,14 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
 
 void Scene::drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader)
 {
+    AssetStore *store = AssetStore::instance();
     if(_shader != "")
     {
         ngl::ShaderLib * slib = ngl::ShaderLib::instance();
         slib->use( _shader );
     }
 
-    ngl::Obj * m = m_store.getModel(_model);
+    ngl::Obj * m = store->getModel(_model);
     if(m == nullptr)
     {
         std::cerr << "Error! Mesh " << _model << " doesn't exist!\n";
@@ -1449,7 +1452,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
 
     if(_texture != "")
     {
-        GLuint t = m_store.getTexture( _texture );
+        GLuint t = store->getTexture( _texture );
         if(t == 0)
         {
             std::cerr << "Error! Texture " << _texture << " doesn't exist!\n";

@@ -75,6 +75,14 @@ public :
   /// \brief mouseUp register mouse as not clicked
   ///
   void mouseUp();
+  ///
+  /// \brief bindTextureToShader bind the given texture to the button shader
+  /// \param _tex texture id to use
+  /// \param _uniform name of texture in shader
+  /// \param _target which number texture unit to use
+  ///
+  void bindTextureToShader(const GLuint _tex, const char *_uniform, int _target);
+
 
 private :
   ///

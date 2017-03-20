@@ -6,17 +6,17 @@
 #include <string>
 
 #include <ngl/Obj.h>
+#include <ngl/Singleton.h>
 #include <SDL2/SDL.h>
 
 //The root folder for asset storage.
 const std::string g_resourceLocation = "resources/";
 
-class AssetStore
+class AssetStore : public ngl::Singleton<AssetStore>
 {
+  friend class Singleton<AssetStore>;
 public:
-    AssetStore() = default;
     ~AssetStore();
-    AssetStore(const AssetStore &_store) = delete;
 
     //Getters for models and textures. These shouldn't really be needed,  as there
     //is a really cool function called 'drawAsset' in the scene class.
@@ -28,6 +28,9 @@ public:
     //Loads a texture from _path, stores it with _id.
     void loadTexture(const std::string &_id, const std::string &_path);
 private:
+    AssetStore() = default;
+    AssetStore(const AssetStore &_store) = delete;
+
     //Internal method to help me load in images.
     GLuint SDLSurfaceToGLTexture( SDL_Surface * _surf );
 

@@ -50,10 +50,10 @@ void main()
   }
 
   s = texture2D(icons, fragUV).xyz;
-  if(s.x > 0)
-  {
-    s = vec3(0,0,1);
-  }
+  //if(s.x > 0)
+  //{
+  //  s = vec3(0,0,1);
+  //}
 
   outColour = vec4(s, 1.0);
 }
