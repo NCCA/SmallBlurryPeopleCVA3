@@ -16,6 +16,8 @@ uniform sampler2D displacement;
 uniform sampler2D terrainPos;
 uniform sampler2D waterReflection;
 
+uniform float sunInts;
+uniform float moonInts;
 uniform vec2 pixelstep;
 uniform vec3 lightDir;
 uniform vec3 camPos;
@@ -175,10 +177,10 @@ void main()
 
 
     ///Foam///
-    float waterDepth = max(position_fs.y - texture(terrainPos, UV).y, 0.001);
-    float dmul = clamp(cnoise(position_fs.xyz * 32.0), 0.25, 1.0);
-    dmul *= 1.0 / (waterDepth * 32.0);
-    fragColour = mix(fragColour, vec4(directionalLightCol.xyz, 1.0), clamp(dmul, 0.0, 1.0));
+    float waterDepth = max(position_fs.y - texture(terrainPos, UV).y, 0.0);
+    float dmul = clamp(cnoise(position_fs.xyz * 24.0) / (waterDepth * 16.0), 0.0, 1.0);
+    dmul += 1.0 / ((0.15 + waterDepth) * 8.0);
+    fragColour = mix(fragColour, vec4(directionalLightCol.xyz * (sunInts + moonInts) * 0.75, 1.0), clamp(dmul, 0.0, 1.0));
 
 
     outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);

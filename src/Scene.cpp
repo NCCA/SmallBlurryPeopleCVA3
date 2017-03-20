@@ -25,11 +25,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_centre_camera(false),
-    m_mouse_zoom_cur(10.0f),
+    m_mouse_zoom_cur(2.0f),
     m_mouse_zoom_targ(10.0f),
-    m_mouse_pan(1.0f),
+    m_mouse_pan_targ(20.0f),
     m_mouse_translation(0.0f,0.0f),
-    m_mouse_rotation(0.0f),
+    m_mouse_rotation_targ(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
@@ -311,33 +311,35 @@ void Scene::update()
         int mouse_distance = 0;
         SDL_GetMouseState(&mouse_origin, nullptr);
         mouse_distance = mouse_origin - m_mouse_rot_origin;
-        m_mouse_rotation += (float) 0.075f * mouse_distance;
+        m_mouse_rotation_targ += (float) 0.075f * mouse_distance;
         m_mouse_rot_origin = mouse_origin;
     }
 
     //Set initial position (should really make this function more intuitive).
-    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur));
+    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur * 2.0f));
 
     //Clear all transformations from previous update.
     m_cam.clearTransforms();
 
     //Construct translation *change* using right and forward vectors.
-    ngl::Vec3 trans = m_cam.right() * m_mouse_translation.m_x * 0.25f;
-    trans += m_cam.forwards() * -m_mouse_translation.m_y * 0.25f;
-    trans -= m_cam.getPivot();
+    m_camTargPos += m_cam.right() * m_mouse_translation.m_x * 0.025f;
+    m_camTargPos += m_cam.forwards() * -m_mouse_translation.m_y * 0.025f;
+    //m_camTargPos -= m_cam.getPivot();
 
     ngl::Vec3 cxyz = m_cam.getPos();
     int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
     int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
     cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
 
-    trans.m_y = -cxyz.m_y;
+    m_camTargPos.m_y = -cxyz.m_y - 0.5f;
 
-    m_camTargPos = trans;
-    m_camCurPos += (m_camTargPos - m_camCurPos) / 16.0f;
-    m_mouse_zoom_cur -= (m_mouse_zoom_cur - m_mouse_zoom_targ) / 8.0f;
+    //m_camTargPos = trans;
+    m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
+    m_mouse_zoom_cur += (m_mouse_zoom_targ - m_mouse_zoom_cur) / 16.0f;
 
-    m_cam.rotateCamera(m_mouse_pan, m_mouse_rotation, 0.0f);
+    m_mouse_pan_cur += (m_mouse_pan_targ - m_mouse_pan_cur) / 8.0f;
+    m_mouse_rotation_cur += (m_mouse_rotation_targ - m_mouse_rotation_cur) / 8.0f;
+    m_cam.rotateCamera(m_mouse_pan_cur, m_mouse_rotation_cur, 0.0f);
 
     if(m_centre_camera == true)
     {
@@ -426,7 +428,6 @@ void Scene::update()
 
     m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
     m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
-    std::cout << m_curFocalDepth << '\n';
 }
 
 //I'm sorry this function is so long :(
@@ -680,6 +681,8 @@ void Scene::draw()
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
     slib->setRegisteredUniform("lightDir", m_sunDir);
     slib->setRegisteredUniform("camPos", m_cam.getPos());
+    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
+    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
@@ -1228,20 +1231,20 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
     //pans camera up and down
-    if(_event.y > 0 && m_mouse_zoom_targ > 10.5)
+    if(_event.y > 0 && m_mouse_zoom_targ > 1.0)
     {
-        if (m_mouse_pan > -5)
+        if (m_mouse_pan_targ > 2)
         {
-            m_mouse_pan -= 0.5;
+            m_mouse_pan_targ -= 0.5;
         }
         m_mouse_zoom_targ -= 0.5;
     }
 
-    else if(_event.y < 0 && m_mouse_zoom_targ < 40)
+    else if(_event.y < 0 && m_mouse_zoom_targ < 25)
     {
-        if(m_mouse_pan < 10)
+        if(m_mouse_pan_targ < 30)
         {
-            m_mouse_pan += 0.5;
+            m_mouse_pan_targ += 0.5;
         }
         m_mouse_zoom_targ += 0.5;
     }

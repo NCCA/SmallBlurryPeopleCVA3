@@ -110,10 +110,12 @@ private:
     /// @brief current zoom of the camera
     float m_mouse_zoom_cur;
     /// @brief current pan of the camera
-    float m_mouse_pan;
+    float m_mouse_pan_cur;
+    float m_mouse_pan_targ;
 
     ngl::Vec2 m_mouse_translation;
-    float m_mouse_rotation;
+    float m_mouse_rotation_cur;
+    float m_mouse_rotation_targ;
     /// @brief stores mouse position when m_mouse_trans_active is true
     ngl::Vec2 m_mouse_trans_origin;
     /// @brief stores mouse x position when m_mouse_rot_active is true
