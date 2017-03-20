@@ -87,14 +87,14 @@ int Gui::executeAction(Action _action)
   std::shared_ptr<Command> command(generateCommand(_action));
   if(command.get())
   {
-    // command generation successful
+    // command generation successful, so execute command
 
     command.get()->execute();
     return 0;
   }
   else
   {
-    // no command corresponds to given action
+    // no command corresponds to given action, so don't execute anything
 
     return 1;
   }
@@ -135,7 +135,8 @@ void Gui::createSceneButtons()
 void Gui::createPauseButtons()
 {
   wipeButtons();
-  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::TOP, ngl::Vec2(10, 100), ngl::Vec2(120, 40));
+  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -25), ngl::Vec2(120, 40));
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(120, 40));
   updateButtonArrays();
 }
 

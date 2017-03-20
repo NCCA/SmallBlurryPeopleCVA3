@@ -554,7 +554,7 @@ void Scene::draw()
     slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
 
     slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
-    for( int i = 0; i < cascadeDistances.size(); ++i )
+    for( size_t i = 0; i < cascadeDistances.size(); ++i )
         slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
     m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
@@ -1268,20 +1268,32 @@ void Scene::zoom(int _direction)
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	Gui *gui = Gui::instance();
-	switch(_event.keysym.sym)
+	if(!m_paused)
 	{
-	case SDLK_SPACE : gui->executeAction(Action::CENTRECAMERA); break;
-	case SDLK_ESCAPE : gui->executeAction(Action::PAUSE); break;
-	default : break;
+		Gui *gui = Gui::instance();
+		switch(_event.keysym.sym)
+		{
+		case SDLK_SPACE:
+			gui->executeAction(Action::CENTRECAMERA);
+			break;
+		case SDLK_ESCAPE:
+		case SDLK_p:
+			gui->executeAction(Action::PAUSE);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-	switch(_event.keysym.sym)
+	if(!m_paused)
 	{
-	default:break;
+		switch(_event.keysym.sym)
+		{
+		default:break;
+		}
 	}
 }
 
@@ -1354,7 +1366,7 @@ void Scene::mouseSelection()
     {
         gui->click();
     }
-    else
+    else if(!m_paused)
     {
         m_pickBuffer.bind();
 
@@ -1363,11 +1375,11 @@ void Scene::mouseSelection()
         glBindTexture(GL_TEXTURE_2D, char_texID);
         glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-        long unsigned int red;
+        long unsigned int red = -1;
         glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_UNSIGNED_BYTE, &red);
         std::cout<<"RED"<<red<<std::endl;
         //change depending on number characters
-        if(red >= 0 && red < m_characters.size())
+        if(red != (long unsigned int)-1 && red < m_characters.size())
         {
             for (Character &character : m_characters)
             {
@@ -1709,10 +1721,10 @@ GLuint Scene::constructTerrain()
     }*/
 
     //Calculate face normals
-    for(int i = 0; i < faces.size(); ++i)
+    for(size_t i = 0; i < faces.size(); ++i)
     {
         facenorms.push_back( std::vector<ngl::Vec3>() );
-        for(int j = 0; j < faces[i].size(); ++j)
+        for(size_t j = 0; j < faces[i].size(); ++j)
         {
             ngl::Vec3 normal;
 
@@ -1774,9 +1786,9 @@ GLuint Scene::constructTerrain()
     std::vector<ngl::Vec3> normesh;
     std::vector<ngl::Vec2> uvmesh;
 
-    for(int i = 0; i < faces.size(); ++i)
+    for(size_t i = 0; i < faces.size(); ++i)
     {
-        for(int j = 0; j < faces[i].size(); ++j)
+        for(size_t j = 0; j < faces[i].size(); ++j)
         {
             terrainFace f = terrainVerticesToFace(
                         i,
