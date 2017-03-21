@@ -1367,21 +1367,25 @@ void Scene::mouseSelection()
 			glBindTexture(GL_TEXTURE_2D, char_texID);
 			glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-			int red;
-			glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED, GL_INT, &red);
-			std::cout<<"RED: "<<red<<std::endl;
+			int red = -1;
+			glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED_INTEGER, GL_INT, &red);
 			//change depending on number characters
-			if(red < m_characters.size())
+			if(red < (m_characters.size() + 1) && red > 0)
 			{
 				for (Character &character : m_characters)
 					{
 						if (character.getID() == red)
 							{
 								// probably needs changing because vector address is not guaranteed
-								 m_active_char = &character;
 								if(character.isActive() == false)
+								{
+									m_active_char = &character;
 									character.setActive(true);
+								}
 							}
+						else
+							if (character.isActive() == true)
+								character.setActive(false);
 					}
 			}
 			//check grid_id texture
@@ -1411,16 +1415,16 @@ void Scene::mouseSelection()
 
 					if(m_characters[0].isActive() == true)
 					{
-						if (m_characters[0].setTarget(target_id))
+						m_characters[0].setTarget(target_id);
 							m_characters[0].setState();
 					}
 
-					}
-					else
-					{
-						//if grid_coord == {0,0,0}
-						std::cout<<"NO GRID CLICK D:"<<std::endl;
-					}
+				}
+				else
+				{
+					//if grid_coord == {0,0,0}
+					std::cout<<"NO GRID CLICK D:"<<std::endl;
+				}
 			}
 
         glReadBuffer(GL_NONE);

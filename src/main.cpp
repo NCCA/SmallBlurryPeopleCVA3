@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <ngl/NGLInit.h>
+#include <set>
 
 #include "imgui.h"
 #include "ImGUIImpl.h"
@@ -9,10 +10,12 @@
 #include "Scene.hpp"
 #include "Grid.hpp"
 #include "Preferences.hpp"
+#include "Utility.hpp"
 
 int main()
 {
-    SDL_Init(SDL_INIT_VIDEO);
+
+		SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
 
