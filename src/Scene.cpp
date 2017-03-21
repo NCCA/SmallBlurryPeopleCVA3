@@ -26,11 +26,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_centre_camera(false),
-    m_mouse_zoom_cur(2.0f),
-    m_mouse_zoom_targ(10.0f),
-    m_mouse_pan_targ(20.0f),
-    m_mouse_translation(0.0f,0.0f),
-    m_mouse_rotation_targ(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
@@ -40,12 +35,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     AssetStore *store = AssetStore::instance();
     m_viewport = _viewport;
 
-    m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom_cur));
-    m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
-    m_cam.setFOV( 60.0f );
     m_cam.calculateProjectionMat();
     m_cam.calculateViewMat();
 
@@ -291,22 +282,19 @@ void Scene::update()
 {
   if(!m_paused)
   {
-    //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
-    m_mouse_translation = ngl::Vec2(0,0);
-
     //translates
     if(m_mouse_trans_active)
     {
-        //Get mouse pos.
-        int mousePos[2] = {0, 0};
-        SDL_GetMouseState( &mousePos[0], &mousePos[1] );
-
         //Compute distance to mouse origin
-        ngl::Vec2 mouse_distance (mousePos[0], mousePos[1]);
+        ngl::Vec2 mouse_distance = Utility::getMousePos();
         mouse_distance -= m_mouse_trans_origin;
 
-        m_mouse_translation = mouse_distance;
-        m_mouse_trans_origin = ngl::Vec2( mousePos[0], mousePos[1] );
+        m_mouse_trans_origin = Utility::getMousePos();
+
+        //Move the camera based on mouse translation.
+        m_cam.moveRight( mouse_distance.m_x * 0.025f );
+        m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+        //---
     }
     //rotates
     else if(m_mouse_rot_active)
@@ -315,64 +303,32 @@ void Scene::update()
         int mouse_distance = 0;
         SDL_GetMouseState(&mouse_origin, nullptr);
         mouse_distance = mouse_origin - m_mouse_rot_origin;
-        m_mouse_rotation_targ += (float) 0.075f * mouse_distance;
         m_mouse_rot_origin = mouse_origin;
+
+        //Rotate the camera based on mouse movement.
+        m_cam.rotate(0.0f, mouse_distance * 0.125f);
+        //---
     }
 
-    //Set initial position (should really make this function more intuitive).
-    m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur * 2.0f));
+    if(m_centre_camera == true)
+        for (Character &character : m_characters)
+            if (character.isActive())
+                m_cam.setPos(-character.getPos());
 
-    //Clear all transformations from previous update.
-    m_cam.clearTransforms();
-
-    //Construct translation *change* using right and forward vectors.
-    m_camTargPos += m_cam.right() * m_mouse_translation.m_x * 0.025f;
-    m_camTargPos += m_cam.forwards() * -m_mouse_translation.m_y * 0.025f;
-    //m_camTargPos -= m_cam.getPivot();
-
+    //Terrain-height correction
     ngl::Vec3 cxyz = m_cam.getPos();
     int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
     int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
     cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+    ngl::Vec3 cp = m_cam.getTargPos();
+    //Grab the y component of the current tile, use that as the target y for the camera.
+    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
+    //---
 
-    m_camTargPos.m_y = -cxyz.m_y - 0.5f;
-
-    //m_camTargPos = trans;
-    m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
-    m_mouse_zoom_cur += (m_mouse_zoom_targ - m_mouse_zoom_cur) / 16.0f;
-
-    m_mouse_pan_cur += (m_mouse_pan_targ - m_mouse_pan_cur) / 8.0f;
-    m_mouse_rotation_cur += (m_mouse_rotation_targ - m_mouse_rotation_cur) / 8.0f;
-    m_cam.rotateCamera(m_mouse_pan_cur, m_mouse_rotation_cur, 0.0f);
-
-    if(m_centre_camera == true)
-    {
-        for (Character &character : m_characters)
-        {
-            if (character.isActive())
-            {
-                /////////////////////////////////////////////////////////////////////////////////////////////////
-                ngl::Vec3 new_pivot;
-                new_pivot.m_y = -character.getPos().m_y / m_terrainHeightDivider;
-                new_pivot.m_x = -character.getPos().m_x;
-                new_pivot.m_z = -character.getPos().m_z;
-                m_cam.movePivot(new_pivot);
-
-                ngl::Vec3 cxy = m_cam.getPos();
-                int x = Utility::clamp(std::round(cxy.m_x),0,m_grid.getW());
-                int y = Utility::clamp(std::round(cxy.m_z),0,m_grid.getH());
-                cxy.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
-                m_cam.moveCamera(cxy);
-                /////////////////////////////////////////////////////////////////////////////////////
-            }
-        }
-    }
-    else
-    {
-        m_cam.movePivot(m_camCurPos);
-    }
-
+    //Recalculate view matrix.
+    m_cam.updateSmoothCamera();
     m_cam.calculateViewMat();
+    //---
 
     for(Character &character : m_characters)
     {
@@ -1215,13 +1171,14 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the left button has been released and turns off flag
     if (_event.button == SDL_BUTTON_LEFT)
     {
-
         //checks if the mouse has moved, a click or a drag
         ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
         //if its a click then the mouseSelection funciton is called
         if(distance.length() < 1)
             mouseSelection();
+
+        m_mouse_trans_origin = Utility::getMousePos();
 
         m_mouse_prev_pos.set(0.0f, 0.0f);
         m_mouse_trans_active = false;
@@ -1231,13 +1188,14 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the right button has been released and turns off flag
     else if (_event.button == SDL_BUTTON_RIGHT)
     {
+        m_mouse_rot_origin = Utility::getMousePos().m_x;
+
         m_mouse_rot_active = false;
     }
 }
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
-
     zoom(_event.y);
 }
 
@@ -1246,22 +1204,16 @@ void Scene::zoom(int _direction)
   if(!m_paused)
   {
     //pans camera up and down
-    if(_direction > 0 && m_mouse_zoom_targ > 1.0)
+    if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
     {
-      if (m_mouse_pan_targ > 2)
-      {
-          m_mouse_pan_targ -= 0.5;
-      }
-      m_mouse_zoom_targ -= 0.5;
+      m_cam.rotate( -0.5f, 0.0f );
+      m_cam.dolly( -0.5f );
     }
 
-    else if(_direction < 0 && m_mouse_zoom_targ < 25)
+    else if(_direction < 0 && m_cam.getTargetDolly() < 25)
     {
-      if(m_mouse_pan_targ < 30)
-      {
-          m_mouse_pan_targ += 0.5;
-      }
-      m_mouse_zoom_targ += 0.5;
+      m_cam.rotate( 0.5f, 0.0f );
+      m_cam.dolly( 0.5f );
     }
   }
 }
