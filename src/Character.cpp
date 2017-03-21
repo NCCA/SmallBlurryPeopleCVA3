@@ -301,7 +301,7 @@ void Character::update()
 	}
 	else
 	{
-		setIdleState();
+		//setIdleState();
 		//setActive(false);
 	}
 }
@@ -394,17 +394,19 @@ bool Character::setTarget(int _tile_id)
 
 bool Character::findNearestStorage()
 {
+	//empty vector to hold positions of storage house
   std::vector<ngl::Vec2> storage_houses;
   int height = m_grid->getH();
   int width = m_grid->getW();
 
+	//go thorugh grid
   for (int i=0; i< height; i++)
   {
     for (int j=0; j<width; j++)
     {
-      //go through grid and find storage houses
       ngl::Vec2 coord = {j, i};
       GridTile current_tile = m_grid->get(coord);
+			//if the current grid tile is a storehouse, add to vector
       if (current_tile.getType() == TileType::STOREHOUSE)
       {
         storage_houses.push_back(coord);
@@ -416,6 +418,8 @@ bool Character::findNearestStorage()
 
 bool Character::findNearestEmptyTile()
 {
+	//checks neighbouring tiles to see if they are empty,
+	//if empty add to vector neighbours
   std::vector<ngl::Vec2> neighbours;
   ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
@@ -446,19 +450,24 @@ bool Character::findNearestEmptyTile()
 
 bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 {
+	//if the vector is not empty
   if (_coord_data.size() > 0)
   {
+		//set the first element to the target id and shortest path
     m_target_id = m_grid->coordToId(_coord_data[0]);
     std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
+		//erase the first element in the vector
     _coord_data.erase(_coord_data.begin());
 
-    //find shortest distance to storage house, storage house becomes target
+		//if the vector is not empty (has more than one element)
     if(_coord_data.size() > 0)
     {
       for (auto coord : _coord_data)
       {
+				//compare the current elemets path length to the shortest_path's length
         int id = m_grid->coordToId(coord);
         std::vector<ngl::Vec2> path = findPath(id);
+				//if shorter path, set as target
         if (shortest_path.size() == 0 && path.size() > shortest_path.size())
         {
           m_target_id = id;
@@ -471,11 +480,13 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
         }
       }
     }
+		//set character path to the shortest path found
     m_path = shortest_path;
     return true;
   }
   else
   {
+		//no path was found
     std::cout<<"NO FOUNDY :((((((((((((((("<<std::endl;
     return false;
   }
@@ -489,9 +500,7 @@ void Character::build(BuildingType _building)
 
 ngl::Vec3 Character::getPos()
 {
-  ngl::Vec2 new_pos = {int(m_pos[0]), int(m_pos[1])};
-  GridTile current_tile = m_grid->get(new_pos);
-  //int height = current_tile.getHeight();
+	//get grid height at character's position
   float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
