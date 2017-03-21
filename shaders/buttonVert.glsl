@@ -10,6 +10,8 @@ uniform int mouseOver;
 
 out vec2 buttonPos;
 out vec2 buttonSize;
+out vec2 pixelPos;
+out vec2 pixelSize;
 out float buttonMousedOver; // 1 for true, 0 for false
 flat out int buttonAction;
 
@@ -27,6 +29,8 @@ void main()
 
   buttonPos = screenPos;
   buttonSize = screenSize;
+  pixelPos = inPosition;
+  pixelSize = inSize;
 
   buttonAction = inAction;
 

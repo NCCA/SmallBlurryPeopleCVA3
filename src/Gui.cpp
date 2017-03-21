@@ -136,7 +136,7 @@ void Gui::createSceneButtons()
 void Gui::createPauseButtons()
 {
   wipeButtons();
-  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -25), ngl::Vec2(1200, 670));
+  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -25), ngl::Vec2(120, 40));
   addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(120, 40));
   updateButtonArrays();
 }
@@ -199,6 +199,9 @@ void Gui::drawButtons()
 {
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
   AssetStore *store = AssetStore::instance();
+
+  glClear(GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_DEPTH_TEST);
 
   slib->use(m_shader_name);
   bindTextureToShader(store->getTexture("icons"), "icons", 0);

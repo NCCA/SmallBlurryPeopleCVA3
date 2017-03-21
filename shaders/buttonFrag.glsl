@@ -11,7 +11,7 @@ const uint ZOOMOUT = 7;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
-vec4 text(vec2 pos);
+vec3 text(vec2 pos);
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 p, vec2 t);
 
@@ -24,6 +24,8 @@ uniform sampler2D font;
 
 in vec2 fragPos;
 in vec2 fragSize;
+in vec2 fragPixelPos;
+in vec2 fragPixelSize;
 in vec2 fragUV;
 in float fragMousedOver;
 flat in int fragAction;
@@ -42,7 +44,7 @@ vec3 button_highlight = vec3(0.9, 0.7, 0.4);
 //--- common data ---
 
 //--- font data ---
-const float FONT_SIZE = 42;
+const float FONT_SIZE = 20;
 const float FONT_SPACE = 0.5;
 
 //----- access to the image of ascii code characters ------
@@ -136,16 +138,15 @@ float character(float ch, vec2 tp)
     return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
 }
 
-vec4 text(vec2 pos)
+vec3 text(vec2 pos)
 {
   vec2 tp0 = pos / FONT_SIZE;  // original position
   vec2 tp  = tp0;  // dynamic text position
 
   float c = 0.0;
-  _H _E _L _L _O _newline
-  _T _E _S _T
+  _Q _U _I _T
 
-  return vec4(max(c, 0.0));
+  return vec3(max(c, 0.0));
 }
 
 // modified functions end
@@ -169,6 +170,7 @@ void main()
   //vec2 buttonUV = (gl_FragCoord.xy - posCoord) / sizeCoord;
   vec2 button_pixel_size = fragSize * fResolution;
   vec2 button_pixel_pos = fragPos * fResolution;
+  vec2 button_abs_pixel_pos = button_pixel_pos + vec2(fResolution/2);
   vec2 pixel_uv = fragUV * button_pixel_size;
 
   vec3 s = border_color;
@@ -199,9 +201,10 @@ void main()
   //{
   //  s = vec3(0,1,1);
   //}
-
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  s += text(translate(pos, vec2(50.0, -FONT_SIZE))).xyz;
-
+  if(fragAction == QUIT)
+  {
+    vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+    s += text(translate(pos, vec2(fragPixelPos.x + border_size, -(fragPixelPos.y+FONT_SIZE+border_size))));
+  }
   outColour = vec4(s, 1.0);
 }

@@ -704,7 +704,6 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
 
-    glClear(GL_DEPTH_BUFFER_BIT);
     Gui::instance()->drawButtons();
 
     //---------------------------//
