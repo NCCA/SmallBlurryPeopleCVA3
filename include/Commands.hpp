@@ -8,7 +8,8 @@
 ///
 /// \brief The Action enum for what the buttons does
 ///
-enum class Action{
+enum class Action
+{
   PASSIVE,      //0
   QUIT,         //1
   BUILDHOUSE,   //2
@@ -17,10 +18,14 @@ enum class Action{
   PAUSE,        //5
   ZOOMIN,       //6
   ZOOMOUT,      //7
-  MOVEUP,       //8
-  MOVEDOWN,     //9
+  MOVEFORWARD,  //8
+  MOVEBACKWARD, //9
   MOVELEFT,     //10
-  MOVERIGHT     //11
+  MOVERIGHT,    //11
+  STOPFORWARD,  //12
+  STOPBACKWARD, //13
+  STOPLEFT,     //14
+  STOPRIGHT     //15
 };
 
 ///
@@ -165,6 +170,18 @@ private:
   /// \brief m_direction the direction to zoom in
   ///
   int m_direction;
+};
+
+class MoveCommand : public Command
+{
+public:
+  MoveCommand(Scene *_scene, Direction _d, bool _stop);
+  ~MoveCommand() = default;
+  virtual void execute();
+private:
+  Scene *m_scene;
+  Direction m_d;
+  bool m_stop;
 };
 
 #endif//__COMMANDS_HPP__

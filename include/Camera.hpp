@@ -74,6 +74,12 @@ public:
     void moveRight(const float _d);
     void moveForward(const float _d);
     void move(const ngl::Vec3 _d);
+    ///
+    /// \brief moveScreenSpace moves camera in screenspace: x for left/right, z for forwards/backwards, y for up/down (world space, because it's more intuitive for input)
+    /// \param _d vector with x, y, z movement components
+    ///
+    void moveScreenSpace(const ngl::Vec3 _d);
+
     void dolly(const float _d);
     void setPos(const ngl::Vec3 _p);
     ngl::Vec3 getTargPos() const {return m_targPos;}

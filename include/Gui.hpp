@@ -102,7 +102,6 @@ public :
   ///
   void bindTextureToShader(const GLuint _tex, const char *_uniform, int _target);
 
-
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

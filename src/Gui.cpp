@@ -77,7 +77,29 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::ZOOMOUT:
     command.reset(new ZoomCommand(m_scene, -1));
     break;
-  default:
+  case Action::MOVEFORWARD:
+    command.reset(new MoveCommand(m_scene, Direction::FORWARDS, false));
+    break;
+  case Action::MOVEBACKWARD:
+    command.reset(new MoveCommand(m_scene, Direction::BACKWARDS, false));
+    break;
+  case Action::MOVELEFT:
+    command.reset(new MoveCommand(m_scene, Direction::LEFT, false));
+    break;
+  case Action::MOVERIGHT:
+    command.reset(new MoveCommand(m_scene, Direction::RIGHT, false));
+    break;
+  case Action::STOPFORWARD:
+    command.reset(new MoveCommand(m_scene, Direction::FORWARDS, true));
+    break;
+  case Action::STOPBACKWARD:
+    command.reset(new MoveCommand(m_scene, Direction::BACKWARDS, true));
+    break;
+  case Action::STOPLEFT:
+    command.reset(new MoveCommand(m_scene, Direction::LEFT, true));
+    break;
+  case Action::STOPRIGHT:
+    command.reset(new MoveCommand(m_scene, Direction::RIGHT, true));
     break;
   }
   return command;
@@ -259,3 +281,4 @@ void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _targ
     glActiveTexture(GL_TEXTURE0 + _target);
     glBindTexture(GL_TEXTURE_2D, _tex);
 }
+

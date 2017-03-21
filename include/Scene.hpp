@@ -14,6 +14,18 @@
 
 #include "Framebuffer.hpp"
 
+
+///
+/// \brief The Direction enum clarification for which direction is being used
+///
+enum Direction
+{
+  FORWARDS,
+  BACKWARDS,
+  LEFT,
+  RIGHT
+};
+
 typedef std::pair<ngl::Vec3, ngl::Vec3> bounds;
 
 class Scene
@@ -98,6 +110,16 @@ public:
     /// \brief togglePause switch between paused and unpaused mode
     ///
     void togglePause();
+    ///
+    /// \brief startMove set movement flag in given direction to true
+    /// \param _d direction to move
+    ///
+    void startMove(Direction _d);
+    ///
+    /// \brief stopMove set movement flag in given direction to false
+    /// \param _d direction to move
+    ///
+    void stopMove(Direction _d);
 
 private:
     ///
@@ -233,6 +255,12 @@ private:
                                                         const std::vector<std::vector<ngl::Vec3>> &_faceNormals
                                                         );
 
+    ///
+    /// \brief getCamMoveVec get the user's movement input
+    /// \return vector for camera to move
+    ///
+    ngl::Vec3 getCamMoveVec();
+
     /// @brief Rather than looping through the grid every frame, and drawing based on tile id, I extract out the positions of the meshes that need
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
@@ -247,6 +275,11 @@ private:
     /// \brief m_paused whether or not the game is paused. if it is, update will not move scene forward
     ///
     bool m_paused;
+
+    ///
+    /// \brief m_movement_held which movement are currently held
+    ///
+    bool m_movement_held[4];
 };
 
 #endif//__SCENE_HPP__

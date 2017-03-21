@@ -136,6 +136,15 @@ void Camera::move(const ngl::Vec3 _d)
     m_targPos += _d;
 }
 
+void Camera::moveScreenSpace(const ngl::Vec3 _d)
+{
+  moveRight(_d.m_x);
+
+  move(ngl::Vec3(0, _d.m_y, 0));
+
+  moveForward(_d.m_z);
+}
+
 void Camera::rotate(const float _pitch, const float _yaw)
 {
     m_targRot += ngl::Vec2(_pitch, _yaw);

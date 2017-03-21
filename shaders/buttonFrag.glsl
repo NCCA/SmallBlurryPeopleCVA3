@@ -8,10 +8,14 @@ const uint CENTRECAMERA = 4;
 const uint PAUSE        = 5;
 const uint ZOOMIN       = 6;
 const uint ZOOMOUT      = 7;
-const uint MOVEUP       = 8;
-const uint MOVEDOWN     = 9;
+const uint MOVEFORWARD  = 8;
+const uint MOVEBACKWARD = 9;
 const uint MOVELEFT     = 10;
 const uint MOVERIGHT    = 11;
+const uint STOPFORWARD  = 12;
+const uint STOPBACKWARD = 13;
+const uint STOPLEFT     = 14;
+const uint STOPRIGHT    = 15;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);

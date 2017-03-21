@@ -312,9 +312,15 @@ void Scene::update()
     }
 
     if(m_centre_camera == true)
+    {
         for (Character &character : m_characters)
             if (character.isActive())
                 m_cam.setPos(-character.getPos());
+    }
+    else
+    {
+      m_cam.move(getCamMoveVec());
+    }
 
     //Terrain-height correction
     ngl::Vec3 cxyz = m_cam.getPos();
@@ -1233,12 +1239,16 @@ void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 			gui->executeAction(Action::PAUSE);
 			break;
 		case SDLK_UP:
+			gui->executeAction(Action::MOVEFORWARD);
 			break;
 		case SDLK_DOWN:
+			gui->executeAction(Action::MOVEBACKWARD);
 			break;
 		case SDLK_LEFT:
+			gui->executeAction(Action::MOVELEFT);
 			break;
 		case SDLK_RIGHT:
+			gui->executeAction(Action::MOVERIGHT);
 			break;
 		default:
 			break;
@@ -1248,10 +1258,24 @@ void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
+	Gui *gui = Gui::instance();
 	if(!m_paused)
 	{
 		switch(_event.keysym.sym)
 		{
+		case SDLK_UP:
+			gui->executeAction(Action::STOPFORWARD);
+			break;
+		case SDLK_DOWN:
+			gui->executeAction(Action::STOPBACKWARD);
+			break;
+		case SDLK_LEFT:
+			gui->executeAction(Action::STOPLEFT);
+			break;
+		case SDLK_RIGHT:
+			gui->executeAction(Action::STOPRIGHT);
+			break;
+
 		default:break;
 		}
 	}
@@ -1907,4 +1931,29 @@ void Scene::togglePause()
     m_paused = true;
     gui->pause();
   }
+}
+
+void Scene::startMove(Direction _d)
+{
+  m_movement_held[_d] = true;
+}
+
+void Scene::stopMove(Direction _d)
+{
+  m_movement_held[_d] = false;
+}
+
+ngl::Vec3 Scene::getCamMoveVec()
+{
+  ngl::Vec3 move(0,0,0);
+  if(m_movement_held[Direction::FORWARDS])
+    move.m_z += 1;
+  if(m_movement_held[Direction::BACKWARDS])
+    move.m_z -= 1;
+  if(m_movement_held[Direction::LEFT])
+    move.m_x += 1;
+  if(m_movement_held[Direction::RIGHT])
+    move.m_x -= 1;
+  move *= 0.3;
+  return move;
 }

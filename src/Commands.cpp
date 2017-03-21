@@ -1,5 +1,5 @@
 #include "Commands.hpp"
-
+#include "Gui.hpp"
 //------------------------------------------------------------//
 // Passive Command
 //------------------------------------------------------------//
@@ -76,4 +76,22 @@ ZoomCommand::ZoomCommand(Scene *_scene, int _direction) :
 void ZoomCommand::execute()
 {
   m_scene->zoom(m_direction);
+}
+
+//------------------------------------------------------------//
+// Move Command
+//------------------------------------------------------------//
+
+MoveCommand::MoveCommand(Scene *_scene, Direction _d, bool _stop) :
+  m_scene(_scene),
+  m_d(_d),
+  m_stop(_stop)
+{}
+
+void MoveCommand::execute()
+{
+  if(m_stop)
+    m_scene->stopMove(m_d);
+  else
+    m_scene->startMove(m_d);
 }
