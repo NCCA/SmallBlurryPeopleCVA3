@@ -1892,11 +1892,11 @@ void Scene::togglePause()
   if(m_paused)
   {
     m_paused = false;
-    gui->createSceneButtons();
+    gui->unpause();
   }
   else
   {
     m_paused = true;
-    gui->createPauseButtons();
+    gui->pause();
   }
 }

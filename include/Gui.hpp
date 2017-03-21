@@ -56,6 +56,14 @@ public :
   ///
   void wipeButtons();
   ///
+  /// \brief pause create pause menu and set pause uniform
+  ///
+  void pause();
+  ///
+  /// \brief unpause leave pause menu and set pause uniform
+  ///
+  void unpause();
+  ///
   /// \brief createSceneButtons creates the set of default buttons for the scene
   ///
   void createSceneButtons();

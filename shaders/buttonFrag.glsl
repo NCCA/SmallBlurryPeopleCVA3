@@ -12,13 +12,15 @@ const uint ZOOMOUT = 7;
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
 vec3 text(vec2 pos);
+vec3 centerText();
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 p, vec2 t);
+vec3 getIcon(vec2 pixel_uv);
 
 layout(location = 0) out vec4 outColour;
 
 uniform vec2 fResolution;
-
+uniform bool paused;
 uniform sampler2D icons;
 uniform sampler2D font;
 
@@ -52,6 +54,8 @@ const float FONT_SPACE = 0.5;
 
 #define S(a) c+=character(float(a), tp); tp.x-=FONT_SPACE;
 
+#define _play S(5);
+#define _pause S(6);
 #define _note  S(10);
 #define _star  S(28);
 #define _smily S(29);
@@ -60,6 +64,17 @@ const float FONT_SPACE = 0.5;
 #define _add S(43);
 #define _comma S(44);
 #define _dot S(46);
+
+#define _0 S(48);
+#define _1 S(49);
+#define _2 S(50);
+#define _3 S(51);
+#define _4 S(52);
+#define _5 S(53);
+#define _6 S(54);
+#define _7 S(55);
+#define _8 S(56);
+#define _9 S(57);
 
 #define _A S(65);
 #define _B S(66);
@@ -115,16 +130,6 @@ const float FONT_SPACE = 0.5;
 #define _y S(121);
 #define _z S(122);
 
-#define _0 S(48);
-#define _1 S(49);
-#define _2 S(50);
-#define _3 S(51);
-#define _4 S(52);
-#define _5 S(53);
-#define _6 S(54);
-#define _7 S(55);
-#define _8 S(56);
-#define _9 S(57);
 #define _newline tp.y += 1.0; tp.x = tp0.x;
 
 // return character intensity of ch at position tp
@@ -138,15 +143,53 @@ float character(float ch, vec2 tp)
     return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
 }
 
-vec3 text(vec2 pos)
+vec3 textQ(vec2 pos)
 {
   vec2 tp0 = pos / FONT_SIZE;  // original position
   vec2 tp  = tp0;  // dynamic text position
 
   float c = 0.0;
   _Q _U _I _T
-
   return vec3(max(c, 0.0));
+}
+
+vec3 centerTextQ()
+{
+  int str_len = 4;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  return textQ(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
+}
+vec3 textP(vec2 pos)
+{
+  vec2 tp0 = pos / FONT_SIZE;  // original position
+  vec2 tp  = tp0;  // dynamic text position
+
+  float c = 0.0;
+  _pause
+  return vec3(max(c, 0.0));
+}
+
+vec3 centerTextP()
+{
+  int str_len = 1;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  return textP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
+}
+vec3 textPP(vec2 pos)
+{
+  vec2 tp0 = pos / FONT_SIZE;  // original position
+  vec2 tp  = tp0;  // dynamic text position
+
+  float c = 0.0;
+  _play
+  return vec3(max(c, 0.0));
+}
+
+vec3 centerTextPP()
+{
+  int str_len = 1;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  return textPP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
 }
 
 // modified functions end
@@ -163,6 +206,17 @@ vec2 translate(vec2 p, vec2 t)
 {
   p -= t;
   return p;
+}
+
+vec3 getIcon(vec2 pixel_uv)
+{
+  vec3 s = vec3(0,1,0);
+  if(!paused)
+  {
+    s = texture2D(icons, pixel_uv/vec2(1024.0)).xyz;
+  }
+
+  return s;
 }
 
 void main()
@@ -190,12 +244,11 @@ void main()
 //  vec2 button_inner = 0.5 - (border_size * 2) / (fragSize*fResolution);
 //  float radius = border_size;
 //  if(box(translate(fragUV, vec2(0.5)), button_inner, 0) <= 0)
+
   if(box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2) <= 0)
   {
     s = mix(button_highlight, button_color, fragUV.y);
   }
-
-  s *= texture2D(icons, fragUV).xyz;
 
   //if(fragAction == PAUSE)
   //{
@@ -203,8 +256,15 @@ void main()
   //}
   if(fragAction == QUIT)
   {
-    vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-    s += text(translate(pos, vec2(fragPixelPos.x + border_size, -(fragPixelPos.y+FONT_SIZE+border_size))));
+    s += centerTextQ();
+  }
+  else if(fragAction == PAUSE)
+  {
+    if(paused) s += centerTextPP();
+    else s += centerTextP();
   }
   outColour = vec4(s, 1.0);
 }
+
+//return text(translate(pos, vec2(fragPixelPos.x + border_size, -(fragPixelPos.y + FONT_SIZE + border_size))));
+

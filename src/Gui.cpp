@@ -125,6 +125,18 @@ void Gui::wipeButtons()
   Button::resetIdCounter();
 }
 
+void Gui::pause()
+{
+  ngl::ShaderLib::instance()->setRegisteredUniform("paused", true);
+  createPauseButtons();
+}
+
+void Gui::unpause()
+{
+  ngl::ShaderLib::instance()->setRegisteredUniform("paused", false);
+  createSceneButtons();
+}
+
 void Gui::createSceneButtons()
 {
   wipeButtons();
