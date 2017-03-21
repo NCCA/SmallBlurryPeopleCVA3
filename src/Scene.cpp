@@ -4,6 +4,7 @@
 #include <ngl/ShaderLib.h>
 #include <ngl/Transformation.h>
 #include <ngl/VAOPrimitives.h>
+#include <ngl/Random.h>
 #include <SDL2/SDL.h>
 
 #include "Scene.hpp"
@@ -44,13 +45,14 @@ Scene::Scene(ngl::Vec2 _viewport) :
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
-    createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
+    createShader("diffuse", "vertDeferredDataInstanced", "fragDeferredDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredData", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
     createShader("sky", "vertScreenQuad", "fragSky");
-    createShader("shadowDepth", "vertMVPUVN", "fragShadowDepth");
+    createShader("shadowDepth", "vertDeferredData", "fragShadowDepth");
+    createShader("shadowDepthInstanced", "vertDeferredDataInstanced", "fragShadowDepth");
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
@@ -159,6 +161,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
 
+    int meshCount = 0;
     m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getW(); ++i)
         for(int j = 0; j < m_grid.getH(); ++j)
@@ -169,7 +172,30 @@ Scene::Scene(ngl::Vec2 _viewport) :
                                                       m_grid.get(i, j).getHeight() / m_terrainHeightDivider,
                                                       j
                                                       ));
+            meshCount++;
         }
+
+    //Generate TBO for mesh instancing.
+    //ngl::Random * rng = ngl::Random::instance();
+    std::vector<ngl::Mat4> transforms;
+    transforms.reserve( meshCount );
+    for(auto &slot : m_meshPositions)
+        for(auto &vec : slot)
+        {
+            ngl::Mat4 m;
+            m.translate( vec.m_x, vec.m_y, vec.m_z );
+            transforms.push_back( m );
+        }
+
+    GLuint buf;
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_TEXTURE_BUFFER, buf);
+    glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
+
+    glGenTextures(1, &m_instanceTBO);
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
@@ -281,115 +307,115 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  if(!m_paused)
-  {
-    //translates
-    if(m_mouse_trans_active)
+    if(!m_paused)
     {
-        //Compute distance to mouse origin
-        ngl::Vec2 mouse_distance = Utility::getMousePos();
-        mouse_distance -= m_mouse_trans_origin;
+        //translates
+        if(m_mouse_trans_active)
+        {
+            //Compute distance to mouse origin
+            ngl::Vec2 mouse_distance = Utility::getMousePos();
+            mouse_distance -= m_mouse_trans_origin;
 
-        m_mouse_trans_origin = Utility::getMousePos();
+            m_mouse_trans_origin = Utility::getMousePos();
 
-        //Move the camera based on mouse translation.
-        m_cam.moveRight( mouse_distance.m_x * 0.025f );
-        m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+            //Move the camera based on mouse translation.
+            m_cam.moveRight( mouse_distance.m_x * 0.025f );
+            m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+            //---
+        }
+        //rotates
+        else if(m_mouse_rot_active)
+        {
+            int mouse_origin = 0;
+            int mouse_distance = 0;
+            SDL_GetMouseState(&mouse_origin, nullptr);
+            mouse_distance = mouse_origin - m_mouse_rot_origin;
+            m_mouse_rot_origin = mouse_origin;
+
+            //Rotate the camera based on mouse movement.
+            m_cam.rotate(0.0f, mouse_distance * 0.125f);
+            //---
+        }
+
+        if(m_centre_camera == true)
+            for (Character &character : m_characters)
+                if (character.isActive())
+                    m_cam.setPos(-character.getPos());
+
+        //Terrain-height correction
+        ngl::Vec3 cxyz = m_cam.getPos();
+        int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+        int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+        cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+        ngl::Vec3 cp = m_cam.getTargPos();
+        //Grab the y component of the current tile, use that as the target y for the camera.
+        m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
         //---
-    }
-    //rotates
-    else if(m_mouse_rot_active)
-    {
-        int mouse_origin = 0;
-        int mouse_distance = 0;
-        SDL_GetMouseState(&mouse_origin, nullptr);
-        mouse_distance = mouse_origin - m_mouse_rot_origin;
-        m_mouse_rot_origin = mouse_origin;
 
-        //Rotate the camera based on mouse movement.
-        m_cam.rotate(0.0f, mouse_distance * 0.125f);
+        //Recalculate view matrix.
+        m_cam.updateSmoothCamera();
+        m_cam.calculateViewMat();
         //---
+
+        for(Character &character : m_characters)
+        {
+            character.update();
+        }
+
+        //m_sunAngle.m_x = 150.0f;
+        m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
+        m_sunAngle.m_x += 0.01f;
+        if(m_sunAngle.m_x > 360.0f)
+        {
+            m_day++;
+            m_sunAngle.m_x = 0.0f;
+            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+        }
+        //std::cout << m_sunAngle.m_x << '\n';
+
+        m_season = (m_day % 365) / 365.0f;
+
+        ngl::Transformation t;
+        t.setRotation( m_sunAngle );
+        m_sunDir = t.getMatrix().getForwardVector();
+        m_sunDir.normalize();
+
+        //1 = Midday
+        //0 = Sunrise/sunset
+        //-1 = Midnight
+        float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
+        //Map to range 0.5PI to -0.5PI
+        a *= M_PI / 2.0;
+
+        float t_midday = 0.5f * sin(a) + 0.5f;
+        float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
+        float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
+
+        m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
+                t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
+                t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+
+        m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+
+        //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
+        m_pickBuffer.bind();
+        GLuint grid_texID = getTerrainPickTexture();
+        glBindTexture(GL_TEXTURE_2D, grid_texID);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+        int mouse_coords[2] = {0,0};
+        SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+        std::array<float, 4> grid_coord;
+
+        // x, window height - y
+        glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+
+        ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
+        m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
+
+        m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
+        m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
     }
-
-    if(m_centre_camera == true)
-        for (Character &character : m_characters)
-            if (character.isActive())
-                m_cam.setPos(-character.getPos());
-
-    //Terrain-height correction
-    ngl::Vec3 cxyz = m_cam.getPos();
-    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
-    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-    cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
-    ngl::Vec3 cp = m_cam.getTargPos();
-    //Grab the y component of the current tile, use that as the target y for the camera.
-    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
-    //---
-
-    //Recalculate view matrix.
-    m_cam.updateSmoothCamera();
-    m_cam.calculateViewMat();
-    //---
-
-    for(Character &character : m_characters)
-    {
-        character.update();
-    }
-
-    //m_sunAngle.m_x = 150.0f;
-    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-    m_sunAngle.m_x += 0.01f;
-    if(m_sunAngle.m_x > 360.0f)
-    {
-        m_day++;
-        m_sunAngle.m_x = 0.0f;
-        //std::cout << "Day " << m_day << " Season " << m_season << '\n';
-    }
-    //std::cout << m_sunAngle.m_x << '\n';
-
-    m_season = (m_day % 365) / 365.0f;
-
-    ngl::Transformation t;
-    t.setRotation( m_sunAngle );
-    m_sunDir = t.getMatrix().getForwardVector();
-    m_sunDir.normalize();
-
-    //1 = Midday
-    //0 = Sunrise/sunset
-    //-1 = Midnight
-    float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
-    //Map to range 0.5PI to -0.5PI
-    a *= M_PI / 2.0;
-
-    float t_midday = 0.5f * sin(a) + 0.5f;
-    float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
-    float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
-
-    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
-            t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-            t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
-
-    m_directionalLightCol /= t_midday + t_midnight + t_sundown;
-
-    //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
-    m_pickBuffer.bind();
-    GLuint grid_texID = getTerrainPickTexture();
-    glBindTexture(GL_TEXTURE_2D, grid_texID);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-    int mouse_coords[2] = {0,0};
-    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
-    std::array<float, 4> grid_coord;
-
-    // x, window height - y
-    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
-
-    ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
-    m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
-
-    m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
-    m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
-  }
 }
 
 //I'm sorry this function is so long :(
@@ -449,8 +475,6 @@ void Scene::draw()
     auto boxes = generateOrthoShadowMatrices( cascadeDistances );
 
     //Render a pass from each AABB
-    slib->use("shadowDepth");
-
     size_t index = 0;
     for(size_t i = 0; i < boxes.first.size(); ++i)
     {
@@ -541,7 +565,7 @@ void Scene::draw()
 
     drawTerrain();
 
-    drawMeshes(boxes.first);
+    drawMeshes();
 
     m_mainBuffer.unbind();
 
@@ -713,7 +737,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    /*glBindVertexArray(m_screenQuad);
+    glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -761,7 +785,7 @@ void Scene::draw()
     }
 
     m_transform.setPosition(m_cam.getPivot());
-    drawAsset("debugSphere", "", "colour");*/
+    drawAsset("debugSphere", "", "colour");
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
@@ -813,28 +837,29 @@ void Scene::drawMeshes()
 
     slib->use("diffuse");
 
+    int offset = 0;
     for(size_t i = 0; i < m_meshPositions.size(); ++i)
-        for(auto &vec : m_meshPositions[i])
+    {
+        int instances = m_meshPositions[i].size();
+        switch( i )
         {
-            m_transform.setPosition(vec);
-            switch( i )
-            {
-            case static_cast<int>(TileType::TREES):
-                drawAsset( "tree", "tree_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::MOUNTAINS):
-                drawAsset( "mountain", "mountain_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "", "colour");
-                break;
-            default:
-                break;
-            }
+        case static_cast<int>(TileType::TREES):
+            drawInstances( "tree", "tree_d", "diffuse", instances, offset );
+            break;
+        case static_cast<int>(TileType::MOUNTAINS):
+            drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
+            break;
+        case static_cast<int>(TileType::STOREHOUSE):
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+            break;
+        case static_cast<int>(TileType::HOUSE):
+            drawInstances( "house", "", "colour", instances, offset);
+            break;
+        default:
+            break;
         }
+        offset += instances;
+    }
 
     for(auto &character : m_characters)
     {
@@ -1037,7 +1062,9 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
 
 void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 {
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
+
     ngl::Vec3 s = m_sunDir;
     //Flip if the sun is pointing up.
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) > 0.0f)
@@ -1065,58 +1092,45 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     ngl::Mat4 view = lightDir * lightPos;
 
-    /*ngl::Mat4 P = ngl::ortho(
-                _lightbox.first.m_x, _lightbox.second.m_x,
-                _lightbox.first.m_y, _lightbox.second.m_y,
-                _lightbox.first.m_z, _lightbox.second.m_z
-                );
-
-    ngl::Mat4 V = ngl::lookAt(
-                ngl::Vec3(0.0f, 0.0f, 0.0f),
-                s,
-                ngl::Vec3(0.0f, 1.0f, 0.0f)
-                );*/
-
     m_shadowMat[_index] = view * project;
     m_shadowBuffer.bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowBuffer.get( "depth[" + std::to_string(_index) + "]" ), 0);
     glClear( GL_DEPTH_BUFFER_BIT );
     //glCullFace(GL_FRONT);
 
+    slib->use("shadowDepth");
     glBindVertexArray(m_terrainVAO);
     //loadMatricesToShader();
     loadMatricesToShader(ngl::Mat4(), m_shadowMat[_index]);
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
     glBindVertexArray(0);
 
+    slib->use("shadowDepthInstanced");
+    int offset = 0;
     for(size_t i = 0; i < m_meshPositions.size(); ++i)
-        for(auto &vec : m_meshPositions[i])
+    {
+        int instances = m_meshPositions[i].size();
+        switch( i )
         {
-            //TO-DO fix
-            if(!Utility::pointInBox(_worldbox, vec))
-                continue;
-            m_transform.setPosition(vec);
-            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
-            loadMatricesToShader( m_transform.getMatrix(), mvp );
-            switch( i )
-            {
-            case static_cast<int>(TileType::TREES):
-                store->getModel( "tree" )->draw();
-                break;
-            case static_cast<int>(TileType::MOUNTAINS):
-                store->getModel( "mountain" )->draw();
-                break;
-            case static_cast<int>(TileType::STOREHOUSE):
-                store->getModel( "storehouse" )->draw();
-                break;
-            case static_cast<int>(TileType::HOUSE):
-                store->getModel( "house" )->draw();
-                break;
-            default:
-                break;
-            }
+        case static_cast<int>(TileType::TREES):
+            drawInstances( "tree", "tree_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            break;
+        case static_cast<int>(TileType::MOUNTAINS):
+            drawInstances( "mountain", "mountain_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            break;
+        case static_cast<int>(TileType::STOREHOUSE):
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            break;
+        case static_cast<int>(TileType::HOUSE):
+            drawInstances( "house", "", "colour", instances, offset, m_shadowMat[_index] );
+            break;
+        default:
+            break;
         }
+        offset += instances;
+    }
 
+    slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
         ngl::Vec3 pos = character.getPos();
@@ -1202,52 +1216,52 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::zoom(int _direction)
 {
-  if(!m_paused)
-  {
-    //pans camera up and down
-    if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
+    if(!m_paused)
     {
-      m_cam.rotate( -0.5f, 0.0f );
-      m_cam.dolly( -0.5f );
-    }
+        //pans camera up and down
+        if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
+        {
+            m_cam.rotate( -0.5f, 0.0f );
+            m_cam.dolly( -0.5f );
+        }
 
-    else if(_direction < 0 && m_cam.getTargetDolly() < 25)
-    {
-      m_cam.rotate( 0.5f, 0.0f );
-      m_cam.dolly( 0.5f );
+        else if(_direction < 0 && m_cam.getTargetDolly() < 25)
+        {
+            m_cam.rotate( 0.5f, 0.0f );
+            m_cam.dolly( 0.5f );
+        }
     }
-  }
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		Gui *gui = Gui::instance();
-		switch(_event.keysym.sym)
-		{
-		case SDLK_SPACE:
-			gui->executeAction(Action::CENTRECAMERA);
-			break;
-		case SDLK_ESCAPE:
-		case SDLK_p:
-			gui->executeAction(Action::PAUSE);
-			break;
-		default:
-			break;
-		}
-	}
+    if(!m_paused)
+    {
+        Gui *gui = Gui::instance();
+        switch(_event.keysym.sym)
+        {
+        case SDLK_SPACE:
+            gui->executeAction(Action::CENTRECAMERA);
+            break;
+        case SDLK_ESCAPE:
+        case SDLK_p:
+            gui->executeAction(Action::PAUSE);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		switch(_event.keysym.sym)
-		{
-		default:break;
-		}
-	}
+    if(!m_paused)
+    {
+        switch(_event.keysym.sym)
+        {
+        default:break;
+        }
+    }
 }
 
 void Scene::updateMousePos()
@@ -1418,7 +1432,7 @@ void Scene::loadMatricesToShader()
     slib->setRegisteredUniform( "MVP", MVP );
 }
 
-void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target)
+void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target, GLenum _type)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     GLint spid = slib->getProgramID( _shaderID );
@@ -1431,7 +1445,7 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
     glUniform1i(loc, _target);
 
     glActiveTexture(GL_TEXTURE0 + _target);
-    glBindTexture(GL_TEXTURE_2D, _tex);
+    glBindTexture(_type, _tex);
 }
 
 void Scene::drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader)
@@ -1463,6 +1477,80 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
 
     loadMatricesToShader();
     m->draw();
+}
+
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    AssetStore *store = AssetStore::instance();
+    if(_shader != "")
+    {
+        slib->use( _shader );
+    }
+
+    ngl::Obj * m = store->getModel(_model);
+    if(m == nullptr)
+    {
+        std::cerr << "Error! Mesh " << _model << " doesn't exist!\n";
+        return;
+    }
+
+    if(_texture != "")
+    {
+        GLuint t = store->getTexture( _texture );
+        if(t == 0)
+        {
+            std::cerr << "Error! Texture " << _texture << " doesn't exist!\n";
+            return;
+        }
+        bindTextureToShader(_shader, t, "diffuse", 0);
+    }
+
+    slib->setRegisteredUniform("VP", m_cam.getVP());
+    slib->setRegisteredUniform("offset", _offset);
+    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
+
+    m->bindVAO();
+    glDrawArraysInstanced(GL_TRIANGLES, 0, m->getMeshSize(), _instances);
+    m->unbindVAO();
+}
+
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const ngl::Mat4 &_VP)
+{
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    AssetStore *store = AssetStore::instance();
+    if(_shader != "")
+    {
+        slib->use( _shader );
+    }
+
+    ngl::Obj * m = store->getModel(_model);
+    if(m == nullptr)
+    {
+        std::cerr << "Error! Mesh " << _model << " doesn't exist!\n";
+        return;
+    }
+
+    if(_texture != "")
+    {
+        GLuint t = store->getTexture( _texture );
+        if(t == 0)
+        {
+            std::cerr << "Error! Texture " << _texture << " doesn't exist!\n";
+            return;
+        }
+        bindTextureToShader(_shader, t, "diffuse", 0);
+    }
+
+    slib->setRegisteredUniform("VP", _VP);
+    slib->setRegisteredUniform("offset", _offset);
+    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
+
+    m->bindVAO();
+    glDrawArraysInstanced(GL_TRIANGLES, 0, m->getMeshSize(), _instances);
+    m->unbindVAO();
 }
 
 void Scene::createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo, const std::string _tessctrl, const std::string _tesseval)
@@ -1883,21 +1971,21 @@ void Scene::centreCamera()
 
 Character *Scene::getActiveCharacter()
 {
-  return m_active_char;
+    return m_active_char;
 }
 
 void Scene::togglePause()
 {
-  Gui *gui = Gui::instance();
-  std::cout << "pause toggled" << std::endl;
-  if(m_paused)
-  {
-    m_paused = false;
-    gui->createSceneButtons();
-  }
-  else
-  {
-    m_paused = true;
-    gui->createPauseButtons();
-  }
+    Gui *gui = Gui::instance();
+    std::cout << "pause toggled" << std::endl;
+    if(m_paused)
+    {
+        m_paused = false;
+        gui->createSceneButtons();
+    }
+    else
+    {
+        m_paused = true;
+        gui->createPauseButtons();
+    }
 }

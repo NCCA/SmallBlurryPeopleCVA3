@@ -201,4 +201,6 @@ void main()
     fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
     fragColour.a = 1.0;
+
+    //fragColour = texture(diffuse, UV);
 }
