@@ -131,7 +131,7 @@ private :
   ///
   /// \brief m_vbo_ids VBOs for various button attributes
   ///
-  GLuint m_vbo_ids[3];
+  GLuint m_vbo_ids[4];
   ///
   /// \brief m_mouse_down whether mouse is pressed down or not
   ///

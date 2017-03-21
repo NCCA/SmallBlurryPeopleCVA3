@@ -34,7 +34,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
-    m_curFocalDepth(0.0f)
+    m_curFocalDepth(0.0f),
+    m_paused(false)
 {
     m_prefs = Preferences::instance();
     AssetStore *store = AssetStore::instance();

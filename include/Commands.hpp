@@ -9,14 +9,14 @@
 /// \brief The Action enum for what the buttons does
 ///
 enum class Action{
-  PASSIVE,
-  QUIT,
-  BUILDHOUSE,
-  BUILDSTORE,
-  CENTRECAMERA,
-  PAUSE,
-  ZOOMIN,
-  ZOOMOUT
+  PASSIVE,      //0
+  QUIT,         //1
+  BUILDHOUSE,   //2
+  BUILDSTORE,   //3
+  CENTRECAMERA, //4
+  PAUSE,        //5
+  ZOOMIN,       //6
+  ZOOMOUT       //7
 };
 
 ///

@@ -3,6 +3,7 @@
 layout( location = 0 ) in vec2 inPosition;
 layout( location = 1 ) in vec2 inSize;
 layout( location = 2 ) in int inId;
+layout( location = 3 ) in int inAction;
 
 uniform vec2 vResolution;
 uniform int mouseOver;
@@ -10,6 +11,7 @@ uniform int mouseOver;
 out vec2 buttonPos;
 out vec2 buttonSize;
 out float buttonMousedOver; // 1 for true, 0 for false
+flat out int buttonAction;
 
 void main()
 {
@@ -25,6 +27,8 @@ void main()
 
   buttonPos = screenPos;
   buttonSize = screenSize;
+
+  buttonAction = inAction;
 
   if(inId == mouseOver) buttonMousedOver = 1.0;
   else buttonMousedOver = 0.0;
