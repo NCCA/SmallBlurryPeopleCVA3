@@ -1,13 +1,17 @@
 #version 410 core
 
-const uint PASSIVE = 0;
-const uint QUIT = 1;
-const uint BUILDHOUSE  =2;
-const uint BUILDSTORE = 3;
+const uint PASSIVE      = 0;
+const uint QUIT         = 1;
+const uint BUILDHOUSE   = 2;
+const uint BUILDSTORE   = 3;
 const uint CENTRECAMERA = 4;
-const uint PAUSE = 5;
-const uint ZOOMIN = 6;
-const uint ZOOMOUT = 7;
+const uint PAUSE        = 5;
+const uint ZOOMIN       = 6;
+const uint ZOOMOUT      = 7;
+const uint MOVEUP       = 8;
+const uint MOVEDOWN     = 9;
+const uint MOVELEFT     = 10;
+const uint MOVERIGHT    = 11;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
@@ -137,10 +141,10 @@ float character(float ch, vec2 tp)
 {
   vec2 tmp = clamp(tp,0.,1.)/16.+fract(floor(vec2(ch,15.999-float(ch)/16.))/16.);
   vec4 f = texture2D(font,vec2(tmp.x, 1-tmp.y));
-  if (1.0 > 0.0)
-    return f.x;   // 2d
-  else
-    return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
+  //if (1.0 > 0.0)
+  return f.x;   // 2d
+  //else
+    //return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
 }
 
 vec3 textQ(vec2 pos)

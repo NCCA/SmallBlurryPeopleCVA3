@@ -16,7 +16,11 @@ enum class Action{
   CENTRECAMERA, //4
   PAUSE,        //5
   ZOOMIN,       //6
-  ZOOMOUT       //7
+  ZOOMOUT,      //7
+  MOVEUP,       //8
+  MOVEDOWN,     //9
+  MOVELEFT,     //10
+  MOVERIGHT     //11
 };
 
 ///

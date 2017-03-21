@@ -218,7 +218,6 @@ void Gui::drawButtons()
   slib->use(m_shader_name);
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
-
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
@@ -229,7 +228,6 @@ void Gui::drawButtons()
   }
   glBindVertexArray(m_vao_id);
   glDrawArrays(GL_POINTS, 0, m_buttons.size());
-
 }
 
 void Gui::mouseDown()
@@ -250,9 +248,9 @@ void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _targ
 
     if(loc == -1)
     {
-        std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
-        std::cerr << "shader name: " << m_shader_name << std::endl;
-        std::cerr << "program id" << id << std::endl;
+        //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
+        //std::cerr << "shader name: " << m_shader_name << std::endl;
+        //std::cerr << "program id" << id << std::endl;
         // don't exit, because texture is optimised out when shader is compiled
         //exit(EXIT_FAILURE);
     }

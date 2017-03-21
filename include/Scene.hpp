@@ -243,6 +243,9 @@ private:
     GLuint m_debugVBO;
     std::vector<ngl::Vec4> m_debugPoints;
 
+    ///
+    /// \brief m_paused whether or not the game is paused. if it is, update will not move scene forward
+    ///
     bool m_paused;
 };
 
