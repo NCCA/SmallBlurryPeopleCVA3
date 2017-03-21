@@ -34,9 +34,10 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
-    m_curFocalDepth(0.0f)
+    m_curFocalDepth(0.0f),
+    m_paused(false)
 {
-    m_prefs = Preferences::instance();
+    m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
     m_viewport = _viewport;
 
@@ -76,7 +77,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("bokeh");
@@ -484,7 +485,7 @@ void Scene::draw()
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
 
-    glViewport(0, 0, m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
+    glViewport(0, 0, m_prefs->getIntPref("SHADOW_MAP_RES"), m_prefs->getIntPref("SHADOW_MAP_RES"));
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
@@ -654,7 +655,7 @@ void Scene::draw()
     m_displacementBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glViewport(0, 0, m_prefs->getWaterMapRes(), m_prefs->getWaterMapRes());
+    glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
 
     glBindVertexArray(m_screenQuad);
 
@@ -1268,33 +1269,33 @@ void Scene::zoom(int _direction)
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		Gui *gui = Gui::instance();
-		switch(_event.keysym.sym)
-		{
-		case SDLK_SPACE:
-			gui->executeAction(Action::CENTRECAMERA);
-			break;
-		case SDLK_ESCAPE:
-		case SDLK_p:
-			gui->executeAction(Action::PAUSE);
-			break;
-		default:
-			break;
-		}
-	}
+  if(!m_paused)
+  {
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_SPACE:
+      gui->executeAction(Action::CENTRECAMERA);
+      break;
+    case SDLK_ESCAPE:
+    case SDLK_p:
+      gui->executeAction(Action::PAUSE);
+      break;
+    default:
+      break;
+    }
+  }
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		switch(_event.keysym.sym)
-		{
-		default:break;
-		}
-	}
+  if(!m_paused)
+  {
+    switch(_event.keysym.sym)
+    {
+    default:break;
+    }
+  }
 }
 
 void Scene::updateMousePos()
@@ -1339,7 +1340,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("bokeh");

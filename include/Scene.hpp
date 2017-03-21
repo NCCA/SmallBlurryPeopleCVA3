@@ -10,7 +10,7 @@
 #include "Camera.hpp"
 #include "Character.hpp"
 #include "Inventory.hpp"
-#include "Preferences.hpp"
+#include "Prefs.hpp"
 
 #include "Framebuffer.hpp"
 
@@ -105,7 +105,7 @@ private:
     ///
     bool m_active;
 
-    Preferences* m_prefs;
+    Prefs* m_prefs;
 
     Camera m_cam;
     ngl::Vec3 m_camCurPos;

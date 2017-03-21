@@ -22,7 +22,8 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Button.cpp \
          $$PWD/src/Utility.cpp \
          $$PWD/src/Commands.cpp \
-         $$PWD/src/Preferences.cpp
+         $$PWD/src/Prefs.cpp \
+         $$PWD/src/PrefsParser.cpp
 
 
 HEADERS+=$$PWD/include/Scene.hpp \
@@ -41,7 +42,8 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Button.hpp \
          $$PWD/include/Utility.hpp \
          $$PWD/include/Commands.hpp \
-         $$PWD/include/Preferences.hpp
+         $$PWD/include/Prefs.hpp \
+         $$PWD/include/PrefsParser.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
@@ -59,7 +61,8 @@ OTHER_FILES += README.md \
                $$PWD/python/*.py \
                $$PWD/python/noise/*.py \
                $$PWD/names/*.txt \
-               $$PWD/preferences.conf
+               $$PWD/preferences.conf \
+               $$PWD/preferences2.conf
 
 #This means I can build this on windows.
 win32 {
