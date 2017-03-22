@@ -19,6 +19,7 @@ void Prefs::restoreDefaultPrefs()
   m_str_prefs.clear();
 
   //setting new values
+  //setting int values
   m_int_prefs["AA"] = 1;
   m_int_prefs["DOP"] = 1;
   m_int_prefs["REFLECTIONS"] = 1;
@@ -28,9 +29,11 @@ void Prefs::restoreDefaultPrefs()
   m_int_prefs["X_RES"] = 1920;
   m_int_prefs["Y_RES"] = 1080;
 
+  //setting float values
   m_float_prefs["CHARACTER_SPEED"] = 0.1;
   m_float_prefs["TIME_SCALE"] = 0.01;
 
+  //setting string values
   m_str_prefs["MAP_SCRIPT_PATH"] = "python/simplexMap.py";
 }
 
@@ -70,10 +73,12 @@ void Prefs::printPrefs()
   {
     std::cout << i.first << ", " << i.second << std::endl;
   }
+
   for (auto i: m_float_prefs)
   {
     std::cout << i.first << ", " << i.second << std::endl;
   }
+
   for (auto i: m_str_prefs)
   {
     std::cout << i.first << ", " << i.second << std::endl;
@@ -83,15 +88,19 @@ void Prefs::printPrefs()
 void Prefs::savePrefs()
 {
   std::ofstream preferences;
-  preferences.open("preferences2.conf");
+  preferences.open("preferences.conf");
   for (auto i: m_int_prefs)
   {
     preferences << i.first << " = " << i.second << "\n";
   }
+
   for (auto i: m_float_prefs)
   {
+    // some funny stuff to ensure the written result has a decimal place because there were problems
+    // with writing the value 1.0 which would come out as 1 and read as an integer on the next parse
     preferences << i.first << " = " << std::fixed << std::setprecision(4) << float(i.second) << "\n";
   }
+
   for (auto i: m_str_prefs)
   {
     preferences << i.first << " = \"" << i.second << "\"\n";
@@ -99,17 +108,17 @@ void Prefs::savePrefs()
 }
 
 
-std::map<std::string, int> Prefs::getIntMap()
+const std::map<std::string, int>& Prefs::getIntMap()
 {
   return m_int_prefs;
 }
 
-std::map<std::string, float> Prefs::getFloatMap()
+const std::map<std::string, float>& Prefs::getFloatMap()
 {
   return m_float_prefs;
 }
 
-std::map<std::string, std::string> Prefs::getStrMap()
+const std::map<std::string, std::string>& Prefs::getStrMap()
 {
   return m_str_prefs;
 }
