@@ -61,8 +61,7 @@ OTHER_FILES += README.md \
                $$PWD/python/*.py \
                $$PWD/python/noise/*.py \
                $$PWD/names/*.txt \
-               $$PWD/preferences.conf \
-               $$PWD/preferences2.conf
+               $$PWD/preferences.conf
 
 #This means I can build this on windows.
 win32 {

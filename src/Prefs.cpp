@@ -97,3 +97,19 @@ void Prefs::savePrefs()
     preferences << i.first << " = \"" << i.second << "\"\n";
   }
 }
+
+
+std::map<std::string, int> Prefs::getIntMap()
+{
+  return m_int_prefs;
+}
+
+std::map<std::string, float> Prefs::getFloatMap()
+{
+  return m_float_prefs;
+}
+
+std::map<std::string, std::string> Prefs::getStrMap()
+{
+  return m_str_prefs;
+}
