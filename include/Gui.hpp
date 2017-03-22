@@ -56,6 +56,14 @@ public :
   ///
   void wipeButtons();
   ///
+  /// \brief pause create pause menu and set pause uniform
+  ///
+  void pause();
+  ///
+  /// \brief unpause leave pause menu and set pause uniform
+  ///
+  void unpause();
+  ///
   /// \brief createSceneButtons creates the set of default buttons for the scene
   ///
   void createSceneButtons();
@@ -131,7 +139,7 @@ private :
   ///
   /// \brief m_vbo_ids VBOs for various button attributes
   ///
-  GLuint m_vbo_ids[3];
+  GLuint m_vbo_ids[4];
   ///
   /// \brief m_mouse_down whether mouse is pressed down or not
   ///

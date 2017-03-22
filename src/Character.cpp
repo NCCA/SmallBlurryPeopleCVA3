@@ -2,7 +2,7 @@
 
 #include "Node.hpp"
 #include "NodeNetwork.hpp"
-#include "Preferences.hpp"
+#include "Prefs.hpp"
 
 #include "Utility.hpp"
 
@@ -20,23 +20,22 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	m_active(false),
 	m_grid(_grid),
 	m_world_inventory(_world_inventory),
-	m_speed(0.05),
+	m_speed(0),
 	m_wood_inventory(0),
 	m_fish_inventory(0),
 	m_called(0)
 {
+  Prefs* prefs = Prefs::instance();
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED");
+  //timer for actions
+  m_timer.start();
 
-	Preferences* p = Preferences::instance();
-	m_speed = p->getCharacterSpeed();
-	//timer for actions
-	m_timer.start();
+  //create random times for abilities
+  //wood chopping speed
+  m_chopping_speed = Utility::randInt(5, 10);
 
-	//create random times for abilities
-	//wood chopping speed
-	m_chopping_speed = Utility::randInt(5, 10);
-
-	//building houses speed
-	m_building_speed = Utility::randInt(10,15);
+  //building houses speed
+  m_building_speed = Utility::randInt(10,15);
 
 	//fishing speed = m_fishing_catch+3
 	//probability of catching a fish
@@ -67,14 +66,14 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 
 void Character::setState()
 {
-	m_state_stack.clear();
-	//reset speed
-	Preferences* p = Preferences::instance();
-	m_speed = p->getCharacterSpeed();
+  m_state_stack.clear();
+  //reset speed
+  Prefs* prefs = Prefs::instance();
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED");
 
-	m_called = 0;
+  m_called = 0;
 
-	GridTile target = m_grid->get(m_target_id);
+  GridTile target = m_grid->get(m_target_id);
 
   if (target.getType() == TileType::TREES)
 	{
@@ -174,7 +173,7 @@ void Character::update()
 				if(m_timer.elapsed() >= 1000 * m_chopping_speed)
 				{
 					m_wood_inventory += 1;
-					std::cout<<"GOT WOOD"<<std::endl;
+					std::cout<<m_name<<" got a piece of wood!"<<std::endl;
 
 					///change type from TREE to NONE
 					//when recieved piece of wood, remove the state from the stack
@@ -197,7 +196,7 @@ void Character::update()
 					m_wood_inventory -=1;
 					m_state_stack.pop_front();
 					m_timer.restart();
-					std::cout<<"WOOD DEPOSITED"<<std::endl;
+					std::cout<<m_name<<" deposited wood"<<std::endl;
 					std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
 					std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
 
@@ -218,7 +217,7 @@ void Character::update()
 					if(fish_rand % m_fishing_catch == 0)
 					{
 						m_fish_inventory += 1;
-						std::cout<<"GOT FISH :)"<<std::endl;
+						std::cout<<m_name<<" got a fish!"<<std::endl;
 						//when recieved fish, remove state from stack
 						m_state_stack.pop_front();
 						m_timer.restart();
@@ -229,7 +228,7 @@ void Character::update()
 					}
 					else
 					{
-						std::cout<<"FISH NOT CAUGHT"<<std::endl;
+						std::cout<<m_name<<" didnt catch a fish"<<std::endl;
 						m_state_stack.clear();
 					}
 				}
@@ -245,7 +244,7 @@ void Character::update()
 					m_state_stack.pop_front();
 					m_timer.restart();
 
-					std::cout<<"FISH DEPOSITED"<<std::endl;
+					std::cout<<m_name<<" deposited a fish"<<std::endl;
 					std::cout<<m_name<<"'s fish inventory: "<<m_fish_inventory<<std::endl;
 					std::cout<<"storage inventory: "<<m_world_inventory->getFishInventory()<<std::endl;
 
@@ -262,7 +261,7 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 1000)
 				{
-					std::cout<<"COLLECTED WOOD"<<std::endl;
+					std::cout<<m_name<<" colected wood"<<std::endl;
 					m_wood_inventory += 1;
 					m_world_inventory->takeWood(1);
 					m_state_stack.pop_front();
@@ -273,7 +272,7 @@ void Character::update()
 			}
 			else
 			{
-				std::cout<<"NOT ENOUGH WOOD"<<std::endl;
+				std::cout<<"There's not enough wood"<<std::endl;
 				m_state_stack.clear();
 			}
 			break;
@@ -283,7 +282,7 @@ void Character::update()
 		{
 			if(!findNearestStorage())
 			{
-				std::cout<<"NO NEARBY STORAGE"<<std::endl;
+				std::cout<<"There's no nearby storage house"<<std::endl;
 				m_state_stack.clear();
 			}
 			else
@@ -300,7 +299,7 @@ void Character::update()
 				{
 					m_wood_inventory -= 1;
 					///Change grid tile from NONE type to HOUSE type
-					std::cout<<"BUILT HOUSE"<<std::endl;
+					std::cout<<m_name<<"built a house"<<std::endl;
 					m_state_stack.pop_front();
 					m_timer.restart();
 				}
@@ -362,26 +361,26 @@ std::vector<ngl::Vec2> Character::findPath(int _target_id)
 
 ngl::Vec2 Character::calcAimVec(float *dist)
 {
-	ngl::Vec2 aim_vec(0,0);
-	if(m_path.size() > 0)
-	{
-	 aim_vec = m_path.back() - m_pos;
-	}
-	if(dist)
-	{
-		*dist = aim_vec.length();
-	}
-	if(aim_vec != ngl::Vec2(0,0))
-	{
-		aim_vec.normalize();
-	}
-	return aim_vec;
+  ngl::Vec2 aim_vec(0,0);
+  if(m_path.size() > 0)
+  {
+   aim_vec = m_path.back() - m_pos;
+  }
+  if(dist)
+  {
+    *dist = aim_vec.length();
+  }
+  if(aim_vec != ngl::Vec2(0,0))
+  {
+    aim_vec.normalize();
+  }
+  return aim_vec;
 }
 
 bool Character::setTarget(ngl::Vec2 _target_pos)
 {
-	// convert to tile id
-	return setTarget(m_grid->coordToId(_target_pos));
+  // convert to tile id
+  return setTarget(m_grid->coordToId(_target_pos));
 }
 
 bool Character::setTarget(int _tile_id)
@@ -401,7 +400,6 @@ bool Character::setTarget(int _tile_id)
 		else
 		{
 			return true;
-			m_state_stack.clear();
 		}
 	}
 	else

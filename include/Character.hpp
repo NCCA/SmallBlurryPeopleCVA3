@@ -53,6 +53,10 @@ public:
 	///
 	void setState();
 	///
+	/// \brief clearState, removes any actions in the state stack
+	///
+	void clearState() {m_state_stack.clear();}
+	///
 	/// \brief setIdleState, randomly moves character while not active
 	///
 	void setIdleState();

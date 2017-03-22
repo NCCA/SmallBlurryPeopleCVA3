@@ -27,7 +27,7 @@ int rings = 3; //ring count
 bool autofocus = false; //use autofocus in shader? disable if you use external focalDepth value
 vec2 focus = vec2(0.5,0.5); // autofocus point on screen (0.0,0.0 - left lower corner, 1.0,1.0 - upper right)
 float range = 4.0; //focal range
-float maxblur = 1.0; //clamp value of max blur
+float maxblur = 0.2; //clamp value of max blur
 
 float threshold = 0.4; //highlight threshold;
 float gain = 2.0; //highlight gain;

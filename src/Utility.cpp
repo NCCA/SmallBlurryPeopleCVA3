@@ -1,4 +1,5 @@
 #include <random>
+#include <SDL.h>
 
 #include "Utility.hpp"
 
@@ -84,6 +85,15 @@ bool boxIntersectBox(std::pair<ngl::Vec3, ngl::Vec3> _a, std::pair<ngl::Vec3, ng
              _b.first.m_z > _a.second.m_z or
              _b.second.m_z < _a.first.m_z
              );
+}
+
+ngl::Vec2 getMousePos()
+{
+    int x = 0;
+    int y = 0;
+    SDL_GetMouseState(&x, &y);
+
+    return ngl::Vec2(x, y);
 }
 
 }

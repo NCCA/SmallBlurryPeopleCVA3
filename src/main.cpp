@@ -9,8 +9,9 @@
 
 #include "Scene.hpp"
 #include "Grid.hpp"
-#include "Preferences.hpp"
 #include "Utility.hpp"
+#include "Prefs.hpp"
+#include "PrefsParser.hpp"
 
 int main()
 {
@@ -62,9 +63,14 @@ int main()
 
     ngl::NGLInit::instance();
 
-    Preferences* p = Preferences::instance();
-    p->init();
-    std::cout << "PREFERENCES: " << p->getCharacterSpeed() << std::endl;
+
+    Prefs* prefs = Prefs::instance();
+    prefs->init();
+    prefs->printPrefs();
+
+
+
+
     Scene scene (ngl::Vec2(rect.w, rect.h));
 
     while(scene.isActive())

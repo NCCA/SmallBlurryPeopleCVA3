@@ -26,26 +26,18 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
     m_centre_camera(false),
-    m_mouse_zoom_cur(2.0f),
-    m_mouse_zoom_targ(10.0f),
-    m_mouse_pan_targ(20.0f),
-    m_mouse_translation(0.0f,0.0f),
-    m_mouse_rotation_targ(0.0f),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
-    m_curFocalDepth(0.0f)
+    m_curFocalDepth(0.0f),
+    m_paused(false)
 {
-    m_prefs = Preferences::instance();
+    m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
     m_viewport = _viewport;
 
-    m_cam.setInitPivot( ngl::Vec3(0.0f, 0.0f, 0.0f));
-    m_cam.setInitPos( ngl::Vec3( 0.0f, 1.0f, m_mouse_zoom_cur));
-    m_cam.setUp (ngl::Vec3(0.0f,1.0f,0.0f));
     float aspect = _viewport.m_x / _viewport.m_y;
     m_cam.setAspect( aspect );
-    m_cam.setFOV( 60.0f );
     m_cam.calculateProjectionMat();
     m_cam.calculateViewMat();
 
@@ -76,7 +68,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("bokeh");
@@ -292,22 +284,19 @@ void Scene::update()
 {
   if(!m_paused)
   {
-    //If this is not zeroed first, the camera will keep sliding about after we release the lmb.
-    m_mouse_translation = ngl::Vec2(0,0);
-
     //translates
     if(m_mouse_trans_active)
     {
-        //Get mouse pos.
-        int mousePos[2] = {0, 0};
-        SDL_GetMouseState( &mousePos[0], &mousePos[1] );
-
         //Compute distance to mouse origin
-        ngl::Vec2 mouse_distance (mousePos[0], mousePos[1]);
+        ngl::Vec2 mouse_distance = Utility::getMousePos();
         mouse_distance -= m_mouse_trans_origin;
 
-        m_mouse_translation = mouse_distance;
-        m_mouse_trans_origin = ngl::Vec2( mousePos[0], mousePos[1] );
+        m_mouse_trans_origin = Utility::getMousePos();
+
+        //Move the camera based on mouse translation.
+        m_cam.moveRight( mouse_distance.m_x * 0.025f );
+        m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+        //---
     }
     //rotates
     else if(m_mouse_rot_active)
@@ -316,23 +305,11 @@ void Scene::update()
         int mouse_distance = 0;
         SDL_GetMouseState(&mouse_origin, nullptr);
         mouse_distance = mouse_origin - m_mouse_rot_origin;
-        m_mouse_rotation_targ += (float) 0.075f * mouse_distance;
         m_mouse_rot_origin = mouse_origin;
-    }
-
-		//Set initial position (should really make this function more intuitive).
-		m_cam.setInitPos(ngl::Vec3(0.0f, 0.0f, m_mouse_zoom_cur * 2.0f));
-
-		//Clear all transformations from previous update.
-		m_cam.clearTransforms();
-
-		m_mouse_zoom_cur += (m_mouse_zoom_targ - m_mouse_zoom_cur) / 16.0f;
-
-		m_mouse_pan_cur += (m_mouse_pan_targ - m_mouse_pan_cur) / 8.0f;
-		m_mouse_rotation_cur += (m_mouse_rotation_targ - m_mouse_rotation_cur) / 8.0f;
-		m_cam.rotateCamera(m_mouse_pan_cur, m_mouse_rotation_cur, 0.0f);
-
-	if(m_centre_camera == true)
+				m_cam.rotate(0.0f, mouse_distance * 0.125f);
+		}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+/*	if(m_centre_camera == true)
 	{
 		for (Character &character : m_characters)
 		{
@@ -347,26 +324,27 @@ void Scene::update()
 			}
 		}
 	}
-	else
-	{
-		//Construct translation *change* using right and forward vectors.
-		m_camTargPos += m_cam.right() * m_mouse_translation.m_x * 0.025f;
-		m_camTargPos += m_cam.forwards() * -m_mouse_translation.m_y * 0.025f;
-		//m_camTargPos -= m_cam.getPivot();
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+		if(m_centre_camera == true)
+        for (Character &character : m_characters)
+            if (character.isActive())
+                m_cam.setPos(-character.getPos());
 
-		ngl::Vec3 cxyz = m_cam.getPos();
-		int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
-		int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-		cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+    //Terrain-height correction
+    ngl::Vec3 cxyz = m_cam.getPos();
+    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+    cxyz.m_y = m_grid.get(x, y).getHeight() / m_terrainHeightDivider;
+    ngl::Vec3 cp = m_cam.getTargPos();
+    //Grab the y component of the current tile, use that as the target y for the camera.
+    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
+    //---
 
-		m_camTargPos.m_y = -cxyz.m_y - 0.5f;
-
-		//m_camTargPos = trans;
-		m_camCurPos += (m_camTargPos - m_camCurPos) / 8.0f;
-		m_cam.movePivot(m_camCurPos);
-	}
-
+    //Recalculate view matrix.
+    m_cam.updateSmoothCamera();
     m_cam.calculateViewMat();
+    //---
 
     for(Character &character : m_characters)
     {
@@ -481,7 +459,7 @@ void Scene::draw()
     if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
         s = -s;
 
-    glViewport(0, 0, m_prefs->getShadowMapRes(), m_prefs->getShadowMapRes());
+    glViewport(0, 0, m_prefs->getIntPref("SHADOW_MAP_RES"), m_prefs->getIntPref("SHADOW_MAP_RES"));
 
     //The intervals at which we will draw into shadow buffers.
     std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
@@ -651,7 +629,7 @@ void Scene::draw()
     m_displacementBuffer.activeColourAttachments();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glViewport(0, 0, m_prefs->getWaterMapRes(), m_prefs->getWaterMapRes());
+    glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
 
     glBindVertexArray(m_screenQuad);
 
@@ -744,7 +722,6 @@ void Scene::draw()
     //          BUTTONS          //
     //---------------------------//
 
-    glClear(GL_DEPTH_BUFFER_BIT);
     Gui::instance()->drawButtons();
 
     //---------------------------//
@@ -1211,13 +1188,14 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the left button has been released and turns off flag
     if (_event.button == SDL_BUTTON_LEFT)
     {
-
         //checks if the mouse has moved, a click or a drag
         ngl::Vec2 distance = m_mouse_trans_origin - m_mouse_prev_pos;
 
         //if its a click then the mouseSelection funciton is called
         if(distance.length() < 1)
             mouseSelection();
+
+        m_mouse_trans_origin = Utility::getMousePos();
 
         m_mouse_prev_pos.set(0.0f, 0.0f);
         m_mouse_trans_active = false;
@@ -1227,6 +1205,8 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
     //checks if the right button has been released and turns off flag
     else if (_event.button == SDL_BUTTON_RIGHT)
     {
+        m_mouse_rot_origin = Utility::getMousePos().m_x;
+
         m_mouse_rot_active = false;
     }
 }
@@ -1241,55 +1221,57 @@ void Scene::zoom(int _direction)
   if(!m_paused)
   {
     //pans camera up and down
-    if(_direction > 0 && m_mouse_zoom_targ > 1.0)
+    if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
     {
-      if (m_mouse_pan_targ > 2)
-      {
-          m_mouse_pan_targ -= 0.5;
-      }
-      m_mouse_zoom_targ -= 0.5;
+      m_cam.rotate( -0.5f, 0.0f );
+      m_cam.dolly( -0.5f );
     }
 
-    else if(_direction < 0 && m_mouse_zoom_targ < 25)
+    else if(_direction < 0 && m_cam.getTargetDolly() < 25)
     {
-      if(m_mouse_pan_targ < 30)
-      {
-          m_mouse_pan_targ += 0.5;
-      }
-      m_mouse_zoom_targ += 0.5;
+      m_cam.rotate( 0.5f, 0.0f );
+      m_cam.dolly( 0.5f );
     }
   }
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		Gui *gui = Gui::instance();
-		switch(_event.keysym.sym)
-		{
-		case SDLK_SPACE:
-			gui->executeAction(Action::CENTRECAMERA);
-			break;
-		case SDLK_ESCAPE:
-		case SDLK_p:
-			gui->executeAction(Action::PAUSE);
-			break;
-		default:
-			break;
-		}
-	}
+  if(!m_paused)
+  {
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_SPACE:
+      gui->executeAction(Action::CENTRECAMERA);
+      break;
+    case SDLK_ESCAPE:
+    case SDLK_p:
+      gui->executeAction(Action::PAUSE);
+      break;
+    case SDLK_UP:
+      break;
+    case SDLK_DOWN:
+      break;
+    case SDLK_LEFT:
+      break;
+    case SDLK_RIGHT:
+      break;
+    default:
+      break;
+    }
+  }
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
-	{
-		switch(_event.keysym.sym)
-		{
-		default:break;
-		}
-	}
+  if(!m_paused)
+  {
+    switch(_event.keysym.sym)
+    {
+    default:break;
+    }
+  }
 }
 
 void Scene::updateMousePos()
@@ -1334,7 +1316,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     glGetIntegerv( GL_MAX_TESS_GEN_LEVEL, &tlvl );
     slib->setRegisteredUniform("maxTessLevel", tlvl);
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
-    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getWaterMapRes());
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("bokeh");
@@ -1384,6 +1366,7 @@ void Scene::mouseSelection()
 									m_active_char = &character;
 									std::cout<<"ACTIVE: "<<m_active_char->getName()<<std::endl;
 									character.setActive(true);
+									character.clearState();
 								}
 							}
 						else
@@ -1942,11 +1925,11 @@ void Scene::togglePause()
   if(m_paused)
   {
     m_paused = false;
-    gui->createSceneButtons();
+    gui->unpause();
   }
   else
   {
     m_paused = true;
-    gui->createPauseButtons();
+    gui->pause();
   }
 }
