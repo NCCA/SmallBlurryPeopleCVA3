@@ -22,7 +22,7 @@ class PrefsParser
   ///
   /// \brief srule is a typedef local to the Parser that abbreviates access to the boost::spirit::classic library
   ///
-  typedef spt:rule<spt::phrase_scanner_t> srule;
+  typedef boost::spirit::classic::rule<spt::phrase_scanner_t> srule;
 
 public:
   ///
