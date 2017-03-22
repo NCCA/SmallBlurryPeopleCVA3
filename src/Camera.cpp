@@ -6,9 +6,33 @@
 #include "Camera.hpp"
 #include "Utility.hpp"
 
+Camera::Camera()
+{
+    m_movementSmoothness = 16.0f;
+    m_rotationSmoothness = 8.0f;
+    m_focalSmoothness = 4.0f;
+    m_dollySmoothness = 16.0f;
+
+    m_targPos = m_curPos = ngl::Vec3(0.0f, 0.0f, 0.0f);
+    m_targRot = m_curRot = ngl::Vec2(1.0f, 0.0f);
+    m_targFocalDepth = m_curFocalDepth = 0.0f;
+    m_targDolly = m_curDolly = 10.0f;
+
+    m_up = ngl::Vec3(0.0f, 1.0f, 0.0f);
+    m_fov = 60.0f;
+
+    m_maxPitch = 0.0f;
+    m_minPitch = -30.0f;
+}
 
 void Camera::calculateViewMat()
 {
+    setInitPos(ngl::Vec3(0.0f, 0.0f, m_curDolly));
+    clearTransforms();
+    movePivot(m_curPos);
+    rotateCamera(m_curRot.m_x, 0.0f, 0.0f);
+    rotateCamera(0.0f, m_curRot.m_y, 0.0f);
+
     m_cameraTransformation = ngl::Mat4();
     m_pivotTransformation = ngl::Mat4();
 
@@ -32,6 +56,16 @@ void Camera::calculateViewMat()
     m_pivot = ngl::Vec3(wti.m_30, wti.m_31, wti.m_32);
 
     m_VP = m_V * m_P;
+}
+
+void Camera::updateSmoothCamera()
+{
+    m_curPos += (m_targPos - m_curPos) / m_movementSmoothness;
+    m_curRot += (m_targRot - m_curRot) / m_rotationSmoothness;
+    m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / m_focalSmoothness;
+    m_curDolly += (m_targDolly - m_curDolly) / m_dollySmoothness;
+
+    //std::cout << "cur pos " << m_curPos << ", cur rot " << m_curRot << ", cur focal depth " << m_curFocalDepth << " cur dolly " << m_curDolly << '\n';
 }
 
 void Camera::calculateProjectionMat()
@@ -74,7 +108,7 @@ ngl::Mat4 Camera::rotationMatrix(float _pitch, float _yaw, float _roll)
     y.rotateY( _yaw );
     r.rotateZ( _roll );
 
-    ngl::Mat4 ret = y * p * r;
+    ngl::Mat4 ret = p * y * r;
     return ret;
 }
 
@@ -83,6 +117,39 @@ ngl::Mat4 Camera::translationMatrix(const ngl::Vec3 &_vec)
     ngl::Mat4 trans;
     trans.translate( _vec.m_x, _vec.m_y, _vec.m_z );
     return trans;
+}
+
+void Camera::moveRight(const float _d)
+{
+    m_targPos += right() * _d;
+}
+
+void Camera::moveForward(const float _d)
+{
+    ngl::Vec3 diff = forwards() * _d;
+    diff.m_y = 0.0f;
+    m_targPos += diff;
+}
+
+void Camera::move(const ngl::Vec3 _d)
+{
+    m_targPos += _d;
+}
+
+void Camera::rotate(const float _pitch, const float _yaw)
+{
+    m_targRot += ngl::Vec2(_pitch, _yaw);
+    //m_targRot.m_x = std::max( std::min( m_targRot.m_x, m_maxPitch ), m_minPitch );
+}
+
+void Camera::dolly(const float _d)
+{
+    m_targDolly += _d;
+}
+
+void Camera::setPos(const ngl::Vec3 _p)
+{
+    m_targPos = _p;
 }
 
 std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)

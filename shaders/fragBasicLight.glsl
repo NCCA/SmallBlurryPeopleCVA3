@@ -200,6 +200,5 @@ void main()
 #if shadowbuffer == 1
     fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
-
     fragColour.a = 1.0;
 }

@@ -34,8 +34,9 @@ void Gui::setResolution(ngl::Vec2 _res)
 void Gui::initGL()
 {
   glGenVertexArrays(1, &m_vao_id);
-  glGenBuffers(3, m_vbo_ids);
+  glGenBuffers(4, m_vbo_ids);
   AssetStore::instance()->loadTexture("icons", "buttons/icons.png");
+  AssetStore::instance()->loadTexture("font", "buttons/font.png");
 }
 
 void Gui::click()
@@ -124,6 +125,18 @@ void Gui::wipeButtons()
   Button::resetIdCounter();
 }
 
+void Gui::pause()
+{
+  ngl::ShaderLib::instance()->setRegisteredUniform("paused", true);
+  createPauseButtons();
+}
+
+void Gui::unpause()
+{
+  ngl::ShaderLib::instance()->setRegisteredUniform("paused", false);
+  createSceneButtons();
+}
+
 void Gui::createSceneButtons()
 {
   wipeButtons();
@@ -151,12 +164,14 @@ void Gui::updateButtonArrays()
   std::vector<ngl::Vec2> positions;
   std::vector<ngl::Vec2> sizes;
   std::vector<int> ids;
+  std::vector<Action> actions;
   for(Button &button : m_buttons)
   {
     button.updatePos(res);
     positions.push_back(button.getPos());
     sizes.push_back(button.getSize());
     ids.push_back(button.getID());
+    actions.push_back(button.getAction());
   }
   glBindVertexArray(m_vao_id);
 
@@ -181,6 +196,14 @@ void Gui::updateButtonArrays()
 
   glEnableVertexAttribArray(2);
 
+
+  glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[3]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * actions.size(), &(actions[0]), GL_DYNAMIC_DRAW);
+  // now fix this to the attribute buffer 2
+  glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glEnableVertexAttribArray(3);
+
   glBindVertexArray(0);
 }
 
@@ -189,9 +212,12 @@ void Gui::drawButtons()
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
   AssetStore *store = AssetStore::instance();
 
+  glClear(GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_DEPTH_TEST);
+
   slib->use(m_shader_name);
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
-
+  bindTextureToShader(store->getTexture("font"), "font", 1);
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
@@ -222,10 +248,11 @@ void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _targ
 
     if(loc == -1)
     {
-        std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
-        std::cerr << m_shader_name << std::endl;
-        std::cerr << id << std::endl;
-        exit(EXIT_FAILURE);
+        //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
+        //std::cerr << "shader name: " << m_shader_name << std::endl;
+        //std::cerr << "program id" << id << std::endl;
+        // don't exit, because texture is optimised out when shader is compiled
+        //exit(EXIT_FAILURE);
     }
     glUniform1i(loc, _target);
 
