@@ -84,8 +84,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //reads file with list of names
     readNameFile();
-    //creates a character with a random name
-    createCharacter();
+		//creates characters with random names
+		for (int i = 0; i<5; i++)
+		{
+			createCharacter();
+		}
 
     initialiseFramebuffers();
 
@@ -879,7 +882,7 @@ void Scene::drawMeshes()
 				pos.m_y /= m_terrainHeightDivider;
 				m_transform.setPosition(pos);
 				slib->use("colour");
-				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+				slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
 				drawAsset( "person", "", "colour");
     }
 }
@@ -925,7 +928,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 				pos.m_y /= m_terrainHeightDivider;
 				m_transform.setPosition(pos);
         slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f,1.0f));
+				slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
         drawAsset( "person", "", "colour");
     }
 }
@@ -1349,7 +1352,6 @@ void Scene::resize(const ngl::Vec2 &_dim)
 
 void Scene::mouseSelection()
 {
-    std::cout<<"CALLED MOUSE SELECTION\n"<<std::endl;
     Gui *gui = Gui::instance();
     int mouse_coords[2] = {0,0};
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
@@ -1380,6 +1382,7 @@ void Scene::mouseSelection()
 								if(character.isActive() == false)
 								{
 									m_active_char = &character;
+									std::cout<<"ACTIVE: "<<m_active_char->getName()<<std::endl;
 									character.setActive(true);
 								}
 							}
@@ -1412,13 +1415,14 @@ void Scene::mouseSelection()
 					grid_coord_y = Utility::clamp(grid_coord_y, 0, m_grid.getH());
 
 					int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
-
-					if(m_characters[0].isActive() == true)
+					for (Character &character : m_characters)
 					{
-						m_characters[0].setTarget(target_id);
-							m_characters[0].setState();
+						if(character.isActive() == true)
+						{
+							character.setTarget(target_id);
+							character.setState();
+						}
 					}
-
 				}
 				else
 				{
@@ -1426,7 +1430,6 @@ void Scene::mouseSelection()
 					std::cout<<"NO GRID CLICK D:"<<std::endl;
 				}
 			}
-
         glReadBuffer(GL_NONE);
         m_pickBuffer.unbind();
     }

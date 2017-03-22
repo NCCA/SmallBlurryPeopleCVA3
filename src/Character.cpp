@@ -17,7 +17,7 @@ int Character::m_id_counter(1);
 Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name):
 	m_id(m_id_counter++),
 	m_name(_name),
-	m_active(true),
+	m_active(false),
 	m_grid(_grid),
 	m_world_inventory(_world_inventory),
 	m_speed(0.05),
@@ -41,6 +41,12 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	//fishing speed = m_fishing_catch+3
 	//probability of catching a fish
 	m_fishing_catch = Utility::randInt(1,3);
+
+	float red = Utility::randFlt(0, 1);
+	float blue = Utility::randFlt(0,1);
+	float green = Utility::randFlt(0,1);
+
+	m_colour = ngl::Vec3(red, blue, green);
 
 	bool valid = false;
 	float x,y = 0;
@@ -260,7 +266,8 @@ void Character::update()
 					m_wood_inventory += 1;
 					m_world_inventory->takeWood(1);
 					m_state_stack.pop_front();
-					setTarget(m_final_target_id);
+					m_target_id = m_final_target_id;
+					m_path = findPath(m_target_id);
 					m_timer.restart();
 				}
 			}
@@ -309,7 +316,6 @@ void Character::update()
 				}
 				break;
 			}
-
 		}
 	}
 	else if (m_active == false)
@@ -393,7 +399,10 @@ bool Character::setTarget(int _tile_id)
 			return false;
 		}
 		else
+		{
 			return true;
+			m_state_stack.clear();
+		}
 	}
 	else
 	{
@@ -453,7 +462,6 @@ bool Character::findNearestEmptyTile()
     neighbours.push_back(down);
 
   return findNearest(neighbours);
-
 }
 
 void Character::findNearestFishingTile()
@@ -464,7 +472,6 @@ void Character::findNearestFishingTile()
 	std::set<int> water_tile_ids;
 
 	floodfill(selection, edge_tile_ids, water_tile_ids);
-	std::cout<<"finished flood fill"<<std::endl;
 
 	std::vector<ngl::Vec2> edge_vector;
 	for (auto edge: edge_tile_ids)
