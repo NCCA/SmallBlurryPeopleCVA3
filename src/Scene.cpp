@@ -319,7 +319,7 @@ void Scene::update()
     }
     else
     {
-      m_cam.move(getCamMoveVec());
+      m_cam.moveScreenSpace(getCamMoveVec());
     }
 
     //Terrain-height correction
@@ -1947,9 +1947,9 @@ ngl::Vec3 Scene::getCamMoveVec()
 {
   ngl::Vec3 move(0,0,0);
   if(m_movement_held[Direction::FORWARDS])
-    move.m_z += 1;
-  if(m_movement_held[Direction::BACKWARDS])
     move.m_z -= 1;
+  if(m_movement_held[Direction::BACKWARDS])
+    move.m_z += 1;
   if(m_movement_held[Direction::LEFT])
     move.m_x += 1;
   if(m_movement_held[Direction::RIGHT])
