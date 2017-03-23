@@ -74,7 +74,7 @@ void Camera::calculateProjectionMat()
                 m_fov,
                 m_aspect,
                 0.1f,
-                128.0f
+                512.0f
                 );
 }
 
