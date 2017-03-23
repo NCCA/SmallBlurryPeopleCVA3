@@ -7,6 +7,7 @@
 #include <QTime>
 #include <vector>
 #include <stack>
+#include <set>
 #include <SDL.h>
 
 /// \file Character.hpp
@@ -25,7 +26,7 @@ enum class State
 	SLEEP,
 	FORAGE,
 	MOVE,
-	WAIT
+	IDLE
 };
 
 /// \class Character
@@ -33,11 +34,15 @@ enum class State
 class Character
 {
 public:
+	///
 	/// \brief ctor, sets reference to grid and initialised values
 	/// \param [in] _grid, pointer to the grid to reference for pathfinding
+	///
   Character(Grid *_grid);
+	///
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
+	///
 	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
 	///
 	/// \brief default destructor
@@ -47,6 +52,10 @@ public:
 	/// \brief setState, creates state stack for the character to execute
 	///
 	void setState();
+	///
+	/// \brief clearState, removes any actions in the state stack
+	///
+	void clearState() {m_state_stack.clear();}
 	///
 	/// \brief setIdleState, randomly moves character while not active
 	///
@@ -87,13 +96,37 @@ public:
 	/// \return a boolean determining whether a storage house was found
 	///
 	bool findNearestStorage();
+	///
+	/// \brief findNearestEmptyTile, finds nearest neighbouring empty grid tile
+	/// \return a boolean determing whether a neighbouring empty tile was found
+	///
 	bool findNearestEmptyTile();
+
+	void findNearestFishingTile();
+	void floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+	//void distanceSort(int io_left, int io_right, std::vector<int> _edges);
+	//float findSortDist(std::vector<int> _vector, int index);
+	///
+	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
+	/// \param _coord_data, vector containing vec2's of coordinates to sort through
+	/// \return a boolean determining if the shortest distance has been found
+	///
 	bool findNearest(std::vector<ngl::Vec2> _coord_data);
 	///
 	/// \brief getID, get the unique character id
 	/// \return m_id, character's id
 	///
 	int getID() {return m_id;}
+	///
+	/// \brief getName, get character's name
+	/// \return m_name, character's name
+	///
+	std::string getName() {return m_name;}
+	///
+	/// \brief getColour, get character's colour
+	/// \return m_colour, character's colour
+	///
+	ngl::Vec3 getColour() {return m_colour;}
 	///
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position
@@ -128,6 +161,10 @@ private:
 	/// @brief m_name, current character's name
 	///
 	std::string m_name;
+	///
+	/// @brief m_colour, current character's shading colour
+	///
+	ngl::Vec3 m_colour;
 	///
 	/// @brief m_active, sets if the current character is selected
 	///
@@ -187,7 +224,13 @@ private:
 	/// \brief m_fishing_catch, likeyhood of catching a fish
 	///
 	int m_fishing_catch;
+	///
+	/// \brief allows for checking if this is the first time the character has been set idle between actions
+	///
 	int m_called;
+	///
+	/// \brief m_idle_target_id, grid id that the character moves around while idle
+	///
 	int m_idle_target_id;
 };
 

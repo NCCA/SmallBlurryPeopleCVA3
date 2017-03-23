@@ -48,7 +48,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)
 
-CONFIG += c++14
+CONFIG += c++11
 
 LIBS+=$$system(sdl2-config --libs)
 LIBS+= -lSDL2_image

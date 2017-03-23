@@ -51,6 +51,21 @@ float clamp(float _in, float _lo, float _hi)
 		return _in;
 }
 
+float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b)
+{
+	return ((_a.m_x -_b.m_x) * (_a.m_x -_b.m_x)) + ((_a.m_y - _b.m_y) * (_a.m_y - _b.m_y));
+}
+
+int findSetElement(std::set<int> _set, int index)
+{
+	auto iter = _set.begin();
+	std::advance(iter, index);
+	if (iter != _set.end())
+	{
+			return *iter;
+	}
+}
+
 bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt)
 {
     return _pt.m_x > _box.first.m_x and

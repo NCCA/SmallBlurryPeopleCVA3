@@ -6,6 +6,7 @@
 #include <limits>
 #include <random>
 #include <vector>
+#include <set>
 
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
@@ -57,6 +58,10 @@ int randInt(const int _min, const int _max);
 float average(std::vector<float> _values);
 
 float clamp(float _in, float _lo, float _hi);
+
+float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b);
+
+int findSetElement(std::set<int> _set, int index);
 
 template<typename T>
 T average(std::vector<T> _values)

@@ -120,7 +120,6 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       }
     }
 
-
     /// CLOSE NODE
     // close current node
     m_nodes[lowest_f_node_id].close();

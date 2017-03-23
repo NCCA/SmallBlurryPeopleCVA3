@@ -6,7 +6,7 @@
 #include <Python.h>
 #include "ngl/Random.h"
 #include "Grid.hpp"
-#include "Preferences.hpp"
+#include "Prefs.hpp"
 
 /// @file Grid.cpp
 /// @brief source code for the Grid class
@@ -15,8 +15,8 @@ Grid::Grid():
   m_w(1),
   m_h(1)
 {
-  Preferences *p = Preferences::instance();
-  updateScript(p->getMapScriptPath());
+  Prefs* prefs = Prefs::instance();
+  updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
   //printTypes();
   //printTrees();
 }
@@ -226,7 +226,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-  return _coord.m_x + m_w * _coord.m_y;
+	return _coord.m_x + m_w * _coord.m_y;
 }
 
 void Grid::loadScript(std::string _script_path)
