@@ -71,6 +71,10 @@ public :
   /// \brief createPauseButtons create the set of buttons for the pause menu
   ///
   void createPauseButtons();
+  ///
+  /// \brief createPrefsButtons create the set of buttons for the preferences menu
+  ///
+  void createPrefsButtons();
 
 
 

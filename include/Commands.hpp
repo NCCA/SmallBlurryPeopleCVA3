@@ -15,7 +15,7 @@ enum class Action
   BUILDHOUSE,   //2
   BUILDSTORE,   //3
   CENTRECAMERA, //4
-  PAUSE,        //5
+  ESCAPE,        //5
   ZOOMIN,       //6
   ZOOMOUT,      //7
   MOVEFORWARD,  //8
@@ -25,7 +25,8 @@ enum class Action
   STOPFORWARD,  //12
   STOPBACKWARD, //13
   STOPLEFT,     //14
-  STOPRIGHT     //15
+  STOPRIGHT,    //15
+  PREFERENCES   //16
 };
 
 ///
@@ -125,17 +126,17 @@ private:
 };
 
 ///
-/// \brief The PauseCommand class sends command to scene to toggle pause
+/// \brief The EscapeCommand class sends command to scene to toggle pause or escape current state
 ///
-class PauseCommand : public Command
+class EscapeCommand : public Command
 {
 public:
   ///
-  /// \brief PauseCommand constructor for centre camera command
+  /// \brief PauseCommand constructor for pause command
   /// \param _scene scene to send instruction to
   ///
-  PauseCommand(Scene *_scene);
-  ~PauseCommand() = default;
+  EscapeCommand(Scene *_scene);
+  ~EscapeCommand() = default;
   ///
   /// \brief execute send command to scene to toggle pause
   ///
@@ -143,6 +144,28 @@ public:
 private:
   ///
   /// \brief m_scene the scene to toggle pause
+  ///
+  Scene *m_scene;
+};
+///
+/// \brief The PrefsCommand class tell scene to show/hide preferences
+///
+class PrefsCommand : public Command
+{
+public:
+  ///
+  /// \brief PrefsCommand constructor for preferences command
+  /// \param _scene scene to send instruction to
+  ///
+  PrefsCommand(Scene *_scene);
+  ~PrefsCommand() = default;
+  ///
+  /// \brief execute send command to scene to toggle preferences
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_scene the scene to toggle preferences
   ///
   Scene *m_scene;
 };

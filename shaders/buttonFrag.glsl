@@ -1,11 +1,11 @@
 #version 410 core
-
+// actions
 const uint PASSIVE      = 0;
 const uint QUIT         = 1;
 const uint BUILDHOUSE   = 2;
 const uint BUILDSTORE   = 3;
 const uint CENTRECAMERA = 4;
-const uint PAUSE        = 5;
+const uint ESCAPE       = 5;
 const uint ZOOMIN       = 6;
 const uint ZOOMOUT      = 7;
 const uint MOVEFORWARD  = 8;
@@ -16,6 +16,12 @@ const uint STOPFORWARD  = 12;
 const uint STOPBACKWARD = 13;
 const uint STOPLEFT     = 14;
 const uint STOPRIGHT    = 15;
+const uint PREFERENCES  = 16;
+
+//game states
+const uint STATE_MAIN  = 0;
+const uint STATE_PAUSE = 1;
+const uint STATE_PREFS = 2;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
@@ -28,7 +34,7 @@ vec3 getIcon(vec2 pixel_uv);
 layout(location = 0) out vec4 outColour;
 
 uniform vec2 fResolution;
-uniform bool paused;
+uniform int game_state;
 uniform sampler2D icons;
 uniform sampler2D font;
 
@@ -183,6 +189,7 @@ vec3 centerTextP()
   vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
   return textP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
 }
+
 vec3 textPP(vec2 pos)
 {
   vec2 tp0 = pos / FONT_SIZE;  // original position
@@ -198,6 +205,40 @@ vec3 centerTextPP()
   int str_len = 1;
   vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
   return textPP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
+}
+
+vec3 textPrefs(vec2 pos)
+{
+  vec2 tp0 = pos / FONT_SIZE;  // original position
+  vec2 tp  = tp0;  // dynamic text position
+
+  float c = 0.0;
+  _P _R _E _F _E _R _E _N _C _E _S
+  return vec3(max(c, 0.0));
+}
+
+vec3 centerTextPrefs()
+{
+  int str_len = 11;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  return textPrefs(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
+}
+
+vec3 textX(vec2 pos)
+{
+  vec2 tp0 = pos / FONT_SIZE;  // original position
+  vec2 tp  = tp0;  // dynamic text position
+
+  float c = 0.0;
+  _x
+  return vec3(max(c, 0.0));
+}
+
+vec3 centerTextX()
+{
+  int str_len = 1;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  return textX(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
 }
 
 // modified functions end
@@ -219,10 +260,8 @@ vec2 translate(vec2 p, vec2 t)
 vec3 getIcon(vec2 pixel_uv)
 {
   vec3 s = vec3(0,1,0);
-  if(!paused)
-  {
-    s = texture2D(icons, pixel_uv/vec2(1024.0)).xyz;
-  }
+
+  s = texture2D(icons, pixel_uv/vec2(1024.0)).xyz;
 
   return s;
 }
@@ -266,10 +305,15 @@ void main()
   {
     s += centerTextQ();
   }
-  else if(fragAction == PAUSE)
+  else if(fragAction == PREFERENCES)
   {
-    if(paused) s += centerTextPP();
-    else s += centerTextP();
+    s += centerTextPrefs();
+  }
+  else if(fragAction == ESCAPE)
+  {
+    if(game_state == STATE_PAUSE) s += centerTextPP();
+    else if(game_state == STATE_MAIN) s += centerTextP();
+    else s += centerTextX();
   }
   outColour = vec4(s, 1.0);
 }

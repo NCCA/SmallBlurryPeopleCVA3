@@ -68,8 +68,8 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::CENTRECAMERA:
     command.reset(new CentreCameraCommand(m_scene));
     break;
-  case Action::PAUSE:
-    command.reset(new PauseCommand(m_scene));
+  case Action::ESCAPE:
+    command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
     command.reset(new ZoomCommand(m_scene, 1));
@@ -100,6 +100,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     break;
   case Action::STOPRIGHT:
     command.reset(new MoveCommand(m_scene, Direction::RIGHT, true));
+    break;
+  case Action::PREFERENCES:
+    command.reset(new PrefsCommand(m_scene));
     break;
   }
   return command;
@@ -149,13 +152,11 @@ void Gui::wipeButtons()
 
 void Gui::pause()
 {
-  ngl::ShaderLib::instance()->setRegisteredUniform("paused", true);
   createPauseButtons();
 }
 
 void Gui::unpause()
 {
-  ngl::ShaderLib::instance()->setRegisteredUniform("paused", false);
   createSceneButtons();
 }
 
@@ -163,15 +164,23 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
 
-  addButton(Action::PAUSE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
   updateButtonArrays();
 }
 
 void Gui::createPauseButtons()
 {
   wipeButtons();
-  addButton(Action::PAUSE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -25), ngl::Vec2(120, 40));
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(120, 40));
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40));
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40));
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40));
+  updateButtonArrays();
+}
+
+void Gui::createPrefsButtons()
+{
+  wipeButtons();
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
   updateButtonArrays();
 }
 
@@ -238,6 +247,7 @@ void Gui::drawButtons()
   glDisable(GL_DEPTH_TEST);
 
   slib->use(m_shader_name);
+  ngl::ShaderLib::instance()->setRegisteredUniform("game_state", m_scene->getState());
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
   if(m_mouse_down)

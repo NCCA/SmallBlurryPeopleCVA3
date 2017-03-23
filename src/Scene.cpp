@@ -30,7 +30,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
     m_curFocalDepth(0.0f),
-    m_paused(false)
+    m_state(GameState::MAIN),
+    m_movement_held{false}
 {
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
@@ -282,7 +283,7 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  if(!m_paused)
+  if(m_state == GameState::MAIN)
   {
     //translates
     if(m_mouse_trans_active)
@@ -1232,7 +1233,7 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::zoom(int _direction)
 {
-  if(!m_paused)
+  if(m_state == GameState::MAIN)
   {
     //pans camera up and down
     if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
@@ -1251,58 +1252,52 @@ void Scene::zoom(int _direction)
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-	if(!m_paused)
+	Gui *gui = Gui::instance();
+	switch(_event.keysym.sym)
 	{
-		Gui *gui = Gui::instance();
-		switch(_event.keysym.sym)
-		{
-		case SDLK_SPACE:
-			gui->executeAction(Action::CENTRECAMERA);
-			break;
-		case SDLK_ESCAPE:
-		case SDLK_p:
-			gui->executeAction(Action::PAUSE);
-			break;
-		case SDLK_UP:
-			gui->executeAction(Action::MOVEFORWARD);
-			break;
-		case SDLK_DOWN:
-			gui->executeAction(Action::MOVEBACKWARD);
-			break;
-		case SDLK_LEFT:
-			gui->executeAction(Action::MOVELEFT);
-			break;
-		case SDLK_RIGHT:
-			gui->executeAction(Action::MOVERIGHT);
-			break;
-		default:
-			break;
-		}
+	case SDLK_SPACE:
+		gui->executeAction(Action::CENTRECAMERA);
+		break;
+	case SDLK_ESCAPE:
+	case SDLK_p:
+		gui->executeAction(Action::ESCAPE);
+		break;
+	case SDLK_UP:
+		gui->executeAction(Action::MOVEFORWARD);
+		break;
+	case SDLK_DOWN:
+		gui->executeAction(Action::MOVEBACKWARD);
+		break;
+	case SDLK_LEFT:
+		gui->executeAction(Action::MOVELEFT);
+		break;
+	case SDLK_RIGHT:
+		gui->executeAction(Action::MOVERIGHT);
+		break;
+	default:
+		break;
 	}
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
 	Gui *gui = Gui::instance();
-	if(!m_paused)
+	switch(_event.keysym.sym)
 	{
-		switch(_event.keysym.sym)
-		{
-		case SDLK_UP:
-			gui->executeAction(Action::STOPFORWARD);
-			break;
-		case SDLK_DOWN:
-			gui->executeAction(Action::STOPBACKWARD);
-			break;
-		case SDLK_LEFT:
-			gui->executeAction(Action::STOPLEFT);
-			break;
-		case SDLK_RIGHT:
-			gui->executeAction(Action::STOPRIGHT);
-			break;
+	case SDLK_UP:
+		gui->executeAction(Action::STOPFORWARD);
+		break;
+	case SDLK_DOWN:
+		gui->executeAction(Action::STOPBACKWARD);
+		break;
+	case SDLK_LEFT:
+		gui->executeAction(Action::STOPLEFT);
+		break;
+	case SDLK_RIGHT:
+		gui->executeAction(Action::STOPRIGHT);
+		break;
 
-		default:break;
-		}
+	default:break;
 	}
 }
 
@@ -1374,7 +1369,7 @@ void Scene::mouseSelection()
     {
         gui->click();
     }
-    else if(!m_paused)
+    else if(m_state == GameState::MAIN)
     {
 			m_pickBuffer.bind();
 
@@ -1954,14 +1949,14 @@ void Scene::togglePause()
 {
   Gui *gui = Gui::instance();
   std::cout << "pause toggled" << std::endl;
-  if(m_paused)
+  if(m_state != GameState::MAIN)
   {
-    m_paused = false;
+    m_state = GameState::MAIN;
     gui->unpause();
   }
   else
   {
-    m_paused = true;
+    m_state = GameState::PAUSE;
     gui->pause();
   }
 }
@@ -1989,4 +1984,32 @@ ngl::Vec3 Scene::getCamMoveVec()
     move.m_x -= 1;
   move *= 0.3;
   return move;
+}
+
+void Scene::prefsMode()
+{
+  m_state = GameState::PREFERENCES;
+  Gui::instance()->createPrefsButtons();
+}
+
+void Scene::escapeState()
+{
+  Gui *gui = Gui::instance();
+  switch (m_state) {
+  case GameState::MAIN:
+  case GameState::PAUSE:
+    togglePause();
+    break;
+  case GameState::PREFERENCES:
+    m_state = GameState::PAUSE;
+    gui->pause();
+    break;
+  default:
+    break;
+  }
+}
+
+GameState Scene::getState()
+{
+  return m_state;
 }

@@ -25,6 +25,16 @@ enum Direction
   LEFT,
   RIGHT
 };
+///
+/// \brief The GameState enum refers to what state the game is currently in:
+/// MAIN <--> PAUSE <--> PREFERENCES
+///
+enum GameState
+{
+  MAIN,
+  PAUSE,
+  PREFERENCES
+};
 
 typedef std::pair<ngl::Vec3, ngl::Vec3> bounds;
 
@@ -120,6 +130,19 @@ public:
     /// \param _d direction to move
     ///
     void stopMove(Direction _d);
+    ///
+    /// \brief prefsMode show/hide preferences
+    ///
+    void prefsMode();
+    ///
+    /// \brief escapeState leave current state
+    ///
+    void escapeState();
+    ///
+    /// \brief getState return the game state
+    /// \return m_state
+    ///
+    GameState getState();
 
 private:
     ///
@@ -272,9 +295,9 @@ private:
     std::vector<ngl::Vec4> m_debugPoints;
 
     ///
-    /// \brief m_paused whether or not the game is paused. if it is, update will not move scene forward
+    /// \brief m_state current game state, MAIN, PAUSE, PREFERENCES etc
     ///
-    bool m_paused;
+    GameState m_state;
 
     ///
     /// \brief m_movement_held which movement are currently held

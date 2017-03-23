@@ -55,13 +55,26 @@ void CentreCameraCommand::execute()
 // Pause Command
 //------------------------------------------------------------//
 
-PauseCommand::PauseCommand(Scene *_scene) :
+EscapeCommand::EscapeCommand(Scene *_scene) :
   m_scene(_scene)
 {}
 
-void PauseCommand::execute()
+void EscapeCommand::execute()
 {
-  m_scene->togglePause();
+  m_scene->escapeState();
+}
+
+//------------------------------------------------------------//
+// Prefs Command
+//------------------------------------------------------------//
+
+PrefsCommand::PrefsCommand(Scene *_scene) :
+  m_scene(_scene)
+{}
+
+void PrefsCommand::execute()
+{
+  m_scene->prefsMode();
 }
 
 //------------------------------------------------------------//
