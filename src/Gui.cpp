@@ -4,8 +4,9 @@
 #include "ngl/NGLStream.h"
 #include "AssetStore.hpp"
 
-constexpr char TEXT_PLAY[2] = "\5";
-constexpr char TEXT_PAUSE[2] = "\6";
+constexpr char TEXT_PLAY[2]   = {5, 0};
+constexpr char TEXT_PAUSE[2]  = {6, 0};
+constexpr char TEXT_SMILEY[2] = {29,0};
 
 Gui::Gui()
 {
@@ -172,6 +173,7 @@ void Gui::createSceneButtons()
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
+  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
   updateButtonArrays();
   updateText();
 }
