@@ -142,7 +142,7 @@ bool Gui::mousePos(ngl::Vec2 _pos)
       button_selected = true;
     }
   }
-  if(!button_selected || m_buttons[m_selected_button_id].isPassive())
+  if(!button_selected || m_buttons[m_selected_button_id].isPassive(m_scene->getActiveCharacter()))
   {
     m_selected_button_id = -1;
   }
@@ -169,7 +169,9 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
-  addButton(Action::PASSIVE_CHARACTER, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
+  addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
+  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
+  addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
   updateButtonArrays();
   updateText();
 }
@@ -188,6 +190,7 @@ void Gui::createPrefsButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
+
   updateButtonArrays();
   updateText();
 }

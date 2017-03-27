@@ -93,13 +93,18 @@ void Button::setText(const std::string &_text)
   m_text = _text;
 }
 
-bool Button::isPassive()
+bool Button::isPassive(bool character_selected)
 {
   switch(m_action)
   {
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
     return true;
+    break;
+  case Action::BUILDHOUSE:
+  case Action::BUILDSTORE:
+    if(!character_selected) return true;
+    else return false;
     break;
   default:
     return false;

@@ -79,9 +79,10 @@ public:
   void setText(const std::string &_text);
   ///
   /// \brief isPassive whether button is clickable
+  /// \param character_selected whether there is currently a selected character
   /// \return true if button has no action
   ///
-  bool isPassive();
+  bool isPassive(bool character_selected);
   ///
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
