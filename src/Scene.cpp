@@ -268,22 +268,6 @@ void Scene::initialiseFramebuffers()
         exit(EXIT_FAILURE);
     }
     m_postEffectsBuffer.unbind();
-
-    std::cout << "Initalising MSAA framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
-    m_AABuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-
-    GLuint tex;
-    glGenRenderbuffers( 1, &tex );
-    glBindRenderbuffer( GL_RENDERBUFFER, tex );
-    glRenderbufferStorageMultisample( GL_RENDERBUFFER, 4, GL_RGBA, m_viewport.m_x, m_viewport.m_y );
-
-    m_AABuffer.addRenderbufferMultisampled("aabuf", tex, GL_COLOR_ATTACHMENT0);
-    if(!m_AABuffer.checkComplete())
-    {
-        std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
-        exit(EXIT_FAILURE);
-    }
-    m_AABuffer.unbind();
 }
 
 void Scene::readNameFile()
@@ -504,12 +488,11 @@ void Scene::draw()
     //---------------------------//
     //         REFLECTIONS       //
     //---------------------------//
-    glCullFace(GL_FRONT);
-    m_transform.reset();
-
-    m_mainBuffer.bind();
-    m_mainBuffer.activeColourAttachments();
+    m_postEffectsBuffer.bind();
+    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    //glCullFace(GL_BACK);
 
     ngl::Mat4 camFlip;
     camFlip.scale(1.0f, -1.0f, 1.0f);
@@ -519,17 +502,13 @@ void Scene::draw()
     m_cam.transformPivot(camFlip);
     m_cam.calculateViewMat();
 
+    drawSky();
+
+    glEnable(GL_DEPTH_TEST);
+
     drawTerrain();
 
     drawMeshes();
-
-    m_postEffectsBuffer.bind();
-    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glCullFace(GL_BACK);
-
-    drawSky();
 
     //Flip camera right way up.
     m_cam.transformPivot(camFlip);
@@ -636,9 +615,6 @@ void Scene::draw()
     //---------------------------//
     slib->use("bokeh");
 
-    m_AABuffer.bind();
-    m_AABuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-
     id = slib->getProgramID("bokeh");
     m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
     m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
@@ -646,8 +622,6 @@ void Scene::draw()
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    m_AABuffer.unbind();
 
     //---------------------------//
     //       DISPLACEMENT       //
@@ -739,27 +713,12 @@ void Scene::draw()
     //---------------------------//
     slib->use("bokeh");
 
-    m_AABuffer.bind();
-    //Draw into MSAA target.
-    m_AABuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-
     id = slib->getProgramID("bokeh");
     m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
     m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    m_AABuffer.unbind();
-
-    //---------------------------//
-    //           MSAA            //
-    //---------------------------//
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);   // Make sure no FBO is set as the draw framebuffer
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_AABuffer.getID()); // Make sure your multisampled FBO is the read framebuffer
-    m_AABuffer.activeReadAttachment(GL_COLOR_ATTACHMENT0);
-    glDrawBuffer(GL_BACK);                       // Set the back buffer as the draw buffer
-    glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     //---------------------------//
     //          BUTTONS          //

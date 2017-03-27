@@ -159,8 +159,6 @@ private:
     Framebuffer m_displacementBuffer;
     /// @brief This buffer will store textures for post effects (DOF, reflections).
     Framebuffer m_postEffectsBuffer;
-    /// @brief Have to create a new framebuffer for MSAA. Seems dumb, but apparently all of the attachments need to be multisampled.
-    Framebuffer m_AABuffer;
 
     /// @brief opens game_names.txt and stores the names in the vector m_file_names
     void readNameFile();
