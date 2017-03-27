@@ -14,6 +14,7 @@ out vec2 pixelPos;
 out vec2 pixelSize;
 out float buttonMousedOver; // 1 for true, 0 for false
 flat out int buttonAction;
+flat out int buttonId;
 
 void main()
 {
@@ -33,6 +34,7 @@ void main()
   pixelSize = inSize;
 
   buttonAction = inAction;
+  buttonId = inId;
 
   if(inId == mouseOver) buttonMousedOver = 1.0;
   else buttonMousedOver = 0.0;

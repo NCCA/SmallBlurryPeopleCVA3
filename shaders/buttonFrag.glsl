@@ -1,4 +1,7 @@
 #version 410 core
+
+#define BUTTON_TEXT_LENGTH 256
+
 // actions
 const uint PASSIVE      = 0;
 const uint QUIT         = 1;
@@ -38,6 +41,8 @@ uniform int game_state;
 uniform sampler2D icons;
 uniform sampler2D font;
 
+uniform uint button_text[BUTTON_TEXT_LENGTH];
+
 in vec2 fragPos;
 in vec2 fragSize;
 in vec2 fragPixelPos;
@@ -45,6 +50,7 @@ in vec2 fragPixelSize;
 in vec2 fragUV;
 in float fragMousedOver;
 flat in int fragAction;
+flat in int fragId;
 
 const float border_size = 7;
 const vec3 border_color = vec3(1,1,0);
@@ -157,88 +163,63 @@ float character(float ch, vec2 tp)
     //return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
 }
 
-vec3 textQ(vec2 pos)
+vec3 text(vec2 pos, int start_index, int end_index)
 {
   vec2 tp0 = pos / FONT_SIZE;  // original position
   vec2 tp  = tp0;  // dynamic text position
 
   float c = 0.0;
-  _Q _U _I _T
+  //_Q _U _I _T
+  int button_id = 0;
+  for(int i=start_index; i<end_index; i++)
+  {
+    S(button_text[i]);
+  }
   return vec3(max(c, 0.0));
 }
 
-vec3 centerTextQ()
+vec3 centerText()
 {
-  int str_len = 4;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  return textQ(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
-}
-vec3 textP(vec2 pos)
-{
-  vec2 tp0 = pos / FONT_SIZE;  // original position
-  vec2 tp  = tp0;  // dynamic text position
 
-  float c = 0.0;
-  _pause
-  return vec3(max(c, 0.0));
-}
-
-vec3 centerTextP()
-{
-  int str_len = 1;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  return textP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
-}
-
-vec3 textPP(vec2 pos)
-{
-  vec2 tp0 = pos / FONT_SIZE;  // original position
-  vec2 tp  = tp0;  // dynamic text position
-
-  float c = 0.0;
-  _play
-  return vec3(max(c, 0.0));
-}
-
-vec3 centerTextPP()
-{
-  int str_len = 1;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  return textPP(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
-}
-
-vec3 textPrefs(vec2 pos)
-{
-  vec2 tp0 = pos / FONT_SIZE;  // original position
-  vec2 tp  = tp0;  // dynamic text position
-
-  float c = 0.0;
-  _P _R _E _F _E _R _E _N _C _E _S
-  return vec3(max(c, 0.0));
-}
-
-vec3 centerTextPrefs()
-{
-  int str_len = 11;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  return textPrefs(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
-}
-
-vec3 textX(vec2 pos)
-{
-  vec2 tp0 = pos / FONT_SIZE;  // original position
-  vec2 tp  = tp0;  // dynamic text position
-
-  float c = 0.0;
-  _x
-  return vec3(max(c, 0.0));
-}
-
-vec3 centerTextX()
-{
-  int str_len = 1;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  return textX(translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2))));
+  int start_index = 0;
+  int end_index = 0;
+  int str_len = 0;
+  int button_id = 0;
+  // find string start and end for this button
+  for(int i=0; i<BUTTON_TEXT_LENGTH; i++)
+  {
+    if(button_text[i] == 0)
+    {
+      if(button_id == fragId)
+      {
+        for(int j=i; j<BUTTON_TEXT_LENGTH; j++)
+        {
+          if(button_text[j] == 0)
+          {
+            end_index = j;
+            break;
+          }
+        }
+        break;
+      }
+      else
+      {
+        button_id++;
+        start_index = i+1;
+      }
+    }
+  }
+  str_len = end_index - start_index;
+  if(str_len > 0)
+  {
+    vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+    vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2)));
+    return text(text_pos, start_index, end_index);
+  }
+  else
+  {
+    return vec3(0,0,0);
+  }
 }
 
 // modified functions end
@@ -297,24 +278,8 @@ void main()
     s = mix(button_highlight, button_color, fragUV.y);
   }
 
-  //if(fragAction == PAUSE)
-  //{
-  //  s = vec3(0,1,1);
-  //}
-  if(fragAction == QUIT)
-  {
-    s += centerTextQ();
-  }
-  else if(fragAction == PREFERENCES)
-  {
-    s += centerTextPrefs();
-  }
-  else if(fragAction == ESCAPE)
-  {
-    if(game_state == STATE_PAUSE) s += centerTextPP();
-    else if(game_state == STATE_MAIN) s += centerTextP();
-    else s += centerTextX();
-  }
+  s += centerText();
+
   outColour = vec4(s, 1.0);
 }
 

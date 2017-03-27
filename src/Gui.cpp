@@ -3,6 +3,7 @@
 #include "ngl/Vec2.h"
 #include "ngl/NGLStream.h"
 #include "AssetStore.hpp"
+
 Gui::Gui()
 {
 
@@ -163,30 +164,32 @@ void Gui::unpause()
 void Gui::createSceneButtons()
 {
   wipeButtons();
-
-  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "\6");
   updateButtonArrays();
+  updateText();
 }
 
 void Gui::createPauseButtons()
 {
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40));
-  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40));
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40));
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40), "\5");
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
   updateButtonArrays();
+  updateText();
 }
 
 void Gui::createPrefsButtons()
 {
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40));
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
   updateButtonArrays();
+  updateText();
 }
 
-void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size)
+void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text)
 {
-  m_buttons.push_back(Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size));
+  m_buttons.push_back(Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size, _text));
 }
 
 void Gui::updateButtonArrays()
@@ -292,3 +295,29 @@ void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _targ
     glBindTexture(GL_TEXTURE_2D, _tex);
 }
 
+void Gui::updateText()
+{
+  std::vector<uint> button_text;
+  // for each button
+  for(Button &b : m_buttons)
+  {
+    // get its text
+    std::string text = b.getText();
+    // add it to the text vector as uints
+    for(char c : text)
+    {
+      button_text.push_back((uint)c);
+    }
+    // add a 0 value for break
+    button_text.push_back(0);
+  }
+  if(button_text.size() <= BUTTON_TEXT_LENGTH)
+  {
+    glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), button_text.size(), (uint *)&(button_text[0]));
+  }
+  else
+  {
+    std::cerr << "button text too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
+    glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), BUTTON_TEXT_LENGTH, (uint *)&(button_text[0]));
+  }
+}

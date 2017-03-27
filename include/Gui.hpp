@@ -9,6 +9,8 @@
 #include "Commands.hpp"
 #include "Scene.hpp"
 
+constexpr unsigned int BUTTON_TEXT_LENGTH = 256;
+
 ///
 /// \brief The Gui class contains button positions and managing their use
 ///
@@ -80,7 +82,7 @@ public :
 
 
 
-  void addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size);
+  void addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text);
 
   ///
   /// \brief updateButtonArrays updates positions and passes them to openGL, useful for changing buttons or resizing screen
@@ -105,7 +107,10 @@ public :
   /// \param _target which number texture unit to use
   ///
   void bindTextureToShader(const GLuint _tex, const char *_uniform, int _target);
-
+  ///
+  /// \brief updateText send m_button_text to shader
+  ///
+  void updateText();
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

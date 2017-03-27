@@ -36,7 +36,7 @@ public:
   /// \param _offset button offset from given alignments
   /// \param _size size of the button
   ///
-  Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size);
+  Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text);
   ///
   /// \brief updatePos update the button's position based on the offset and screen res
   /// \param screen_res resolution of the window
@@ -67,6 +67,11 @@ public:
   /// \return vec2 of x and y size
   ///
   ngl::Vec2 getSize();
+  ///
+  /// \brief getText get button text
+  /// \return text of button, or "\0"
+  ///
+  const std::string &getText();
   ///
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
@@ -104,6 +109,10 @@ private:
   /// \brief m_action action that button does upon activation
   ///
   Action m_action;
+  ///
+  /// \brief m_text button text displayed on button
+  ///
+  std::string m_text;
 };
 
 #endif//__BUTTON_HPP__

@@ -3,14 +3,15 @@
 
 int Button::m_id_counter(0);
 
-Button::Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size) :
+Button::Button(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text) :
   m_id(m_id_counter++),
   m_offset(_offset),
   m_pos(0,0),
   m_size(_size),
   m_x_align(_x_align),
   m_y_align(_y_align),
-  m_action(_action)
+  m_action(_action),
+  m_text(_text)
 {
   updatePos(_window_res);
 }
@@ -80,6 +81,11 @@ ngl::Vec2 Button::getPos()
 ngl::Vec2 Button::getSize()
 {
   return m_size;
+}
+
+const std::string &Button::getText()
+{
+  return m_text;
 }
 
 // static function

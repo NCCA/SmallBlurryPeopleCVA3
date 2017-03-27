@@ -8,6 +8,7 @@ in vec2 pixelPos[];
 in vec2 pixelSize[];
 in float buttonMousedOver[];
 flat in int buttonAction[];
+flat in int buttonId[];
 
 out vec2 fragPos;
 out vec2 fragSize;
@@ -16,6 +17,7 @@ out vec2 fragPixelSize;
 out vec2 fragUV;
 out float fragMousedOver;
 flat out int fragAction;
+flat out int fragId;
 
 void main()
 {
@@ -25,6 +27,7 @@ void main()
   fragPixelSize = pixelSize[0];
   fragMousedOver = buttonMousedOver[0];
   fragAction = buttonAction[0];
+  fragId = buttonId[0];
 
   fragUV = vec2(0.0, 0.0);
   gl_Position = gl_in[0].gl_Position + vec4(0.0, 0.0, 0.0, 0.0);
