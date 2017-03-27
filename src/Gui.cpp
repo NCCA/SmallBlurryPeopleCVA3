@@ -58,6 +58,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   switch (_action)
   {
   case Action::PASSIVE:
+  case Action::PASSIVE_CHARACTER:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -141,7 +142,7 @@ bool Gui::mousePos(ngl::Vec2 _pos)
       button_selected = true;
     }
   }
-  if(!button_selected || m_buttons[m_selected_button_id].getAction() == Action::PASSIVE)
+  if(!button_selected || m_buttons[m_selected_button_id].isPassive())
   {
     m_selected_button_id = -1;
   }
@@ -168,6 +169,7 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
+  addButton(Action::PASSIVE_CHARACTER, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
   updateButtonArrays();
   updateText();
 }
@@ -314,13 +316,34 @@ void Gui::updateText()
     // add a 0 value for break
     button_text.push_back(0);
   }
-  if(button_text.size() <= BUTTON_TEXT_LENGTH)
+  if(button_text.size() > BUTTON_TEXT_LENGTH)
   {
-    glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), button_text.size(), (uint *)&(button_text[0]));
+    std::cerr << "button text of size " << button_text.size() << " too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
   }
-  else
+  glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), std::min((uint)button_text.size(), BUTTON_TEXT_LENGTH), (uint *)&(button_text[0]));
+}
+
+void Gui::updateActiveCharacter()
+{
+  bool text_needs_updating = false;
+  std::string char_name = m_scene->getActiveCharacterName();
+  for(Button &b : m_buttons)
   {
-    std::cerr << "button text too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
-    glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), BUTTON_TEXT_LENGTH, (uint *)&(button_text[0]));
+    switch(b.getAction())
+    {
+    case Action::PASSIVE_CHARACTER:
+      if(b.getText() != char_name)
+      {
+        b.setText(char_name);
+        text_needs_updating = true;
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  if(text_needs_updating)
+  {
+    updateText();
   }
 }

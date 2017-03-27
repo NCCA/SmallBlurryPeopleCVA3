@@ -111,6 +111,10 @@ public :
   /// \brief updateText send m_button_text to shader
   ///
   void updateText();
+  ///
+  /// \brief updateActiveCharacter if active character changes, this function updates button text
+  ///
+  void updateActiveCharacter();
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

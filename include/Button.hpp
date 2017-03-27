@@ -73,6 +73,16 @@ public:
   ///
   const std::string &getText();
   ///
+  /// \brief setText change the text on a button
+  /// \param _text string to set the text to
+  ///
+  void setText(const std::string &_text);
+  ///
+  /// \brief isPassive whether button is clickable
+  /// \return true if button has no action
+  ///
+  bool isPassive();
+  ///
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();

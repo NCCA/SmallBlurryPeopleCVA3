@@ -117,6 +117,11 @@ public:
     ///
     Character *getActiveCharacter();
     ///
+    /// \brief getActiveCharacterName get the name of the active character
+    /// \return active character's name, or an empty string if no active character
+    ///
+    std::string getActiveCharacterName();
+    ///
     /// \brief togglePause switch between paused and unpaused mode
     ///
     void togglePause();
@@ -166,7 +171,10 @@ private:
     /// @brief Vector of character objects that have been created
     std::vector<Character> m_characters;
 
-    Character *m_active_char;
+    ///
+    /// \brief m_active_char_id id used to keep track of active character, more stable than using addresses
+    ///
+    int m_active_char_id;
 
     ngl::Transformation m_transform;
 

@@ -88,6 +88,25 @@ const std::string &Button::getText()
   return m_text;
 }
 
+void Button::setText(const std::string &_text)
+{
+  m_text = _text;
+}
+
+bool Button::isPassive()
+{
+  switch(m_action)
+  {
+  case Action::PASSIVE:
+  case Action::PASSIVE_CHARACTER:
+    return true;
+    break;
+  default:
+    return false;
+    break;
+  }
+}
+
 // static function
 void Button::resetIdCounter()
 {

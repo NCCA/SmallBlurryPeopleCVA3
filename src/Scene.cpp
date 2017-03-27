@@ -31,7 +31,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_day(80),
     m_curFocalDepth(0.0f),
     m_state(GameState::MAIN),
-    m_movement_held{false}
+    m_movement_held{false},
+    m_active_char_id(-1)
 {
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
@@ -1390,10 +1391,11 @@ void Scene::mouseSelection()
 								// probably needs changing because vector address is not guaranteed
 								if(character.isActive() == false)
 								{
-									m_active_char = &character;
-									std::cout<<"ACTIVE: "<<m_active_char->getName()<<std::endl;
+									m_active_char_id = character.getID();
+									std::cout<<"ACTIVE: "<<getActiveCharacter()->getName()<<std::endl;
 									character.setActive(true);
 									character.clearState();
+									gui->updateActiveCharacter();
 								}
 							}
 						else
@@ -1942,7 +1944,28 @@ void Scene::centreCamera()
 
 Character *Scene::getActiveCharacter()
 {
-  return m_active_char;
+  if(m_active_char_id == -1)
+  {
+    return nullptr;
+  }
+  for(Character &c : m_characters)
+  {
+    if(c.getID() == m_active_char_id)
+    {
+      return &c;
+    }
+  }
+  return nullptr;
+}
+
+std::string Scene::getActiveCharacterName()
+{
+  std::string char_name("");
+  if(getActiveCharacter())
+  {
+    char_name = getActiveCharacter()->getName();
+  }
+  return char_name;
 }
 
 void Scene::togglePause()
