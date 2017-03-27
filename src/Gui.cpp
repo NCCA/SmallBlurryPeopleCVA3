@@ -4,6 +4,9 @@
 #include "ngl/NGLStream.h"
 #include "AssetStore.hpp"
 
+constexpr char TEXT_PLAY[2] = "\5";
+constexpr char TEXT_PAUSE[2] = "\6";
+
 Gui::Gui()
 {
 
@@ -164,7 +167,7 @@ void Gui::unpause()
 void Gui::createSceneButtons()
 {
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "\6");
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
   updateButtonArrays();
   updateText();
 }
@@ -172,7 +175,7 @@ void Gui::createSceneButtons()
 void Gui::createPauseButtons()
 {
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40), "\5");
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40), TEXT_PLAY);
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
   addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
   updateButtonArrays();
