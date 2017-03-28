@@ -33,37 +33,16 @@ public:
   /// @return a vector of ngl vector 3's where each 3 specify a triangle to be drawn
   std::vector<ngl::Vec3> getTriangles();
 
-  /// @brief returns the tile at the specified width and height coordinate.
-  /// @param [in] _x is the x coordinate of the requested tile
-  /// @param [in] _y is the y coordinate of the requested tile
-  /// @return returns the GridTile at the given coordinate
-  GridTile get(int _x, int _y);
+  TileType getTileType(int _x, int _y);
+  TileType getTileType(int _id);
+  int getTileHeight(int _x, int _y);
+  int getTileHeight(int _id);
+  float getInterpolatedHeight(float _x, float _y);
+  int getTileId(int _x, int _y);
+  bool isTileTraversable(int _x, int _y);
+  bool isTileTraversable(int _id);
+  int cutTileTrees(int _id, int _goal_amount);
 
-  /// @brief returns the tile at the specified coordinate.
-  /// @param [in] _coord is the coordinate as a ngl::Vec2
-  /// @return returns the Tile at the given coordinate
-  GridTile get(ngl::Vec2 _coord);
-
-  /// @brief returns the tile at the specified width and height coordinate.
-  /// @param [in] _id is the 1d coordinate of the tile
-  /// @return returns the Tile at the given coordinate
-  GridTile get(int _id);
-
-  /// @brief sets the tile at a given coordinate
-  /// @param [in] _x is the x coordinate of the tile to be set
-  /// @param [in] _y is the y coordinate of the tile to be set
-  /// @param [in] _t is the value to be set at the given coordiate
-  void set(int _x, int _y, GridTile _t);
-
-  /// @brief sets the tile at a given coordinate
-  /// @param [in] _coord is the coordinate as a ngl::Vec2
-  /// @param [in] _t is the value to be set at the given coordiate
-  void set(ngl::Vec2 _coord, GridTile _t);
-
-  /// @brief sets the value of a tile at a given coordinate
-  /// @param [in] _id is the 1d coord of the tile
-  /// @param [in] _t is the tile to be set at the given coordiate
-  void set(int _id, GridTile _t);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
@@ -84,10 +63,9 @@ public:
   /// @return int height of grid
   int getH();
 
-  int getMountainHeight();
-  int getWaterLevel();
+  int getGlobalMountainHeight();
+  int getGlobalWaterLevel();
 
-  float getInterpolatedHeight(float _x, float _y);
 
 private:
   /// @brief runs the given python script to generate a map

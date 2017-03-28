@@ -17,8 +17,6 @@ Grid::Grid():
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
-  //printTypes();
-  //printTrees();
 }
 
 void Grid::updateScript(std::string _script_path)
@@ -84,32 +82,6 @@ void Grid::runCurrentScript()
   Py_Finalize();
 }
 
-void Grid::printTrees()
-{
-  for(int y = 0; y < m_h; y++)
-  {
-    for(int x = 0; x < m_w; x++)
-    {
-      GridTile t = get(x, y);
-      std::cout << std::setfill('0') << std::setw(1) << t.getNumTrees() << " ";
-    }
-    std::cout << std::endl;
-  }
-}
-
-void Grid::printTypes()
-{
-  for(int y = 0; y < m_h; y++)
-  {
-    for(int x = 0; x < m_w; x++)
-    {
-      GridTile t = get(x, y);
-      std::cout << std::setfill('0') << std::setw(1) << (int)t.getType() << " ";
-    }
-    std::cout << std::endl;
-  }
-}
-
 std::vector<ngl::Vec3> Grid::getTriangles()
 {
   //initialize vector of points for triangles
@@ -133,90 +105,6 @@ std::vector<ngl::Vec3> Grid::getTriangles()
   return tris;
 }
 
-GridTile Grid::get(int _x, int _y)
-{
-  if (_x >= 0 &&
-      _y >= 0 &&
-      _x < m_w &&
-      _y < m_h)
-  {
-    return m_tiles[_x + _y * m_w];
-  }
-  else
-  {
-    return GridTile(-1);
-  }
-}
-
-GridTile Grid::get(ngl::Vec2 _coord)
-{
-  if (_coord.m_x >= 0 &&
-      _coord.m_y >= 0 &&
-      _coord.m_x < m_w &&
-      _coord.m_y < m_h)
-  {
-    return m_tiles[_coord.m_x + _coord.m_y * m_w];
-  }
-  else
-  {
-    return GridTile(-1);
-  }
-}
-
-GridTile Grid::get(int _id)
-{
-  if (_id >= 0 && _id < m_w * m_h)
-  {
-    return m_tiles[_id];
-  }
-  else
-  {
-    return GridTile(-1);
-  }
-}
-
-void Grid::set(int _x, int _y, GridTile _t)
-{
-  if (_x >= 0 &&
-      _y >= 0 &&
-      _x < m_w &&
-      _y < m_h)
-  {
-    m_tiles[_x + _y * m_w] = _t;
-  }
-  else
-  {
-    std::cerr << "ERROR: Attemtping to write tile out of range\n";
-  }
-}
-
-void Grid::set(ngl::Vec2 _coord, GridTile _t)
-{
-  if (_coord.m_x >= 0 &&
-      _coord.m_y >= 0 &&
-      _coord.m_x < m_w &&
-      _coord.m_y < m_h)
-  {
-    m_tiles[_coord.m_x + _coord.m_y * m_w] = _t;
-  }
-  else
-  {
-    std::cerr << "ERROR: Attemtping to write tile out of range\n";
-  }
-}
-
-void Grid::set(int _id, GridTile _t)
-{
-  if (_id >= 0 && _id < m_w * m_h)
-  {
-    m_tiles[_id] = _t;
-  }
-  else
-  {
-    std::cerr << "ERROR: Attemtping to write tile out of range\n";
-  }
-}
-
 ngl::Vec2 Grid::idToCoord(int _tileId)
 {
   int x = _tileId % m_w;
@@ -226,7 +114,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-	return _coord.m_x + m_w * _coord.m_y;
+  return _coord.m_x + m_w * _coord.m_y;
 }
 
 void Grid::loadScript(std::string _script_path)
@@ -255,12 +143,12 @@ int Grid::getH()
   return m_h;
 }
 
-int Grid::getMountainHeight()
+int Grid::getGlobalMountainHeight()
 {
   return m_mountain_height;
 }
 
-int Grid::getWaterLevel()
+int Grid::getGlobalWaterLevel()
 {
   return m_water_level;
 }
@@ -285,4 +173,44 @@ float Grid::getInterpolatedHeight(float _x, float _y)
 }
 
 
+TileType Grid::getTileType(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getType();
+}
 
+TileType Grid::getTileType(int _id)
+{
+  return m_tiles[_id].getType();
+}
+
+int Grid::getTileHeight(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getHeight();
+}
+
+int Grid::getTileHeight(int _id)
+{
+  return m_tiles[_id].getHeight();
+}
+
+int Grid::getTileId(int _x, int _y)
+{
+  return _x + m_w * _y;
+}
+
+bool Grid::isTileTraversable(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].isTraversable();
+}
+
+bool Grid::isTileTraversable(int _id)
+{
+  return m_tiles[_id].isTraversable();
+}
+
+int Grid::cutTileTrees(int _id, int _goal_amount)
+{
+  int out =  m_tiles[_id].cutTrees(_goal_amount);
+  std::cout << "trees: " << m_tiles[_id].getNumTrees() << std::endl;
+  return out;
+}

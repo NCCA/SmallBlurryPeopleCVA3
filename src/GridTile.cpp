@@ -1,4 +1,5 @@
 #include "GridTile.hpp"
+#include <iostream>
 
 GridTile::GridTile(int _id):
   m_id(_id)
@@ -49,6 +50,22 @@ void GridTile::setNumTrees(int _num_trees)
   m_trees = _num_trees;
 }
 
+int GridTile::cutTrees(int _goal_amount)
+{
+  int output = 0;
+  if (m_trees <= _goal_amount)
+  {
+    output = m_trees;
+    m_trees = 0;
+    m_type = TileType::NONE;
+  }
+  else
+  {
+    m_trees -= _goal_amount;
+    output = _goal_amount;
+  }
+  return output;
+}
 
 
 
