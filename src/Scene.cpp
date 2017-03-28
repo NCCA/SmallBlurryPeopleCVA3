@@ -788,18 +788,30 @@ void Scene::draw()
     m_pickBuffer.unbind();
 
     p.m_x = std::round(grid_coord[0]);
-    p.m_y = std::round(grid_coord[1]);
     p.m_z = std::round(grid_coord[2]);
+    p.m_y = m_grid.getTileHeight(p.m_x, p.m_z) / m_terrainHeightDivider - 1;
 
+    m_transform.reset();
     m_transform.setPosition(p);
+    m_transform.setScale(1.0f, 2.0f, 1.0f);
 
     m_postEffectsBuffer.bind();
     m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
 
     slib->use("mousebox");
-    slib->setRegisteredUniform("base", p);
-    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 0.0f));
+    slib->setRegisteredUniform("base", grid_coord[1]);
+    slib->setRegisteredUniform("m", 0.2f);
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
     drawAsset("debugBox", "", "mousebox");
+
+    AssetStore * a = AssetStore::instance();
+    ngl::Obj * k = a->getModel("debugBox");
+    k->bindVAO();
+    slib->setRegisteredUniform("m", 0.1f);
+    glLineWidth(5.0f);
+    glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
+    glLineWidth(1.0f);
+    glBindVertexArray(0);
 
     m_postEffectsBuffer.unbind();
 
