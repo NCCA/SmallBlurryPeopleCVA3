@@ -730,12 +730,10 @@ void Scene::draw()
     slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
     id = slib->getProgramID("water");
-std::cout << "p1\n";
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
     m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
     m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
     m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
-std::cout << "p2\n";
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
 
