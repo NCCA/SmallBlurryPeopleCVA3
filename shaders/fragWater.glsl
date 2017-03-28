@@ -182,6 +182,7 @@ void main()
     dmul += 1.0 / ((0.15 + waterDepth) * 8.0);
     fragColour = mix(fragColour, vec4(directionalLightCol.xyz * (sunInts + moonInts) * 0.75, 1.0), clamp(dmul, 0.0, 1.0));
 
-
     outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
+
+    //fragColour = texture(waterReflection, UV);
 }

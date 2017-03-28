@@ -15,6 +15,7 @@ in vec2 UV;
 
 void main()
 {
+    //outColour = vec4(1.0);
     outColour = texture(diffuse, vec2(UV.x, -UV.y));
     outColour.a = 1.0;
     outNormal = normal;
