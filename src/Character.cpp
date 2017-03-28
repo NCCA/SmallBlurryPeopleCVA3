@@ -21,11 +21,14 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_grid(_grid),
   m_world_inventory(_world_inventory),
   m_speed(0),
-	m_inventory(INVENTORY::NONE),
-  m_called(0)
+	m_inventory(CharInventory::NONE),
+	m_called(0),
+	m_building_amount(0),
+	m_building_type(TileType::NONE)
 {
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
+	m_building_amount = prefs->getFloatPref("CHARACTER_BUILDING");
   //timer for actions
   m_timer.start();
 
@@ -82,13 +85,12 @@ void Character::setState()
 
 void Character::buildState(TileType _building)
 {
-
 	//Start building the building type at current position
 	if(findNearestEmptyTile())
 	{
 		m_final_target_id = m_target_id;
-		int building_amount = 1;
-		for(int i =0; i<building_amount; i++)
+		m_building_type = _building;
+		for(int i =0; i<(int)m_building_amount; i++)
 		{
 			m_state_stack.push_back(State::COLLECT);
 			m_state_stack.push_back(State::MOVE);
@@ -217,7 +219,7 @@ void Character::update()
 					int wood_taken = m_grid->cutTileTrees(m_final_target_id, 1);
 					if (wood_taken == 1)
 					{
-						m_inventory = INVENTORY::WOOD;
+						m_inventory = CharInventory::WOOD;
 						std::cout<<m_name<<" got a piece of wood!"<<std::endl;
 
 						//when recieved piece of wood, remove the state from the stack
@@ -242,23 +244,23 @@ void Character::update()
       {
         if(m_timer.elapsed() >= 1000)
         {
-					if (m_inventory == INVENTORY::WOOD)
+					if (m_inventory == CharInventory::WOOD)
 					{
 						m_world_inventory->addWood(1);
 						std::cout<<m_name<<" deposited wood"<<std::endl;
 					}
-					else if (m_inventory == INVENTORY::FISH)
+					else if (m_inventory == CharInventory::FISH)
 					{
 						m_world_inventory->addFish(1);
 						std::cout<<m_name<<" deposited fish"<<std::endl;
 					}
-					else if (m_inventory == INVENTORY::BERRY)
+					else if (m_inventory == CharInventory::BERRY)
 					{
 						m_world_inventory->addBerries(1);
 						std::cout<<m_name<<" deposited berries"<<std::endl;
 					}
 
-					m_inventory = INVENTORY::NONE;
+					m_inventory = CharInventory::NONE;
           m_state_stack.pop_front();
           m_timer.restart();
 
@@ -282,7 +284,7 @@ void Character::update()
           int fish_rand = rand->randomPositiveNumber(10);
           if(fish_rand % m_fishing_catch == 0)
           {
-						m_inventory=INVENTORY::FISH;
+						m_inventory=CharInventory::FISH;
             std::cout<<m_name<<" got a fish!"<<std::endl;
             //when recieved fish, remove state from stack
             m_state_stack.pop_front();
@@ -308,7 +310,7 @@ void Character::update()
 		{
 			if(m_timer.elapsed() >= 1000)
 			{
-				m_inventory = INVENTORY::BERRY;
+				m_inventory = CharInventory::BERRY;
 				std::cout<<m_name<<" got berries"<<std::endl;
 
 				m_state_stack.pop_front();
@@ -327,7 +329,7 @@ void Character::update()
         if(m_timer.elapsed() >= 1000)
         {
           std::cout<<m_name<<" colected wood"<<std::endl;
-					m_inventory = INVENTORY::WOOD;
+					m_inventory = CharInventory::WOOD;
           m_world_inventory->takeWood(1);
           m_state_stack.pop_front();
           m_target_id = m_final_target_id;
@@ -362,7 +364,9 @@ void Character::update()
       {
         if(m_timer.elapsed() >= 1000 * m_building_speed)
         {
-					m_inventory = INVENTORY::NONE;
+					m_inventory = CharInventory::NONE;
+					float percentage = 1.0/m_building_amount;
+					m_grid->setBuildState(m_final_target_id, percentage, m_building_type);
           ///Change grid tile from NONE type to HOUSE type
           m_state_stack.pop_front();
           m_timer.restart();
@@ -374,8 +378,6 @@ void Character::update()
 		{
 			m_target_id = m_final_target_id;
 			findNearestEmptyTile();
-			std::cout<<"TARGET 2: " <<m_target_id<<std::endl;
-			std::cout<<"PATH SIZE: "<<m_path.size()<<std::endl;
 			m_state_stack.pop_front();
 			m_timer.restart();
 			break;

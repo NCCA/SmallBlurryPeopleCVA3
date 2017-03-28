@@ -106,7 +106,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadMesh("debugSphere", "sphere.obj");
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
-    store->loadMesh("house", "house/house.obj");
+		//store->loadMesh("house", "house/house.obj");
+		store->loadMesh("house", "house/stilt_house.obj" );
+		store->loadMesh("foundation_B", "house/mid_way_building.obj");
     store->loadMesh("person", "person/person.obj");
     store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
     store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
@@ -319,7 +321,7 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  if (m_grid.HasChanges())
+	if (m_grid.hasChanges())
   {
     initMeshInstances();
     m_grid.resetHasChanges();
@@ -891,9 +893,12 @@ void Scene::drawMeshes()
         case static_cast<int>(TileType::STOREHOUSE):
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "", "colour", instances, offset);
+				case static_cast<int>(TileType::HOUSE):
+						drawInstances( "house", "", "colour", instances, offset);
             break;
+				case static_cast<int>(TileType::FOUNDATION_B):
+						drawInstances("foundation_B", "", "colour", instances, offset);
+					break;
         default:
             break;
         }
@@ -938,9 +943,12 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
             case static_cast<int>(TileType::STOREHOUSE):
                 drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
-            case static_cast<int>(TileType::HOUSE):
+						case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "", "colour");
                 break;
+						case static_cast<int>(TileType::FOUNDATION_B):
+								drawAsset("foundation_B", "", "colour");
+								break;
             default:
                 break;
             }
@@ -1035,7 +1043,7 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
     for(auto &c : cascades)
     {
         //Loop through each vertex.
-        for(auto &vert : c)
+				for(auto &vert : c)
         {
             ngl::Vec4 vert4 (vert.m_x, vert.m_y, vert.m_z, 1.0f);
             vert4 = vert4 * lightView;
@@ -1072,8 +1080,8 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
         m_debugPoints.push_back(verts[2]);
         m_debugPoints.push_back(verts[3]);
         m_debugPoints.push_back(verts[3]);
-        m_debugPoints.push_back(verts[0]);
 
+        m_debugPoints.push_back(verts[0]);
         m_debugPoints.push_back(verts[4]);
         m_debugPoints.push_back(verts[5]);
         m_debugPoints.push_back(verts[5]);
@@ -1160,12 +1168,15 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         case static_cast<int>(TileType::STOREHOUSE):
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
-        case static_cast<int>(TileType::HOUSE):
+				case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "", "colour", instances, offset, m_shadowMat[_index] );
             break;
+				case static_cast<int>(TileType::FOUNDATION_B):
+						drawInstances("foundation_B", "", "colour", instances, offset, m_shadowMat[_index]);
+						break;
         default:
             break;
-        }
+				}
         offset += instances;
     }
 

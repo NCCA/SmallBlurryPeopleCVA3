@@ -70,7 +70,7 @@ public:
   int getGlobalMountainHeight();
   int getGlobalWaterLevel();
 
-  bool HasChanges();
+	bool hasChanges();
   void resetHasChanges();
 
 

@@ -29,7 +29,7 @@ enum class State
 	IDLE
 };
 
-enum class INVENTORY
+enum class CharInventory
 {
 	WOOD,
 	FISH,
@@ -218,7 +218,7 @@ private:
 	///
 	/// \brief m_inventory, character's current inventory
 	///
-	INVENTORY m_inventory;
+	CharInventory m_inventory;
 	///
 	/// \brief m_chopping_speed, how long it takes the character to chop wood
 	///
@@ -247,6 +247,9 @@ private:
 	/// \brief m_idle_target_id, grid id that the character moves around while idle
 	///
 	int m_idle_target_id;
+
+	float m_building_amount;
+	TileType m_building_type;
 };
 
 #endif//__CHARACTER_HPP__
