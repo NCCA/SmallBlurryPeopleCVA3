@@ -23,17 +23,17 @@ const int shadowResolution = 4096;
 const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
-  m_active(true),
-  m_curFocalDepth(0.0f),
-  m_active_char_id(-1),
-  m_mouse_trans_active(false),
-  m_mouse_rot_active(false),
-  m_centre_camera(false),
-  m_mouse_prev_pos(0.0f, 0.0f),
-  m_sunAngle(90.0f, 0.0f, 5.0f),
-  m_day(80),
-  m_state(GameState::MAIN),
-  m_movement_held{false}
+    m_active(true),
+    m_curFocalDepth(0.0f),
+    m_active_char_id(-1),
+    m_mouse_trans_active(false),
+    m_mouse_rot_active(false),
+    m_centre_camera(false),
+    m_mouse_prev_pos(0.0f, 0.0f),
+    m_sunAngle(90.0f, 0.0f, 5.0f),
+    m_day(80),
+    m_state(GameState::MAIN),
+    m_movement_held{false}
 {
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
@@ -59,6 +59,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
 
@@ -75,6 +76,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     std::cout << "Max water tesselation level set to " << tlvl << '\n';
     slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
     slib->setRegisteredUniform("viewport", m_viewport);
+
+    slib->use("waterDisplacementNormal");
+    slib->setRegisteredUniform("pixelstep", ngl::Vec2(1.0f, 1.0f) / m_prefs->getIntPref("WATER_MAP_RES"));
 
     slib->use("bokeh");
     slib->setRegisteredUniform("bgl_dim", m_viewport);
@@ -253,6 +257,7 @@ void Scene::initialiseFramebuffers()
     std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
     m_displacementBuffer.initialise(waterResolution, waterResolution);
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
+    m_displacementBuffer.addTexture("waterNormal", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT1);
     if(!m_displacementBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
@@ -676,8 +681,9 @@ void Scene::draw()
     //---------------------------//
     //       DISPLACEMENT       //
     //---------------------------//
+    //Base
     m_displacementBuffer.bind();
-    m_displacementBuffer.activeColourAttachments();
+    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
     glClear(GL_COLOR_BUFFER_BIT);
 
     glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
@@ -688,6 +694,8 @@ void Scene::draw()
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //Normals
 
     m_displacementBuffer.unbind();
 

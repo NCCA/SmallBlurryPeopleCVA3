@@ -168,13 +168,11 @@ void main()
     reflMul = clamp(reflMul, 0.0, 1.0);
     fragColour.xyz = mix(fragColour.xyz, reflColour, reflMul);
 
-
     ///Alpha///
     fragColour.a = reflMul;
     float d = distance(position_fs, texture(terrainPos, UV));
     fragColour.a += d / 2.0;
     fragColour.a = clamp(fragColour.a, 0.0, 1.0);
-
 
     ///Foam///
     float waterDepth = max(position_fs.y - texture(terrainPos, UV).y, 0.0);
