@@ -52,7 +52,7 @@ void CentreCameraCommand::execute()
 }
 
 //------------------------------------------------------------//
-// Pause Command
+// Escape Command
 //------------------------------------------------------------//
 
 EscapeCommand::EscapeCommand(Scene *_scene) :

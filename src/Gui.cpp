@@ -201,22 +201,25 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
     y_pos += 50;
   }
-  x_pos += 210;
+  x_pos += 320;
   y_pos = y0;
   for(auto &p : prefs->getFloatMap())
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
     y_pos += 50;
   }
-  x_pos += 210;
+  x_pos += 320;
   y_pos = y0;
   for(auto &p : prefs->getStrMap())
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
     y_pos += 50;
   }
 
