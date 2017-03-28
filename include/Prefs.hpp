@@ -86,7 +86,7 @@ public:
   /// \brief getIntMap retrieves the whole integer preference map
   /// \return the map containing all of the integer preference key-value pairs
   ///
-  const std::map<std::string, int>& getIntMap();
+  const std::map<std::string, int> &getIntMap();
 
   ///
   /// \brief getFloatMap retrieves the entire float preference map
@@ -110,6 +110,38 @@ public:
   ///
   void savePrefs();
 
+  ///
+  /// \brief getTypeOfPref find what type the preference is
+  /// \param _key name of preference
+  /// \return INT, FLOAT or STRING PrefType enum
+  ///
+  PrefType getTypeOfPref(const std::string &_key);
+
+  ///
+  /// \brief setPref generic template for setting preference
+  /// \param _key is the string key
+  /// \param _val is the value to be associated with the string key, either int, float or string
+  ///
+  void setPref(std::string &_key, int _val)
+  {
+    setIntPref(_key, _val);
+  }
+  void setPref(std::string &_key, float _val)
+  {
+    setFloatPref(_key, _val);
+  }
+  void setPref(std::string &_key, const std::string &_val)
+  {
+    setStrPref(_key, _val);
+  }
+
+  ///
+  /// \brief getPrefValueString get text for value of string
+  /// \param _key preferences key value
+  /// \return string representing value, eg "10" if value is 10
+  ///
+  std::string getPrefValueString(const std::string &_key);
+
 private:
   ///
   /// \brief The Prefs class is a singlton and therefor needs a private constructor
@@ -130,63 +162,6 @@ private:
   /// \brief m_str_prefs a std::map that maps string keys to string preferences
   ///
   std::map<std::string, std::string> m_str_prefs;
-
-  ///
-  /// \brief getTypeOfPref find what type the preference is
-  /// \param _key name of preference
-  /// \return INT, FLOAT or STRING PrefType enum
-  ///
-  PrefType getTypeOfPref(const std::string &_key);
-
-  ///
-  /// \brief setPref generic template for setting preference
-  /// \param _key is the string key
-  /// \param _val is the value to be associated with the string key
-  ///
-  template <typename T>
-  void setPref(std::string &_key, const T &_val)
-  {
-    PrefType type = getTypeOfPref(_key);
-    switch (type) {
-    case PrefType::INT:
-      setIntPref(_key, _val);
-      break;
-    case PrefType::FLOAT:
-      setFloatPref(_key, _val);
-      break;
-    case PrefType::STRING:
-      setStrPref(_key, _val);
-      break;
-    default:
-      std::cerr << "error in setPref, type not known" << std::endl;
-      break;
-    }
-  }
-
-  ///
-  /// \brief getPref get value associated with a key
-  /// \param _key string key
-  /// \return  value associated with given key
-  ///
-  template <typename T>
-  const T &getPref(std::string &_key)
-  {
-    PrefType type = getTypeOfPref(_key);
-    switch (type) {
-    case PrefType::INT:
-      return getIntPref(_key);
-      break;
-    case PrefType::FLOAT:
-      return getFloatPref(_key);
-      break;
-    case PrefType::STRING:
-      return getStrPref(_key);
-      break;
-    default:
-      std::cerr << "error in getPref, type not known" << std::endl;
-      break;
-    }
-  }
 };
 
 #endif//__PREFS_HPP__
