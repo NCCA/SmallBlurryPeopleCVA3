@@ -149,6 +149,8 @@ public:
     ///
     GameState getState();
 
+    void initMeshInstances();
+
 private:
     ///
     /// \brief m_active whether scene is still active (if user has not quit)

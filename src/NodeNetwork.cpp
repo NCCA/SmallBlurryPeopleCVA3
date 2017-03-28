@@ -44,7 +44,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     // if no nodes are open
     if(!open_nodes_available)
     {
-			break;
+      break;
     }
 
     ///FUNCTION END
@@ -175,7 +175,7 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
 {
   std::vector<ngl::Vec2> path;
   // create path with nodes
-	Node *current_node = &_end_node;
+  Node *current_node = &_end_node;
   while(true)
   {
     path.push_back(current_node->getPos());
@@ -185,8 +185,8 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
     }
     current_node = &(m_nodes[current_node->getParentID()]);
   }
-	//printPath(path);
-	return path;
+  //printPath(path);
+  return path;
 }
 
 void NodeNetwork::printPath(std::vector<ngl::Vec2> &_path)
@@ -210,7 +210,7 @@ void NodeNetwork::printPath(std::vector<ngl::Vec2> &_path)
       }
       else
       {
-        if(m_grid->get(x, y).isTraversable())
+        if(m_grid->isTileTraversable(x, y))
         {
           std::cout << "  ";
         }

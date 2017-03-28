@@ -13,6 +13,7 @@ void PrefsParser::parseFile(std::string _file_name)
       spt::parse(line.c_str(),
                  m_str_pref_rule |
                  m_real_pref_rule |
+                 m_bool_pref_rule |
                  m_int_pref_rule,
                  spt::space_p);
     }
@@ -65,4 +66,22 @@ void PrefsParser::parseStrPref(const char *_begin)
 
   //add the new key-value pair to the preferences
   m_prefs->setStrPref(key, val);
+}
+
+void PrefsParser::parseBoolPref(const char *_begin)
+{
+  //variables to hold the key and value extracted from the line
+  std::string key;
+  std::string val;
+  srule rule = m_name_rule[spt::assign_a(key)] >> "="  >> m_bool_rule[spt::assign_a(val)];
+  parse(_begin, rule, spt::space_p);
+
+  if (val == "True")
+  {
+    m_prefs->setBoolPref(key, true);
+  }
+  else if (val == "False")
+  {
+    m_prefs->setBoolPref(key, false);
+  }
 }

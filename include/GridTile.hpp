@@ -50,6 +50,8 @@ public:
   /// @brief sets the number of trees, maybe a decrement tree would be useful?
   void setNumTrees(int _num_trees);
 
+  int cutTrees(int _goal_amount);
+
 private:
   int m_id;
   TileType m_type = TileType::NONE;

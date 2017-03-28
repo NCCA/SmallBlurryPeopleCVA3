@@ -134,7 +134,7 @@ void main()
 
     int cascadeIndex = -1;
     //TO-DO: Have a better way to compute depth. Maybe write to another buffer.
-    float fragDepth = distance(camPos, texture(position, UV));
+    float fragDepth = texture(linearDepth, UV).r;// distance(camPos, texture(position, UV));
 
     if(fragDepth > cascades[0] && fragDepth < cascades[1])
     {
@@ -201,7 +201,8 @@ void main()
 #if shadowbuffer == 1
     fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
-    fragColour.a = 1.0;
 
-    //fragColour = texture(diffuse, UV);
+    //fragColour.xyz = vec3(fragDepth.r);
+
+    fragColour.a = 1.0;
 }

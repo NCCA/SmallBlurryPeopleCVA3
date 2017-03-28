@@ -17,13 +17,10 @@ void Prefs::restoreDefaultPrefs()
   m_int_prefs.clear();
   m_float_prefs.clear();
   m_str_prefs.clear();
+  m_bool_prefs.clear();
 
   //setting new values
   //setting int values
-  m_int_prefs["AA"] = 1;
-  m_int_prefs["DOP"] = 1;
-  m_int_prefs["REFLECTIONS"] = 1;
-  m_int_prefs["SHADOWS"] = 1;
   m_int_prefs["SHADOW_MAP_RES"] = 4096;
   m_int_prefs["WATER_MAP_RES"] = 1024;
   m_int_prefs["X_RES"] = 1920;
@@ -35,6 +32,12 @@ void Prefs::restoreDefaultPrefs()
 
   //setting string values
   m_str_prefs["MAP_SCRIPT_PATH"] = "python/simplexMap.py";
+
+  //setting bool values
+  m_bool_prefs["AA"] = true;
+  m_bool_prefs["DOP"] = true;
+  m_bool_prefs["REFLECTIONS"] = true;
+  m_bool_prefs["SHADOWS"] = true;
 }
 
 void Prefs::setIntPref(std::string _key, int _val)
@@ -52,6 +55,11 @@ void Prefs::setStrPref(std::string _key, std::string _val)
   m_str_prefs[_key] = _val;
 }
 
+void Prefs::setBoolPref(std::string _key, bool _val)
+{
+  m_bool_prefs[_key] = _val;
+}
+
 int Prefs::getIntPref(std::string _key)
 {
   return m_int_prefs[_key];
@@ -67,6 +75,11 @@ std::string Prefs::getStrPref(std::string _key)
   return m_str_prefs[_key];
 }
 
+bool Prefs::getBoolPref(std::string _key)
+{
+  return m_bool_prefs[_key];
+}
+
 void Prefs::printPrefs()
 {
   for (auto i: m_int_prefs)
@@ -80,6 +93,11 @@ void Prefs::printPrefs()
   }
 
   for (auto i: m_str_prefs)
+  {
+    std::cout << i.first << ", " << i.second << std::endl;
+  }
+
+  for (auto i: m_bool_prefs)
   {
     std::cout << i.first << ", " << i.second << std::endl;
   }
@@ -105,6 +123,11 @@ void Prefs::savePrefs()
   {
     preferences << i.first << " = \"" << i.second << "\"\n";
   }
+
+  for (auto i: m_bool_prefs)
+  {
+    preferences << i.first << " = " << (i.second? "True" : "False") << "\n";
+  }
 }
 
 
@@ -121,6 +144,11 @@ const std::map<std::string, float>& Prefs::getFloatMap()
 const std::map<std::string, std::string>& Prefs::getStrMap()
 {
   return m_str_prefs;
+}
+
+const std::map<std::string, bool>& Prefs::getBoolMap()
+{
+  return m_bool_prefs;
 }
 
 PrefType Prefs::getTypeOfPref(const std::string &_key)
@@ -147,6 +175,26 @@ PrefType Prefs::getTypeOfPref(const std::string &_key)
     }
   }
   return PrefType::ERROR;
+}
+
+void Prefs::setPref(std::string &_key, int _val)
+{
+  setIntPref(_key, _val);
+}
+
+void Prefs::setPref(std::string &_key, float _val)
+{
+  setFloatPref(_key, _val);
+}
+
+void Prefs::setPref(std::string &_key, bool _val)
+{
+  setBoolPref(_key, _val);
+}
+
+void Prefs::setPref(std::string &_key, const std::string &_val)
+{
+  setStrPref(_key, _val);
 }
 
 std::string Prefs::getPrefValueString(const std::string &_key)

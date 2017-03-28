@@ -215,7 +215,4 @@ void main()
     {
         fragColour.rgb = vec3(1.0, 0.0, 0.0);
     }*/
-
-    //fragColour.rgb = vec3(depth);
-    //fragColour.a = 1.0;
 }
