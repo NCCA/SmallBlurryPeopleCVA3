@@ -23,17 +23,17 @@ const int shadowResolution = 4096;
 const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
-    m_active(true),
-    m_mouse_trans_active(false),
-    m_mouse_rot_active(false),
-    m_centre_camera(false),
-    m_mouse_prev_pos(0.0f, 0.0f),
-    m_sunAngle(90.0f, 0.0f, 5.0f),
-    m_day(80),
-    m_curFocalDepth(0.0f),
-    m_state(GameState::MAIN),
-    m_movement_held{false},
-    m_active_char_id(-1)
+  m_active(true),
+  m_curFocalDepth(0.0f),
+  m_active_char_id(-1),
+  m_mouse_trans_active(false),
+  m_mouse_rot_active(false),
+  m_centre_camera(false),
+  m_mouse_prev_pos(0.0f, 0.0f),
+  m_sunAngle(90.0f, 0.0f, 5.0f),
+  m_day(80),
+  m_state(GameState::MAIN),
+  m_movement_held{false}
 {
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
@@ -473,6 +473,7 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     slib->use("terrainPick");
+
     ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
     slib->setRegisteredUniform("dimensions", grid_size);
 
@@ -990,7 +991,7 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
     //Get cascades from this.
     std::vector< std::array<ngl::Vec3, 8> > cascades;
 
-    for(int i = 0; i <= _divisions.size() - 2; ++i)
+    for(size_t i = 0; i <= _divisions.size() - 2; ++i)
     {
         //std::cout << "Calculating for " << _divisions[i] << " to " << _divisions[ i + 1 ] << '\n';
         cascades.push_back( m_cam.calculateCascade( _divisions[i], _divisions[i + 1] ) );
@@ -1338,7 +1339,6 @@ void Scene::updateMousePos()
 void Scene::windowEvent(const SDL_WindowEvent &_event)
 {
     ngl::Vec2 res;
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     switch (_event.event) {
     case SDL_WINDOWEVENT_SIZE_CHANGED:
         res = ngl::Vec2(_event.data1, _event.data2);

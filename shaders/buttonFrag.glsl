@@ -3,23 +3,24 @@
 #define BUTTON_TEXT_LENGTH 256
 
 // actions
-const uint PASSIVE      = 0;
-const uint QUIT         = 1;
-const uint BUILDHOUSE   = 2;
-const uint BUILDSTORE   = 3;
-const uint CENTRECAMERA = 4;
-const uint ESCAPE       = 5;
-const uint ZOOMIN       = 6;
-const uint ZOOMOUT      = 7;
-const uint MOVEFORWARD  = 8;
-const uint MOVEBACKWARD = 9;
-const uint MOVELEFT     = 10;
-const uint MOVERIGHT    = 11;
-const uint STOPFORWARD  = 12;
-const uint STOPBACKWARD = 13;
-const uint STOPLEFT     = 14;
-const uint STOPRIGHT    = 15;
-const uint PREFERENCES  = 16;
+const uint PASSIVE           = 0;
+const uint QUIT              = 1;
+const uint BUILDHOUSE        = 2;
+const uint BUILDSTORE        = 3;
+const uint CENTRECAMERA      = 4;
+const uint ESCAPE            = 5;
+const uint ZOOMIN            = 6;
+const uint ZOOMOUT           = 7;
+const uint MOVEFORWARD       = 8;
+const uint MOVEBACKWARD      = 9;
+const uint MOVELEFT          = 10;
+const uint MOVERIGHT         = 11;
+const uint STOPFORWARD       = 12;
+const uint STOPBACKWARD      = 13;
+const uint STOPLEFT          = 14;
+const uint STOPRIGHT         = 15;
+const uint PREFERENCES       = 16;
+const uint PASSIVE_CHARACTER = 17;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -78,7 +79,7 @@ const float FONT_SPACE = 0.5;
 #define _pause S(6);
 #define _note  S(10);
 #define _star  S(28);
-#define _smily S(29);
+#define _smiley S(29);
 #define __    S(32);
 #define _exc S(33);
 #define _add S(43);

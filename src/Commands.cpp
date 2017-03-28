@@ -108,3 +108,16 @@ void MoveCommand::execute()
   else
     m_scene->startMove(m_d);
 }
+
+//------------------------------------------------------------//
+// Set Prefs Command
+//------------------------------------------------------------//
+
+SetPrefsCommand::SetPrefsCommand(const std::string &_pref_name) :
+  m_pref_name(_pref_name)
+{}
+
+void SetPrefsCommand::execute()
+{
+  //Prefs::instance()->setIntPref(m_pref_name, m_val);
+}

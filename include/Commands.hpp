@@ -208,4 +208,14 @@ private:
   bool m_stop;
 };
 
+class SetPrefsCommand :public Command
+{
+public:
+  SetPrefsCommand(const std::string &_pref_name);
+  ~SetPrefsCommand() = default;
+  virtual void execute();
+private:
+  std::string m_pref_name;
+};
+
 #endif//__COMMANDS_HPP__
