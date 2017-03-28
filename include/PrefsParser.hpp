@@ -55,6 +55,13 @@ private:
   ///
   void parseStrPref(const char *_begin);
 
+  void parseBoolPref(const char *_begin);
+
+  srule m_true_rule = (spt::str_p("True"));
+
+  srule m_false_rule = (spt::str_p("False"));
+
+  srule m_bool_rule =  (m_true_rule | m_false_rule);
   ///
   /// \brief m_name_rule is a helper variable that defines the format of a preference name in EBNF
   ///
@@ -87,6 +94,9 @@ private:
   ///
   srule m_real_pref_rule = (m_name_rule >> "=" >> spt::strict_real_p)
                    [bind(&PrefsParser::parseFloatPref, boost::ref(*this), _1)];
+
+  srule m_bool_pref_rule = (m_name_rule >> "=" >> m_bool_rule)
+      [bind(&PrefsParser::parseBoolPref, boost::ref(*this), _1)];
 
   ///
   /// \brief m_prefs is an instance of the Prefs class that will store the result of the parsing
