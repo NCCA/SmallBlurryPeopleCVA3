@@ -199,7 +199,6 @@ void Prefs::setPref(std::string &_key, const std::string &_val)
   setStrPref(_key, _val);
 }
 
-
 void Prefs::setPref(std::string &_key, bool _val)
 {
   setBoolPref(_key, _val);

@@ -27,6 +27,9 @@ const uint STATE_MAIN  = 0;
 const uint STATE_PAUSE = 1;
 const uint STATE_PREFS = 2;
 
+// character exceptions
+const int TEXT_CROSS = 32;
+
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
 vec3 text(vec2 pos);
@@ -85,6 +88,7 @@ const float FONT_SPACE = 0.5;
 #define _add S(43);
 #define _comma S(44);
 #define _dot S(46);
+#define _cross S(215);
 
 #define _0 S(48);
 #define _1 S(49);
@@ -174,7 +178,14 @@ vec3 text(vec2 pos, int start_index, int end_index)
   int button_id = 0;
   for(int i=start_index; i<end_index; i++)
   {
-    S(button_text[i]);
+   if(button_text[i] == TEXT_CROSS)
+   {
+     _cross;
+   }
+   else
+   {
+     S(button_text[i]);
+   }
   }
   return vec3(max(c, 0.0));
 }

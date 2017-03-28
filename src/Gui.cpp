@@ -7,6 +7,7 @@
 constexpr char TEXT_PLAY[2]   = {5, 0};
 constexpr char TEXT_PAUSE[2]  = {6, 0};
 constexpr char TEXT_SMILEY[2] = {29,0};
+constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
 
 Gui::Gui()
 {
@@ -200,7 +201,7 @@ void Gui::createPrefsButtons()
   float x_pos = 10;
   std::string name = "";
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_CROSS);
   for(auto &p : prefs->getIntMap())
   {
     name = p.first;

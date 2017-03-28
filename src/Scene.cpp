@@ -324,43 +324,42 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-    if (m_grid.HasChanges())
+  if (m_grid.HasChanges())
+  {
+      initMeshInstances();
+      m_grid.resetHasChanges();
+  }
+  if(m_state == GameState::MAIN)
+  {
+    //translates
+    if(m_mouse_trans_active)
     {
-        initMeshInstances();
-        m_grid.resetHasChanges();
-    }
-    if(m_state == GameState::MAIN)
-    {
-        //translates
-        if(m_mouse_trans_active)
-        {
-            //Compute distance to mouse origin
-            ngl::Vec2 mouse_distance = Utility::getMousePos();
-            mouse_distance -= m_mouse_trans_origin;
+        //Compute distance to mouse origin
+        ngl::Vec2 mouse_distance = Utility::getMousePos();
+        mouse_distance -= m_mouse_trans_origin;
 
-            m_mouse_trans_origin = Utility::getMousePos();
+        m_mouse_trans_origin = Utility::getMousePos();
 
-            //Move the camera based on mouse translation.
-            m_cam.moveRight( mouse_distance.m_x * 0.025f );
-            m_cam.moveForward( -mouse_distance.m_y * 0.025f );
-            //---
-        }
-        //rotates
-        else if(m_mouse_rot_active)
-        {
-            int mouse_origin = 0;
-            int mouse_distance = 0;
-            SDL_GetMouseState(&mouse_origin, nullptr);
-            mouse_distance = mouse_origin - m_mouse_rot_origin;
-            m_mouse_rot_origin = mouse_origin;
-
-            //Rotate the camera based on mouse movement.
-            m_cam.rotate(0.0f, mouse_distance * 0.125f);
-            //---
-        }
-
+        //Move the camera based on mouse translation.
+        m_cam.moveRight( mouse_distance.m_x * 0.025f );
+        m_cam.moveForward( -mouse_distance.m_y * 0.025f );
         //---
     }
+    //rotates
+    else if(m_mouse_rot_active)
+    {
+        int mouse_origin = 0;
+        int mouse_distance = 0;
+        SDL_GetMouseState(&mouse_origin, nullptr);
+        mouse_distance = mouse_origin - m_mouse_rot_origin;
+        m_mouse_rot_origin = mouse_origin;
+
+        //Rotate the camera based on mouse movement.
+        m_cam.rotate(0.0f, mouse_distance * 0.125f);
+        //---
+    }
+
+    //---
 
     if(m_centre_camera == true)
     {
@@ -450,7 +449,7 @@ void Scene::update()
 
     m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
     m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
-
+  }
 }
 
 //I'm sorry this function is so long :(
@@ -893,7 +892,6 @@ void Scene::draw()
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
-
 }
 
 void Scene::drawSky()
