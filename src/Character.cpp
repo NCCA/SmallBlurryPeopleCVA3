@@ -607,9 +607,15 @@ void Character::build(BuildingType _building)
   std::cout << "building YAY" << std::endl;
 }
 
+void Character::forage()
+{
+  std::cout << "foraging YAY" << std::endl;
+}
+
 ngl::Vec3 Character::getPos()
 {
   //get grid height at character's position
   float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
+

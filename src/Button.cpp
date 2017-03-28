@@ -103,6 +103,7 @@ bool Button::isPassive(bool character_selected)
     break;
   case Action::BUILDHOUSE:
   case Action::BUILDSTORE:
+  case Action::FORAGE:
   case Action::CENTRECAMERA:
     if(!character_selected) return true;
     else return false;

@@ -116,6 +116,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new SetPrefsCommand<bool>(getCurrentButton()->getText(), !prefs->getBoolPref(getCurrentButton()->getText())));
     m_text_outdated = true;
     break;
+  case Action::FORAGE:
+    command.reset(new ForageCommand(m_scene->getActiveCharacter()));
+    break;
   }
   return command;
 }
@@ -177,6 +180,7 @@ void Gui::createSceneButtons()
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
+  addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "F");
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
   updateButtonArrays();

@@ -27,7 +27,8 @@ enum class Action
   STOPRIGHT,         //15
   PREFERENCES,       //16
   PASSIVE_CHARACTER, //17
-  SETBOOLPREF        //18
+  SETBOOLPREF,       //18
+  FORAGE
 };
 
 ///
@@ -271,5 +272,29 @@ void SetPrefsCommand<T>::execute()
 {
   Prefs::instance()->setPref(m_key, m_val);
 }
+
+///
+/// \brief The ForageCommand class used to tell character to start foraging
+///
+class ForageCommand : public Command
+{
+public:
+  ///
+  /// \brief ForageCommand constructor for forage command
+  /// \param _character character to instruct
+  ///
+  ForageCommand(Character *_character);
+  ~ForageCommand() = default;
+  ///
+  /// \brief execute tells character to forage
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_character character to instruct
+  ///
+  Character *m_character;
+};
+
 
 #endif//__COMMANDS_HPP__

@@ -114,3 +114,16 @@ void MoveCamCommand::execute()
 //------------------------------------------------------------//
 
 // setPrefsCommand is a template, so is defined in the header
+
+//------------------------------------------------------------//
+// Forage Command
+//------------------------------------------------------------//
+
+ForageCommand::ForageCommand(Character *_character) :
+  m_character(_character)
+{}
+
+void ForageCommand::execute()
+{
+  m_character->forage();
+}

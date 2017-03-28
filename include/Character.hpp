@@ -147,6 +147,10 @@ public:
 	/// \param _building type of building to build
 	///
 	void build(BuildingType _building);
+	///
+	/// \brief forage tell character to forage
+	///
+	void forage();
 
 private:
 	///

@@ -21,6 +21,7 @@ const uint STOPLEFT          = 14;
 const uint STOPRIGHT         = 15;
 const uint PREFERENCES       = 16;
 const uint PASSIVE_CHARACTER = 17;
+const uint FORAGE            = 18;
 
 //game states
 const uint STATE_MAIN  = 0;
