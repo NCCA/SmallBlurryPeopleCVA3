@@ -1283,16 +1283,61 @@ void Scene::updateMousePos()
     int mouse_coords[2] = {0,0};
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
     Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
+		
+		
+		slib->use("colour");
 
+		m_pickBuffer.bind();
+		//check character_id texture
+		GLuint char_texID = getCharPickTexture();
+		glBindTexture(GL_TEXTURE_2D, char_texID);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
 
+		int red = -1;
+		glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED_INTEGER, GL_INT, &red);
+		if(red < (m_characters.size() + 1) && red > 0)
+		{
+			for (Character &character : m_characters)
+				{
+					if (character.getID() == red)
+						{
+								slib->use("colour");
+								ngl::Vec3 pos = character.getPos();
+								pos.m_y /= m_terrainHeightDivider;
+								m_transform.setPosition(pos);
+								slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f,0.5f));
+								drawAsset( "person", "", "");
+							
+						}
+				}
+		}
+		else
+		{
+			//bind default texture
+			glBindTexture(GL_TEXTURE_2D, 0);
 
-		/*slib->use("colour");
-		ngl::Vec3 pos = character.getPos();
-		pos.m_y /= m_terrainHeightDivider;
-		m_transform.setPosition(pos);
-		slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f,0.5f));
-		drawAsset( "person", "", "");
-		*/
+			GLuint grid_texID = getTerrainPickTexture();
+			glBindTexture(GL_TEXTURE_2D, grid_texID);
+			glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+			std::array<float, 4> grid_coord;
+			glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+
+			if(grid_coord[0] != 0 && grid_coord[2] != 0)
+			{
+				int grid_coord_x = floor(grid_coord[0]);
+				grid_coord_x = Utility::clamp(grid_coord_x, 0, m_grid.getW());
+
+				int grid_coord_y = floor(grid_coord[2]);
+				grid_coord_y = Utility::clamp(grid_coord_y, 0, m_grid.getH());
+
+				int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
+				
+				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f,0.5f));
+				//draw tile
+			}
+		
+		
 }
 
 void Scene::windowEvent(const SDL_WindowEvent &_event)

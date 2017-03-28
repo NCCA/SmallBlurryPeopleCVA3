@@ -13,7 +13,6 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Inventory.cpp \
          $$PWD/src/Prop.cpp \
          $$PWD/src/Node.cpp \
-         $$PWD/src/imgui/*.cpp \
          $$PWD/src/GridTile.cpp \
          $$PWD/src/NodeNetwork.cpp \
          $$PWD/src/AssetStore.cpp \
@@ -33,7 +32,6 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Inventory.hpp \
          $$PWD/include/Prop.hpp \
          $$PWD/include/Node.hpp \
-         $$PWD/include/imgui/*.h \
          $$PWD/include/GridTile.hpp \
          $$PWD/include/NodeNetwork.hpp \
          $$PWD/include/AssetStore.hpp \

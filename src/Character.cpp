@@ -41,6 +41,8 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	//probability of catching a fish
 	m_fishing_catch = Utility::randInt(1,3);
 
+	m_forage_amount = m_fishing_catch * 3;
+
 	float red = Utility::randFlt(0, 1);
 	float blue = Utility::randFlt(0,1);
 	float green = Utility::randFlt(0,1);
@@ -55,8 +57,7 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 		x = Utility::randInt(0, m_grid->getW());
 		y = Utility::randInt(0, m_grid->getH());
 
-		int tile = m_grid->coordToId(ngl::Vec2(x,y));
-		GridTile target = m_grid->get(tile);
+		GridTile target = m_grid->get(x,y);
 		if (target.getType() == TileType::NONE)
 			valid = true;
 	}
@@ -75,7 +76,7 @@ void Character::setState()
 
   GridTile target = m_grid->get(m_target_id);
 
-  if (target.getType() == TileType::TREES)
+	if (target.getType() == TileType::TREES)
 	{
 		if(findNearestEmptyTile() == true)
 		{
@@ -88,6 +89,20 @@ void Character::setState()
 			std::cout<<"TREE"<<std::endl;
 		}
 	}
+	else if (target.getType() == TileType::TREES)//&& flag)
+	{
+		if(findNearestEmptyTile() == true)
+		{
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::FORAGE);
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::STORE_BERRIES);
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::IDLE);
+			std::cout<<"TREE"<<std::endl;
+		}
+	}
+
 	else if (target.getType() == TileType::WATER)
 	{
 		findNearestFishingTile();
@@ -99,8 +114,9 @@ void Character::setState()
 		m_state_stack.push_back(State::IDLE);
 		std::cout<<"WATER"<<std::endl;
 	}
+
 	//WILL NEED OPTION BETWEEN BUILDING AND MOVING
-	else if (target.getType() == TileType::STOREHOUSE)
+	else if (target.getType() == TileType::STOREHOUSE) // build flag needed
 	{
 		m_final_target_id = m_target_id;
 		m_state_stack.push_back(State::COLLECT);
@@ -192,10 +208,10 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 1000)
 				{
-					m_world_inventory->addWood(1);
-					m_wood_inventory -=1;
+					m_world_inventory->addWood(m_wood_inventory);
+					m_wood_inventory  = 0;
 					m_state_stack.pop_front();
-					m_timer.restart();
+
 					std::cout<<m_name<<" deposited wood"<<std::endl;
 					std::cout<<m_name<<"'s wood inventory: "<<m_wood_inventory<<std::endl;
 					std::cout<<"storage inventory: "<<m_world_inventory->getWoodInventory()<<std::endl;
@@ -239,10 +255,9 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 1000)
 				{
-					m_world_inventory->addFish(1);
-					m_fish_inventory -=1;
+					m_world_inventory->addFish(m_fish_inventory);
+					m_fish_inventory =0;
 					m_state_stack.pop_front();
-					m_timer.restart();
 
 					std::cout<<m_name<<" deposited a fish"<<std::endl;
 					std::cout<<m_name<<"'s fish inventory: "<<m_fish_inventory<<std::endl;
@@ -254,6 +269,44 @@ void Character::update()
 				}
 				break;
 			}
+
+
+		case(State::FORAGE):
+		{
+			if(m_timer.elapsed() >= 3000)
+			{
+				m_berry_inventory += m_forage_amount + Utility::randInt(-1, 1);
+				if (m_berry_inventory < 0)
+				{
+					m_berry_inventory = 0;
+					std::cout<<m_name<<" found no berries"<<std::endl;
+					m_state_stack.clear();
+				}
+
+				std::cout<<m_name<<" got "<<m_berry_inventory<<" berries"<<std::endl;
+
+				m_state_stack.pop_front();
+				m_timer.restart();
+
+				if(!findNearestStorage())
+					m_state_stack.clear();
+			}
+			break;
+		}
+
+		case(State::STORE_BERRIES):
+		{
+			if(m_timer.elapsed() >= 1000)
+			{
+				m_world_inventory->addBerries(m_berry_inventory);
+				m_berry_inventory = 0;
+				m_state_stack.pop_front();
+
+				findNearestEmptyTile();
+				m_timer.restart();
+			}
+			break;
+		}
 
 		case(State::GET_WOOD):
 		{

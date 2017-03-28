@@ -4,9 +4,6 @@
 #include <ngl/NGLInit.h>
 #include <set>
 
-#include "imgui.h"
-#include "ImGUIImpl.h"
-
 #include "Scene.hpp"
 #include "Grid.hpp"
 #include "Utility.hpp"
@@ -63,13 +60,9 @@ int main()
 
     ngl::NGLInit::instance();
 
-
     Prefs* prefs = Prefs::instance();
     prefs->init();
     prefs->printPrefs();
-
-
-
 
     Scene scene (ngl::Vec2(rect.w, rect.h));
 

@@ -20,11 +20,12 @@ enum class State
 	STORE_WOOD,
 	FISH,
 	STORE_FISH,
+	FORAGE,
+	STORE_BERRIES,
 	COLLECT,
 	GET_WOOD,
 	BUILD,
 	SLEEP,
-	FORAGE,
 	MOVE,
 	IDLE
 };
@@ -213,6 +214,10 @@ private:
 	///
 	int m_fish_inventory;
 	///
+	/// \brief m_berry_inventory, the amount of berries the character has
+	///
+	int m_berry_inventory;
+	///
 	/// \brief m_chopping_speed, how long it takes the character to chop wood
 	///
 	int m_chopping_speed;
@@ -224,6 +229,10 @@ private:
 	/// \brief m_fishing_catch, likeyhood of catching a fish
 	///
 	int m_fishing_catch;
+	///
+	/// \brief m_forage_amount, how many berries they find
+	///
+	int m_forage_amount;
 	///
 	/// \brief allows for checking if this is the first time the character has been set idle between actions
 	///
