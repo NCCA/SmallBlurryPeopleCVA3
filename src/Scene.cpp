@@ -62,6 +62,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
+    createShader("mousebox", "vertDeferredData", "fragMousebox");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -88,7 +89,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //creates characters with random names
     for (int i = 0; i<100; i++)
     {
-      createCharacter();
+        createCharacter();
     }
 
     initialiseFramebuffers();
@@ -107,6 +108,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
+    store->loadMesh("debugBox", "box.obj");
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
     store->loadMesh("house", "house/house.obj");
@@ -171,49 +173,48 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     initMeshInstances();
 
-
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
 }
 
 void Scene::initMeshInstances()
 {
-  int meshCount = 0;
-  //m_meshPositions.clear()
-  m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
-  for(int i = 0; i < m_grid.getW(); ++i)
-      for(int j = 0; j < m_grid.getH(); ++j)
-      {
-          int index = static_cast<int>( m_grid.getTileType(i, j) );
-          m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                    i,
-                                                    m_grid.getTileHeight(i, j) / m_terrainHeightDivider,
-                                                    j
-                                                    ));
-          meshCount++;
-      }
+    int meshCount = 0;
+    //m_meshPositions.clear()
+    m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            int index = static_cast<int>( m_grid.getTileType(i, j) );
+            m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                      i,
+                                                      m_grid.getTileHeight(i, j) / m_terrainHeightDivider,
+                                                      j
+                                                      ));
+            meshCount++;
+        }
 
-  //Generate TBO for mesh instancing.
-  //ngl::Random * rng = ngl::Random::instance();
-  std::vector<ngl::Mat4> transforms;
-  transforms.reserve( meshCount );
-  for(auto &slot : m_meshPositions)
-      for(auto &vec : slot)
-      {
-          ngl::Mat4 m;
-          m.translate( vec.m_x, vec.m_y, vec.m_z );
-          transforms.push_back( m );
-      }
+    //Generate TBO for mesh instancing.
+    //ngl::Random * rng = ngl::Random::instance();
+    std::vector<ngl::Mat4> transforms;
+    transforms.reserve( meshCount );
+    for(auto &slot : m_meshPositions)
+        for(auto &vec : slot)
+        {
+            ngl::Mat4 m;
+            m.translate( vec.m_x, vec.m_y, vec.m_z );
+            transforms.push_back( m );
+        }
 
-  GLuint buf;
-  glGenBuffers(1, &buf);
-  glBindBuffer(GL_TEXTURE_BUFFER, buf);
-  glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
+    GLuint buf;
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_TEXTURE_BUFFER, buf);
+    glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
 
-  glGenTextures(1, &m_instanceTBO);
-  glActiveTexture( GL_TEXTURE0 );
-  glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
+    glGenTextures(1, &m_instanceTBO);
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 }
 
 void Scene::initialiseFramebuffers()
@@ -323,11 +324,11 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  if (m_grid.HasChanges())
-  {
-    initMeshInstances();
-    m_grid.resetHasChanges();
-  }
+    if (m_grid.HasChanges())
+    {
+        initMeshInstances();
+        m_grid.resetHasChanges();
+    }
     if(m_state == GameState::MAIN)
     {
         //translates
@@ -372,83 +373,83 @@ void Scene::update()
         m_cam.moveScreenSpace(getCamMoveVec());
     }
 
-        //Terrain-height correction
-        ngl::Vec3 cxyz = m_cam.getPos();
-        int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
-        int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-        cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
-        ngl::Vec3 cp = m_cam.getTargPos();
-        //Grab the y component of the current tile, use that as the target y for the camera.
-        m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
-        //---
+    //Terrain-height correction
+    ngl::Vec3 cxyz = m_cam.getPos();
+    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+    cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
+    ngl::Vec3 cp = m_cam.getTargPos();
+    //Grab the y component of the current tile, use that as the target y for the camera.
+    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
+    //---
 
 
-        //Recalculate view matrix.
-        m_cam.updateSmoothCamera();
-        m_cam.clearTransforms();
-        m_cam.calculateViewMat();
-        //---
+    //Recalculate view matrix.
+    m_cam.updateSmoothCamera();
+    m_cam.clearTransforms();
+    m_cam.calculateViewMat();
+    //---
 
-        for(Character &character : m_characters)
-        {
-            character.update();
-        }
+    for(Character &character : m_characters)
+    {
+        character.update();
+    }
 
-        //m_sunAngle.m_x = 150.0f;
-        m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x += 0.01f;
-        if(m_sunAngle.m_x > 360.0f)
-        {
-            m_day++;
-            m_sunAngle.m_x = 0.0f;
-            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
-        }
-        //std::cout << m_sunAngle.m_x << '\n';
+    //m_sunAngle.m_x = 150.0f;
+    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
+    m_sunAngle.m_x += 0.01f;
+    if(m_sunAngle.m_x > 360.0f)
+    {
+        m_day++;
+        m_sunAngle.m_x = 0.0f;
+        //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+    }
+    //std::cout << m_sunAngle.m_x << '\n';
 
-        m_season = (m_day % 365) / 365.0f;
+    m_season = (m_day % 365) / 365.0f;
 
-        ngl::Transformation t;
-        t.setRotation( m_sunAngle );
-        m_sunDir = t.getMatrix().getForwardVector();
-        m_sunDir.normalize();
+    ngl::Transformation t;
+    t.setRotation( m_sunAngle );
+    m_sunDir = t.getMatrix().getForwardVector();
+    m_sunDir.normalize();
 
-        //1 = Midday
-        //0 = Sunrise/sunset
-        //-1 = Midnight
-        float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
-        //Map to range 0.5PI to -0.5PI
-        a *= M_PI / 2.0;
+    //1 = Midday
+    //0 = Sunrise/sunset
+    //-1 = Midnight
+    float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
+    //Map to range 0.5PI to -0.5PI
+    a *= M_PI / 2.0;
 
-        float t_midday = 0.5f * sin(a) + 0.5f;
-        float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
-        float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
+    float t_midday = 0.5f * sin(a) + 0.5f;
+    float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
+    float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
 
-        m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
-                t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-                t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
+            t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
+            t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
 
-        m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+    m_directionalLightCol /= t_midday + t_midnight + t_sundown;
 
-        //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
-        m_pickBuffer.bind();
-        GLuint grid_texID = getTerrainPickTexture();
-        glBindTexture(GL_TEXTURE_2D, grid_texID);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
+    //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
+    m_pickBuffer.bind();
+    GLuint grid_texID = getTerrainPickTexture();
+    glBindTexture(GL_TEXTURE_2D, grid_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-        int mouse_coords[2] = {0,0};
-        SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
-        std::array<float, 4> grid_coord;
+    int mouse_coords[2] = {0,0};
+    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+    std::array<float, 4> grid_coord;
 
-        // x, window height - y
-        glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+    // x, window height - y
+    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
 
 
     ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
     m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
 
 
-        m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
-        m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
+    m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
+    m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
 
 }
 
@@ -490,11 +491,11 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-      ngl::Vec3 pos = ch.getPos();
-      pos.m_y /= m_terrainHeightDivider;
-      m_transform.setPosition(pos);
-      slib->setRegisteredUniform("id", ch.getID());
-      drawAsset( "person", "", "");
+        ngl::Vec3 pos = ch.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->setRegisteredUniform("id", ch.getID());
+        drawAsset( "person", "", "");
     }
 
     m_pickBuffer.unbind();
@@ -730,12 +731,10 @@ void Scene::draw()
     slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
     id = slib->getProgramID("water");
-std::cout << "p1\n";
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
     m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
     m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
     m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
-std::cout << "p2\n";
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
 
@@ -770,7 +769,54 @@ std::cout << "p2\n";
 
     m_postEffectsBuffer.unbind();
 
+    //---------------------------//
+    //  DRAW BOX WHERE MOUSE IS  //
+    //---------------------------//
+    ngl::Vec3 p;
+    //Get world space mouse pos.
+    m_pickBuffer.bind();
+    GLuint grid_texID = getTerrainPickTexture();
+    glBindTexture(GL_TEXTURE_2D, grid_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+    int mouse_coords[2] = {0,0};
+    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+    std::array<float, 4> grid_coord;
+
+    // x, window height - y
+    glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+    m_pickBuffer.unbind();
+
+    p.m_x = std::round(grid_coord[0]);
+    p.m_z = std::round(grid_coord[2]);
+    p.m_y = m_grid.getTileHeight(p.m_x, p.m_z) / m_terrainHeightDivider - 1;
+
+    m_transform.reset();
+    m_transform.setPosition(p);
+    m_transform.setScale(1.0f, 2.0f, 1.0f);
+
+    m_postEffectsBuffer.bind();
+    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
+    slib->use("mousebox");
+    slib->setRegisteredUniform("base", grid_coord[1]);
+    slib->setRegisteredUniform("m", 0.2f);
+    slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
+    drawAsset("debugBox", "", "mousebox");
+
+    AssetStore * a = AssetStore::instance();
+    ngl::Obj * k = a->getModel("debugBox");
+    k->bindVAO();
+    slib->setRegisteredUniform("m", 0.1f);
+    glLineWidth(5.0f);
+    glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
+    glLineWidth(1.0f);
+    glBindVertexArray(0);
+
+    m_postEffectsBuffer.unbind();
+
     glDisable(GL_DEPTH_TEST);
+
     //---------------------------//
     //     FORWARD BLUR PASS     //
     //---------------------------//
@@ -1291,54 +1337,54 @@ void Scene::zoom(int _direction)
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-  Gui *gui = Gui::instance();
-  switch(_event.keysym.sym)
-  {
-  case SDLK_SPACE:
-    gui->executeAction(Action::CENTRECAMERA);
-    break;
-  case SDLK_ESCAPE:
-  case SDLK_p:
-    gui->executeAction(Action::ESCAPE);
-    break;
-  case SDLK_UP:
-    gui->executeAction(Action::MOVEFORWARD);
-    break;
-  case SDLK_DOWN:
-    gui->executeAction(Action::MOVEBACKWARD);
-    break;
-  case SDLK_LEFT:
-    gui->executeAction(Action::MOVELEFT);
-    break;
-  case SDLK_RIGHT:
-    gui->executeAction(Action::MOVERIGHT);
-    break;
-  default:
-    break;
-  }
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_SPACE:
+        gui->executeAction(Action::CENTRECAMERA);
+        break;
+    case SDLK_ESCAPE:
+    case SDLK_p:
+        gui->executeAction(Action::ESCAPE);
+        break;
+    case SDLK_UP:
+        gui->executeAction(Action::MOVEFORWARD);
+        break;
+    case SDLK_DOWN:
+        gui->executeAction(Action::MOVEBACKWARD);
+        break;
+    case SDLK_LEFT:
+        gui->executeAction(Action::MOVELEFT);
+        break;
+    case SDLK_RIGHT:
+        gui->executeAction(Action::MOVERIGHT);
+        break;
+    default:
+        break;
+    }
 
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-  Gui *gui = Gui::instance();
-  switch(_event.keysym.sym)
-  {
-  case SDLK_UP:
-    gui->executeAction(Action::STOPFORWARD);
-    break;
-  case SDLK_DOWN:
-    gui->executeAction(Action::STOPBACKWARD);
-    break;
-  case SDLK_LEFT:
-    gui->executeAction(Action::STOPLEFT);
-    break;
-  case SDLK_RIGHT:
-    gui->executeAction(Action::STOPRIGHT);
-    break;
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_UP:
+        gui->executeAction(Action::STOPFORWARD);
+        break;
+    case SDLK_DOWN:
+        gui->executeAction(Action::STOPBACKWARD);
+        break;
+    case SDLK_LEFT:
+        gui->executeAction(Action::STOPLEFT);
+        break;
+    case SDLK_RIGHT:
+        gui->executeAction(Action::STOPRIGHT);
+        break;
 
-  default:break;
-  }
+    default:break;
+    }
 }
 
 void Scene::updateMousePos()
