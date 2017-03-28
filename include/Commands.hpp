@@ -4,30 +4,30 @@
 #include "Character.hpp"
 #include "Scene.hpp"
 
-
 ///
-/// \brief The Action enum for what the buttons does
+/// \brief The Action enum for what the buttons does, ints are commented in to match shader consts
 ///
 enum class Action
 {
-  PASSIVE,          //0
-  QUIT,             //1
-  BUILDHOUSE,       //2
-  BUILDSTORE,       //3
-  CENTRECAMERA,     //4
-  ESCAPE,           //5
-  ZOOMIN,           //6
-  ZOOMOUT,          //7
-  MOVEFORWARD,      //8
-  MOVEBACKWARD,     //9
-  MOVELEFT,         //10
-  MOVERIGHT,        //11
-  STOPFORWARD,      //12
-  STOPBACKWARD,     //13
-  STOPLEFT,         //14
-  STOPRIGHT,        //15
-  PREFERENCES,      //16
-  PASSIVE_CHARACTER //17
+  PASSIVE,           //0
+  QUIT,              //1
+  BUILDHOUSE,        //2
+  BUILDSTORE,        //3
+  CENTRECAMERA,      //4
+  ESCAPE,            //5
+  ZOOMIN,            //6
+  ZOOMOUT,           //7
+  MOVEFORWARD,       //8
+  MOVEBACKWARD,      //9
+  MOVELEFT,          //10
+  MOVERIGHT,         //11
+  STOPFORWARD,       //12
+  STOPBACKWARD,      //13
+  STOPLEFT,          //14
+  STOPRIGHT,         //15
+  PREFERENCES,       //16
+  PASSIVE_CHARACTER, //17
+  SETBOOLPREF        //18
 };
 
 ///
@@ -170,6 +170,7 @@ private:
   ///
   Scene *m_scene;
 };
+
 ///
 /// \brief The ZoomCommand class allows zooming in/out of a scene
 ///
@@ -262,7 +263,7 @@ private:
 template<class T>
 SetPrefsCommand<T>::SetPrefsCommand(const std::string &_key, const T &_val) :
   m_key(_key),
-  m_val(_key)
+  m_val(_val)
 {}
 
 template<class T>

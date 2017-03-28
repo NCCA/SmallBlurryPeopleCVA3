@@ -115,6 +115,11 @@ public :
   /// \brief updateActiveCharacter if active character changes, this function updates button text
   ///
   void updateActiveCharacter();
+  ///
+  /// \brief getCurrentButton get the currently selected button
+  /// \return pointer to selected button
+  ///
+  Button *getCurrentButton();
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern
@@ -160,6 +165,10 @@ private :
   /// \brief m_active_character pointer to currently selected character
   ///
   Character *m_active_character;
+  ///
+  /// \brief m_text_outdated flag. if true, text will be updated on next draw call
+  ///
+  bool m_text_outdated;
 };
 
 #endif//__GUI_HPP__

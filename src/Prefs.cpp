@@ -4,6 +4,7 @@
 
 #include "Prefs.hpp"
 #include "PrefsParser.hpp"
+#include "Utility.hpp"
 
 void Prefs::init(std::string _pref_file)
 {
@@ -130,7 +131,6 @@ void Prefs::savePrefs()
   }
 }
 
-
 const std::map<std::string, int>& Prefs::getIntMap()
 {
   return m_int_prefs;
@@ -167,6 +167,13 @@ PrefType Prefs::getTypeOfPref(const std::string &_key)
       return PrefType::FLOAT;
     }
   }
+  for(auto &p : m_bool_prefs)
+  {
+    if(p.first == _key)
+    {
+      return PrefType::BOOL;
+    }
+  }
   for(auto &p : m_str_prefs)
   {
     if(p.first == _key)
@@ -187,14 +194,15 @@ void Prefs::setPref(std::string &_key, float _val)
   setFloatPref(_key, _val);
 }
 
-void Prefs::setPref(std::string &_key, bool _val)
-{
-  setBoolPref(_key, _val);
-}
-
 void Prefs::setPref(std::string &_key, const std::string &_val)
 {
   setStrPref(_key, _val);
+}
+
+
+void Prefs::setPref(std::string &_key, bool _val)
+{
+  setBoolPref(_key, _val);
 }
 
 std::string Prefs::getPrefValueString(const std::string &_key)
@@ -202,6 +210,9 @@ std::string Prefs::getPrefValueString(const std::string &_key)
   PrefType type = getTypeOfPref(_key);
   std::string str_out;
   switch (type) {
+  case PrefType::BOOL:
+    str_out = boolToString(getBoolPref(_key));
+    break;
   case PrefType::INT:
     str_out = std::to_string(getIntPref(_key));
     break;
@@ -217,4 +228,14 @@ std::string Prefs::getPrefValueString(const std::string &_key)
     break;
   }
   return str_out;
+}
+
+int Prefs::getNumPrefs()
+{
+  return m_int_prefs.size() + m_float_prefs.size() + m_bool_prefs.size() +  m_str_prefs.size();
+}
+
+std::string Prefs::boolToString(bool _b)
+{
+  return _b ? "1" : "0";
 }

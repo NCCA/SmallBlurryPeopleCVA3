@@ -87,7 +87,7 @@ public:
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();
-private:
+protected:
   ///
   /// \brief m_id_counter keeps track of number of buttons
   ///
@@ -121,7 +121,7 @@ private:
   ///
   Action m_action;
   ///
-  /// \brief m_text button text displayed on button
+  /// \brief m_text button text displayed on button, or used for setting buttons to store key
   ///
   std::string m_text;
 };

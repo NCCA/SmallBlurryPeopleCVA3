@@ -49,12 +49,13 @@ void Gui::click()
   if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
   {
     std::cout << "clicked button " << m_selected_button_id << std::endl;
-    executeAction(m_buttons[m_selected_button_id].getAction());
+    executeAction(getCurrentButton()->getAction());
   }
 }
 
 std::shared_ptr<Command> Gui::generateCommand(Action _action)
 {
+  Prefs *prefs = Prefs::instance();
   std::shared_ptr<Command> command(nullptr);
   switch (_action)
   {
@@ -110,6 +111,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PREFERENCES:
     command.reset(new PrefsCommand(m_scene));
     break;
+  case Action::SETBOOLPREF:
+    command.reset(new SetPrefsCommand<bool>(getCurrentButton()->getText(), !prefs->getBoolPref(getCurrentButton()->getText())));
+    m_text_outdated = true;
+    break;
   }
   return command;
 }
@@ -127,7 +132,6 @@ int Gui::executeAction(Action _action)
   else
   {
     // no command corresponds to given action, so don't execute anything
-
     return 1;
   }
 }
@@ -143,7 +147,7 @@ bool Gui::mousePos(ngl::Vec2 _pos)
       button_selected = true;
     }
   }
-  if(!button_selected || m_buttons[m_selected_button_id].isPassive(m_scene->getActiveCharacter()))
+  if(!button_selected || getCurrentButton()->isPassive(m_scene->getActiveCharacter()))
   {
     m_selected_button_id = -1;
   }
@@ -175,7 +179,7 @@ void Gui::createSceneButtons()
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
   updateButtonArrays();
-  updateText();
+  m_text_outdated = true;
 }
 
 void Gui::createPauseButtons()
@@ -185,7 +189,7 @@ void Gui::createPauseButtons()
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
   addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
   updateButtonArrays();
-  updateText();
+  m_text_outdated = true;
 }
 
 void Gui::createPrefsButtons()
@@ -201,16 +205,25 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
+    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
+  y_pos = y0;
+  for(auto &p : prefs->getBoolMap())
+  {
+    name = p.first;
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(40,40), name);
+    y_pos += 50;
+  }
+  x_pos += 260;
   y_pos = y0;
   for(auto &p : prefs->getFloatMap())
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
+    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
@@ -219,12 +232,12 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), prefs->getPrefValueString(name));
+    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
 
   updateButtonArrays();
-  updateText();
+  m_text_outdated = true;
 }
 
 void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text)
@@ -290,6 +303,10 @@ void Gui::drawButtons()
   glDisable(GL_DEPTH_TEST);
 
   slib->use(m_shader_name);
+  if(m_text_outdated)
+  {
+    updateText();
+  }
   ngl::ShaderLib::instance()->setRegisteredUniform("game_state", m_scene->getState());
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
@@ -337,12 +354,23 @@ void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _targ
 
 void Gui::updateText()
 {
+  Prefs *prefs = Prefs::instance();
   std::vector<uint> button_text;
   // for each button
   for(Button &b : m_buttons)
   {
     // get its text
-    std::string text = b.getText();
+    std::string text = "";
+    switch(b.getAction())
+    {
+    case Action::SETBOOLPREF:
+      text = prefs->getPrefValueString(b.getText());
+      break;
+    default:
+      text = b.getText();
+      break;
+    }
+
     // add it to the text vector as uints
     for(char c : text)
     {
@@ -356,11 +384,11 @@ void Gui::updateText()
     std::cerr << "button text of size " << button_text.size() << " too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
   }
   glUniform1uiv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "button_text"), std::min((uint)button_text.size(), BUTTON_TEXT_LENGTH), (uint *)&(button_text[0]));
+  m_text_outdated = false;
 }
 
 void Gui::updateActiveCharacter()
 {
-  bool text_needs_updating = false;
   std::string char_name = m_scene->getActiveCharacterName();
   for(Button &b : m_buttons)
   {
@@ -370,15 +398,16 @@ void Gui::updateActiveCharacter()
       if(b.getText() != char_name)
       {
         b.setText(char_name);
-        text_needs_updating = true;
+        m_text_outdated = true;
       }
       break;
     default:
       break;
     }
   }
-  if(text_needs_updating)
-  {
-    updateText();
-  }
+}
+
+Button *Gui::getCurrentButton()
+{
+  return &(m_buttons[m_selected_button_id]);
 }
