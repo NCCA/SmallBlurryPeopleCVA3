@@ -110,7 +110,7 @@ void Framebuffer::bindTexture(const GLint _shaderID, const std::string &_tex, co
     glUniform1i(loc, _target);
 
     glActiveTexture(GL_TEXTURE0 + _target);
-    glBindTexture(GL_TEXTURE_2D, m_textures[_tex]);
+    glBindTexture(GL_TEXTURE_2D, m_textures.at(_tex));
 }
 
 bool Framebuffer::checkComplete()
