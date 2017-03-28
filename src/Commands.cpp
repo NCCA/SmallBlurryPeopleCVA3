@@ -27,14 +27,14 @@ void QuitCommand::execute()
 // Build Command
 //------------------------------------------------------------//
 
-BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
+BuildCommand::BuildCommand(Character *_character, TileType _building) :
   m_character(_character),
   m_building(_building)
 {}
 
 void BuildCommand::execute()
 {
-  m_character->build(m_building);
+	m_character->buildState(m_building);
 }
 
 //------------------------------------------------------------//
@@ -92,19 +92,25 @@ void ZoomCommand::execute()
 }
 
 //------------------------------------------------------------//
-// Move Command
+// Move Cam Command
 //------------------------------------------------------------//
 
-MoveCommand::MoveCommand(Scene *_scene, Direction _d, bool _stop) :
+MoveCamCommand::MoveCamCommand(Scene *_scene, Direction _d, bool _stop) :
   m_scene(_scene),
   m_d(_d),
   m_stop(_stop)
 {}
 
-void MoveCommand::execute()
+void MoveCamCommand::execute()
 {
   if(m_stop)
     m_scene->stopMove(m_d);
   else
     m_scene->startMove(m_d);
 }
+
+//------------------------------------------------------------//
+// Set Prefs Command
+//------------------------------------------------------------//
+
+// setPrefsCommand is a template, so is defined in the header

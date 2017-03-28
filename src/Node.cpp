@@ -13,7 +13,7 @@ Node::Node(Grid *_grid, std::vector<Node> *_nodes, ngl::Vec2 _pos, ngl::Vec2 _ta
   m_h_cost(manhattanDist(_target_pos))
 {
 
-	if(!m_grid->get(m_pos).isTraversable() && m_pos != _target_pos && _parent_id != -1)
+  if(!m_grid->isTileTraversable(m_pos.m_x, m_pos.m_y) && m_pos != _target_pos && _parent_id != -1)
   {
     close();
   }

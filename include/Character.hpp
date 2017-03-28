@@ -17,17 +17,24 @@
 enum class State
 {
 	CHOP_WOOD,
-	STORE_WOOD,
+	STORE,
 	FISH,
-	STORE_FISH,
 	FORAGE,
-	STORE_BERRIES,
 	COLLECT,
 	GET_WOOD,
 	BUILD,
 	SLEEP,
 	MOVE,
+	REPEAT,
 	IDLE
+};
+
+enum class INVENTORY
+{
+	WOOD,
+	FISH,
+	BERRY,
+	NONE
 };
 
 /// \class Character
@@ -53,6 +60,15 @@ public:
 	/// \brief setState, creates state stack for the character to execute
 	///
 	void setState();
+	///
+	/// \brief buildState, tell character to start building on current square
+	/// \param _building type of building to build
+	///
+	void buildState(TileType _building);
+	void moveState();
+	void chopState();
+	void fishState();
+	void forageState();
 	///
 	/// \brief clearState, removes any actions in the state stack
 	///
@@ -102,11 +118,9 @@ public:
 	/// \return a boolean determing whether a neighbouring empty tile was found
 	///
 	bool findNearestEmptyTile();
+	bool findNearestFishingTile();
 
-	void findNearestFishingTile();
 	void floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
-	//void distanceSort(int io_left, int io_right, std::vector<int> _edges);
-	//float findSortDist(std::vector<int> _vector, int index);
 	///
 	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
 	/// \param _coord_data, vector containing vec2's of coordinates to sort through
@@ -143,11 +157,6 @@ public:
 	/// \return m_active, the boolean stored in the character determining if it is active or not
 	///
 	bool isActive() {return m_active;}
-	///
-	/// \brief build tell character to start building on current square
-	/// \param _building type of building to build
-	///
-	void build(BuildingType _building);
 
 private:
 	///
@@ -207,16 +216,9 @@ private:
 	///
 	std::deque <State> m_state_stack;
 	///
-	/// \brief m_wood_inventory, the amount of wood a character has
+	/// \brief m_inventory, character's current inventory
 	///
-	int m_wood_inventory;
-	/// \brief m_fish_inventory, the amount of fish a character has
-	///
-	int m_fish_inventory;
-	///
-	/// \brief m_berry_inventory, the amount of berries the character has
-	///
-	int m_berry_inventory;
+	INVENTORY m_inventory;
 	///
 	/// \brief m_chopping_speed, how long it takes the character to chop wood
 	///
@@ -225,6 +227,10 @@ private:
 	/// \brief m_building_speed, how long it takes the character to build a house
 	///
 	int m_building_speed;
+	///
+	/// \brief m_fishing_speed, how long it takes the character to get a fish
+	///
+	int m_fishing_speed;
 	///
 	/// \brief m_fishing_catch, likeyhood of catching a fish
 	///

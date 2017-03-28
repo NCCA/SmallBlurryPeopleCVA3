@@ -86,7 +86,7 @@ public:
   /// \param _character character to instruct
   /// \param _building building wanted
   ///
-  BuildCommand(Character *_character, BuildingType _building);
+	BuildCommand(Character *_character, TileType _building);
   ~BuildCommand() = default;
   ///
   /// \brief execute tells character to build given building
@@ -100,7 +100,7 @@ private:
   ///
   /// \brief m_building type of building wanted
   ///
-  BuildingType m_building;
+	TileType m_building;
 };
 
 ///
@@ -170,7 +170,9 @@ private:
   ///
   Scene *m_scene;
 };
-
+///
+/// \brief The ZoomCommand class allows zooming in/out of a scene
+///
 class ZoomCommand : public Command
 {
 public:
@@ -195,17 +197,78 @@ private:
   ///
   int m_direction;
 };
-
-class MoveCommand : public Command
+///
+/// \brief The MoveCamCommand class moves the camera or stops the camera in the given direction
+///
+class MoveCamCommand : public Command
 {
 public:
-  MoveCommand(Scene *_scene, Direction _d, bool _stop);
-  ~MoveCommand() = default;
+  ///
+  /// \brief MoveCamCommand constructor for MoveCamCommand
+  /// \param _scene scene to send instruction to
+  /// \param _d direction of command
+  /// \param _stop whether to stop in that direction or not
+  ///
+  MoveCamCommand(Scene *_scene, Direction _d, bool _stop);
+  ~MoveCamCommand() = default;
+  ///
+  /// \brief execute send command to scene to move/stop camera
+  ///
   virtual void execute();
 private:
+  ///
+  /// \brief m_scene scene to move/stop camera
+  ///
   Scene *m_scene;
+  ///
+  /// \brief m_d which direction to use
+  ///
   Direction m_d;
+  ///
+  /// \brief m_stop whether it is a move command (false) or a stop command (true)
+  ///
   bool m_stop;
 };
+
+///
+/// \brief The SetPrefsCommand class used to set a preference
+///
+template<class T>
+class SetPrefsCommand :public Command
+{
+public:
+  ///
+  /// \brief SetPrefsCommand constructor for the set prefs command
+  /// \param _key preference key to use
+  /// \param _val value to set it to
+  ///
+  SetPrefsCommand(const std::string &_key, const T &_val);
+  ~SetPrefsCommand() = default;
+  ///
+  /// \brief execute send command to prefs to change one of the settings
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_key key to access preference
+  ///
+  std::string m_key;
+  ///
+  /// \brief m_val value to set it to
+  ///
+  T m_val;
+};
+
+template<class T>
+SetPrefsCommand<T>::SetPrefsCommand(const std::string &_key, const T &_val) :
+  m_key(_key),
+  m_val(_key)
+{}
+
+template<class T>
+void SetPrefsCommand<T>::execute()
+{
+  Prefs::instance()->setPref(m_key, m_val);
+}
 
 #endif//__COMMANDS_HPP__

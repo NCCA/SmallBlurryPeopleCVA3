@@ -82,12 +82,11 @@ void Character::setState()
 
 void Character::buildState(TileType _building)
 {
-
 	//Start building the building type at current position
 	if(findNearestEmptyTile())
 	{
 		m_final_target_id = m_target_id;
-		int building_amount = 1;
+		int building_amount = 6;
 		for(int i =0; i<building_amount; i++)
 		{
 			m_state_stack.push_back(State::COLLECT);
@@ -363,6 +362,7 @@ void Character::update()
         if(m_timer.elapsed() >= 1000 * m_building_speed)
         {
 					m_inventory = INVENTORY::NONE;
+					
           ///Change grid tile from NONE type to HOUSE type
           m_state_stack.pop_front();
           m_timer.restart();

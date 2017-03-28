@@ -66,10 +66,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new QuitCommand(m_scene));
     break;
   case Action::BUILDHOUSE:
-    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
+		command.reset(new BuildCommand(m_scene->getActiveCharacter(), TileType::HOUSE));
     break;
   case Action::BUILDSTORE:
-    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
+		command.reset(new BuildCommand(m_scene->getActiveCharacter(), TileType::STOREHOUSE));
     break;
   case Action::CENTRECAMERA:
     command.reset(new CentreCameraCommand(m_scene));
@@ -84,28 +84,28 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new ZoomCommand(m_scene, -1));
     break;
   case Action::MOVEFORWARD:
-    command.reset(new MoveCommand(m_scene, Direction::FORWARDS, false));
+    command.reset(new MoveCamCommand(m_scene, Direction::FORWARDS, false));
     break;
   case Action::MOVEBACKWARD:
-    command.reset(new MoveCommand(m_scene, Direction::BACKWARDS, false));
+    command.reset(new MoveCamCommand(m_scene, Direction::BACKWARDS, false));
     break;
   case Action::MOVELEFT:
-    command.reset(new MoveCommand(m_scene, Direction::LEFT, false));
+    command.reset(new MoveCamCommand(m_scene, Direction::LEFT, false));
     break;
   case Action::MOVERIGHT:
-    command.reset(new MoveCommand(m_scene, Direction::RIGHT, false));
+    command.reset(new MoveCamCommand(m_scene, Direction::RIGHT, false));
     break;
   case Action::STOPFORWARD:
-    command.reset(new MoveCommand(m_scene, Direction::FORWARDS, true));
+    command.reset(new MoveCamCommand(m_scene, Direction::FORWARDS, true));
     break;
   case Action::STOPBACKWARD:
-    command.reset(new MoveCommand(m_scene, Direction::BACKWARDS, true));
+    command.reset(new MoveCamCommand(m_scene, Direction::BACKWARDS, true));
     break;
   case Action::STOPLEFT:
-    command.reset(new MoveCommand(m_scene, Direction::LEFT, true));
+    command.reset(new MoveCamCommand(m_scene, Direction::LEFT, true));
     break;
   case Action::STOPRIGHT:
-    command.reset(new MoveCommand(m_scene, Direction::RIGHT, true));
+    command.reset(new MoveCamCommand(m_scene, Direction::RIGHT, true));
     break;
   case Action::PREFERENCES:
     command.reset(new PrefsCommand(m_scene));
@@ -190,8 +190,35 @@ void Gui::createPauseButtons()
 
 void Gui::createPrefsButtons()
 {
+  Prefs *prefs = Prefs::instance();
+  float y0 = 10;
+  float y_pos = 10;
+  float x_pos = 10;
+  std::string name = "";
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
+  for(auto &p : prefs->getIntMap())
+  {
+    name = p.first;
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    y_pos += 50;
+  }
+  x_pos += 210;
+  y_pos = y0;
+  for(auto &p : prefs->getFloatMap())
+  {
+    name = p.first;
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    y_pos += 50;
+  }
+  x_pos += 210;
+  y_pos = y0;
+  for(auto &p : prefs->getStrMap())
+  {
+    name = p.first;
+    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
+    y_pos += 50;
+  }
 
   updateButtonArrays();
   updateText();

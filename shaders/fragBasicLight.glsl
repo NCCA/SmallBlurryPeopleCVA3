@@ -181,8 +181,9 @@ void main()
     fragColour.xyz *= directionalLightCol;
 #endif
 
+    //Fog
     float a = clamp(texture(linearDepth, UV).r / 128.0, 0.0, 1.0);
-    fragColour.xyz = mix(fragColour.xyz, 0.5 * directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
+    fragColour.xyz = mix(fragColour.xyz, 0.8 * directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
     //fragColour.xyz = vec3(texture(linearDepth, UV).r);
 
     if(camPos.y < waterLevel)
@@ -201,4 +202,6 @@ void main()
     fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
     fragColour.a = 1.0;
+
+    //fragColour = texture(diffuse, UV);
 }
