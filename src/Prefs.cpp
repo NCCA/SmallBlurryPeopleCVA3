@@ -122,3 +122,29 @@ const std::map<std::string, std::string>& Prefs::getStrMap()
 {
   return m_str_prefs;
 }
+
+PrefType Prefs::getTypeOfPref(const std::string &_key)
+{
+  for(auto it=m_int_prefs.begin(); it != m_int_prefs.end(); it++)
+  {
+    if(it->first == _key)
+    {
+      return PrefType::INT;
+    }
+  }
+  for(auto it=m_float_prefs.begin(); it != m_float_prefs.end(); it++)
+  {
+    if(it->first == _key)
+    {
+      return PrefType::FLOAT;
+    }
+  }
+  for(auto it=m_str_prefs.begin(); it != m_str_prefs.end(); it++)
+  {
+    if(it->first == _key)
+    {
+      return PrefType::STRING;
+    }
+  }
+  return PrefType::ERROR;
+}
