@@ -23,6 +23,17 @@ int main()
     SDL_Rect rect = {100, 100, 1280, 720};
     //SDL_GetDisplayBounds(0, &rect);
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
     SDL_Window *window=SDL_CreateWindow("window_test",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
@@ -38,17 +49,6 @@ int main()
         SDL_Quit();
         exit(EXIT_FAILURE);
     }
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     SDL_GLContext glContext = SDL_GL_CreateContext(window);
     if(glContext == NULL)

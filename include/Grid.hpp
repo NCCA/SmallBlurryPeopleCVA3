@@ -66,6 +66,10 @@ public:
   int getGlobalMountainHeight();
   int getGlobalWaterLevel();
 
+  bool HasChanges();
+  void resetHasChanges();
+
+
 
 private:
   /// @brief runs the given python script to generate a map
@@ -90,6 +94,9 @@ private:
 
   int m_mountain_height = 0;
   int m_water_level = 0;
+
+  bool m_has_changes = false;
+
 };
 
 #endif//__GRID_HPP__

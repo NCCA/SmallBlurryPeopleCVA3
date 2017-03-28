@@ -211,6 +211,17 @@ bool Grid::isTileTraversable(int _id)
 int Grid::cutTileTrees(int _id, int _goal_amount)
 {
   int out =  m_tiles[_id].cutTrees(_goal_amount);
-  std::cout << "trees: " << m_tiles[_id].getNumTrees() << std::endl;
+  m_has_changes = true;
   return out;
+}
+
+
+bool Grid::HasChanges()
+{
+  return m_has_changes;
+}
+
+void Grid::resetHasChanges()
+{
+  m_has_changes = false;
 }

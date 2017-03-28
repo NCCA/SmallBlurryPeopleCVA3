@@ -169,7 +169,7 @@ void Character::update()
         //when chopping speed has been reached, gain a piece of wood
         if(m_timer.elapsed() >= 1000 * m_chopping_speed)
         {
-          m_wood_inventory += m_grid->cutTileTrees(m_final_target_id, 10);
+          m_wood_inventory += m_grid->cutTileTrees(m_final_target_id, 5);
           std::cout<<m_name<<" got a piece of wood!"<<std::endl;
 
           ///change type from TREE to NONE
@@ -316,7 +316,7 @@ void Character::update()
   }
   else if (m_active == false)
   {
-    setIdleState();
+    //setIdleState();
   }
 }
 

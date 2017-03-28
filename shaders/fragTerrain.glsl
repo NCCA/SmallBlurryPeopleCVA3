@@ -103,7 +103,7 @@ void main()
 {
     float grassMul = dot(normal.xyz, vec3(0.0, 1.0, 0.0));
     grassMul = clamp(grassMul, 0.0, 1.0);
-    grassMul = pow(grassMul, 12.0);
+    grassMul = pow(grassMul, 16.0);
 
     float depth = gl_FragCoord.z / gl_FragCoord.w;
     depth = clamp(depth / 32.0, 0.01, 1.0);
@@ -136,7 +136,7 @@ void main()
     vec3 hcol = mix(
                 grassDepthMix,
                 rockDepthMix,
-                clamp((waterlevel - position.y) * grassMul * 8.0, 0.0, 1.0)
+                clamp((waterlevel - position.y) * grassMul * 1.0, 0.0, 1.0)
                 );
 
     hcol = mix(
