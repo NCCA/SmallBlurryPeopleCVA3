@@ -92,16 +92,16 @@ void ZoomCommand::execute()
 }
 
 //------------------------------------------------------------//
-// Move Command
+// Move Cam Command
 //------------------------------------------------------------//
 
-MoveCommand::MoveCommand(Scene *_scene, Direction _d, bool _stop) :
+MoveCamCommand::MoveCamCommand(Scene *_scene, Direction _d, bool _stop) :
   m_scene(_scene),
   m_d(_d),
   m_stop(_stop)
 {}
 
-void MoveCommand::execute()
+void MoveCamCommand::execute()
 {
   if(m_stop)
     m_scene->stopMove(m_d);
@@ -113,11 +113,4 @@ void MoveCommand::execute()
 // Set Prefs Command
 //------------------------------------------------------------//
 
-SetPrefsCommand::SetPrefsCommand(const std::string &_pref_name) :
-  m_pref_name(_pref_name)
-{}
-
-void SetPrefsCommand::execute()
-{
-  //Prefs::instance()->setIntPref(m_pref_name, m_val);
-}
+// setPrefsCommand is a template, so is defined in the header

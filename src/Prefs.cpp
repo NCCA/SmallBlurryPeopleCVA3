@@ -125,26 +125,48 @@ const std::map<std::string, std::string>& Prefs::getStrMap()
 
 PrefType Prefs::getTypeOfPref(const std::string &_key)
 {
-  for(auto it=m_int_prefs.begin(); it != m_int_prefs.end(); it++)
+  for(auto &p : m_int_prefs)
   {
-    if(it->first == _key)
+    if(p.first == _key)
     {
       return PrefType::INT;
     }
   }
-  for(auto it=m_float_prefs.begin(); it != m_float_prefs.end(); it++)
+  for(auto &p : m_float_prefs)
   {
-    if(it->first == _key)
+    if(p.first == _key)
     {
       return PrefType::FLOAT;
     }
   }
-  for(auto it=m_str_prefs.begin(); it != m_str_prefs.end(); it++)
+  for(auto &p : m_str_prefs)
   {
-    if(it->first == _key)
+    if(p.first == _key)
     {
       return PrefType::STRING;
     }
   }
   return PrefType::ERROR;
+}
+
+std::string Prefs::getPrefValueString(const std::string &_key)
+{
+  PrefType type = getTypeOfPref(_key);
+  std::string str_out;
+  switch (type) {
+  case PrefType::INT:
+    str_out = std::to_string(getIntPref(_key));
+    break;
+  case PrefType::FLOAT:
+    str_out = std::to_string(getFloatPref(_key));
+    break;
+  case PrefType::STRING:
+    str_out = getStrPref(_key);
+    break;
+  default:
+    std::cerr << "error in setPref, type not known" << std::endl;
+    str_out =  "ERROR";
+    break;
+  }
+  return str_out;
 }
