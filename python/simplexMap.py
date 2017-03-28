@@ -46,8 +46,8 @@ import noise.noise as n
 gen = n.fractalNoise(4)
 
 #setting up variables that will be passed to the game
-map_width = 50
-map_height = 50
+map_width = 100
+map_height = 100
 map_data = [[tileTypes["NONE"], 0] for i in range(map_width * map_height)]
 print map_data[0]
 #setting up noise function values

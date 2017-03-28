@@ -224,8 +224,10 @@ private:
     /// @brief checks the colour of the pixel where the user has clicked and sets states on objects
     void mouseSelection();
 
-    void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target);
+    void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target, GLenum _type = GL_TEXTURE_2D);
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
+    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset);
+    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const ngl::Mat4 &_VP);
 
     void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "", const std::string _tessctrl = "", const std::string _tesseval = "");
     GLuint createVAO(std::vector<ngl::Vec4> &_verts);
@@ -296,6 +298,7 @@ private:
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
     std::vector< std::vector<ngl::Vec3> > m_meshPositions;
+    GLuint m_instanceTBO;
 
     //Use these to draw debug points to the screen. Should be deleted/hidden at some point.
     GLuint m_debugVAO;
