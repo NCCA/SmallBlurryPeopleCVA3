@@ -18,8 +18,8 @@ int main()
   Prefs* prefs = Prefs::instance();
   prefs->init();
   prefs->printPrefs();
-  prefs->savePrefs();
-  return 0;
+
+
 
     SDL_Init(SDL_INIT_VIDEO);
 
