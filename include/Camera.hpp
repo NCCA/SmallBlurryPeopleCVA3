@@ -90,24 +90,8 @@ public:
 
     float getFocalDepth() const {return m_curFocalDepth;}
 
-    //These functions are too low-level for general use. I have created public functions like moveRight and moveForwards etc,
-    //which call these. Some are used raw for specialised transformations, such as flipping the camera upside down to draw reflections.
-    /// @brief Moves the camera (not the pivot).
-    void moveCamera(const ngl::Vec3 _translation);
-    /// @brief Moves the pivot ( and the camera).
-    void movePivot(const ngl::Vec3 _translation);
-    /// @brief Rotates the camera around the pivot.
-    void rotateCamera(const float _pitch, const float _yaw, const float _roll);
-    /// @brief Rotates the pivot and the camera. I don't think I ever really use this function but it's here if you want it.
-    void rotatePivot(const float _pitch, const float _yaw, const float _roll);
-    /// @brief Transform the camera (allows for customised transforms).
-    void transformCamera(const ngl::Mat4 _trans) {m_cameraTransformationStack.push_back(_trans);}
-    /// @brief Transform the pivot (allows for customised transforms).
-    void transformPivot(const ngl::Mat4 _trans) {m_pivotTransformationStack.push_back(_trans);}
-    /// @brief Returns a rotation matrix given pitch, yaw and roll.
-    ngl::Mat4 rotationMatrix(float _pitch, float _yaw, float _roll);
-    /// @brief Returns a mat4 which will tranlate a given point by _vec.
-    ngl::Mat4 translationMatrix(const ngl::Vec3 &_vec);
+    void immediateTransform(const ngl::Mat4 &_mat) {m_V *= _mat; m_VP = m_V * m_P;
+                                                        }
 private:
     /// @brief Holds the horizontal fov in degrees.
     float m_fov;
@@ -173,6 +157,25 @@ private:
 
     /// @brief Controls the smoothness of dollying.
     float m_dollySmoothness;
+
+    //These functions are too low-level for general use. I have created public functions like moveRight and moveForwards etc,
+    //which call these. Some are used raw for specialised transformations, such as flipping the camera upside down to draw reflections.
+    /// @brief Moves the camera (not the pivot).
+    void moveCamera(const ngl::Vec3 _translation);
+    /// @brief Moves the pivot ( and the camera).
+    void movePivot(const ngl::Vec3 _translation);
+    /// @brief Rotates the camera around the pivot.
+    void rotateCamera(const float _pitch, const float _yaw, const float _roll);
+    /// @brief Rotates the pivot and the camera. I don't think I ever really use this function but it's here if you want it.
+    void rotatePivot(const float _pitch, const float _yaw, const float _roll);
+    /// @brief Transform the camera (allows for customised transforms).
+    void transformCamera(const ngl::Mat4 _trans) {m_cameraTransformationStack.push_back(_trans);}
+    /// @brief Transform the pivot (allows for customised transforms).
+    void transformPivot(const ngl::Mat4 _trans) {m_pivotTransformationStack.push_back(_trans);}
+    /// @brief Returns a rotation matrix given pitch, yaw and roll.
+    ngl::Mat4 rotationMatrix(float _pitch, float _yaw, float _roll);
+    /// @brief Returns a mat4 which will tranlate a given point by _vec.
+    ngl::Mat4 translationMatrix(const ngl::Vec3 &_vec);
 };
 
 

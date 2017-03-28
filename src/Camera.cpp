@@ -1,4 +1,4 @@
-//TO-DO: Delete
+#include <algorithm>
 #include <iostream>
 #include <ngl/NGLStream.h>
 
@@ -28,7 +28,6 @@ Camera::Camera()
 void Camera::calculateViewMat()
 {
     setInitPos(ngl::Vec3(0.0f, 0.0f, m_curDolly));
-    clearTransforms();
     movePivot(m_curPos);
     rotateCamera(m_curRot.m_x, 0.0f, 0.0f);
     rotateCamera(0.0f, m_curRot.m_y, 0.0f);
