@@ -30,6 +30,7 @@ const uint STATE_PREFS = 2;
 
 // character exceptions
 const int TEXT_CROSS = 32;
+const int TEXT_NEWLINE = 10;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
@@ -183,6 +184,10 @@ vec3 text(vec2 pos, int start_index, int end_index)
    {
      _cross;
    }
+   else if(button_text[i] == TEXT_NEWLINE)
+   {
+     _newline;
+   }
    else
    {
      S(button_text[i]);
@@ -196,37 +201,45 @@ vec3 centerText()
 
   int start_index = 0;
   int end_index = 0;
-  int str_len = 0;
+  int line_len = 0;
+  int max_len = 0;
   int button_id = 0;
+  int num_lines = 0;
   // find string start and end for this button
   for(int i=0; i<BUTTON_TEXT_LENGTH; i++)
   {
+    if(button_text[i] == TEXT_NEWLINE)
+    {
+      line_len = 0;
+      num_lines++;
+    }
+    else
+    {
+      line_len++;
+    }
+    max_len = max(max_len, line_len);
     if(button_text[i] == 0)
     {
       if(button_id == fragId)
       {
-        for(int j=i; j<BUTTON_TEXT_LENGTH; j++)
-        {
-          if(button_text[j] == 0)
-          {
-            end_index = j;
-            break;
-          }
-        }
+        end_index = i;
         break;
       }
       else
       {
         button_id++;
         start_index = i+1;
+        max_len = 0;
+        line_len = 0;
+        num_lines = 0;
       }
     }
   }
-  str_len = end_index - start_index;
-  if(str_len > 0)
+  //str_len = end_index - start_index;
+  if(max_len > 0)
   {
     vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-    vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2)));
+    vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - max_len * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (num_lines - 1) * FONT_SIZE)/2.0)));
     return text(text_pos, start_index, end_index);
   }
   else
