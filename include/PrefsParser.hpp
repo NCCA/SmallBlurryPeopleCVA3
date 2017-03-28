@@ -5,9 +5,80 @@
 #include <fstream>
 #include <boost/spirit/include/classic.hpp>
 #include <boost/bind.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
 #include "Prefs.hpp"
 
 namespace spt = boost::spirit::classic;
+namespace qi = boost::spirit::qi;
+
+template <typename Iterator>
+struct int_pair
+  : qi::grammar<Iterator, std::map<std::string, int>()>
+{
+    int_pair()
+      : int_pair::base_type(query)
+    {
+        query =  pair;
+        pair  =  key >> qi::lit('=') >> qi::int_;
+        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+    }
+    qi::rule<Iterator, std::map<std::string, int>()> query;
+    qi::rule<Iterator, std::pair<std::string, int>()> pair;
+    qi::rule<Iterator, std::string()> key;
+};
+
+template <typename Iterator>
+struct double_pair
+  : qi::grammar<Iterator, std::map<std::string, double>()>
+{
+    double_pair()
+      : double_pair::base_type(query)
+    {
+        query =  pair;
+        pair  =  key >> qi::lit('=') >> strict_double;
+        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+
+    }
+    qi::rule<Iterator, std::map<std::string, double>()> query;
+    qi::rule<Iterator, std::pair<std::string, double>()> pair;
+    qi::rule<Iterator, std::string()> key;
+    qi::real_parser<double, qi::strict_real_policies<double>> strict_double;
+};
+
+template <typename Iterator>
+struct bool_pair
+  : qi::grammar<Iterator, std::map<std::string, bool>()>
+{
+    bool_pair()
+      : bool_pair::base_type(query)
+    {
+        query =  pair;
+        pair  =  key >> qi::lit('=') >> qi::bool_;
+        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+
+    }
+    qi::rule<Iterator, std::map<std::string, bool>()> query;
+    qi::rule<Iterator, std::pair<std::string, bool>()> pair;
+    qi::rule<Iterator, std::string()> key;
+};
+
+template <typename Iterator>
+struct str_pair
+  : qi::grammar<Iterator, std::map<std::string, std::string>()>
+{
+    str_pair()
+      : str_pair::base_type(query)
+    {
+        query =  pair;
+        pair  =  key >> qi::lit("=") >> +(qi::char_);
+        key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+
+    }
+    qi::rule<Iterator, std::map<std::string, std::string>()> query;
+    qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
+    qi::rule<Iterator, std::string()> key;
+};
 
 ///
 /// \brief The PrefsParser class is resposible for reading in a preferences text file and
@@ -19,10 +90,7 @@ namespace spt = boost::spirit::classic;
 ///
 class PrefsParser
 {
-  ///
-  /// \brief srule is a typedef local to the Parser that abbreviates access to the boost::spirit::classic library
-  ///
-  typedef boost::spirit::classic::rule<spt::phrase_scanner_t> srule;
+
 
 public:
   ///
@@ -37,70 +105,7 @@ public:
   void parseFile(std::string _file_name);
 
 private:
-  ///
-  /// \brief parseIntPref parses a int preference, storing the result in the Prefs singelton class
-  /// \param _begin is a pointer to the first char in the line containing an int pref
-  ///
-  void parseIntPref(const char *_begin);
 
-  ///
-  /// \brief parseFloatPref parses a float preference, storing the result in the Prefs singelton class
-  /// \param _begin is a pointer to the first char in the line containing a float pref
-  ///
-  void parseFloatPref(const char *_begin);
-
-  ///
-  /// \brief parseStrPref parses a string preference, storing the result in the Prefs singelton class
-  /// \param _begin is a pointer to the first char in the line containing a string pref
-  ///
-  void parseStrPref(const char *_begin);
-
-  void parseBoolPref(const char *_begin);
-
-  srule m_true_rule = (spt::str_p("True"));
-
-  srule m_false_rule = (spt::str_p("False"));
-
-  srule m_bool_rule =  (m_true_rule | m_false_rule);
-  ///
-  /// \brief m_name_rule is a helper variable that defines the format of a preference name in EBNF
-  ///
-  srule m_name_rule = spt::alpha_p >> *spt::alnum_p >> *("_" >> +spt::alnum_p);
-
-  ///
-  /// \brief m_str_rule is a helper varible that defines a string of characters without quotes in EBNF
-  ///
-  srule m_str_rule = *(spt::anychar_p - '"');
-
-  ///
-  /// \brief m_quoted_str_rule is a helper variable that defines a string in quotes
-  ///
-  srule m_quoted_str_rule = '"' >> m_str_rule >> '"';
-
-  ///
-  /// \brief m_str_pref_rule is a helper variable that define the format of a string preference line
-  ///
-  srule m_str_pref_rule = (m_name_rule >> "=" >> m_quoted_str_rule)
-                      [bind(&PrefsParser::parseStrPref, boost::ref(*this), _1)];
-
-  ///
-  /// \brief m_int_pref_rule is a helper variable that define the format of an integer preference line
-  ///
-  srule m_int_pref_rule = (m_name_rule >> "=" >> spt::int_p)
-                   [bind(&PrefsParser::parseIntPref, boost::ref(*this), _1)];
-
-  ///
-  /// \brief m_real_pref_rule is a helper variable that define the format of a float preference line
-  ///
-  srule m_real_pref_rule = (m_name_rule >> "=" >> spt::strict_real_p)
-                   [bind(&PrefsParser::parseFloatPref, boost::ref(*this), _1)];
-
-  srule m_bool_pref_rule = (m_name_rule >> "=" >> m_bool_rule)
-      [bind(&PrefsParser::parseBoolPref, boost::ref(*this), _1)];
-
-  ///
-  /// \brief m_prefs is an instance of the Prefs class that will store the result of the parsing
-  ///
   Prefs* m_prefs = Prefs::instance();
 };
 
