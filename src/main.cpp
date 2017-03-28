@@ -15,8 +15,13 @@
 
 int main()
 {
+  Prefs* prefs = Prefs::instance();
+  prefs->init();
+  prefs->printPrefs();
 
-		SDL_Init(SDL_INIT_VIDEO);
+
+
+    SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
 
@@ -64,9 +69,7 @@ int main()
     ngl::NGLInit::instance();
 
 
-    Prefs* prefs = Prefs::instance();
-    prefs->init();
-    prefs->printPrefs();
+
 
 
 
