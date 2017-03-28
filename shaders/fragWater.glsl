@@ -15,6 +15,7 @@ uniform mat4 MV;
 uniform sampler2D displacement;
 uniform sampler2D terrainPos;
 uniform sampler2D waterReflection;
+uniform sampler2D normal;
 
 uniform float sunInts;
 uniform float moonInts;
@@ -104,45 +105,17 @@ void main()
 {
     vec2 UV = gl_FragCoord.xy / viewport;
 
-    //Calculate normal from displacement.
-    float heights[4];
-    heights[0] = textureOffset(displacement, tile_uv_fs, ivec2(0, 1)).r;
-    heights[1] = textureOffset(displacement, tile_uv_fs, ivec2(1, 0)).r;
-    heights[2] = textureOffset(displacement, tile_uv_fs, ivec2(0, -1)).r;
-    heights[3] = textureOffset(displacement, tile_uv_fs, ivec2(-1, 0)).r;
+    vec3 n = texture(normal, tile_uv_fs).xyz;
 
-    vec3 center = vec3(tile_uv_fs.xy, texture(displacement, tile_uv_fs).r);
-
-    //y/z to be swizzled later.
-    vec3 top = vec3((tile_uv_fs + vec2(0.0, pixelstep.y)), heights[0]) - center;
-    vec3 right = vec3((tile_uv_fs + vec2(pixelstep.x, 0.0)), heights[1]) - center;
-    vec3 bottom = vec3((tile_uv_fs + vec2(0.0, -pixelstep.y)), heights[2]) - center;
-    vec3 left = vec3((tile_uv_fs + vec2(pixelstep.x, 0.0)), heights[3]) - center;
-
-    bottom.x = -bottom.x;
-    left.x = -left.x;
-
-    vec3 normals[4];
-    normals[0] = normalize( cross( top.xzy,       right.xzy ) );
-    normals[1] = normalize( cross( right.xzy,     bottom.xzy ) );
-    normals[2] = normalize( cross( bottom.xzy,    left.xzy ) );
-    normals[3] = normalize( cross( left.xzy,      top.xzy ) );
-
-    vec3 nav = normals[0] + normals[1] + normals[2] + normals[3];
-    nav /= 4.0;
-
-    vec3 normal = normalize( nav );
-
-    float mul = dot(normal, lightDir);
+    float mul = dot(n, lightDir);
     mul += 1.0;
     mul /= 2.0;
-
 
     ///Specular///
     //Surface to cam
     vec3 eyeVec = normalize(camPos - position_fs.xyz);
     //Lightdir is direction to light
-    vec3 reflection = normalize(reflect(lightDir, normal));
+    vec3 reflection = normalize(reflect(lightDir, n));
     reflection.y = 1.0 - reflection.y;
     //reflection.z = -reflection.z;
     reflection = normalize( reflection );
@@ -156,14 +129,14 @@ void main()
 
     ///Reflections///
     //Sourced from http://ivanleben.blogspot.co.uk/2008/03/water-reflections-with-opengl.html
-    vec3 flatNormal = normal - dot(normal, vec3(0.0, 1.0, 0.0)) * vec3(0.0, 1.0, 0.0);
+    vec3 flatNormal = n - dot(n, vec3(0.0, 1.0, 0.0)) * vec3(0.0, 1.0, 0.0);
     //Project into eye space
     vec3 eyeFlatNormal = (MV * vec4(flatNormal.xyz, 0.0)).xyz;
     //Normalise!
     vec2 reflectOffset = normalize( eyeFlatNormal.xy ) * length(flatNormal) * 0.025;
     vec3 reflColour = texture(waterReflection, UV + reflectOffset).xyz * 0.8;
 
-    float reflMul = clamp( dot(eyeVec, normal), 0.0, 1.0 );
+    float reflMul = clamp( dot(eyeVec, n), 0.0, 1.0 );
     reflMul = 0.5 - reflMul;
     reflMul = clamp(reflMul, 0.0, 1.0);
     fragColour.xyz = mix(fragColour.xyz, reflColour, reflMul);
@@ -182,5 +155,6 @@ void main()
 
     outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
 
-    //fragColour = texture(waterReflection, UV);
+    /*fragColour.xyz = n;
+    fragColour.a = 1.0;*/
 }

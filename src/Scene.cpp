@@ -257,7 +257,7 @@ void Scene::initialiseFramebuffers()
     std::cout << "Initalising displacement framebuffer to " << waterResolution << " by " << waterResolution << '\n';
     m_displacementBuffer.initialise(waterResolution, waterResolution);
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
-    m_displacementBuffer.addTexture("waterNormal", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT1);
+    m_displacementBuffer.addTexture("waterNormal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     if(!m_displacementBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
@@ -588,7 +588,6 @@ void Scene::draw()
     for( size_t i = 0; i < cascadeDistances.size(); ++i )
         slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-    m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
@@ -652,7 +651,6 @@ void Scene::draw()
     for( size_t i = 0; i < cascadeDistances.size(); ++i )
         slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-    m_shadowBuffer.bindTexture(id, "depth", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
     m_mainBuffer.bindTexture(id, "normal", "normal", 1);
     m_mainBuffer.bindTexture(id, "position", "position", 2);
@@ -696,6 +694,13 @@ void Scene::draw()
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     //Normals
+    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
+    slib->use("waterDisplacementNormal");
+    id = slib->getProgramID("waterDisplacementNormal");
+    m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
     m_displacementBuffer.unbind();
 
@@ -726,11 +731,12 @@ void Scene::draw()
     slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
     id = slib->getProgramID("water");
-
+std::cout << "p1\n";
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
     m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
     m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
-
+    m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
+std::cout << "p2\n";
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
 
@@ -2007,9 +2013,9 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (_x + _dirX) > 0 and (_x + _dirX) < _facePositions[0].size() - 1;
+    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions[0].size() - 1;
     //Can we move in the vertical direction?
-    bool vertical = (_y + _dirY) > 0 and (_y + _dirY) < _facePositions.size() - 1;
+    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions.size() - 1;
 
     if(horizontal)
     {
