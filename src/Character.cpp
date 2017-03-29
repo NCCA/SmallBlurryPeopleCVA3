@@ -382,8 +382,8 @@ bool Character::setTarget(ngl::Vec2 _target_pos)
 
 bool Character::setTarget(int _tile_id)
 {
-  m_pos.m_x = int(m_pos.m_x);
-  m_pos.m_y = int(m_pos.m_y);
+  //m_pos.m_x = int(m_pos.m_x);
+  //m_pos.m_y = int(m_pos.m_y);
   //if the chosen tile isnt equal to the target and isnt equal to the character's pos
   if(_tile_id != m_target_id && _tile_id != m_grid->coordToId(m_pos))
   {
