@@ -44,6 +44,15 @@ public:
   /// \param _path list of nodes that make up path
   ///
   void printPath(std::vector<ngl::Vec2> &_path);
+  ///
+  /// \brief raytrace check whether straight path is possible between given points. Does not require instance of class
+  /// \param _grid grid to check
+  /// \param _start_pos start of line
+  /// \param _end_pos end of line
+  /// \return true for line of sight
+  ///
+  static bool raytrace(Grid *_grid, ngl::Vec2 _start_pos, ngl::Vec2 _end_pos);
+
 private:
   ///
   /// \brief m_grid grid which network can read for pathfinding
