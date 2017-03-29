@@ -49,7 +49,7 @@ public:
   /// \param _grid grid to check
   /// \param _start_pos start of line
   /// \param _end_pos end of line
-  /// \return true for line of sight
+  /// \return true for line of sight between _start_pos and _end_pos
   ///
   static bool raytrace(Grid *_grid, ngl::Vec2 _start_pos, ngl::Vec2 _end_pos);
 

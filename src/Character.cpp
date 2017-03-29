@@ -130,10 +130,10 @@ void Character::setIdleState()
   bool valid = false;
   while(!valid)
   {
-    int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, 50);
-    int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, 50);
-    int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, 50);
-    int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, 50);
+    int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
+    int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
+    int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
+    int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, m_grid->getH());
 
     int x = Utility::randInt(x_min_range, x_max_range);
     int y = Utility::randInt(y_min_range, y_max_range);
@@ -316,7 +316,7 @@ void Character::update()
   }
   else if (m_active == false)
   {
-    //setIdleState();
+    setIdleState();
   }
 }
 
@@ -325,6 +325,8 @@ bool Character::move()
   // check whether the next point is necessary or if character has line of sight to the second point in list
   if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
   {
+    // if character can see point after next, remove the next point so character heads directly to the furtherst one they can see
+    // done on a one by one basis so it does all happen in the same frame as pathfinding, not super slow that way but marginally better this way
     m_path.pop_back();
   }
 
