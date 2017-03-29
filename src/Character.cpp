@@ -323,7 +323,7 @@ void Character::update()
 bool Character::move()
 {
   // check whether the next point is necessary or if character has line of sight to the second point in list
-  if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.back()))
+  if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
   {
     m_path.pop_back();
   }
