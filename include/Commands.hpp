@@ -28,7 +28,8 @@ enum class Action
   PREFERENCES,       //16
   PASSIVE_CHARACTER, //17
   SETBOOLPREF,       //18
-  FORAGE
+  FORAGE,            //19
+  NOTIFY             //20
 };
 
 ///

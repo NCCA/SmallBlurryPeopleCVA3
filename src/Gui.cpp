@@ -47,9 +47,9 @@ void Gui::initGL()
 
 void Gui::click()
 {
-  if(m_selected_button_id >= 0 && (size_t)m_selected_button_id < m_buttons.size())
+  if(m_selected_button)
   {
-    std::cout << "clicked button " << m_selected_button_id << std::endl;
+    std::cout << "clicked button " << m_selected_button->getID() << std::endl;
     executeAction(getCurrentButton()->getAction());
   }
 }
@@ -143,17 +143,17 @@ int Gui::executeAction(Action _action)
 bool Gui::mousePos(ngl::Vec2 _pos)
 {
   bool button_selected = false;
-  for(Button &button : m_buttons)
+  for(std::shared_ptr<Button> &button : m_buttons)
   {
-    if(button.isInside(_pos))
+    if(button.get()->isInside(_pos))
     {
-      m_selected_button_id = button.getID();
+      m_selected_button = button.get();
       button_selected = true;
     }
   }
   if(!button_selected || getCurrentButton()->isPassive(m_scene->getActiveCharacter()))
   {
-    m_selected_button_id = -1;
+    m_selected_button = nullptr;
   }
   return button_selected;
 }
@@ -247,7 +247,7 @@ void Gui::createPrefsButtons()
 
 void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text)
 {
-  m_buttons.push_back(Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size, _text));
+  m_buttons.push_back(std::shared_ptr<Button>(new Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size, _text)));
 }
 
 void Gui::updateButtonArrays()
@@ -257,13 +257,14 @@ void Gui::updateButtonArrays()
   std::vector<ngl::Vec2> sizes;
   std::vector<int> ids;
   std::vector<Action> actions;
-  for(Button &button : m_buttons)
+  for(std::shared_ptr<Button> &button : m_buttons)
   {
-    button.updatePos(res);
-    positions.push_back(button.getPos());
-    sizes.push_back(button.getSize());
-    ids.push_back(button.getID());
-    actions.push_back(button.getAction());
+    Button *b = button.get();
+    b->updatePos(res);
+    positions.push_back(b->getPos());
+    sizes.push_back(b->getSize());
+    ids.push_back(b->getID());
+    actions.push_back(b->getAction());
   }
   glBindVertexArray(m_vao_id);
 
@@ -321,7 +322,14 @@ void Gui::drawButtons()
   }
   else
   {
-    slib->setRegisteredUniform("mouseOver", m_selected_button_id);
+    if(m_selected_button)
+    {
+      slib->setRegisteredUniform("mouseOver", m_selected_button->getID());
+    }
+    else
+    {
+      slib->setRegisteredUniform("mouseOver", -1);
+    }
   }
   glBindVertexArray(m_vao_id);
   glDrawArrays(GL_POINTS, 0, m_buttons.size());
@@ -362,17 +370,18 @@ void Gui::updateText()
   Prefs *prefs = Prefs::instance();
   std::vector<uint> button_text;
   // for each button
-  for(Button &b : m_buttons)
+  for(std::shared_ptr<Button> &button : m_buttons)
   {
+    Button *b = button.get();
     // get its text
     std::string text = "";
-    switch(b.getAction())
+    switch(b->getAction())
     {
     case Action::SETBOOLPREF:
-      text = prefs->getPrefValueString(b.getText());
+      text = prefs->getPrefValueString(b->getText());
       break;
     default:
-      text = b.getText();
+      text = b->getText();
       break;
     }
 
@@ -395,14 +404,15 @@ void Gui::updateText()
 void Gui::updateActiveCharacter()
 {
   std::string char_name = m_scene->getActiveCharacterName();
-  for(Button &b : m_buttons)
+  for(std::shared_ptr<Button> &button : m_buttons)
   {
-    switch(b.getAction())
+    Button *b = button.get();
+    switch(b->getAction())
     {
     case Action::PASSIVE_CHARACTER:
-      if(b.getText() != char_name)
+      if(b->getText() != char_name)
       {
-        b.setText(char_name);
+        b->setText(char_name);
         m_text_outdated = true;
       }
       break;
@@ -414,5 +424,10 @@ void Gui::updateActiveCharacter()
 
 Button *Gui::getCurrentButton()
 {
-  return &(m_buttons[m_selected_button_id]);
+  return m_selected_button;
+}
+
+void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
+{
+  //addButton();
 }

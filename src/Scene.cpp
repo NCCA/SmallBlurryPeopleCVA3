@@ -87,7 +87,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-    for (int i = 0; i<100; i++)
+    for (int i = 0; i<10; i++)
     {
         createCharacter();
     }

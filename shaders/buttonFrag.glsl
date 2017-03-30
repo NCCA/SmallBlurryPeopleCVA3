@@ -21,7 +21,9 @@ const uint STOPLEFT          = 14;
 const uint STOPRIGHT         = 15;
 const uint PREFERENCES       = 16;
 const uint PASSIVE_CHARACTER = 17;
-const uint FORAGE            = 18;
+const uint SETBOOLPREF       = 18;
+const uint FORAGE            = 19;
+const uint NOTIFY            = 20;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -46,6 +48,9 @@ uniform vec2 fResolution;
 uniform int game_state;
 uniform sampler2D icons;
 uniform sampler2D font;
+uniform float notification_age[3];
+uniform int num_buttons;
+uniform int num_notes;
 
 uniform uint button_text[BUTTON_TEXT_LENGTH];
 
@@ -305,8 +310,12 @@ void main()
   }
 
   s += centerText();
-
-  outColour = vec4(s, 1.0);
+  float a = 1.0;
+  if(fragAction == NOTIFY)
+  {
+    a = 0.5;
+  }
+  outColour = vec4(s, a);
 }
 
 //return text(translate(pos, vec2(fragPixelPos.x + border_size, -(fragPixelPos.y + FONT_SIZE + border_size))));

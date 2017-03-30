@@ -120,6 +120,12 @@ public :
   /// \return pointer to selected button
   ///
   Button *getCurrentButton();
+  ///
+  /// \brief notify create a notification command
+  /// \param _text text for notification
+  /// \param _pos position on map that notification comes from
+  ///
+  void notify(const std::string &_text, ngl::Vec2 _pos);
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern
@@ -132,11 +138,11 @@ private :
   ///
   /// \brief m_buttons vector of buttons contained in the Gui
   ///
-  std::vector<Button> m_buttons;
+  std::vector< std::shared_ptr<Button> > m_buttons;
   ///
   /// \brief m_selected_button_id current button that mouse is over
   ///
-  int m_selected_button_id;
+  Button *m_selected_button;
   ///
   /// \brief m_win_w width of window
   ///
