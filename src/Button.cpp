@@ -119,3 +119,23 @@ void Button::resetIdCounter()
 {
   m_id_counter = 0;
 }
+
+// Notification Button:
+
+NotificationButton::NotificationButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text, ngl::Vec2 _map_pos) :
+  Button(_action, _x_align, _y_align, _window_res, _offset, _size, _text),
+  m_map_pos(_map_pos),
+  m_age(0)
+{
+
+}
+
+void NotificationButton::incrementAge()
+{
+  m_age++;
+}
+
+int NotificationButton::getAge()
+{
+  return m_age;
+}

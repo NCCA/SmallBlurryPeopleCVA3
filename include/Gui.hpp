@@ -84,10 +84,16 @@ public :
 
   void addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text);
 
+  void addNotification(const std::string &_text, ngl::Vec2 _map_pos);
+
+  void removeButton(std::shared_ptr<Button> button);
   ///
   /// \brief updateButtonArrays updates positions and passes them to openGL, useful for changing buttons or resizing screen
   ///
   void updateButtonArrays();
+
+  void updateNotifications();
+
   ///
   /// \brief drawButtons draw buttons to screen
   ///
@@ -115,11 +121,6 @@ public :
   /// \brief updateActiveCharacter if active character changes, this function updates button text
   ///
   void updateActiveCharacter();
-  ///
-  /// \brief getCurrentButton get the currently selected button
-  /// \return pointer to selected button
-  ///
-  Button *getCurrentButton();
   ///
   /// \brief notify create a notification command
   /// \param _text text for notification

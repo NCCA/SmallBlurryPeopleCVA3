@@ -77,8 +77,8 @@ vec3 button_highlight = vec3(0.9, 0.7, 0.4);
 //--- common data ---
 
 //--- font data ---
-const float FONT_SIZE = 20;
-const float FONT_SPACE = 0.5;
+uniform float FONT_SIZE = 20;
+uniform float FONT_SPACE = 0.5;
 
 //----- access to the image of ascii code characters ------
 //#define S(a) c+=texture(iChannel0,clamp(tp,0.,1.)/16.+fract(floor(vec2(a,15.999-float(a)/16.))/16.)).x; uv.x-=FONT_SPACE;
@@ -185,11 +185,7 @@ vec3 text(vec2 pos, int start_index, int end_index)
   int button_id = 0;
   for(int i=start_index; i<end_index; i++)
   {
-   if(button_text[i] == TEXT_CROSS)
-   {
-     _cross;
-   }
-   else if(button_text[i] == TEXT_NEWLINE)
+   if(button_text[i] == TEXT_NEWLINE)
    {
      _newline;
    }

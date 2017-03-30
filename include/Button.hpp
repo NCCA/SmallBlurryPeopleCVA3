@@ -126,4 +126,15 @@ protected:
   std::string m_text;
 };
 
+class NotificationButton : public Button
+{
+public:
+  NotificationButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text, ngl::Vec2 _map_pos);
+  void incrementAge();
+  int getAge();
+private:
+  ngl::Vec2 m_map_pos;
+  int m_age;
+};
+
 #endif//__BUTTON_HPP__

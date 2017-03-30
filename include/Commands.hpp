@@ -297,5 +297,4 @@ private:
   Character *m_character;
 };
 
-
 #endif//__COMMANDS_HPP__

@@ -7,7 +7,11 @@
 constexpr char TEXT_PLAY[2]   = {5, 0};
 constexpr char TEXT_PAUSE[2]  = {6, 0};
 constexpr char TEXT_SMILEY[2] = {29,0};
-constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
+//constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
+
+constexpr int MAX_AGE = 50;
+constexpr float FONT_SIZE = 20;
+constexpr float FONT_SPACE = 0.5;
 
 Gui::Gui()
 {
@@ -50,7 +54,7 @@ void Gui::click()
   if(m_selected_button)
   {
     std::cout << "clicked button " << m_selected_button->getID() << std::endl;
-    executeAction(getCurrentButton()->getAction());
+    executeAction(m_selected_button->getAction());
   }
 }
 
@@ -62,6 +66,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   {
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
+  case Action::NOTIFY:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -80,6 +85,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
+    notify("big old\n testaroo", ngl::Vec2(0,0));
     command.reset(new ZoomCommand(m_scene, 1));
     break;
   case Action::ZOOMOUT:
@@ -113,8 +119,11 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new PrefsCommand(m_scene));
     break;
   case Action::SETBOOLPREF:
-    command.reset(new SetPrefsCommand<bool>(getCurrentButton()->getText(), !prefs->getBoolPref(getCurrentButton()->getText())));
-    m_text_outdated = true;
+    if(m_selected_button)
+    {
+      command.reset(new SetPrefsCommand<bool>(m_selected_button->getText(), !prefs->getBoolPref(m_selected_button->getText())));
+      m_text_outdated = true;
+    }
     break;
   case Action::FORAGE:
     command.reset(new ForageCommand(m_scene->getActiveCharacter()));
@@ -151,7 +160,7 @@ bool Gui::mousePos(ngl::Vec2 _pos)
       button_selected = true;
     }
   }
-  if(!button_selected || getCurrentButton()->isPassive(m_scene->getActiveCharacter()))
+  if(!button_selected || (m_selected_button && m_selected_button->isPassive(m_scene->getActiveCharacter())))
   {
     m_selected_button = nullptr;
   }
@@ -184,7 +193,6 @@ void Gui::createSceneButtons()
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
   updateButtonArrays();
-  m_text_outdated = true;
 }
 
 void Gui::createPauseButtons()
@@ -194,7 +202,6 @@ void Gui::createPauseButtons()
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
   addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
   updateButtonArrays();
-  m_text_outdated = true;
 }
 
 void Gui::createPrefsButtons()
@@ -205,7 +212,7 @@ void Gui::createPrefsButtons()
   float x_pos = 10;
   std::string name = "";
   wipeButtons();
-  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_CROSS);
+  addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
   for(auto &p : prefs->getIntMap())
   {
     name = p.first;
@@ -242,7 +249,6 @@ void Gui::createPrefsButtons()
   }
 
   updateButtonArrays();
-  m_text_outdated = true;
 }
 
 void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text)
@@ -250,21 +256,39 @@ void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ng
   m_buttons.push_back(std::shared_ptr<Button>(new Button(_action, _x_align, _y_align, ngl::Vec2(m_win_w, m_win_h), _offset, _size, _text)));
 }
 
+void Gui::addNotification(const std::string &_text, ngl::Vec2 _map_pos)
+{
+  ngl::Vec2 size(0,40);
+  size.m_x = _text.length() * (FONT_SIZE+2) * FONT_SPACE;
+  m_buttons.push_back(std::shared_ptr<NotificationButton>(new NotificationButton(Action::NOTIFY, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(10,10), size, _text, _map_pos)));
+}
+
+void Gui::removeButton(std::shared_ptr<Button> button)
+{
+  auto it = std::find(m_buttons.begin(), m_buttons.end(), button);
+  if(it != m_buttons.end())
+  {
+    m_buttons.erase(it);
+  }
+}
+
 void Gui::updateButtonArrays()
 {
   ngl::Vec2 res(m_win_w, m_win_h);
   std::vector<ngl::Vec2> positions;
   std::vector<ngl::Vec2> sizes;
-  std::vector<int> ids;
+  std::vector<int> shader_ids;
   std::vector<Action> actions;
+  int shader_id = 0;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
     b->updatePos(res);
     positions.push_back(b->getPos());
     sizes.push_back(b->getSize());
-    ids.push_back(b->getID());
+    shader_ids.push_back(shader_id);
     actions.push_back(b->getAction());
+    shader_id++;
   }
   glBindVertexArray(m_vao_id);
 
@@ -283,12 +307,11 @@ void Gui::updateButtonArrays()
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[2]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * ids.size(), &(ids[0]), GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * shader_ids.size(), &(shader_ids[0]), GL_DYNAMIC_DRAW);
   // now fix this to the attribute buffer 2
   glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnableVertexAttribArray(2);
-
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[3]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(GL_INT) * actions.size(), &(actions[0]), GL_DYNAMIC_DRAW);
@@ -298,6 +321,23 @@ void Gui::updateButtonArrays()
   glEnableVertexAttribArray(3);
 
   glBindVertexArray(0);
+  m_text_outdated = true;
+}
+
+void Gui::updateNotifications()
+{
+  for(std::shared_ptr<Button> &button : m_buttons)
+  {
+    Button *b = button.get();
+    if(b && b->getAction() == Action::NOTIFY)
+    {
+      ((NotificationButton *)b)->incrementAge();
+      if(((NotificationButton *)b)->getAge() > MAX_AGE)
+      {
+        removeButton(button);
+      }
+    }
+  }
 }
 
 void Gui::drawButtons()
@@ -314,6 +354,8 @@ void Gui::drawButtons()
     updateText();
   }
   ngl::ShaderLib::instance()->setRegisteredUniform("game_state", m_scene->getState());
+  ngl::ShaderLib::instance()->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
+  ngl::ShaderLib::instance()->setRegisteredUniform("FONT_SPACE", FONT_SPACE);
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
   if(m_mouse_down)
@@ -384,6 +426,7 @@ void Gui::updateText()
       text = b->getText();
       break;
     }
+    std::cout << b->getText() << std::endl;
 
     // add it to the text vector as uints
     for(char c : text)
@@ -393,6 +436,12 @@ void Gui::updateText()
     // add a 0 value for break
     button_text.push_back(0);
   }
+  for(auto c : button_text)
+  {
+    std::cout << (char)c;
+  }
+  std::cout << std::endl;
+
   if(button_text.size() > BUTTON_TEXT_LENGTH)
   {
     std::cerr << "button text of size " << button_text.size() << " too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
@@ -422,12 +471,8 @@ void Gui::updateActiveCharacter()
   }
 }
 
-Button *Gui::getCurrentButton()
-{
-  return m_selected_button;
-}
-
 void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
 {
-  //addButton();
+  addNotification(_text, _pos);
+  updateButtonArrays();
 }

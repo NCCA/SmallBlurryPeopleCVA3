@@ -324,6 +324,7 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
+  Gui::instance()->updateNotifications();
   if (m_grid.HasChanges())
   {
       initMeshInstances();
@@ -1312,7 +1313,7 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
-    zoom(_event.y);
+    Gui::instance()->executeAction(_event.y > 0 ? Action::ZOOMIN : Action::ZOOMOUT);
 }
 
 void Scene::zoom(int _direction)
