@@ -148,6 +148,11 @@ public:
     /// \return m_state
     ///
     GameState getState();
+    ///
+    /// \brief moveCamToPos send the target to the given position
+    /// \param _pos position for the camera to focus in on
+    ///
+    void moveCamToPos(ngl::Vec2 _pos);
 
     void initMeshInstances();
 

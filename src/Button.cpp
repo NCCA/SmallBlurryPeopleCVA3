@@ -139,3 +139,8 @@ int NotificationButton::getAge()
 {
   return m_age;
 }
+
+ngl::Vec2 NotificationButton::getMapPos()
+{
+  return m_map_pos;
+}

@@ -297,4 +297,15 @@ private:
   Character *m_character;
 };
 
+class CentreNotificationCommand : public Command
+{
+public:
+  CentreNotificationCommand(Scene *_scene, ngl::Vec2 _map_pos);
+  ~CentreNotificationCommand() = default;
+  virtual void execute();
+private:
+  Scene *m_scene;
+  ngl::Vec2 m_map_pos;
+};
+
 #endif//__COMMANDS_HPP__

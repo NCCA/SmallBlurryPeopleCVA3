@@ -127,3 +127,17 @@ void ForageCommand::execute()
 {
   m_character->forage();
 }
+
+//------------------------------------------------------------//
+// Centre Notification Command
+//------------------------------------------------------------//
+
+CentreNotificationCommand::CentreNotificationCommand(Scene *_scene, ngl::Vec2 _map_pos) :
+  m_scene(_scene),
+  m_map_pos(_map_pos)
+{}
+
+void CentreNotificationCommand::execute()
+{
+  m_scene->moveCamToPos(m_map_pos);
+}

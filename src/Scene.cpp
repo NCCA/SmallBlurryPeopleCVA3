@@ -2195,3 +2195,9 @@ GameState Scene::getState()
 {
     return m_state;
 }
+
+void Scene::moveCamToPos(ngl::Vec2 _pos)
+{
+  std::cout << "moved camera" << std::endl;
+  //m_cam.setPos(_pos);
+}

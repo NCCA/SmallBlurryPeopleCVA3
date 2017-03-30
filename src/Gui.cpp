@@ -66,7 +66,6 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   {
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
-  case Action::NOTIFY:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -85,7 +84,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
-    notify("big old\n testaroo", ngl::Vec2(0,0));
+    notify("big old testaroo", ngl::Vec2(0,0));
     command.reset(new ZoomCommand(m_scene, 1));
     break;
   case Action::ZOOMOUT:
@@ -127,6 +126,12 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     break;
   case Action::FORAGE:
     command.reset(new ForageCommand(m_scene->getActiveCharacter()));
+    break;
+  case Action::NOTIFY:
+    if(m_selected_button)
+    {
+      command.reset(new CentreNotificationCommand(m_scene, ((NotificationButton *)m_selected_button)->getMapPos()));
+    }
     break;
   }
   return command;
