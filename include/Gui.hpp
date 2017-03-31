@@ -127,6 +127,11 @@ public :
   /// \param _pos position on map that notification comes from
   ///
   void notify(const std::string &_text, ngl::Vec2 _pos);
+  ///
+  /// \brief moveNotifications move all notifications eg up or down
+  /// \param _move_vec
+  ///
+  void moveNotifications(ngl::Vec2 _move_vec);
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern
@@ -176,6 +181,8 @@ private :
   /// \brief m_text_outdated flag. if true, text will be updated on next draw call
   ///
   bool m_text_outdated;
+
+  int m_note_id;
 };
 
 #endif//__GUI_HPP__

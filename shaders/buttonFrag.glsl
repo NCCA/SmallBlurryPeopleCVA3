@@ -1,6 +1,7 @@
 #version 410 core
 
 #define BUTTON_TEXT_LENGTH 256
+#define DOUBLE_MAX_NOTES 10
 
 // actions
 const uint PASSIVE           = 0;
@@ -48,9 +49,9 @@ uniform vec2 fResolution;
 uniform int game_state;
 uniform sampler2D icons;
 uniform sampler2D font;
-uniform float notification_age[3];
-uniform int num_buttons;
-uniform int num_notes;
+
+uniform int notification_ages[DOUBLE_MAX_NOTES];
+uniform int max_notification_age;
 
 uniform uint button_text[BUTTON_TEXT_LENGTH];
 
@@ -309,7 +310,15 @@ void main()
   float a = 1.0;
   if(fragAction == NOTIFY)
   {
-    a = 0.5;
+    for(int i=1; i < DOUBLE_MAX_NOTES; i+=2)
+    {
+      if(notification_ages[i-1] == fragId)
+      {
+        //a = float(notification_ages[i])/float(max_notification_age);
+        a = smoothstep(1, 0, notification_ages[i] / float(max_notification_age));
+      }
+    }
+    //a = pow(smoothstep(1, 0, notification_ages[1] / float(max_notification_age)), 0.25);
   }
   outColour = vec4(s, a);
 }

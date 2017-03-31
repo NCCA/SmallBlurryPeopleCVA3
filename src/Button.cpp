@@ -120,6 +120,11 @@ void Button::resetIdCounter()
   m_id_counter = 0;
 }
 
+void Button::move(ngl::Vec2 _move_vec)
+{
+  m_offset += _move_vec;
+}
+
 // Notification Button:
 
 NotificationButton::NotificationButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text, ngl::Vec2 _map_pos) :
@@ -144,3 +149,4 @@ ngl::Vec2 NotificationButton::getMapPos()
 {
   return m_map_pos;
 }
+

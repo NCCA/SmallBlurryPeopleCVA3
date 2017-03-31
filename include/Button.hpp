@@ -87,6 +87,11 @@ public:
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();
+  ///
+  /// \brief move move a button by a given amount
+  /// \param _move_vec the vector to move the button by
+  ///
+  void move(ngl::Vec2 _move_vec);
 protected:
   ///
   /// \brief m_id_counter keeps track of number of buttons

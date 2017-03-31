@@ -9,9 +9,10 @@ constexpr char TEXT_PAUSE[2]  = {6, 0};
 constexpr char TEXT_SMILEY[2] = {29,0};
 //constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
 
-constexpr int MAX_AGE = 50;
+constexpr int MAX_AGE = 150;
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
+constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
 {
@@ -20,6 +21,7 @@ Gui::Gui()
 
 void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
 {
+  m_note_id = 0;
   m_scene = _scene;
   m_shader_name = _shader_name;
   setResolution(_res);
@@ -84,7 +86,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
-    notify("big old testaroo", ngl::Vec2(0,0));
+    notify(std::to_string(m_note_id), ngl::Vec2(0,0));
     command.reset(new ZoomCommand(m_scene, 1));
     break;
   case Action::ZOOMOUT:
@@ -264,7 +266,8 @@ void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ng
 void Gui::addNotification(const std::string &_text, ngl::Vec2 _map_pos)
 {
   ngl::Vec2 size(0,40);
-  size.m_x = _text.length() * (FONT_SIZE+2) * FONT_SPACE;
+  size.m_x = std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+  moveNotifications(ngl::Vec2(0, 50));
   m_buttons.push_back(std::shared_ptr<NotificationButton>(new NotificationButton(Action::NOTIFY, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(10,10), size, _text, _map_pos)));
 }
 
@@ -275,6 +278,7 @@ void Gui::removeButton(std::shared_ptr<Button> button)
   {
     m_buttons.erase(it);
   }
+  updateButtonArrays();
 }
 
 void Gui::updateButtonArrays()
@@ -285,6 +289,10 @@ void Gui::updateButtonArrays()
   std::vector<int> shader_ids;
   std::vector<Action> actions;
   int shader_id = 0;
+
+  std::array<int, DOUBLE_MAX_NOTES> notification_ages{0};
+  size_t notification_ages_index = 0;
+  bool notification_uniform_needs_updating = false;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
@@ -293,8 +301,25 @@ void Gui::updateButtonArrays()
     sizes.push_back(b->getSize());
     shader_ids.push_back(shader_id);
     actions.push_back(b->getAction());
+    if(b->getAction() == Action::NOTIFY)
+    {
+      notification_uniform_needs_updating = true;
+      if(notification_ages_index < notification_ages.size())
+      {
+        notification_ages[notification_ages_index] = shader_id;
+        notification_ages[notification_ages_index+1] = ((NotificationButton *)b)->getAge();
+        notification_ages_index+=2;
+      }
+    }
     shader_id++;
   }
+
+  if(notification_uniform_needs_updating)
+  {
+    glUniform1iv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "notification_ages"), DOUBLE_MAX_NOTES, &(notification_ages[0]));
+    glUniform1i(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "max_notification_age"), MAX_AGE);
+  }
+
   glBindVertexArray(m_vao_id);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo_ids[0]);
@@ -331,17 +356,36 @@ void Gui::updateButtonArrays()
 
 void Gui::updateNotifications()
 {
+  // flag for whether there are any notifications to updated
+  bool uniform_needs_updating = false;
+  std::array<int, DOUBLE_MAX_NOTES> ages{0};
+  size_t i = 0;
+  int shader_id = 0;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
     if(b && b->getAction() == Action::NOTIFY)
     {
+      uniform_needs_updating = true;
       ((NotificationButton *)b)->incrementAge();
       if(((NotificationButton *)b)->getAge() > MAX_AGE)
       {
         removeButton(button);
       }
+      else if(i < ages.size())
+      {
+        ages[i] = shader_id;
+        i++;
+        ages[i] = ((NotificationButton *)b)->getAge();
+        i++;
+      }
     }
+    shader_id++;
+  }
+  if(uniform_needs_updating)
+  {
+    glUniform1iv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "notification_ages"), DOUBLE_MAX_NOTES, &(ages[0]));
+    glUniform1i(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "max_notification_age"), MAX_AGE);
   }
 }
 
@@ -350,6 +394,7 @@ void Gui::drawButtons()
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
   AssetStore *store = AssetStore::instance();
 
+  updateNotifications();
   glClear(GL_DEPTH_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
 
@@ -358,9 +403,10 @@ void Gui::drawButtons()
   {
     updateText();
   }
-  ngl::ShaderLib::instance()->setRegisteredUniform("game_state", m_scene->getState());
-  ngl::ShaderLib::instance()->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
-  ngl::ShaderLib::instance()->setRegisteredUniform("FONT_SPACE", FONT_SPACE);
+  slib->setRegisteredUniform("game_state", m_scene->getState());
+  slib->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
+  slib->setRegisteredUniform("FONT_SPACE", FONT_SPACE);
+
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
   if(m_mouse_down)
@@ -431,7 +477,6 @@ void Gui::updateText()
       text = b->getText();
       break;
     }
-    std::cout << b->getText() << std::endl;
 
     // add it to the text vector as uints
     for(char c : text)
@@ -441,11 +486,6 @@ void Gui::updateText()
     // add a 0 value for break
     button_text.push_back(0);
   }
-  for(auto c : button_text)
-  {
-    std::cout << (char)c;
-  }
-  std::cout << std::endl;
 
   if(button_text.size() > BUTTON_TEXT_LENGTH)
   {
@@ -478,6 +518,37 @@ void Gui::updateActiveCharacter()
 
 void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
 {
+  int num_notifications = 1;
+  for(int i = m_buttons.size()-1 ; i>=0; i--)
+  {
+    std::shared_ptr<Button> button(m_buttons[i]);
+    if(button.get()->getAction() == Action::NOTIFY)
+    {
+      if(num_notifications*2 >= DOUBLE_MAX_NOTES)
+      {
+        removeButton(button);
+      }
+      else
+      {
+        num_notifications++;
+      }
+    }
+
+  }
   addNotification(_text, _pos);
   updateButtonArrays();
+  m_note_id++;
+}
+
+void Gui::moveNotifications(ngl::Vec2 _move_vec)
+{
+  for(std::shared_ptr<Button> &button : m_buttons)
+  {
+    Button *b = button.get();
+    if(b->getAction() == Action::NOTIFY)
+    {
+      std::cout << b->getText() << std::endl;
+      b->move(_move_vec);
+    }
+  }
 }

@@ -324,7 +324,6 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  Gui::instance()->updateNotifications();
   if (m_grid.HasChanges())
   {
       initMeshInstances();
@@ -443,10 +442,8 @@ void Scene::update()
     // x, window height - y
     glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
 
-
     ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
     m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
-
 
     m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
     m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
