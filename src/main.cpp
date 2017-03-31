@@ -4,9 +4,6 @@
 #include <ngl/NGLInit.h>
 #include <set>
 
-#include "imgui.h"
-#include "ImGUIImpl.h"
-
 #include "Scene.hpp"
 #include "Grid.hpp"
 #include "Utility.hpp"
@@ -67,12 +64,6 @@ int main()
     SDL_GL_SetSwapInterval(1);
 
     ngl::NGLInit::instance();
-
-
-
-
-
-
 
     Scene scene (ngl::Vec2(rect.w, rect.h));
 

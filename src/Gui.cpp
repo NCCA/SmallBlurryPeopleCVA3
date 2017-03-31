@@ -74,10 +74,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new QuitCommand(m_scene));
     break;
   case Action::BUILDHOUSE:
-    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::HOUSE));
+		command.reset(new BuildCommand(m_scene->getActiveCharacter(), TileType::HOUSE));
     break;
   case Action::BUILDSTORE:
-    command.reset(new BuildCommand(m_scene->getActiveCharacter(), BuildingType::STOREHOUSE));
+		command.reset(new BuildCommand(m_scene->getActiveCharacter(), TileType::STOREHOUSE));
     break;
   case Action::CENTRECAMERA:
     command.reset(new CentreCameraCommand(m_scene));
@@ -394,7 +394,6 @@ void Gui::drawButtons()
   ngl::ShaderLib *slib = ngl::ShaderLib::instance();
   AssetStore *store = AssetStore::instance();
 
-  updateNotifications();
   glClear(GL_DEPTH_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
 

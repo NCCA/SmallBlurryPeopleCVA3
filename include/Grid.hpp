@@ -42,6 +42,10 @@ public:
   bool isTileTraversable(int _x, int _y);
   bool isTileTraversable(int _id);
   int cutTileTrees(int _id, int _goal_amount);
+	void setTileType(int _id, TileType _type);
+	void setTileType(int _x, int _y, TileType _type);
+	void setBuildState(int _id, float _value, TileType _type);
+	void setBuildState(int _x, int _y, float _value, TileType _type);
 
 
   /// @brief converts a tile id to a coordinate, the tile id is the
@@ -66,7 +70,7 @@ public:
   int getGlobalMountainHeight();
   int getGlobalWaterLevel();
 
-  bool HasChanges();
+	bool hasChanges();
   void resetHasChanges();
 
 

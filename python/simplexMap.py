@@ -88,8 +88,11 @@ for x in range(map_width):
 
 #scattering some random stoerehouses
 for i in range(10):
-  x_rand = rand.randint(0, map_width)
-  y_rand = rand.randint(0, map_height)
-  map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
+	#wtf is going on here
+	rand.seed(i)
+	x_rand = rand.randint(0, map_width)
+	y_rand = rand.randint(0, map_height)
+	if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
+		map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
 
 print map_data[0]

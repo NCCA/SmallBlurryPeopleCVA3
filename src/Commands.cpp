@@ -27,14 +27,14 @@ void QuitCommand::execute()
 // Build Command
 //------------------------------------------------------------//
 
-BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
+BuildCommand::BuildCommand(Character *_character, TileType _building) :
   m_character(_character),
   m_building(_building)
 {}
 
 void BuildCommand::execute()
 {
-  m_character->build(m_building);
+	m_character->buildState(m_building);
 }
 
 //------------------------------------------------------------//
@@ -125,7 +125,7 @@ ForageCommand::ForageCommand(Character *_character) :
 
 void ForageCommand::execute()
 {
-  m_character->forage();
+	m_character->forageState();
 }
 
 //------------------------------------------------------------//
@@ -139,5 +139,5 @@ CentreNotificationCommand::CentreNotificationCommand(Scene *_scene, ngl::Vec2 _m
 
 void CentreNotificationCommand::execute()
 {
-  m_scene->moveCamToPos(m_map_pos);
+  m_scene->focusCamToGridPos(m_map_pos);
 }

@@ -88,7 +88,7 @@ public:
   /// \param _character character to instruct
   /// \param _building building wanted
   ///
-  BuildCommand(Character *_character, BuildingType _building);
+	BuildCommand(Character *_character, TileType _building);
   ~BuildCommand() = default;
   ///
   /// \brief execute tells character to build given building
@@ -102,7 +102,7 @@ private:
   ///
   /// \brief m_building type of building wanted
   ///
-  BuildingType m_building;
+	TileType m_building;
 };
 
 ///
