@@ -382,11 +382,11 @@ void Gui::updateNotifications()
     }
     shader_id++;
   }
-  if(uniform_needs_updating)
-  {
+  //if(uniform_needs_updating)
+  //{
     glUniform1iv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "notification_ages"), DOUBLE_MAX_NOTES, &(ages[0]));
     glUniform1i(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "max_notification_age"), MAX_AGE);
-  }
+  //}
 }
 
 void Gui::drawButtons()
@@ -519,7 +519,7 @@ void Gui::updateActiveCharacter()
 void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
 {
   int num_notifications = 1;
-  for(int i = m_buttons.size()-1 ; i>=0; i--)
+  /*for(int i = m_buttons.size()-1 ; i>=0; i--)
   {
     std::shared_ptr<Button> button(m_buttons[i]);
     if(button.get()->getAction() == Action::NOTIFY)
@@ -534,7 +534,7 @@ void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
       }
     }
 
-  }
+  }*/
   addNotification(_text, _pos);
   updateButtonArrays();
   m_note_id++;
@@ -547,7 +547,6 @@ void Gui::moveNotifications(ngl::Vec2 _move_vec)
     Button *b = button.get();
     if(b->getAction() == Action::NOTIFY)
     {
-      std::cout << b->getText() << std::endl;
       b->move(_move_vec);
     }
   }
