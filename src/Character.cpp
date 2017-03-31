@@ -79,11 +79,11 @@ void Character::setState()
   m_called = 0;
 
   if (m_grid->getTileType(m_target_id) == TileType::TREES)
-		forageState();
+		chopState();
   else if (m_grid->getTileType(m_target_id) == TileType::WATER)
 		fishState();
   else if (m_grid->getTileType(m_target_id) == TileType::NONE)
-		buildState(TileType::HOUSE);
+		moveState();
 }
 
 void Character::buildState(TileType _building)
@@ -151,7 +151,7 @@ void Character::fishState()
 
 void Character::forageState()
 {
-	m_final_target_id = m_target_id;
+	findNearestTree();
 	if(findNearestEmptyTile())
 	{
 		int berry_amount = m_forage_amount + Utility::randInt(-2, 2);
@@ -184,10 +184,10 @@ void Character::setIdleState()
   bool valid = false;
   while(!valid)
   {
-    int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, 50);
-    int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, 50);
-    int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, 50);
-    int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, 50);
+    int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
+    int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
+    int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
+    int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, m_grid->getH());
 
     int x = Utility::randInt(x_min_range, x_max_range);
     int y = Utility::randInt(y_min_range, y_max_range);
@@ -404,12 +404,20 @@ void Character::update()
   }
   else if (m_active == false)
   {
-    //setIdleState();
+    setIdleState();
   }
 }
 
 bool Character::move()
 {
+  // check whether the next point is necessary or if character has line of sight to the second point in list
+  if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
+  {
+    // if character can see point after next, remove the next point so character heads directly to the furtherst one they can see
+    // done on a one by one basis so it does all happen in the same frame as pathfinding, not super slow that way but marginally better this way
+    m_path.pop_back();
+  }
+
   // move by distance up to speed
   float dist_moved = 0;
   while(m_path.size() > 0 && dist_moved < m_speed)
@@ -470,8 +478,8 @@ bool Character::setTarget(ngl::Vec2 _target_pos)
 
 bool Character::setTarget(int _tile_id)
 {
-  m_pos.m_x = int(m_pos.m_x);
-  m_pos.m_y = int(m_pos.m_y);
+  //m_pos.m_x = int(m_pos.m_x);
+  //m_pos.m_y = int(m_pos.m_y);
   //if the chosen tile isnt equal to the target and isnt equal to the character's pos
   if(_tile_id != m_target_id && _tile_id != m_grid->coordToId(m_pos))
   {
@@ -522,17 +530,17 @@ bool Character::findNearestEmptyTile()
   std::vector<ngl::Vec2> neighbours;
   ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
-  if(m_grid->getTileType(target[0]+1, target[1]) == TileType::NONE)
+	if(m_grid->getTileType(target[0]+1, target[1]) == TileType::NONE)
+		neighbours.push_back(ngl::Vec2(target[0]+1, target[1]));
+
+	if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
     neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
 
-  if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
+	if(m_grid->getTileType(target[0], target[1]+1) == TileType::NONE)
+		neighbours.push_back(ngl::Vec2(target[0], target[1]+1));
 
-  if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
-
-  if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
+	if(m_grid->getTileType(target[0], target[1]-1) == TileType::NONE)
+		neighbours.push_back(ngl::Vec2(target[0], target[1]-1));
 
   return findNearest(neighbours);
 }
@@ -544,7 +552,7 @@ bool Character::findNearestFishingTile()
   std::set<int> edge_tile_ids;
   std::set<int> water_tile_ids;
 
-  floodfill(selection, edge_tile_ids, water_tile_ids);
+	waterFloodfill(selection, edge_tile_ids, water_tile_ids);
 
 	std::vector<ngl::Vec2> edge_vector;
   for (auto edge: edge_tile_ids)
@@ -566,7 +574,50 @@ bool Character::findNearestFishingTile()
 	return false;
 }
 
-void Character::floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water)
+bool Character::findNearestTree()
+{
+	bool found = false;
+	treeFloodfill(m_pos, found);
+	if (found == true)
+		return true;
+	else
+		return false;
+}
+
+void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found)
+{
+	if (_found == true)
+		return;
+
+	if(_coord.m_x >= m_grid->getW() ||
+		 _coord.m_x <= 0 ||
+		 _coord.m_y >= m_grid->getH() ||
+		 _coord.m_y <= 0)
+	{
+		return;
+	}
+
+	int id = m_grid->getTileId(_coord.m_x, _coord.m_y);
+
+	if(m_grid->getTileType(id) == TileType::TREES)
+	{
+		if(setTarget(id))
+		{
+			_found = true;
+			m_final_target_id = id;
+		}
+		return;
+	}
+	else
+	{
+		treeFloodfill(ngl::Vec2 (_coord.m_x-1, _coord.m_y), _found);
+		treeFloodfill(ngl::Vec2 (_coord.m_x+1, _coord.m_y), _found);
+		treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y-1), _found);
+		treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y+1), _found);
+	}
+}
+
+void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water)
 {
   //algorithm created with help of Quentin
   //if out of map exit
@@ -592,42 +643,22 @@ void Character::floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int>
   bool is_edge = false;
 
 	if (m_grid->getTileType(_coord.m_x, _coord.m_y) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
+		waterFloodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
   if (m_grid->getTileType(_coord.m_x-1, _coord.m_y) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
+		waterFloodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
 	if(m_grid->getTileType(_coord.m_x, _coord.m_y-1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
+		waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
   else
     is_edge = true;
 
 	if(m_grid->getTileType(_coord.m_x, _coord.m_y+1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
-	else
-		is_edge = true;
-
-	if(m_grid->getTileType(_coord.m_x-1, _coord.m_y+1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y+1), _edges, _water);
-	else
-		is_edge = true;
-
-	if(m_grid->getTileType(_coord.m_x+1, _coord.m_y-1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y-1), _edges, _water);
-	else
-		is_edge = true;
-
-	if(m_grid->getTileType(_coord.m_x+1, _coord.m_y+1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y+1), _edges, _water);
-	else
-		is_edge = true;
-
-	if(m_grid->getTileType(_coord.m_x-1, _coord.m_y-1) == TileType::WATER)
-		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y-1), _edges, _water);
+		waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
 	else
 		is_edge = true;
 
@@ -716,3 +747,4 @@ ngl::Vec3 Character::getPos()
   float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
+

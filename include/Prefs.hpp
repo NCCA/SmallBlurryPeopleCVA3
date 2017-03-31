@@ -9,6 +9,7 @@
 enum class PrefType
 {
   ERROR,
+  BOOL,
   INT,
   FLOAT,
   STRING
@@ -61,6 +62,8 @@ public:
   ///
   void setStrPref(std::string _key, std::string _val);
 
+  void setBoolPref(std::string _key, bool _val);
+
   ///
   /// \brief getIntPref retrieves an integer preference with the given key
   /// \param _key is the string key associated with the value
@@ -82,6 +85,8 @@ public:
   ///
   std::string getStrPref(std::string _key);
 
+  bool getBoolPref(std::string _key);
+
   ///
   /// \brief getIntMap retrieves the whole integer preference map
   /// \return the map containing all of the integer preference key-value pairs
@@ -99,6 +104,12 @@ public:
   /// \return the map containing all of the integer preference key-value pairs
   ///
   const std::map<std::string, std::string>& getStrMap();
+
+  ///
+  /// \brief getBoolMap retrieves the entire string preference map
+  /// \return the map containing all of the boolean preference key-value pairs
+  ///
+  const std::map<std::string, bool>& getBoolMap();
 
   ///
   /// \brief printPrefs prints out all key-value pairs stored in the three maps
@@ -122,18 +133,10 @@ public:
   /// \param _key is the string key
   /// \param _val is the value to be associated with the string key, either int, float or string
   ///
-  void setPref(std::string &_key, int _val)
-  {
-    setIntPref(_key, _val);
-  }
-  void setPref(std::string &_key, float _val)
-  {
-    setFloatPref(_key, _val);
-  }
-  void setPref(std::string &_key, const std::string &_val)
-  {
-    setStrPref(_key, _val);
-  }
+  void setPref(std::string &_key, int _val);
+  void setPref(std::string &_key, float _val);
+  void setPref(std::string &_key, const std::string &_val);
+  void setPref(std::string &_key, bool _val);
 
   ///
   /// \brief getPrefValueString get text for value of string
@@ -141,6 +144,17 @@ public:
   /// \return string representing value, eg "10" if value is 10
   ///
   std::string getPrefValueString(const std::string &_key);
+
+  ///
+  /// \brief getNumPrefs get total number of preference options
+  /// \return total number of preference options
+  ///
+  int getNumPrefs();
+  ///
+  /// \brief boolToString convert bool to string for Gui
+  /// \return string, either "0" or "1"
+  ///
+  std::string boolToString(bool _b);
 
 private:
   ///
@@ -157,6 +171,11 @@ private:
   /// \brief m_float_prefs a std::map that maps string keys to float preferences
   ///
   std::map<std::string, float> m_float_prefs;
+
+  ///
+  /// \brief m_bool_prefs a std::map that maps string keys to boolean preferences
+  ///
+  std::map<std::string, bool> m_bool_prefs;
 
   ///
   /// \brief m_str_prefs a std::map that maps string keys to string preferences

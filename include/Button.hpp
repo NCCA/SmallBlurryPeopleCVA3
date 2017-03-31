@@ -87,7 +87,7 @@ public:
   /// \brief resetIdCounter set id counter of buttons to 0, NEED TO WIPE ALL BUTTONS BEFORE DOING THIS
   ///
   static void resetIdCounter();
-private:
+protected:
   ///
   /// \brief m_id_counter keeps track of number of buttons
   ///
@@ -121,9 +121,21 @@ private:
   ///
   Action m_action;
   ///
-  /// \brief m_text button text displayed on button
+  /// \brief m_text button text displayed on button, or used for setting buttons to store key
   ///
   std::string m_text;
+};
+
+class NotificationButton : public Button
+{
+public:
+  NotificationButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _window_res, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text, ngl::Vec2 _map_pos);
+  void incrementAge();
+  int getAge();
+  ngl::Vec2 getMapPos();
+private:
+  ngl::Vec2 m_map_pos;
+  int m_age;
 };
 
 #endif//__BUTTON_HPP__

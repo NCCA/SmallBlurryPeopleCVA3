@@ -12,8 +12,13 @@
 
 int main()
 {
+  Prefs* prefs = Prefs::instance();
+  prefs->init();
+  prefs->printPrefs();
 
-		SDL_Init(SDL_INIT_VIDEO);
+
+
+    SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
 
@@ -59,10 +64,6 @@ int main()
     SDL_GL_SetSwapInterval(1);
 
     ngl::NGLInit::instance();
-
-    Prefs* prefs = Prefs::instance();
-    prefs->init();
-    prefs->printPrefs();
 
     Scene scene (ngl::Vec2(rect.w, rect.h));
 

@@ -121,7 +121,9 @@ public:
 	bool findNearestFishingTile();
 	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges);
 
-	void floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	bool findNearestTree();
 	///
 	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
 	/// \param _coord_data, vector containing vec2's of coordinates to sort through
@@ -158,7 +160,6 @@ public:
 	/// \return m_active, the boolean stored in the character determining if it is active or not
 	///
 	bool isActive() {return m_active;}
-
 private:
 	///
 	/// \brief m_id_counter, counts how many objects have been created
