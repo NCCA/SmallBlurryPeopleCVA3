@@ -41,16 +41,19 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 
   //probability of catching a fish
   m_fishing_catch = Utility::randInt(1,3);
+	//fishing speed
 	m_fishing_speed = Utility::randInt(m_fishing_catch,5);
-
+	//amount of berries collected
 	m_forage_amount = Utility::randInt(5,10);
 
+	//random colour
 	float red = Utility::randFlt(0, 1);
 	float blue = Utility::randFlt(0,1);
 	float green = Utility::randFlt(0,1);
 
   m_colour = ngl::Vec3(red, blue, green);
 
+	//random starting position
   bool valid = false;
   float x,y = 0;
 
@@ -76,7 +79,7 @@ void Character::setState()
   m_called = 0;
 
   if (m_grid->getTileType(m_target_id) == TileType::TREES)
-		chopState();
+		forageState();
   else if (m_grid->getTileType(m_target_id) == TileType::WATER)
 		fishState();
   else if (m_grid->getTileType(m_target_id) == TileType::NONE)
@@ -148,19 +151,23 @@ void Character::fishState()
 
 void Character::forageState()
 {
-	int berry_amount = m_forage_amount + Utility::randInt(-2, 2);
-	for(int i=0; i<berry_amount; i++)
+	m_final_target_id = m_target_id;
+	if(findNearestEmptyTile())
 	{
-		m_state_stack.push_back(State::MOVE);
-		m_state_stack.push_back(State::FORAGE);
-		m_state_stack.push_back(State::MOVE);
-		m_state_stack.push_back(State::STORE);
-		m_state_stack.push_back(State::MOVE);
-		if (i != (berry_amount -1))
-			m_state_stack.push_back(State::REPEAT);
+		int berry_amount = m_forage_amount + Utility::randInt(-2, 2);
+		for(int i=0; i<berry_amount; i++)
+		{
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::FORAGE);
+			m_state_stack.push_back(State::MOVE);
+			m_state_stack.push_back(State::STORE);
+			m_state_stack.push_back(State::MOVE);
+			if (i != (berry_amount -1))
+				m_state_stack.push_back(State::REPEAT);
+		}
+		std::cout<<"FORAGE"<<std::endl;
+		m_state_stack.push_back(State::IDLE);
 	}
-	std::cout<<"FORAGE"<<std::endl;
-	m_state_stack.push_back(State::IDLE);
 }
 
 void Character::setIdleState()
@@ -539,14 +546,24 @@ bool Character::findNearestFishingTile()
 
   floodfill(selection, edge_tile_ids, water_tile_ids);
 
-  std::vector<ngl::Vec2> edge_vector;
+	std::vector<ngl::Vec2> edge_vector;
   for (auto edge: edge_tile_ids)
   {
     ngl::Vec2 coord = m_grid->idToCoord(edge);
     edge_vector.push_back(coord);
   }
 
-	return findNearest(edge_vector);
+	distanceSort(0, edge_vector.size()-1, edge_vector);
+
+	for(auto edge : edge_vector)
+	{
+		int tile = m_grid->coordToId(edge);
+		if(setTarget(tile))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Character::floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water)
@@ -573,32 +590,80 @@ void Character::floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int>
 
   //Check neighbouring tiles, call flood if water tile
   bool is_edge = false;
-  if (m_grid->getTileType(_coord.m_x, _coord.m_y+1) == TileType::WATER)
-    floodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
-  else
-    is_edge = true;
 
-  if (m_grid->getTileType(_coord.m_x, _coord.m_y-1) == TileType::WATER)
-    floodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
+	if (m_grid->getTileType(_coord.m_x, _coord.m_y) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
   if (m_grid->getTileType(_coord.m_x-1, _coord.m_y) == TileType::WATER)
-    floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
+		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
-  if(m_grid->getTileType(_coord.m_x+1, _coord.m_y) == TileType::WATER)
-    floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
+	if(m_grid->getTileType(_coord.m_x, _coord.m_y-1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
   else
     is_edge = true;
 
+	if(m_grid->getTileType(_coord.m_x, _coord.m_y+1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
+	else
+		is_edge = true;
+
+	if(m_grid->getTileType(_coord.m_x-1, _coord.m_y+1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y+1), _edges, _water);
+	else
+		is_edge = true;
+
+	if(m_grid->getTileType(_coord.m_x+1, _coord.m_y-1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y-1), _edges, _water);
+	else
+		is_edge = true;
+
+	if(m_grid->getTileType(_coord.m_x+1, _coord.m_y+1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y+1), _edges, _water);
+	else
+		is_edge = true;
+
+	if(m_grid->getTileType(_coord.m_x-1, _coord.m_y-1) == TileType::WATER)
+		floodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y-1), _edges, _water);
+	else
+		is_edge = true;
 
   if(is_edge)
   {
     _edges.insert(id);
     return;
   }
+}
+
+void Character::distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges)
+{
+ int i = io_left, j = io_right;
+ int pivot = (io_left + io_right) / 2;
+ float pivot_dist = Utility::sqrDistance(_edges[pivot], m_pos);
+
+ while (i <= j)
+ {
+
+		 while (Utility::sqrDistance(_edges[i], m_pos) < pivot_dist) i++;
+		 while (Utility::sqrDistance(_edges[j], m_pos) > pivot_dist) j--;
+
+		 if (i <= j)
+		 {
+				 ngl::Vec2 tmpCoord = _edges[i];
+				 _edges[i] = _edges[j];
+				 _edges[j] = tmpCoord;
+				 i++;
+				 j--;
+		 }
+ }
+
+ if (io_left < j)
+	 distanceSort(io_left, j, _edges);
+ if (i < io_right)
+	 distanceSort (i, io_right, _edges);
 }
 
 bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)

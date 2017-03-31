@@ -108,6 +108,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("tree_d", "tree/tree_d.png");
 		//store->loadMesh("house", "house/house.obj");
 		store->loadMesh("house", "house/stilt_house.obj" );
+		//store->loadMesh("foundation_A", "house/start_building.obj");
 		store->loadMesh("foundation_B", "house/mid_way_building.obj");
     store->loadMesh("person", "person/person.obj");
     store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
@@ -896,9 +897,9 @@ void Scene::drawMeshes()
 				case static_cast<int>(TileType::HOUSE):
 						drawInstances( "house", "", "colour", instances, offset);
             break;
-				case static_cast<int>(TileType::FOUNDATION_B):
-						drawInstances("foundation_B", "", "colour", instances, offset);
-					break;
+				//case static_cast<int>(TileType::FOUNDATION_B):
+				//		drawInstances("foundation_B", "", "colour", instances, offset);
+				//		break;
         default:
             break;
         }
@@ -946,9 +947,9 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 						case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "", "colour");
                 break;
-						case static_cast<int>(TileType::FOUNDATION_B):
-								drawAsset("foundation_B", "", "colour");
-								break;
+						//case static_cast<int>(TileType::FOUNDATION_B):
+						//		drawAsset("foundation_B", "", "colour");
+						//		break;
             default:
                 break;
             }
@@ -1171,9 +1172,9 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 				case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "", "colour", instances, offset, m_shadowMat[_index] );
             break;
-				case static_cast<int>(TileType::FOUNDATION_B):
-						drawInstances("foundation_B", "", "colour", instances, offset, m_shadowMat[_index]);
-						break;
+				//case static_cast<int>(TileType::FOUNDATION_B):
+				//		drawInstances("foundation_B", "", "colour", instances, offset, m_shadowMat[_index]);
+				//		break;
         default:
             break;
 				}
@@ -1338,9 +1339,8 @@ void Scene::updateMousePos()
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
     Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
 
-
-
-		/*slib->use("colour");
+		/*
+		slib->use("colour");
 		ngl::Vec3 pos = character.getPos();
 		pos.m_y /= m_terrainHeightDivider;
 		m_transform.setPosition(pos);

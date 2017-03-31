@@ -119,6 +119,7 @@ public:
 	///
 	bool findNearestEmptyTile();
 	bool findNearestFishingTile();
+	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges);
 
 	void floodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
 	///
