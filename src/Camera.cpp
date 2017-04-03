@@ -7,17 +7,12 @@
 #include "Utility.hpp"
 
 Camera::Camera()
+    :
+      m_ipos(ngl::Vec3(0.0f, 0.0f, 0.0f), ngl::Vec3(0.0f, 0.0f, 0.0f), 0.08f),
+      m_irot(ngl::Vec2(1.0f, 0.0f), ngl::Vec2(1.0f, 0.0f), 0.14f),
+      m_iFocalDepth(0.0f, 0.0f, 0.2f),
+      m_iDolly(10.0f, 10.0f, 0.08f)
 {
-    m_movementSmoothness = 16.0f;
-    m_rotationSmoothness = 8.0f;
-    m_focalSmoothness = 4.0f;
-    m_dollySmoothness = 16.0f;
-
-    m_targPos = m_curPos = ngl::Vec3(0.0f, 0.0f, 0.0f);
-    m_targRot = m_curRot = ngl::Vec2(1.0f, 0.0f);
-    m_targFocalDepth = m_curFocalDepth = 0.0f;
-    m_targDolly = m_curDolly = 10.0f;
-
     m_up = ngl::Vec3(0.0f, 1.0f, 0.0f);
     m_fov = 60.0f;
 
@@ -27,10 +22,10 @@ Camera::Camera()
 
 void Camera::calculateViewMat()
 {
-    setInitPos(ngl::Vec3(0.0f, 0.0f, m_curDolly));
-    movePivot(m_curPos);
-    rotateCamera(m_curRot.m_x, 0.0f, 0.0f);
-    rotateCamera(0.0f, m_curRot.m_y, 0.0f);
+    setInitPos(ngl::Vec3(0.0f, 0.0f, m_iDolly.get()));
+    movePivot(m_ipos.get());
+    rotateCamera(m_irot.get().m_x, 0.0f, 0.0f);
+    rotateCamera(0.0f, m_irot.get().m_y, 0.0f);
 
     m_cameraTransformation = ngl::Mat4();
     m_pivotTransformation = ngl::Mat4();
@@ -58,12 +53,11 @@ void Camera::calculateViewMat()
 }
 
 void Camera::updateSmoothCamera()
-{
-    m_curPos += (m_targPos - m_curPos) / m_movementSmoothness;
-    m_curRot += (m_targRot - m_curRot) / m_rotationSmoothness;
-    m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / m_focalSmoothness;
-    m_curDolly += (m_targDolly - m_curDolly) / m_dollySmoothness;
-
+{    
+    m_ipos.update();
+    m_irot.update();
+    m_iFocalDepth.update();
+    m_iDolly.update();
     //std::cout << "cur pos " << m_curPos << ", cur rot " << m_curRot << ", cur focal depth " << m_curFocalDepth << " cur dolly " << m_curDolly << '\n';
 }
 
@@ -120,19 +114,19 @@ ngl::Mat4 Camera::translationMatrix(const ngl::Vec3 &_vec)
 
 void Camera::moveRight(const float _d)
 {
-    m_targPos += right() * _d;
+    m_ipos.incrEnd( right() * _d );
 }
 
 void Camera::moveForward(const float _d)
 {
     ngl::Vec3 diff = forwards() * _d;
     diff.m_y = 0.0f;
-    m_targPos += diff;
+    m_ipos.incrEnd( diff );
 }
 
 void Camera::move(const ngl::Vec3 _d)
 {
-    m_targPos += _d;
+    m_ipos.incrEnd( _d );
 }
 
 void Camera::moveScreenSpace(const ngl::Vec3 _d)
@@ -146,18 +140,18 @@ void Camera::moveScreenSpace(const ngl::Vec3 _d)
 
 void Camera::rotate(const float _pitch, const float _yaw)
 {
-    m_targRot += ngl::Vec2(_pitch, _yaw);
+    m_irot.incrEnd( ngl::Vec2(_pitch, _yaw) );
     //m_targRot.m_x = std::max( std::min( m_targRot.m_x, m_maxPitch ), m_minPitch );
 }
 
 void Camera::dolly(const float _d)
 {
-    m_targDolly += _d;
+    m_iDolly.incrEnd( _d );
 }
 
 void Camera::setPos(const ngl::Vec3 _p)
 {
-    m_targPos = _p;
+    m_ipos.setEnd( _p );
 }
 
 std::array<ngl::Vec3, 8> Camera::calculateCascade(float _start, float _end)

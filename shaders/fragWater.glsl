@@ -6,7 +6,7 @@ layout (location = 0) out vec4 fragColour;
 layout (location = 1) out vec4 outDepth;
 
 in vec4 position_fs;
-in vec3 normal_fs;
+flat in vec3 normal_fs;
 in vec2 tile_uv_fs;
 in vec2 uv_fs;
 
