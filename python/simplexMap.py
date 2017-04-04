@@ -33,20 +33,45 @@ The preamble is required because the module is stoeed as part of the game, which
 on the PYTHONPATH variable
 """
 
-#importing modules
-from PIL import Image
 import random as rand
 import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import utils.noise.noise as n
+import gameUtils.noise.noise as n
+import gameUtils.mapViewer.mapViewer as mv
+import gameUtils.helperFunctions.helperFunctions as hf
+
+#parameters from game
+map_width = 100
+map_height = 100
+map_seed = 4
+tileTypes = {"NONE": 0,
+             "TREES": 1,
+             "WATER": 2,
+             "MOUNTAINS": 3,
+             "STOREHOUSE": 4}
+
+if "width_in" in globals():
+  map_width = width_in
+
+if "height_in" in globals():
+  map_height = height_in
+
+if "seed_in" in globals():
+  map_seed = seed_in
+
+if "tileTypes_in" in globals():
+  tileTypes = tileTypes_in
+
+
+
+
 
 #setting the seed for the noise generator
-gen = n.fractalNoise(seed_in)
+gen = n.fractalNoise(map_seed)
 #setting up variables that will be passed to the game
-map_width = width_in
-map_height = height_in
+
 map_data = [[tileTypes["NONE"], 0] for i in range(map_width * map_height)]
 print map_data[0]
 #setting up noise function values
@@ -67,7 +92,7 @@ water_height = 90
 for x in range(map_width):
   for y in range(map_height):
     noise = int(gen.fractal(x, y, octaves, persistence, freq, min, max))
-    map_data[x + map_width * y][1] = noise
+    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)
     #setting terrain types
     if noise > peak_height:
       map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
@@ -95,3 +120,8 @@ for i in range(10):
     map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
 
 print map_data[0]
+
+if "from_game" not in globals():
+  print "not from game"
+  viewer = mv.mapViewer(map_data, tileTypes, map_width, map_height)
+  viewer.display(displayType = "types")
