@@ -11,6 +11,7 @@
 #include "Character.hpp"
 #include "Inventory.hpp"
 #include "IVal.hpp"
+#include "Light.hpp"
 #include "Prefs.hpp"
 
 #include "Framebuffer.hpp"
@@ -324,8 +325,15 @@ private:
     ///
     bool m_movement_held[4];
 
+    /// @brief Where the mouse selection box is.
     IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
+    /// @brief How the mouse selection box is scaled. For example, when hovering over a character it gets taller and thinner.
     IVal<ngl::Vec3> m_mouseSelectionBoxScale;
+
+    /// @brief Put your point lights in this vector and they'll get drawn as a part of the lighting pass.
+    std::vector<Light> m_pointLights;
+    const size_t m_maxLights = 512;
+    GLuint m_lightBuffer;
 };
 
 #endif//__SCENE_HPP__
