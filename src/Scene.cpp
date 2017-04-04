@@ -1545,7 +1545,6 @@ void Scene::resize(const ngl::Vec2 &_dim)
 
 void Scene::mouseSelection()
 {
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     Gui *gui = Gui::instance();
     ngl::Vec2 mouse_coords = Utility::getMousePos();
 
@@ -2260,7 +2259,7 @@ ngl::Vec3 Scene::getCamMoveVec()
         move.m_x -= 1;
     move *= 10;
     float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
-    cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
+    cam_to_pivot_height *= cam_to_pivot_height * 0.00004f;
     move *= cam_to_pivot_height;
     return move;
 }

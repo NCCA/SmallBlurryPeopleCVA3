@@ -145,16 +145,17 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
       command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
       break;
     case PrefType::INT:
-     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getIncValue(button_text)));
+      command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text) + prefs->getIntIncValue(button_text)));
       break;
     case PrefType::FLOAT:
-     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getIncValue(button_text)));
+      command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text) + prefs->getFloatIncValue(button_text)));
       break;
     case PrefType::ERROR:
       break;
     case PrefType::STRING:
       break;
     }
+    m_text_outdated = true;
     break;
   case Action::DECR_PREFS:
     switch(prefs->getTypeOfPref(button_text))
@@ -163,16 +164,17 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
       command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
       break;
     case PrefType::INT:
-     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getDecValue(button_text)));
+      command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text) - prefs->getIntDecValue(button_text)));
       break;
     case PrefType::FLOAT:
-     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getDecValue(button_text)));
+      command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text) - prefs->getFloatDecValue(button_text)));
       break;
     case PrefType::ERROR:
       break;
     case PrefType::STRING:
       break;
     }
+    m_text_outdated = true;
     break;
   }
   return command;
@@ -293,15 +295,6 @@ void Gui::createPrefsButtons()
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
     addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
-    y_pos += 50;
-  }
-  x_pos += 320;
-  y_pos = y0;
-  for(auto &p : prefs->getStrMap())
-  {
-    name = p.first;
-    addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::TOGGLEBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
 
@@ -623,19 +616,23 @@ int Gui::getButtonLength(const std::string &_text)
 
 void Gui::scrollButton(int _dir)
 {
-  switch(m_selected_button->getAction())
+  if(m_selected_button)
   {
-  case Action::PREFS_VALUE:
-    if(_dir>0)
+    switch(m_selected_button->getAction())
     {
-      executeAction(Action::INCR_PREFS);
+    case Action::PREFS_VALUE:
+    case Action::TOGGLEBOOLPREF:
+      if(_dir>0)
+      {
+        executeAction(Action::INCR_PREFS);
+      }
+      else
+      {
+        executeAction(Action::DECR_PREFS);
+      }
+      break;
+    default:
+      break;
     }
-    else
-    {
-      executeAction(Action::DECR_PREFS);
-    }
-    break;
-  default:
-    break;
   }
 }

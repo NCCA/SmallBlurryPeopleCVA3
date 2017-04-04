@@ -17,16 +17,16 @@ enum class PrefType
 
 enum class IncType
 {
-  NONE,
-  X1,
-  X10,
-  X100,
-  X1000,
-  X0_1,
-  X0_01,
-  X0_001,
-  X0_0001,
-  POW_2
+  NONE,    //
+  X1,      //
+  X10,     //
+  X100,    //
+  X1000,   //
+  X0_1,    //
+  X0_01,   //
+  X0_001,  //
+  X0_0001, //
+  POW_2    //
 };
 
 
@@ -59,6 +59,46 @@ public:
   void restoreDefaultPrefs();
 
   IncType getIncType(std::string _key);
+
+  ///
+  /// \brief getFloatIncValue get value for incrementing given preference
+  /// \param _key name of preference
+  /// \return float value to add to preference
+  ///
+  float getFloatIncValue(const std::string &_key);
+  ///
+  /// \brief getFloatDecValue get value for decrementing given preference
+  /// \param _key name of preference
+  /// \return float value to subtract from preference
+  ///
+  float getFloatDecValue(const std::string &_key);
+  ///
+  /// \brief getFloatChangeValue get float value required for changing given preference in given direction
+  /// \param _key name of preference
+  /// \param _dir positive or negative for up/down
+  /// \return value to add/subtract
+  ///
+  float getFloatChangeValue(const std::string &_key, int _dir);
+
+  ///
+  /// \brief getIntIncValue get value for incrementing given preference
+  /// \param _key name of preference
+  /// \return int value to add to preference
+  ///
+  int getIntIncValue(const std::string &_key);
+  ///
+  /// \brief getIntDecValue get value for decrementing given preference
+  /// \param _key name of preference
+  /// \return int value to subtract to preference
+  ///
+  int getIntDecValue(const std::string &_key);
+  ///
+  /// \brief getIntChangeValue get int value required for changing given preference in given direction
+  /// \param _key name of preference
+  /// \param _dir positive or negative for up/down
+  /// \return value to add/subtract
+  ///
+  int getIntChangeValue(const std::string &_key, int _dir);
 
   ///
   /// \brief setIntPref adds an integer preference key value pair to the interger preferences map
@@ -169,6 +209,11 @@ public:
   /// \return total number of preference options
   ///
   int getNumPrefs();
+  ///
+  /// \brief getNumChangeablePrefs get number of preferences that can be changed by the Gui
+  /// \return number of prefs that can be changed by the Gui
+  ///
+  int getNumChangeablePrefs();
   ///
   /// \brief boolToString convert bool to string for Gui
   /// \return string, either "0" or "1"
