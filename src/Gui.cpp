@@ -12,7 +12,7 @@ constexpr char TEXT_SMILEY[2] = {29,0};
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
 
-constexpr int MAX_AGE = 300;
+constexpr int MAX_AGE = 500;
 constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
@@ -22,7 +22,6 @@ Gui::Gui()
 
 void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
 {
-  m_note_id = 0;
   m_scene = _scene;
   m_shader_name = _shader_name;
   setResolution(_res);
@@ -69,6 +68,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   {
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
+  case Action::PREFS_VALUE:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -87,7 +87,6 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
-    notify(std::to_string(m_note_id), ngl::Vec2(0,0));
     command.reset(new ZoomCommand(m_scene, 1));
     break;
   case Action::ZOOMOUT:
@@ -135,6 +134,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     {
       command.reset(new CentreNotificationCommand(m_scene, ((NotificationButton *)m_selected_button)->getMapPos()));
     }
+    break;
+  case Action::INCR_PREFS:
+    break;
+  case Action::DECR_PREFS:
     break;
   }
   return command;
@@ -422,6 +425,8 @@ void Gui::drawButtons()
   if(m_text_outdated)
   {
     updateText();
+    // need to update notification set if text has changed
+    updateNotifications();
   }
   slib->setRegisteredUniform("game_state", m_scene->getState());
   slib->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
@@ -562,7 +567,6 @@ void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
   }
   addNotification(_text, _pos);
   updateButtonArrays();
-  m_note_id++;
 }
 
 void Gui::moveNotifications(ngl::Vec2 _move_vec)

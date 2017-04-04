@@ -191,8 +191,6 @@ private :
   /// \brief m_text_outdated flag. if true, text will be updated on next draw call
   ///
   bool m_text_outdated;
-
-  int m_note_id;
 };
 
 #endif//__GUI_HPP__
