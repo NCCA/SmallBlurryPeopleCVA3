@@ -350,6 +350,9 @@ void Scene::update()
       m_cam.moveRight( mouse_distance.m_x * 0.025f );
       m_cam.moveForward( -mouse_distance.m_y * 0.025f );
       //---
+
+      if(mouse_distance.lengthSquared() > Utility::Sqr(8.0f))
+        m_centre_camera = false;
     }
     //rotates
     else if(m_mouse_rot_active)
