@@ -142,6 +142,11 @@ public :
   /// \return length of button needed
   ///
   int getButtonLength(const std::string &_text);
+  ///
+  /// \brief scrollButton send an increment or decrement command
+  /// \param _dir positive for increment, negative for decrement
+  ///
+  void scrollButton(int _dir);
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

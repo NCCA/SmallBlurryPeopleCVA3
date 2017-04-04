@@ -1362,13 +1362,21 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
+  Gui *gui = Gui::instance();
+  if(gui->mousePos(Utility::getMousePos()))
+  {
+    gui->scrollButton(_event.y);
+  }
+  else
+  {
     Gui::instance()->executeAction(_event.y > 0 ? Action::ZOOMIN : Action::ZOOMOUT);
+  }
 }
 
 void Scene::zoom(int _direction)
 {
-    m_cam.rotate(-1.0f * _direction, 0.0f);
-    m_cam.dolly(-0.5f * _direction);
+  m_cam.rotate(-1.0f * _direction, 0.0f);
+  m_cam.dolly(-0.5f * _direction);
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)

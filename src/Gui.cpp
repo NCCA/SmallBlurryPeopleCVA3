@@ -64,6 +64,12 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
 {
   Prefs *prefs = Prefs::instance();
   std::shared_ptr<Command> command(nullptr);
+
+  std::string button_text("");
+  if(m_selected_button)
+  {
+    button_text = m_selected_button->getText();
+  }
   switch (_action)
   {
   case Action::PASSIVE:
@@ -120,11 +126,8 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new PrefsCommand(m_scene));
     break;
   case Action::TOGGLEBOOLPREF:
-    if(m_selected_button)
-    {
-      command.reset(new SetPrefsCommand<bool>(m_selected_button->getText(), !prefs->getBoolPref(m_selected_button->getText())));
-      m_text_outdated = true;
-    }
+    command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+    m_text_outdated = true;
     break;
   case Action::FORAGE:
     command.reset(new ForageCommand(m_scene->getActiveCharacter()));
@@ -136,8 +139,40 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     }
     break;
   case Action::INCR_PREFS:
+    switch(prefs->getTypeOfPref(button_text))
+    {
+    case PrefType::BOOL:
+      command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+      break;
+    case PrefType::INT:
+     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getIncValue(button_text)));
+      break;
+    case PrefType::FLOAT:
+     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getIncValue(button_text)));
+      break;
+    case PrefType::ERROR:
+      break;
+    case PrefType::STRING:
+      break;
+    }
     break;
   case Action::DECR_PREFS:
+    switch(prefs->getTypeOfPref(button_text))
+    {
+    case PrefType::BOOL:
+      command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+      break;
+    case PrefType::INT:
+     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getDecValue(button_text)));
+      break;
+    case PrefType::FLOAT:
+     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getDecValue(button_text)));
+      break;
+    case PrefType::ERROR:
+      break;
+    case PrefType::STRING:
+      break;
+    }
     break;
   }
   return command;
@@ -584,4 +619,23 @@ void Gui::moveNotifications(ngl::Vec2 _move_vec)
 int Gui::getButtonLength(const std::string &_text)
 {
   return std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+}
+
+void Gui::scrollButton(int _dir)
+{
+  switch(m_selected_button->getAction())
+  {
+  case Action::PREFS_VALUE:
+    if(_dir>0)
+    {
+      executeAction(Action::INCR_PREFS);
+    }
+    else
+    {
+      executeAction(Action::DECR_PREFS);
+    }
+    break;
+  default:
+    break;
+  }
 }
