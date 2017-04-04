@@ -31,7 +31,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
-    m_state(GameState::MAIN),
+    m_state(GameState::START_MENU),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
     m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
@@ -2170,6 +2170,12 @@ void Scene::togglePause()
     }
 }
 
+void Scene::startGame()
+{
+  m_state = GameState::MAIN;
+  Gui::instance()->unpause();
+}
+
 void Scene::startMove(Direction _d)
 {
     m_movement_held[_d] = true;
@@ -2203,19 +2209,22 @@ void Scene::prefsMode()
 
 void Scene::escapeState()
 {
-    Gui *gui = Gui::instance();
-    switch (m_state) {
-    case GameState::MAIN:
-    case GameState::PAUSE:
-        togglePause();
-        break;
-    case GameState::PREFERENCES:
-        m_state = GameState::PAUSE;
-        gui->pause();
-        break;
-    default:
-        break;
-    }
+  Gui *gui = Gui::instance();
+  switch (m_state) {
+  case GameState::START_MENU:
+    startGame();
+    break;
+  case GameState::MAIN:
+  case GameState::PAUSE:
+    togglePause();
+    break;
+  case GameState::PREFERENCES:
+    m_state = GameState::PAUSE;
+    gui->pause();
+    break;
+  default:
+    break;
+  }
 }
 
 GameState Scene::getState()

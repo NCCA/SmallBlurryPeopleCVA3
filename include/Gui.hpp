@@ -66,6 +66,10 @@ public :
   ///
   void unpause();
   ///
+  /// \brief createStartMenuButtons creates the set of buttons for start menu
+  ///
+  void createStartMenuButtons();
+  ///
   /// \brief createSceneButtons creates the set of default buttons for the scene
   ///
   void createSceneButtons();
@@ -132,6 +136,12 @@ public :
   /// \param _move_vec
   ///
   void moveNotifications(ngl::Vec2 _move_vec);
+  ///
+  /// \brief getButtonLength find out how long a button should be to fit a string
+  /// \param _text text on button
+  /// \return length of button needed
+  ///
+  int getButtonLength(const std::string &_text);
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

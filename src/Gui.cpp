@@ -27,7 +27,7 @@ void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
   m_shader_name = _shader_name;
   setResolution(_res);
   initGL();
-  createSceneButtons();
+  createStartMenuButtons();
   m_mouse_down = false;
 }
 
@@ -191,6 +191,17 @@ void Gui::unpause()
   createSceneButtons();
 }
 
+void Gui::createStartMenuButtons()
+{
+  wipeButtons();
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "GAME TITLE");
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), TEXT_PLAY);
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
+
+  updateButtonArrays();
+}
+
 void Gui::createSceneButtons()
 {
   wipeButtons();
@@ -267,7 +278,7 @@ void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ng
 void Gui::addNotification(const std::string &_text, ngl::Vec2 _map_pos)
 {
   ngl::Vec2 size(0,40);
-  size.m_x = std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+  size.m_x = getButtonLength(_text);
   moveNotifications(ngl::Vec2(0, 50));
   m_buttons.push_back(std::shared_ptr<NotificationButton>(new NotificationButton(Action::NOTIFY, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(10,10), size, _text, _map_pos)));
 }
@@ -528,23 +539,27 @@ void Gui::updateActiveCharacter()
 
 void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
 {
+  std::vector< std::shared_ptr<Button> > buttons_to_remove;
   int num_notifications = 1;
-  /*for(int i = m_buttons.size()-1 ; i>=0; i--)
+  for(int i = m_buttons.size()-1 ; i>=0; i--)
   {
     std::shared_ptr<Button> button(m_buttons[i]);
     if(button.get()->getAction() == Action::NOTIFY)
     {
       if(num_notifications*2 >= DOUBLE_MAX_NOTES)
       {
-        removeButton(button);
+        buttons_to_remove.push_back(button);
       }
       else
       {
         num_notifications++;
       }
     }
-
-  }*/
+  }
+  for(std::shared_ptr<Button> &button : buttons_to_remove)
+  {
+    removeButton(button);
+  }
   addNotification(_text, _pos);
   updateButtonArrays();
   m_note_id++;
@@ -560,4 +575,9 @@ void Gui::moveNotifications(ngl::Vec2 _move_vec)
       b->move(_move_vec);
     }
   }
+}
+
+int Gui::getButtonLength(const std::string &_text)
+{
+  return std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
 }

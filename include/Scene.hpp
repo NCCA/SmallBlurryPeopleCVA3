@@ -32,6 +32,7 @@ enum Direction
 ///
 enum GameState
 {
+  START_MENU,
   MAIN,
   PAUSE,
   PREFERENCES
@@ -126,6 +127,10 @@ public:
     /// \brief togglePause switch between paused and unpaused mode
     ///
     void togglePause();
+    ///
+    /// \brief startGame leave main menu and start the game
+    ///
+    void startGame();
     ///
     /// \brief startMove set movement flag in given direction to true
     /// \param _d direction to move
