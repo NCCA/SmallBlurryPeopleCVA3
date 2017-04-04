@@ -2212,7 +2212,10 @@ ngl::Vec3 Scene::getCamMoveVec()
         move.m_x += 1;
     if(m_movement_held[Direction::RIGHT])
         move.m_x -= 1;
-    move *= 0.3;
+    move *= 10;
+    float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
+    cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
+    move *= cam_to_pivot_height;
     return move;
 }
 
