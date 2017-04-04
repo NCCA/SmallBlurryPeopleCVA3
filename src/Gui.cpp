@@ -279,6 +279,7 @@ void Gui::removeButton(std::shared_ptr<Button> button)
     m_buttons.erase(it);
   }
   updateButtonArrays();
+
 }
 
 void Gui::updateButtonArrays()
@@ -361,16 +362,17 @@ void Gui::updateNotifications()
   std::array<int, DOUBLE_MAX_NOTES> ages{0};
   size_t i = 0;
   int shader_id = 0;
+  std::vector< std::shared_ptr<Button> > buttons_to_remove;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
-    if(b && b->getAction() == Action::NOTIFY)
+    if(b->getAction() == Action::NOTIFY)
     {
       uniform_needs_updating = true;
       ((NotificationButton *)b)->incrementAge();
       if(((NotificationButton *)b)->getAge() > MAX_AGE)
       {
-        removeButton(button);
+        buttons_to_remove.push_back(button);
       }
       else if(i < ages.size())
       {
@@ -382,11 +384,17 @@ void Gui::updateNotifications()
     }
     shader_id++;
   }
-  //if(uniform_needs_updating)
-  //{
+
+  for(std::shared_ptr<Button> &button : buttons_to_remove)
+  {
+    removeButton(button);
+  }
+
+  if(uniform_needs_updating)
+  {
     glUniform1iv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "notification_ages"), DOUBLE_MAX_NOTES, &(ages[0]));
     glUniform1i(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "max_notification_age"), MAX_AGE);
-  //}
+  }
 }
 
 void Gui::drawButtons()
@@ -398,6 +406,7 @@ void Gui::drawButtons()
   glDisable(GL_DEPTH_TEST);
 
   slib->use(m_shader_name);
+  updateNotifications();
   if(m_text_outdated)
   {
     updateText();

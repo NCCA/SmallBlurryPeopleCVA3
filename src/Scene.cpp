@@ -294,151 +294,151 @@ void Scene::initialiseFramebuffers()
 
 void Scene::readNameFile()
 {
-    std::ifstream namesFile;
-    namesFile.open("names/game_names.txt");
+  std::ifstream namesFile;
+  namesFile.open("names/game_names.txt");
 
-    if(!namesFile.is_open())
-    {
-        std::cerr<<"Couldnt open file\n";
-        exit(EXIT_FAILURE);
-    }
+  if(!namesFile.is_open())
+  {
+      std::cerr<<"Couldnt open file\n";
+      exit(EXIT_FAILURE);
+  }
 
-    int lineNo = 0;
-    std::string lineBuffer;
-    while (!namesFile.eof())
-    {
-        std::getline(namesFile, lineBuffer, '\n');
-        if(lineBuffer.size() != 0)
-        {
-            m_file_names.push_back(lineBuffer);
-            lineNo++;
-        }
-    }
-    namesFile.close();
+  int lineNo = 0;
+  std::string lineBuffer;
+  while (!namesFile.eof())
+  {
+      std::getline(namesFile, lineBuffer, '\n');
+      if(lineBuffer.size() != 0)
+      {
+          m_file_names.push_back(lineBuffer);
+          lineNo++;
+      }
+  }
+  namesFile.close();
 }
 
 void Scene::createCharacter()
 {
-    int numberNames = m_file_names.size();
-    std::random_device rnd;
-    std::mt19937 mt_rand(rnd());
-    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-    int name_chosen = nameNo(mt_rand);
-    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+  int numberNames = m_file_names.size();
+  std::random_device rnd;
+  std::mt19937 mt_rand(rnd());
+  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+  int name_chosen = nameNo(mt_rand);
+  m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
 }
 
 void Scene::update()
 {
-    Gui::instance()->updateNotifications();
-    if (m_grid.hasChanges())
+  //Gui::instance()->updateNotifications();
+  if (m_grid.hasChanges())
+  {
+    initMeshInstances();
+    m_grid.resetHasChanges();
+  }
+  if(m_state == GameState::MAIN)
+  {
+    //translates
+    if(m_mouse_trans_active)
     {
-        initMeshInstances();
-        m_grid.resetHasChanges();
+      //Compute distance to mouse origin
+      ngl::Vec2 mouse_distance = Utility::getMousePos();
+      mouse_distance -= m_mouse_trans_origin;
+
+      m_mouse_trans_origin = Utility::getMousePos();
+
+      //Move the camera based on mouse translation.
+      m_cam.moveRight( mouse_distance.m_x * 0.025f );
+      m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+      //---
     }
-    if(m_state == GameState::MAIN)
+    //rotates
+    else if(m_mouse_rot_active)
     {
-        //translates
-        if(m_mouse_trans_active)
-        {
-            //Compute distance to mouse origin
-            ngl::Vec2 mouse_distance = Utility::getMousePos();
-            mouse_distance -= m_mouse_trans_origin;
+      int mouse_origin = 0;
+      int mouse_distance = 0;
+      SDL_GetMouseState(&mouse_origin, nullptr);
+      mouse_distance = mouse_origin - m_mouse_rot_origin;
+      m_mouse_rot_origin = mouse_origin;
 
-            m_mouse_trans_origin = Utility::getMousePos();
-
-            //Move the camera based on mouse translation.
-            m_cam.moveRight( mouse_distance.m_x * 0.025f );
-            m_cam.moveForward( -mouse_distance.m_y * 0.025f );
-            //---
-        }
-        //rotates
-        else if(m_mouse_rot_active)
-        {
-            int mouse_origin = 0;
-            int mouse_distance = 0;
-            SDL_GetMouseState(&mouse_origin, nullptr);
-            mouse_distance = mouse_origin - m_mouse_rot_origin;
-            m_mouse_rot_origin = mouse_origin;
-
-            //Rotate the camera based on mouse movement.
-            m_cam.rotate(0.0f, mouse_distance * 0.125f);
-            //---
-        }
-
-        //---
-
-        if(m_centre_camera == true)
-        {
-            for (Character &character : m_characters)
-                if (character.isActive())
-                    m_cam.setPos(-character.getPos());
-        }
-        else
-        {
-            m_cam.moveScreenSpace(getCamMoveVec());
-        }
-
-        //Terrain-height correction
-        ngl::Vec3 cxyz = m_cam.getPos();
-        int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
-        int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-        cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
-        ngl::Vec3 cp = m_cam.getTargPos();
-        //Grab the y component of the current tile, use that as the target y for the camera.
-        m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
-        //---
-
-
-        //Recalculate view matrix.
-        m_cam.updateSmoothCamera();
-        m_cam.clearTransforms();
-        m_cam.calculateViewMat();
-        //---
-
-        //Update mouse selection box.
-        m_mouseSelectionBoxPosition.update();
-        m_mouseSelectionBoxScale.update();
-
-        for(Character &character : m_characters)
-        {
-            character.update();
-        }
-
-        //m_sunAngle.m_x = 150.0f;
-        m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x += 0.01f;
-        if(m_sunAngle.m_x > 360.0f)
-        {
-            m_day++;
-            m_sunAngle.m_x = 0.0f;
-            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
-        }
-        //std::cout << m_sunAngle.m_x << '\n';
-
-        m_season = (m_day % 365) / 365.0f;
-
-        ngl::Transformation t;
-        t.setRotation( m_sunAngle );
-        m_sunDir = t.getMatrix().getForwardVector();
-        m_sunDir.normalize();
-
-        //1 = Midday
-        //0 = Sunrise/sunset
-        //-1 = Midnight
-        float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
-        //Map to range 0.5PI to -0.5PI
-        a *= M_PI / 2.0;
-
-        float t_midday = 0.5f * sin(a) + 0.5f;
-        float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
-        float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
-
-        m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
-                t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-                t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
-
-        m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+      //Rotate the camera based on mouse movement.
+      m_cam.rotate(0.0f, mouse_distance * 0.125f);
+      //---
     }
+
+    //---
+
+    if(m_centre_camera == true)
+    {
+      for (Character &character : m_characters)
+        if (character.isActive())
+          m_cam.setPos(-character.getPos());
+    }
+    else
+    {
+      m_cam.moveScreenSpace(getCamMoveVec());
+    }
+
+    //Terrain-height correction
+    ngl::Vec3 cxyz = m_cam.getPos();
+    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+    cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
+    ngl::Vec3 cp = m_cam.getTargPos();
+    //Grab the y component of the current tile, use that as the target y for the camera.
+    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
+    //---
+
+
+    //Recalculate view matrix.
+    m_cam.updateSmoothCamera();
+    m_cam.clearTransforms();
+    m_cam.calculateViewMat();
+    //---
+
+    //Update mouse selection box.
+    m_mouseSelectionBoxPosition.update();
+    m_mouseSelectionBoxScale.update();
+
+    for(Character &character : m_characters)
+    {
+      character.update();
+    }
+
+    //m_sunAngle.m_x = 150.0f;
+    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
+    m_sunAngle.m_x += 0.01f;
+    if(m_sunAngle.m_x > 360.0f)
+    {
+      m_day++;
+      m_sunAngle.m_x = 0.0f;
+      //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+    }
+    //std::cout << m_sunAngle.m_x << '\n';
+
+    m_season = (m_day % 365) / 365.0f;
+
+    ngl::Transformation t;
+    t.setRotation( m_sunAngle );
+    m_sunDir = t.getMatrix().getForwardVector();
+    m_sunDir.normalize();
+
+    //1 = Midday
+    //0 = Sunrise/sunset
+    //-1 = Midnight
+    float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
+    //Map to range 0.5PI to -0.5PI
+    a *= M_PI / 2.0;
+
+    float t_midday = 0.5f * sin(a) + 0.5f;
+    float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
+    float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
+
+    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
+            t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
+            t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+
+    m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+  }
 }
 
 //I'm sorry this function is so long :(
@@ -2228,7 +2228,7 @@ GameState Scene::getState()
 void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 {
     std::cout << "moved camera" << std::endl;
-    //m_cam.setPos(_pos);
+    m_cam.setPos(ngl::Vec3(_pos.m_x, 0, _pos.m_y));
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()

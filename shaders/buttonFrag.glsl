@@ -314,7 +314,7 @@ void main()
     {
       if(notification_ages[i-1] == fragId)
       {
-        a = (max_notification_age - notification_ages[1])/float(max_notification_age);
+        a = (max_notification_age - notification_ages[i])/float(max_notification_age);
         //a = float(notification_ages[i])/float(max_notification_age);
         //a = smoothstep(1, 0, notification_ages[i] / float(max_notification_age));
       }
