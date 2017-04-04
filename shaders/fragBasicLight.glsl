@@ -174,7 +174,7 @@ void main()
         mul -= shadow;
     }
 
-    mul = max(mul, 0.2);
+    mul = max(mul, 0.15);
 
 #if shadowbuffer == 0
     fragColour.xyz *= mul;
