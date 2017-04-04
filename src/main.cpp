@@ -4,9 +4,6 @@
 #include <ngl/NGLInit.h>
 #include <set>
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/fusion/adapted/std_pair.hpp>
-
 #include "imgui.h"
 #include "ImGUIImpl.h"
 
@@ -16,16 +13,12 @@
 #include "Prefs.hpp"
 #include "PrefsParser.hpp"
 
-
-
-
-
 int main()
 {
   Prefs* prefs = Prefs::instance();
   prefs->init();
   prefs->printPrefs();
-  return 0;
+
 
 
     SDL_Init(SDL_INIT_VIDEO);
