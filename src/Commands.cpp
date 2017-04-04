@@ -27,14 +27,14 @@ void QuitCommand::execute()
 // Build Command
 //------------------------------------------------------------//
 
-BuildCommand::BuildCommand(Character *_character, BuildingType _building) :
+BuildCommand::BuildCommand(Character *_character, TileType _building) :
   m_character(_character),
   m_building(_building)
 {}
 
 void BuildCommand::execute()
 {
-  m_character->build(m_building);
+	m_character->buildState(m_building);
 }
 
 //------------------------------------------------------------//
@@ -52,7 +52,7 @@ void CentreCameraCommand::execute()
 }
 
 //------------------------------------------------------------//
-// Pause Command
+// Escape Command
 //------------------------------------------------------------//
 
 EscapeCommand::EscapeCommand(Scene *_scene) :
@@ -114,3 +114,30 @@ void MoveCamCommand::execute()
 //------------------------------------------------------------//
 
 // setPrefsCommand is a template, so is defined in the header
+
+//------------------------------------------------------------//
+// Forage Command
+//------------------------------------------------------------//
+
+ForageCommand::ForageCommand(Character *_character) :
+  m_character(_character)
+{}
+
+void ForageCommand::execute()
+{
+	m_character->forageState();
+}
+
+//------------------------------------------------------------//
+// Centre Notification Command
+//------------------------------------------------------------//
+
+CentreNotificationCommand::CentreNotificationCommand(Scene *_scene, ngl::Vec2 _map_pos) :
+  m_scene(_scene),
+  m_map_pos(_map_pos)
+{}
+
+void CentreNotificationCommand::execute()
+{
+  m_scene->focusCamToGridPos(m_map_pos);
+}

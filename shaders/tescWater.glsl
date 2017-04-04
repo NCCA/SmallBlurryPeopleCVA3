@@ -22,7 +22,7 @@ float GetTessLevel(float Distance0, float Distance1)
 {
     float AvgDistance = (Distance0 + Distance1) / 2.0;
 
-    int t = 1024;//min(maxTessLevel, 256);
+    int t = 32;//min(maxTessLevel, 256);
 
     if (AvgDistance <= 8.0)
     {

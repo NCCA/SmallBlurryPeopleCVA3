@@ -4,30 +4,32 @@
 #include "Character.hpp"
 #include "Scene.hpp"
 
-
 ///
-/// \brief The Action enum for what the buttons does
+/// \brief The Action enum for what the buttons does, ints are commented in to match shader consts
 ///
 enum class Action
 {
-  PASSIVE,          //0
-  QUIT,             //1
-  BUILDHOUSE,       //2
-  BUILDSTORE,       //3
-  CENTRECAMERA,     //4
-  ESCAPE,           //5
-  ZOOMIN,           //6
-  ZOOMOUT,          //7
-  MOVEFORWARD,      //8
-  MOVEBACKWARD,     //9
-  MOVELEFT,         //10
-  MOVERIGHT,        //11
-  STOPFORWARD,      //12
-  STOPBACKWARD,     //13
-  STOPLEFT,         //14
-  STOPRIGHT,        //15
-  PREFERENCES,      //16
-  PASSIVE_CHARACTER //17
+  PASSIVE,           //0
+  QUIT,              //1
+  BUILDHOUSE,        //2
+  BUILDSTORE,        //3
+  CENTRECAMERA,      //4
+  ESCAPE,            //5
+  ZOOMIN,            //6
+  ZOOMOUT,           //7
+  MOVEFORWARD,       //8
+  MOVEBACKWARD,      //9
+  MOVELEFT,          //10
+  MOVERIGHT,         //11
+  STOPFORWARD,       //12
+  STOPBACKWARD,      //13
+  STOPLEFT,          //14
+  STOPRIGHT,         //15
+  PREFERENCES,       //16
+  PASSIVE_CHARACTER, //17
+  SETBOOLPREF,       //18
+  FORAGE,            //19
+  NOTIFY             //20
 };
 
 ///
@@ -86,7 +88,7 @@ public:
   /// \param _character character to instruct
   /// \param _building building wanted
   ///
-  BuildCommand(Character *_character, BuildingType _building);
+	BuildCommand(Character *_character, TileType _building);
   ~BuildCommand() = default;
   ///
   /// \brief execute tells character to build given building
@@ -100,7 +102,7 @@ private:
   ///
   /// \brief m_building type of building wanted
   ///
-  BuildingType m_building;
+	TileType m_building;
 };
 
 ///
@@ -170,6 +172,7 @@ private:
   ///
   Scene *m_scene;
 };
+
 ///
 /// \brief The ZoomCommand class allows zooming in/out of a scene
 ///
@@ -262,7 +265,7 @@ private:
 template<class T>
 SetPrefsCommand<T>::SetPrefsCommand(const std::string &_key, const T &_val) :
   m_key(_key),
-  m_val(_key)
+  m_val(_val)
 {}
 
 template<class T>
@@ -270,5 +273,39 @@ void SetPrefsCommand<T>::execute()
 {
   Prefs::instance()->setPref(m_key, m_val);
 }
+
+///
+/// \brief The ForageCommand class used to tell character to start foraging
+///
+class ForageCommand : public Command
+{
+public:
+  ///
+  /// \brief ForageCommand constructor for forage command
+  /// \param _character character to instruct
+  ///
+  ForageCommand(Character *_character);
+  ~ForageCommand() = default;
+  ///
+  /// \brief execute tells character to forage
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_character character to instruct
+  ///
+  Character *m_character;
+};
+
+class CentreNotificationCommand : public Command
+{
+public:
+  CentreNotificationCommand(Scene *_scene, ngl::Vec2 _map_pos);
+  ~CentreNotificationCommand() = default;
+  virtual void execute();
+private:
+  Scene *m_scene;
+  ngl::Vec2 m_map_pos;
+};
 
 #endif//__COMMANDS_HPP__

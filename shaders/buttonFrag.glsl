@@ -1,6 +1,7 @@
 #version 410 core
 
 #define BUTTON_TEXT_LENGTH 256
+#define DOUBLE_MAX_NOTES 10
 
 // actions
 const uint PASSIVE           = 0;
@@ -21,11 +22,18 @@ const uint STOPLEFT          = 14;
 const uint STOPRIGHT         = 15;
 const uint PREFERENCES       = 16;
 const uint PASSIVE_CHARACTER = 17;
+const uint SETBOOLPREF       = 18;
+const uint FORAGE            = 19;
+const uint NOTIFY            = 20;
 
 //game states
 const uint STATE_MAIN  = 0;
 const uint STATE_PAUSE = 1;
 const uint STATE_PREFS = 2;
+
+// character exceptions
+const int TEXT_CROSS = 32;
+const int TEXT_NEWLINE = 10;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
@@ -41,6 +49,9 @@ uniform vec2 fResolution;
 uniform int game_state;
 uniform sampler2D icons;
 uniform sampler2D font;
+
+uniform int notification_ages[DOUBLE_MAX_NOTES];
+uniform int max_notification_age;
 
 uniform uint button_text[BUTTON_TEXT_LENGTH];
 
@@ -67,8 +78,8 @@ vec3 button_highlight = vec3(0.9, 0.7, 0.4);
 //--- common data ---
 
 //--- font data ---
-const float FONT_SIZE = 20;
-const float FONT_SPACE = 0.5;
+uniform float FONT_SIZE = 20;
+uniform float FONT_SPACE = 0.5;
 
 //----- access to the image of ascii code characters ------
 //#define S(a) c+=texture(iChannel0,clamp(tp,0.,1.)/16.+fract(floor(vec2(a,15.999-float(a)/16.))/16.)).x; uv.x-=FONT_SPACE;
@@ -85,6 +96,7 @@ const float FONT_SPACE = 0.5;
 #define _add S(43);
 #define _comma S(44);
 #define _dot S(46);
+#define _cross S(215);
 
 #define _0 S(48);
 #define _1 S(49);
@@ -174,7 +186,14 @@ vec3 text(vec2 pos, int start_index, int end_index)
   int button_id = 0;
   for(int i=start_index; i<end_index; i++)
   {
-    S(button_text[i]);
+   if(button_text[i] == TEXT_NEWLINE)
+   {
+     _newline;
+   }
+   else
+   {
+     S(button_text[i]);
+   }
   }
   return vec3(max(c, 0.0));
 }
@@ -184,37 +203,45 @@ vec3 centerText()
 
   int start_index = 0;
   int end_index = 0;
-  int str_len = 0;
+  int line_len = 0;
+  int max_len = 0;
   int button_id = 0;
+  int num_lines = 0;
   // find string start and end for this button
   for(int i=0; i<BUTTON_TEXT_LENGTH; i++)
   {
+    if(button_text[i] == TEXT_NEWLINE)
+    {
+      line_len = 0;
+      num_lines++;
+    }
+    else
+    {
+      line_len++;
+    }
+    max_len = max(max_len, line_len);
     if(button_text[i] == 0)
     {
       if(button_id == fragId)
       {
-        for(int j=i; j<BUTTON_TEXT_LENGTH; j++)
-        {
-          if(button_text[j] == 0)
-          {
-            end_index = j;
-            break;
-          }
-        }
+        end_index = i;
         break;
       }
       else
       {
         button_id++;
         start_index = i+1;
+        max_len = 0;
+        line_len = 0;
+        num_lines = 0;
       }
     }
   }
-  str_len = end_index - start_index;
-  if(str_len > 0)
+  //str_len = end_index - start_index;
+  if(max_len > 0)
   {
     vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-    vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x)/2 - ((str_len+1) * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y + FONT_SIZE)/2)));
+    vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - max_len * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (num_lines - 1) * FONT_SIZE)/2.0)));
     return text(text_pos, start_index, end_index);
   }
   else
@@ -280,8 +307,21 @@ void main()
   }
 
   s += centerText();
-
-  outColour = vec4(s, 1.0);
+  float a = 1.0;
+  if(fragAction == NOTIFY)
+  {
+    for(int i=1; i < DOUBLE_MAX_NOTES; i+=2)
+    {
+      if(notification_ages[i-1] == fragId)
+      {
+        a = (max_notification_age - notification_ages[1])/float(max_notification_age);
+        //a = float(notification_ages[i])/float(max_notification_age);
+        //a = smoothstep(1, 0, notification_ages[i] / float(max_notification_age));
+      }
+    }
+    //a = pow(smoothstep(1, 0, notification_ages[1] / float(max_notification_age)), 0.25);
+  }
+  outColour = vec4(s, a);
 }
 
 //return text(translate(pos, vec2(fragPixelPos.x + border_size, -(fragPixelPos.y + FONT_SIZE + border_size))));

@@ -64,6 +64,11 @@ int findSetElement(std::set<int> _set, int index)
 	{
 			return *iter;
 	}
+	else
+	{
+		std::cerr << "ERROR, element not found" << std::endl;
+		return -1;
+	}
 }
 
 bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt)

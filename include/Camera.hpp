@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "IVal.hpp"
+
 /// @file Camera.hpp
 /// @brief The camera class is essentially a wrapper around a load of mat4s. Similar to NGLs default camera class but it represents
 /// both the camera and a lookat target. The user can transform both of these. When happy with the transformations they have set up,
@@ -82,19 +84,14 @@ public:
 
     void dolly(const float _d);
     void setPos(const ngl::Vec3 _p);
-    ngl::Vec3 getTargPos() const {return m_targPos;}
+    ngl::Vec3 getTargPos() const {return m_ipos.getEnd();}
 
     /// @brief Rotates the camera.
     void rotate(const float _pitch, const float _yaw);
 
-    void setMovementSmoothness(const float _s) {m_movementSmoothness = _s;}
-    void setRotationSmoothness(const float _s) {m_rotationSmoothness = _s;}
-    void setFocalSmoothness(const float _s) {m_focalSmoothness = _s;}
-    void setDollySmoothness(const float _s) {m_dollySmoothness = _s;}
+    float getTargetDolly() const {return m_iDolly.getEnd();}
 
-    float getTargetDolly() const {return m_curDolly;}
-
-    float getFocalDepth() const {return m_curFocalDepth;}
+    float getFocalDepth() const {return m_iFocalDepth.get();}
 
     void immediateTransform(const ngl::Mat4 &_mat) {m_V *= _mat; m_VP = m_V * m_P;
                                                         }
@@ -132,37 +129,22 @@ private:
     /// @brief The up direction.
     ngl::Vec3 m_up = ngl::Vec3(0.0f, 1.0f, 0.0f);
 
-    /// @brief Target and current position, for smooth camera
-    ngl::Vec3 m_targPos;
-    ngl::Vec3 m_curPos;
+    /// @brief Target and current position, for smooth camera  
+    IVal<ngl::Vec3> m_ipos;
 
     /// @brief Target and current rotation, for smooth camera
-    ngl::Vec2 m_targRot;
-    ngl::Vec2 m_curRot;
+    IVal<ngl::Vec2> m_irot;
 
     /// @brief Clamp rotation to these values.
     float m_minPitch;
     float m_maxPitch;
 
     /// @brief Target and current focal depth, for smooth camera
-    float m_targFocalDepth;
-    float m_curFocalDepth;
+    IVal<float> m_iFocalDepth;
 
     /// @brief Target and current dollying, for smooth camera
-    float m_targDolly;
-    float m_curDolly;
+    IVal<float> m_iDolly;
 
-    /// @brief Controls the smoothness of movement.
-    float m_movementSmoothness;
-
-    /// @brief Controls the smoothness of rotation.
-    float m_rotationSmoothness;
-
-    /// @brief Controls the smoothness of focal depth change.
-    float m_focalSmoothness;
-
-    /// @brief Controls the smoothness of dollying.
-    float m_dollySmoothness;
 
     //These functions are too low-level for general use. I have created public functions like moveRight and moveForwards etc,
     //which call these. Some are used raw for specialised transformations, such as flipping the camera upside down to draw reflections.

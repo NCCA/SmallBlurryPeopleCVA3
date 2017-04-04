@@ -131,8 +131,6 @@ void Grid::loadScript(std::string _script_path)
              std::istreambuf_iterator<char>());
 }
 
-
-
 int Grid::getW()
 {
   return m_w;
@@ -215,8 +213,29 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
   return out;
 }
 
+void Grid::setTileType(int _id, TileType _type)
+{
+	m_tiles[_id].setType(_type);
+}
 
-bool Grid::HasChanges()
+void Grid::setTileType(int _x, int _y, TileType _type)
+{
+	m_tiles[_x + m_w * _y].setType(_type);
+}
+
+void Grid::setBuildState(int _id, float _value, TileType _type)
+{
+	m_tiles[_id].setBuildState(_value, _type);
+	m_has_changes = true;
+}
+
+void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
+{
+	m_tiles[_x + m_w * _y].setBuildState(_value, _type);
+	m_has_changes = true;
+}
+
+bool Grid::hasChanges()
 {
   return m_has_changes;
 }

@@ -9,6 +9,7 @@
 enum class PrefType
 {
   ERROR,
+  BOOL,
   INT,
   FLOAT,
   STRING
@@ -133,13 +134,9 @@ public:
   /// \param _val is the value to be associated with the string key, either int, float or string
   ///
   void setPref(std::string &_key, int _val);
-
   void setPref(std::string &_key, float _val);
-
-  void setPref(std::string &_key, bool _val);
-
   void setPref(std::string &_key, const std::string &_val);
-
+  void setPref(std::string &_key, bool _val);
 
   ///
   /// \brief getPrefValueString get text for value of string
@@ -147,6 +144,17 @@ public:
   /// \return string representing value, eg "10" if value is 10
   ///
   std::string getPrefValueString(const std::string &_key);
+
+  ///
+  /// \brief getNumPrefs get total number of preference options
+  /// \return total number of preference options
+  ///
+  int getNumPrefs();
+  ///
+  /// \brief boolToString convert bool to string for Gui
+  /// \return string, either "0" or "1"
+  ///
+  std::string boolToString(bool _b);
 
 private:
   ///

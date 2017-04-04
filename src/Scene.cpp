@@ -24,7 +24,6 @@ const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_active(true),
-    m_curFocalDepth(0.0f),
     m_active_char_id(-1),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
@@ -33,7 +32,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
     m_state(GameState::MAIN),
-    m_movement_held{false}
+    m_movement_held{false},
+    m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
@@ -50,9 +51,10 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuse", "vertDeferredDataInstanced", "fragDeferredDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
-    createShader("charPick", "vertDeferredData", "fragPickChar");
+    createShader("charPick", "vertDeferredDataChar", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
     createShader("terrainPick", "vertDeferredData", "fragPickTerrain");
+    createShader("selection", "vertDeferredData", "fragBasicColour");
     createShader("sky", "vertScreenQuad", "fragSky");
     createShader("shadowDepth", "vertDeferredData", "fragShadowDepth");
     createShader("shadowDepthInstanced", "vertDeferredDataInstanced", "fragShadowDepth");
@@ -62,6 +64,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
+    createShader("mousebox", "vertDeferredData", "fragMousebox");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -86,9 +89,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-    for (int i = 0; i<100; i++)
+    for (int i = 0; i<10; i++)
     {
-      createCharacter();
+        createCharacter();
     }
 
     initialiseFramebuffers();
@@ -107,9 +110,13 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
+    store->loadMesh("debugBox", "box.obj");
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
-    store->loadMesh("house", "house/house.obj");
+    //store->loadMesh("house", "house/house.obj");
+    store->loadMesh("house", "house/stilt_house.obj" );
+    //store->loadMesh("foundation_A", "house/start_building.obj");
+    store->loadMesh("foundation_B", "house/mid_way_building.obj");
     store->loadMesh("person", "person/person.obj");
     store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
     store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
@@ -171,49 +178,48 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     initMeshInstances();
 
-
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
 }
 
 void Scene::initMeshInstances()
 {
-  int meshCount = 0;
-  //m_meshPositions.clear()
-  m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
-  for(int i = 0; i < m_grid.getW(); ++i)
-      for(int j = 0; j < m_grid.getH(); ++j)
-      {
-          int index = static_cast<int>( m_grid.getTileType(i, j) );
-          m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                    i,
-                                                    m_grid.getTileHeight(i, j) / m_terrainHeightDivider,
-                                                    j
-                                                    ));
-          meshCount++;
-      }
+    int meshCount = 0;
+    //m_meshPositions.clear()
+    m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getW(); ++i)
+        for(int j = 0; j < m_grid.getH(); ++j)
+        {
+            int index = static_cast<int>( m_grid.getTileType(i, j) );
+            m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                      i,
+                                                      m_grid.getTileHeight(i, j) / m_terrainHeightDivider,
+                                                      j
+                                                      ));
+            meshCount++;
+        }
 
-  //Generate TBO for mesh instancing.
-  //ngl::Random * rng = ngl::Random::instance();
-  std::vector<ngl::Mat4> transforms;
-  transforms.reserve( meshCount );
-  for(auto &slot : m_meshPositions)
-      for(auto &vec : slot)
-      {
-          ngl::Mat4 m;
-          m.translate( vec.m_x, vec.m_y, vec.m_z );
-          transforms.push_back( m );
-      }
+    //Generate TBO for mesh instancing.
+    //ngl::Random * rng = ngl::Random::instance();
+    std::vector<ngl::Mat4> transforms;
+    transforms.reserve( meshCount );
+    for(auto &slot : m_meshPositions)
+        for(auto &vec : slot)
+        {
+            ngl::Mat4 m;
+            m.translate( vec.m_x, vec.m_y, vec.m_z );
+            transforms.push_back( m );
+        }
 
-  GLuint buf;
-  glGenBuffers(1, &buf);
-  glBindBuffer(GL_TEXTURE_BUFFER, buf);
-  glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
+    GLuint buf;
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_TEXTURE_BUFFER, buf);
+    glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
 
-  glGenTextures(1, &m_instanceTBO);
-  glActiveTexture( GL_TEXTURE0 );
-  glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
+    glGenTextures(1, &m_instanceTBO);
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 }
 
 void Scene::initialiseFramebuffers()
@@ -323,11 +329,12 @@ void Scene::createCharacter()
 
 void Scene::update()
 {
-  if (m_grid.HasChanges())
-  {
-    initMeshInstances();
-    m_grid.resetHasChanges();
-  }
+    Gui::instance()->updateNotifications();
+    if (m_grid.hasChanges())
+    {
+        initMeshInstances();
+        m_grid.resetHasChanges();
+    }
     if(m_state == GameState::MAIN)
     {
         //translates
@@ -359,18 +366,17 @@ void Scene::update()
         }
 
         //---
-    }
 
-    if(m_centre_camera == true)
-    {
-        for (Character &character : m_characters)
-            if (character.isActive())
-                m_cam.setPos(-character.getPos());
-    }
-    else
-    {
-        m_cam.moveScreenSpace(getCamMoveVec());
-    }
+        if(m_centre_camera == true)
+        {
+            for (Character &character : m_characters)
+                if (character.isActive())
+                    m_cam.setPos(-character.getPos());
+        }
+        else
+        {
+            m_cam.moveScreenSpace(getCamMoveVec());
+        }
 
         //Terrain-height correction
         ngl::Vec3 cxyz = m_cam.getPos();
@@ -388,6 +394,10 @@ void Scene::update()
         m_cam.clearTransforms();
         m_cam.calculateViewMat();
         //---
+
+        //Update mouse selection box.
+        m_mouseSelectionBoxPosition.update();
+        m_mouseSelectionBoxScale.update();
 
         for(Character &character : m_characters)
         {
@@ -428,33 +438,41 @@ void Scene::update()
                 t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
-
-        //Get mouse terrain position to drive camera focal distance. Code borrowed from Rosie.
-        m_pickBuffer.bind();
-        GLuint grid_texID = getTerrainPickTexture();
-        glBindTexture(GL_TEXTURE_2D, grid_texID);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-        int mouse_coords[2] = {0,0};
-        SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
-        std::array<float, 4> grid_coord;
-
-        // x, window height - y
-        glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
-
-
-    ngl::Vec3 tpos (grid_coord[0], grid_coord[1], grid_coord[2]);
-    m_targFocalDepth = (tpos - m_cam.getPos()).length() + 0.01f;
-
-
-        m_curFocalDepth += (m_targFocalDepth - m_curFocalDepth) / 16.0f;
-        m_curFocalDepth = Utility::clamp( m_curFocalDepth, 0.1f, 128.0f );
-
+    }
 }
 
 //I'm sorry this function is so long :(
+//Order of operations:
+//  --
+//  SETUP                   : Sets up the scene ready for drawing.
+//  --
+//  UTILITY ID DRAW         : Draws out utility textures from the scene. Currently this is CHARACTER IDS and TERRAIN WORLD POSITION.
+//                            This can all be queried to find what the user is mousing-over.
+//  SHADOW PASS             : This section draws shadow maps for the sun/moon. These maps are later referenced when lighting is applied.
+//  REFLECTIONS             : The scene is drawn upside down, to be used for reflections later on. This is accomplished by scaling the camera by -1 in the y
+//                            then drawing as usual.
+//  DISPLACEMENT            : The textures that drive the water are generated. This is done in two passes. First, the displacement map is created,
+//                            then this texture is fed into another draw call to generate a normal map.
+//  --
+//  RAW DATA PASS           : The heart of the deferred rendering pipeline, the scene is drawn to a set of buffers, to which lighting is later applied.
+//  SKY                     : The sky is drawn to the back buffer.
+//  LIGHTING                : Lighting is applied to our data from RAW DATA PASS.
+//  --
+//  DEFERRED BLUR PASS      : The first of the post-processing stages, the lit scene from the LIGHTING stage is run through a blur shader.
+//  FORWARD SHADING         : Forward-shaded elements are drawn. Currently this is only the water, which is drawn into the post effects framebuffer,
+//                            ready for a DOF pass.
+//  DRAW BOX WHERE MOUSE IS : Inelegantly named, this stage draws a blue box where the mouse is. On Felix's suggestion, there are several
+//                            conditions to it being drawn, such as the mouse being over the world/not clicking and dragging.
+//  FORWARD BLUR PASS       : Blurs forwarded shaded elements, in the same way that DEFERRED BLUR PASS operates.
+//  BUTTONS                 : Draws the GUI to the screen after everything else has completed.
+//  DEBUG DRAW              : Originally used to debug the CSM shadowing I was using, this is now largely obsolete. Should be removed before submission,
+//                            but for now it can be used to draw points stored in m_debugPoints.
+
 void Scene::draw()
 {
+    //---------------------------//
+    //           SETUP           //
+    //---------------------------//
     m_debugPoints.clear();
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
@@ -472,12 +490,6 @@ void Scene::draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     slib->use("terrainPick");
-
-
-
-    ngl::Vec2 grid_size {m_grid.getW(), m_grid.getH()};
-    slib->setRegisteredUniform("dimensions", grid_size);
-
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
     glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
@@ -490,11 +502,11 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
-      ngl::Vec3 pos = ch.getPos();
-      pos.m_y /= m_terrainHeightDivider;
-      m_transform.setPosition(pos);
-      slib->setRegisteredUniform("id", ch.getID());
-      drawAsset( "person", "", "");
+        ngl::Vec3 pos = ch.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->setRegisteredUniform("id", ch.getID());
+        drawAsset( "person", "", "");
     }
 
     m_pickBuffer.unbind();
@@ -547,7 +559,6 @@ void Scene::draw()
     m_cam.immediateTransform(camFlip);
     m_cam.immediateTransform(camMove);
 
-
     drawTerrain();
 
     drawMeshes();
@@ -567,7 +578,6 @@ void Scene::draw()
     //m_cam.calculateViewMat();
     m_cam.immediateTransform(camMove);
     m_cam.immediateTransform(camFlip);
-
 
     //Light reflections
     glBindVertexArray(m_screenQuad);
@@ -604,7 +614,37 @@ void Scene::draw()
     m_postEffectsBuffer.unbind();
 
     //---------------------------//
-    // RAW DATA PASS //
+    //       DISPLACEMENT       //
+    //---------------------------//
+    //Base
+    m_displacementBuffer.bind();
+    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
+
+    glBindVertexArray(m_screenQuad);
+
+    slib->use("waterDisplacement");
+    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    //Normals
+    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
+    slib->use("waterDisplacementNormal");
+    id = slib->getProgramID("waterDisplacementNormal");
+    m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+
+    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+    m_displacementBuffer.unbind();
+
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+    //---------------------------//
+    //  RAW DATA PASS //
     //---------------------------//
     m_transform.reset();
     m_mainBuffer.bind();
@@ -670,40 +710,10 @@ void Scene::draw()
     id = slib->getProgramID("bokeh");
     m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
     m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
-    slib->setRegisteredUniform("focalDepth", m_curFocalDepth);
+    slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    //---------------------------//
-    //       DISPLACEMENT       //
-    //---------------------------//
-    //Base
-    m_displacementBuffer.bind();
-    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
-
-    glBindVertexArray(m_screenQuad);
-
-    slib->use("waterDisplacement");
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    //Normals
-    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-
-    slib->use("waterDisplacementNormal");
-    id = slib->getProgramID("waterDisplacementNormal");
-    m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    m_displacementBuffer.unbind();
-
-    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     //---------------------------//
     //      FORWARD SHADING      //
@@ -730,12 +740,10 @@ void Scene::draw()
     slib->setRegisteredUniform("waterDimensions", waterDimensions);
 
     id = slib->getProgramID("water");
-std::cout << "p1\n";
     m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
     m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
     m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
     m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
-std::cout << "p2\n";
     glBindVertexArray(m_unitSquareVAO);
     m_transform.reset();
 
@@ -770,7 +778,70 @@ std::cout << "p2\n";
 
     m_postEffectsBuffer.unbind();
 
-    glDisable(GL_DEPTH_TEST);
+    //---------------------------//
+    //  DRAW BOX WHERE MOUSE IS  //
+    //---------------------------//
+    Gui * g = Gui::instance();
+    int charid = getCharIDAtMouse();
+
+    if(m_state == GameState::MAIN and !m_mouse_trans_active and !m_mouse_rot_active and !g->mousePos( Utility::getMousePos() ))
+    {
+        glDisable(GL_CULL_FACE);
+        m_transform.reset();
+
+        ngl::Vec4 p;
+        //Player is not hovering over a character.
+        if(charid == -1)
+        {
+            p = getTerrainPosAtMouse();
+
+            p.m_x = std::round(p.m_x);
+            p.m_z = std::round(p.m_z);
+            p.m_y = m_grid.getTileHeight(p.m_x, p.m_z) / m_terrainHeightDivider;
+
+            m_transform.setScale( m_mouseSelectionBoxScale.get() );
+            m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+            m_mouseSelectionBoxScale.setEnd(ngl::Vec3(1.0f, 2.0f, 1.0f));
+        }
+        else
+        {
+            for(auto &c : m_characters)
+                if(c.getID() == charid)
+                    p = c.getPos();
+
+            p.m_y /= m_terrainHeightDivider;
+
+            m_transform.setScale( m_mouseSelectionBoxScale.get() );
+            m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+            m_mouseSelectionBoxScale.setEnd(ngl::Vec3(0.25f, 8.0f, 0.25f));
+        }
+        p.m_y -= 1.0f;
+        m_mouseSelectionBoxPosition.setEnd(ngl::Vec3(p.m_x, p.m_y, p.m_z));
+
+        m_postEffectsBuffer.bind();
+        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
+        slib->use("mousebox");
+        slib->setRegisteredUniform("base", p.m_y);
+        slib->setRegisteredUniform("m", 0.025f);
+        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
+        drawAsset("debugBox", "", "mousebox");
+
+        AssetStore * a = AssetStore::instance();
+        ngl::Obj * k = a->getModel("debugBox");
+        k->bindVAO();
+        slib->setRegisteredUniform("m", 0.0125f);
+        glLineWidth(5.0f);
+        glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
+        glLineWidth(1.0f);
+        glBindVertexArray(0);
+
+        m_postEffectsBuffer.unbind();
+
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+    }
+
     //---------------------------//
     //     FORWARD BLUR PASS     //
     //---------------------------//
@@ -847,7 +918,6 @@ std::cout << "p2\n";
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
-
 }
 
 void Scene::drawSky()
@@ -913,6 +983,9 @@ void Scene::drawMeshes()
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "", "colour", instances, offset);
             break;
+            //case static_cast<int>(TileType::FOUNDATION_B):
+            //		drawInstances("foundation_B", "", "colour", instances, offset);
+            //		break;
         default:
             break;
         }
@@ -960,6 +1033,9 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
             case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "", "colour");
                 break;
+                //case static_cast<int>(TileType::FOUNDATION_B):
+                //		drawAsset("foundation_B", "", "colour");
+                //		break;
             default:
                 break;
             }
@@ -1091,8 +1167,8 @@ std::pair< std::vector< bounds >, std::vector< bounds > > Scene::generateOrthoSh
         m_debugPoints.push_back(verts[2]);
         m_debugPoints.push_back(verts[3]);
         m_debugPoints.push_back(verts[3]);
-        m_debugPoints.push_back(verts[0]);
 
+        m_debugPoints.push_back(verts[0]);
         m_debugPoints.push_back(verts[4]);
         m_debugPoints.push_back(verts[5]);
         m_debugPoints.push_back(verts[5]);
@@ -1182,6 +1258,9 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "", "colour", instances, offset, m_shadowMat[_index] );
             break;
+            //case static_cast<int>(TileType::FOUNDATION_B):
+            //		drawInstances("foundation_B", "", "colour", instances, offset, m_shadowMat[_index]);
+            //		break;
         default:
             break;
         }
@@ -1232,7 +1311,9 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
     //checks if the right button has been pressed down and flags start
     else if(_event.button == SDL_BUTTON_RIGHT)
     {
-        m_centre_camera = false;
+        //Commented this out so the player could follow a character and rotate at the same time.
+        //I am not familiar with this section of code, sorry if it broke anything -Ben
+        //m_centre_camera = false;
         m_mouse_rot_origin = _event.x;
         m_mouse_rot_active = true;
     }
@@ -1268,15 +1349,14 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
-    zoom(_event.y);
+    Gui::instance()->executeAction(_event.y > 0 ? Action::ZOOMIN : Action::ZOOMOUT);
 }
 
 void Scene::zoom(int _direction)
 {
-    if(m_state == GameState::MAIN)
     {
         //pans camera up and down
-        if(_direction > 0 && m_cam.getTargetDolly() > 2.0)
+        if(_direction > 0 && m_cam.getTargetDolly() > 10.0)
         {
             m_cam.rotate( -0.5f, 0.0f );
             m_cam.dolly( -0.5f );
@@ -1291,54 +1371,54 @@ void Scene::zoom(int _direction)
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
 {
-  Gui *gui = Gui::instance();
-  switch(_event.keysym.sym)
-  {
-  case SDLK_SPACE:
-    gui->executeAction(Action::CENTRECAMERA);
-    break;
-  case SDLK_ESCAPE:
-  case SDLK_p:
-    gui->executeAction(Action::ESCAPE);
-    break;
-  case SDLK_UP:
-    gui->executeAction(Action::MOVEFORWARD);
-    break;
-  case SDLK_DOWN:
-    gui->executeAction(Action::MOVEBACKWARD);
-    break;
-  case SDLK_LEFT:
-    gui->executeAction(Action::MOVELEFT);
-    break;
-  case SDLK_RIGHT:
-    gui->executeAction(Action::MOVERIGHT);
-    break;
-  default:
-    break;
-  }
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_SPACE:
+        gui->executeAction(Action::CENTRECAMERA);
+        break;
+    case SDLK_ESCAPE:
+    case SDLK_p:
+        gui->executeAction(Action::ESCAPE);
+        break;
+    case SDLK_UP:
+        gui->executeAction(Action::MOVEFORWARD);
+        break;
+    case SDLK_DOWN:
+        gui->executeAction(Action::MOVEBACKWARD);
+        break;
+    case SDLK_LEFT:
+        gui->executeAction(Action::MOVELEFT);
+        break;
+    case SDLK_RIGHT:
+        gui->executeAction(Action::MOVERIGHT);
+        break;
+    default:
+        break;
+    }
 
 }
 
 void Scene::keyUpEvent(const SDL_KeyboardEvent &_event)
 {
-  Gui *gui = Gui::instance();
-  switch(_event.keysym.sym)
-  {
-  case SDLK_UP:
-    gui->executeAction(Action::STOPFORWARD);
-    break;
-  case SDLK_DOWN:
-    gui->executeAction(Action::STOPBACKWARD);
-    break;
-  case SDLK_LEFT:
-    gui->executeAction(Action::STOPLEFT);
-    break;
-  case SDLK_RIGHT:
-    gui->executeAction(Action::STOPRIGHT);
-    break;
+    Gui *gui = Gui::instance();
+    switch(_event.keysym.sym)
+    {
+    case SDLK_UP:
+        gui->executeAction(Action::STOPFORWARD);
+        break;
+    case SDLK_DOWN:
+        gui->executeAction(Action::STOPBACKWARD);
+        break;
+    case SDLK_LEFT:
+        gui->executeAction(Action::STOPLEFT);
+        break;
+    case SDLK_RIGHT:
+        gui->executeAction(Action::STOPRIGHT);
+        break;
 
-  default:break;
-  }
+    default:break;
+    }
 }
 
 void Scene::updateMousePos()
@@ -1346,6 +1426,15 @@ void Scene::updateMousePos()
     int mouse_coords[2] = {0,0};
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
     Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
+
+    /*
+        slib->use("colour");
+        ngl::Vec3 pos = character.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f,0.5f));
+        drawAsset( "person", "", "");
+        */
 }
 
 void Scene::windowEvent(const SDL_WindowEvent &_event)
@@ -1401,27 +1490,18 @@ void Scene::resize(const ngl::Vec2 &_dim)
 
 void Scene::mouseSelection()
 {
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     Gui *gui = Gui::instance();
-    int mouse_coords[2] = {0,0};
-    SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
+    ngl::Vec2 mouse_coords = Utility::getMousePos();
 
-    if(gui->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1])))
+    if(gui->mousePos( mouse_coords ) )
     {
         gui->click();
     }
     else if(m_state == GameState::MAIN)
     {
+        int red = getCharIDAtMouse();
 
-        m_pickBuffer.bind();
-
-        //check character_id texture
-        GLuint char_texID = getCharPickTexture();
-        glBindTexture(GL_TEXTURE_2D, char_texID);
-        glReadBuffer(GL_COLOR_ATTACHMENT1);
-
-        int red = -1;
-        glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RED_INTEGER, GL_INT, &red);
-        //change depending on number characters
         if(red < (m_characters.size() + 1) && red > 0)
         {
             for (Character &character : m_characters)
@@ -1446,17 +1526,7 @@ void Scene::mouseSelection()
         //check grid_id texture
         else
         {
-            //bind default texture
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            GLuint grid_texID = getTerrainPickTexture();
-            glBindTexture(GL_TEXTURE_2D, grid_texID);
-            glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-            std::array<float, 4> grid_coord;
-
-            // x, window height - y
-            glReadPixels(mouse_coords[0], (m_viewport[1] - mouse_coords[1]), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord[0]);
+            ngl::Vec4 grid_coord = getTerrainPosAtMouse();
 
             if(grid_coord[0] != 0 && grid_coord[2] != 0)
             {
@@ -1925,23 +1995,27 @@ GLuint Scene::constructTerrain()
                         facenorms
                         );
 
+            ngl::Vec3 t1na = f.m_verts[2].m_norm + f.m_verts[1].m_norm + f.m_verts[0].m_norm;
+            t1na /= 3.0f;
             //t1
             trimesh.push_back( f.m_verts[2].m_pos );
             trimesh.push_back( f.m_verts[1].m_pos );
             trimesh.push_back( f.m_verts[0].m_pos );
 
-            normesh.push_back( f.m_verts[2].m_norm );
-            normesh.push_back( f.m_verts[1].m_norm );
-            normesh.push_back( f.m_verts[0].m_norm );
+            normesh.push_back( t1na );
+            normesh.push_back( t1na );
+            normesh.push_back( t1na );
 
+            ngl::Vec3 t2na = f.m_verts[1].m_norm + f.m_verts[2].m_norm + f.m_verts[3].m_norm;
+            t2na /= 3.0f;
             //t2
             trimesh.push_back( f.m_verts[1].m_pos );
             trimesh.push_back( f.m_verts[2].m_pos );
             trimesh.push_back( f.m_verts[3].m_pos );
 
-            normesh.push_back( f.m_verts[1].m_norm );
-            normesh.push_back( f.m_verts[2].m_norm );
-            normesh.push_back( f.m_verts[3].m_norm );
+            normesh.push_back( t2na );
+            normesh.push_back( t2na );
+            normesh.push_back( t2na );
         }
     }
 
@@ -2149,4 +2223,48 @@ void Scene::escapeState()
 GameState Scene::getState()
 {
     return m_state;
+}
+
+void Scene::focusCamToGridPos(ngl::Vec2 _pos)
+{
+    std::cout << "moved camera" << std::endl;
+    //m_cam.setPos(_pos);
+}
+
+ngl::Vec4 Scene::getTerrainPosAtMouse()
+{
+    m_pickBuffer.bind();
+    GLuint grid_texID = getTerrainPickTexture();
+    glBindTexture(GL_TEXTURE_2D, grid_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+    ngl::Vec2 mouse_coords = Utility::getMousePos();
+    ngl::Vec4 grid_coord = ngl::Vec4();
+
+    // x, window height - y
+    glReadPixels(mouse_coords.m_x, (m_viewport.m_y - mouse_coords.m_y), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord.m_x);
+    m_pickBuffer.unbind();
+
+    //std::cout << "wmp = " << grid_coord << '\n';
+    return grid_coord;
+}
+
+int Scene::getCharIDAtMouse()
+{
+    m_pickBuffer.bind();
+
+    ngl::Vec2 mousePos = Utility::getMousePos();
+
+    //check character_id texture
+    GLuint char_texID = getCharPickTexture();
+    glBindTexture(GL_TEXTURE_2D, char_texID);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+
+    int red = 0;
+
+    glReadPixels(mousePos.m_x, (m_viewport.m_y - mousePos.m_y), 1, 1, GL_RED_INTEGER, GL_INT, &red);
+
+    m_pickBuffer.unbind();
+
+    return red - 1;
 }

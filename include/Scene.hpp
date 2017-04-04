@@ -10,6 +10,7 @@
 #include "Camera.hpp"
 #include "Character.hpp"
 #include "Inventory.hpp"
+#include "IVal.hpp"
 #include "Prefs.hpp"
 
 #include "Framebuffer.hpp"
@@ -148,6 +149,11 @@ public:
     /// \return m_state
     ///
     GameState getState();
+    ///
+    /// \brief focusCamToGridPos send the target to the given position
+    /// \param _pos position for the camera to focus in on
+    ///
+    void focusCamToGridPos(ngl::Vec2 _pos);
 
     void initMeshInstances();
 
@@ -160,10 +166,6 @@ private:
     Prefs* m_prefs;
 
     Camera m_cam;
-    ngl::Vec3 m_camCurPos;
-    ngl::Vec3 m_camTargPos;
-    float m_curFocalDepth;
-    float m_targFocalDepth;
 
     Grid m_grid;
     Inventory m_world_inventory;
@@ -240,7 +242,12 @@ private:
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
     void setBufferLocation(GLuint _buffer, int _index, int _size);
 
+    /// @brief Wrapper for getTerrainPickTexture, returns the encoded world pos of the "terrainpos" texture at the mouse position.
+    ngl::Vec4 getTerrainPosAtMouse();
     GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
+
+    /// @brief Wrapper for getTerrainPickTexture, returns the encoded id of the "charid" texture at the mouse position.
+    int getCharIDAtMouse();
     GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
 
     std::pair<std::vector<bounds>, std::vector<bounds> > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
@@ -316,6 +323,9 @@ private:
     /// \brief m_movement_held which movement are currently held
     ///
     bool m_movement_held[4];
+
+    IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
+    IVal<ngl::Vec3> m_mouseSelectionBoxScale;
 };
 
 #endif//__SCENE_HPP__

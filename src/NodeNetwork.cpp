@@ -3,7 +3,7 @@
 
 NodeNetwork::NodeNetwork(Grid *_grid, ngl::Vec2 _pos, ngl::Vec2 _target_pos) :
   m_grid(_grid),
-  m_char_pos(_pos),
+  m_char_pos((int)_pos.m_x, (int)_pos.m_y),
   m_target_pos(_target_pos)
 {
   m_nodes.push_back(Node(_grid, &m_nodes, m_char_pos, m_target_pos, -1));
@@ -178,11 +178,11 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
   Node *current_node = &_end_node;
   while(true)
   {
-    path.push_back(current_node->getPos());
     if(current_node->getParentID() == -1)
     {
       break;
     }
+    path.push_back(current_node->getPos());
     current_node = &(m_nodes[current_node->getParentID()]);
   }
   //printPath(path);
@@ -222,4 +222,40 @@ void NodeNetwork::printPath(std::vector<ngl::Vec2> &_path)
     }
     std::cout << '\n';
   }
+}
+
+bool NodeNetwork::raytrace(Grid *_grid, ngl::Vec2 _start_pos, ngl::Vec2 _end_pos)
+{
+  _start_pos.m_x = (int)_start_pos.m_x;
+  _start_pos.m_y = (int)_start_pos.m_y;
+  _end_pos.m_x = (int)_end_pos.m_x;
+  _end_pos.m_y = (int)_end_pos.m_y;
+
+  int dx = abs(_end_pos.m_x - _start_pos.m_x);
+  int dy = abs(_end_pos.m_y - _start_pos.m_y);
+  int x = _start_pos.m_x;
+  int y = _start_pos.m_y;
+  int n = 1 + dx + dy;
+  int x_inc = (_end_pos.m_x > _start_pos.m_x) ? 1 : -1;
+  int y_inc = (_end_pos.m_y > _start_pos.m_y) ? 1 : -1;
+  int error = dx - dy;
+  dx *= 2;
+  dy *= 2;
+
+  for (; n > 0; --n)
+  {
+      if(!_grid->isTileTraversable(x, y)) return false;
+
+      if (error > 0)
+      {
+          x += x_inc;
+          error -= dy;
+      }
+      else
+      {
+          y += y_inc;
+          error += dx;
+      }
+  }
+  return true;
 }
