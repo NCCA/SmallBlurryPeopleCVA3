@@ -323,6 +323,10 @@ private:
     /// \brief m_state current game state, MAIN, PAUSE, PREFERENCES etc
     ///
     GameState m_state;
+    ///
+    /// \brief m_game_started false if game is in title screen, true otherwise
+    ///
+    bool m_game_started;
 
     ///
     /// \brief m_movement_held which movement are currently held

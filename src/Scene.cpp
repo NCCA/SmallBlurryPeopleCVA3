@@ -32,6 +32,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_day(80),
     m_state(GameState::START_MENU),
+    m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
     m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
@@ -2176,6 +2177,7 @@ void Scene::togglePause()
 void Scene::startGame()
 {
   m_state = GameState::MAIN;
+  m_game_started = true;
   Gui::instance()->unpause();
 }
 
@@ -2222,8 +2224,16 @@ void Scene::escapeState()
     togglePause();
     break;
   case GameState::PREFERENCES:
-    m_state = GameState::PAUSE;
-    gui->pause();
+    if(m_game_started)
+    {
+      m_state = GameState::PAUSE;
+      gui->pause();
+    }
+    else
+    {
+      m_state = GameState::START_MENU;
+      gui->createStartMenuButtons();
+    }
     break;
   default:
     break;
