@@ -19,13 +19,13 @@ Grid::Grid():
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
 }
 
-void Grid::updateScript(std::string _script_path)
+void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _new_seed)
 {
   loadScript(_script_path);
-  runCurrentScript();
+  runCurrentScript(_new_w, _new_h, _new_seed);
 }
 
-void Grid::runCurrentScript()
+void Grid::runCurrentScript(int _w, int _h, int _seed)
 {
   // init python stuff
   Py_Initialize();
@@ -47,7 +47,9 @@ void Grid::runCurrentScript()
   PyDict_SetItemString(py_tileTypes, "HOUSE", PyInt_FromLong((long)TileType::HOUSE));
   PyDict_SetItemString(py_tileTypes, "STOREHOUSE", PyInt_FromLong((long)TileType::STOREHOUSE));
   PyDict_SetItemString(py_dict, "tileTypes", py_tileTypes);
-
+  PyDict_SetItemString(py_dict, "seed_in", PyInt_FromLong(_seed));
+  PyDict_SetItemString(py_dict, "width_in", PyInt_FromLong(_w));
+  PyDict_SetItemString(py_dict, "height_in", PyInt_FromLong(_h));
   //run the script held in the m_script string
   PyRun_SimpleString(m_script.c_str());
 
