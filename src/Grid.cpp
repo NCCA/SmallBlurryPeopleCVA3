@@ -235,6 +235,16 @@ void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
 	m_has_changes = true;
 }
 
+float Grid::getBuildState(int _id)
+{
+	return m_tiles[_id].getBuildState();
+}
+
+float Grid::getBuildState(int _x, int _y)
+{
+	return m_tiles[_x + m_w * _y].getBuildState();
+}
+
 bool Grid::hasChanges()
 {
   return m_has_changes;

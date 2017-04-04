@@ -11,11 +11,11 @@
 /// @enum An enum to identify node neighbours
 ///
 enum Neighbour{
-                UP,
-                DOWN,
-                LEFT,
-                RIGHT
-               };
+								UP,
+								DOWN,
+								LEFT,
+								RIGHT
+							 };
 ///
 /// @class Node
 /// @brief Pathfinding node class

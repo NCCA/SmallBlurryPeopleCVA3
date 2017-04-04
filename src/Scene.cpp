@@ -115,10 +115,13 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("tree_d", "tree/tree_d.png");
     //store->loadMesh("house", "house/house.obj");
     store->loadMesh("house", "house/stilt_house.obj" );
-    //store->loadMesh("foundation_A", "house/start_building.obj");
+		store->loadTexture("house_d", "house/stilt_house_diff.tif" );
+		store->loadMesh("foundation_A", "house/start_building.obj");
+		store->loadTexture("foundation_A_d", "house/start_building_diff.tif");
     store->loadMesh("foundation_B", "house/mid_way_building.obj");
+		store->loadTexture("foundation_B_d", "house/mid_way_building_diff.tif");
     store->loadMesh("person", "person/person.obj");
-    store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
+		store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
     store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
 
     store->loadTexture("grass", "terrain/grass.png");
@@ -186,7 +189,7 @@ void Scene::initMeshInstances()
 {
     int meshCount = 0;
     //m_meshPositions.clear()
-    m_meshPositions.assign(static_cast<int>(TileType::STOREHOUSE) + 1, std::vector<ngl::Vec3>());
+		m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_B) + 1, std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getW(); ++i)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
@@ -335,6 +338,18 @@ void Scene::update()
         initMeshInstances();
         m_grid.resetHasChanges();
     }
+
+/* check if character is sleeping, if so dont have as active character
+		if(m_active_char_id != -1)
+		{
+			if(m_characters[m_active_char_id].isSleeping())
+			{
+				std::cout<<"Sleeping"<<std::endl;
+				m_active_char_id = -1;
+				Gui::instance()->updateActiveCharacter();
+			}
+		}
+*/
     if(m_state == GameState::MAIN)
     {
         //translates
@@ -502,11 +517,14 @@ void Scene::draw()
     //Draw characters...
     for(auto &ch : m_characters)
     {
+			if(!ch.isSleeping())
+			{
         ngl::Vec3 pos = ch.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
         slib->setRegisteredUniform("id", ch.getID());
         drawAsset( "person", "", "");
+			}
     }
 
     m_pickBuffer.unbind();
@@ -981,11 +999,14 @@ void Scene::drawMeshes()
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "", "colour", instances, offset);
+						drawInstances( "house", "house_d", "diffuse", instances, offset);
             break;
-            //case static_cast<int>(TileType::FOUNDATION_B):
-            //		drawInstances("foundation_B", "", "colour", instances, offset);
-            //		break;
+				case static_cast<int>(TileType::FOUNDATION_A):
+						drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset);
+						break;
+				case static_cast<int>(TileType::FOUNDATION_B):
+						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset);
+						break;
         default:
             break;
         }
@@ -994,12 +1015,15 @@ void Scene::drawMeshes()
 
     for(auto &character : m_characters)
     {
-        ngl::Vec3 pos = character.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset( "person", "", "colour");
+			if(character.isSleeping() == false)
+			{
+					ngl::Vec3 pos = character.getPos();
+					pos.m_y /= m_terrainHeightDivider;
+					m_transform.setPosition(pos);
+					slib->use("colour");
+					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+					drawAsset( "person", "", "colour");
+			}
     }
 }
 
@@ -1031,11 +1055,14 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
                 drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "", "colour");
+								drawAsset( "house", "house_d", "diffuse");
                 break;
-                //case static_cast<int>(TileType::FOUNDATION_B):
-                //		drawAsset("foundation_B", "", "colour");
-                //		break;
+						case static_cast<int>(TileType::FOUNDATION_A):
+								drawAsset("foundation_A", "foundation_A_d", "diffuse");
+								break;
+						case static_cast<int>(TileType::FOUNDATION_B):
+								drawAsset("foundation_B", "foundation_B_d", "diffuse");
+								break;
             default:
                 break;
             }
@@ -1043,12 +1070,15 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &character : m_characters)
     {
+			if(character.isSleeping() == false)
+			{
         ngl::Vec3 pos = character.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
         slib->use("colour");
         slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
         drawAsset( "person", "", "colour");
+			}
     }
 }
 
@@ -1256,11 +1286,14 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "", "colour", instances, offset, m_shadowMat[_index] );
+						drawInstances( "house", "house_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
-            //case static_cast<int>(TileType::FOUNDATION_B):
-            //		drawInstances("foundation_B", "", "colour", instances, offset, m_shadowMat[_index]);
-            //		break;
+				case static_cast<int>(TileType::FOUNDATION_A):
+						drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset, m_shadowMat[_index] );
+						break;
+				case static_cast<int>(TileType::FOUNDATION_B):
+						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset, m_shadowMat[_index]);
+						break;
         default:
             break;
         }
@@ -1270,6 +1303,8 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
+			if(character.isSleeping() == false)
+			{
         ngl::Vec3 pos = character.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
@@ -1278,6 +1313,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         ngl::Obj * k = store->getModel( "person" );
         loadMatricesToShader( m_transform.getMatrix(), mvp );
         k->draw();
+			}
     }
 
 
@@ -1426,15 +1462,6 @@ void Scene::updateMousePos()
     int mouse_coords[2] = {0,0};
     SDL_GetMouseState(&mouse_coords[0], &mouse_coords[1]);
     Gui::instance()->mousePos(ngl::Vec2(mouse_coords[0], mouse_coords[1]));
-
-    /*
-        slib->use("colour");
-        ngl::Vec3 pos = character.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f, 0.0f, 0.0f,0.5f));
-        drawAsset( "person", "", "");
-        */
 }
 
 void Scene::windowEvent(const SDL_WindowEvent &_event)
@@ -1512,7 +1539,6 @@ void Scene::mouseSelection()
                     if(character.isActive() == false)
                     {
                         m_active_char_id = character.getID();
-                        std::cout<<"ACTIVE: "<<getActiveCharacter()->getName()<<std::endl;
                         character.setActive(true);
                         character.clearState();
                         gui->updateActiveCharacter();
@@ -1541,8 +1567,7 @@ void Scene::mouseSelection()
                 {
                     if(character.isActive() == true)
                     {
-                        character.setTarget(target_id);
-                        character.setState();
+												character.setState(target_id);
                     }
                 }
             }
@@ -2189,9 +2214,9 @@ ngl::Vec3 Scene::getCamMoveVec()
         move.m_z -= 1;
     if(m_movement_held[Direction::BACKWARDS])
         move.m_z += 1;
-    if(m_movement_held[Direction::LEFT])
+		if(m_movement_held[Direction::LEFTWARDS])
         move.m_x += 1;
-    if(m_movement_held[Direction::RIGHT])
+		if(m_movement_held[Direction::RIGHTWARDS])
         move.m_x -= 1;
     move *= 0.3;
     return move;

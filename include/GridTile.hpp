@@ -49,6 +49,8 @@ public:
 
 	void setBuildState(float _value, TileType _type);
 
+	float getBuildState() {return m_build_state;}
+
 private:
   int m_id;
   TileType m_type = TileType::NONE;
