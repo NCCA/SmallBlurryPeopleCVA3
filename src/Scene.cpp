@@ -181,6 +181,13 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
+
+    //Create and reserve light buffer.
+    m_pointLights.reserve(m_maxLights);
+    glGenBuffers(1, &m_lightBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Scene::initMeshInstances()
@@ -443,6 +450,20 @@ void Scene::update()
 
     m_directionalLightCol /= t_midday + t_midnight + t_sundown;
   }
+
+  m_pointLights.clear();
+
+  ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+  for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
+      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+  for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+  for(auto &c : m_characters)
+  {
+      ngl::Vec3 vec = c.getPos() + off;
+      vec.m_y /= m_terrainHeightDivider;
+      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.25f) );
+  }
 }
 
 //I'm sorry this function is so long :(
@@ -484,6 +505,8 @@ void Scene::draw()
 
     m_transform.reset();
     glEnable(GL_DEPTH_TEST);
+
+    ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
 
     //---------------------------//
     // UTILITY ID DRAW //
@@ -589,8 +612,8 @@ void Scene::draw()
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.1f, 1.0f) * 1.8f );
-    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.1f, 1.0f) );
+    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.2f, 1.0f) * 1.8f );
+    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.2f, 1.0f) );
     slib->setRegisteredUniform( "iGlobalTime", m_sunAngle.m_x * 8.0f );
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
@@ -675,6 +698,17 @@ void Scene::draw()
     //---------------------------//
     //          LIGHTING         //
     //---------------------------//
+    //Pass lights to shader.
+    m_pointLights.push_back(
+                Light(mouseWorldPos + ngl::Vec4(0.0, 2.0, 0.0, 0.0),ngl::Vec3(0.0,1.0,1.0),0.5f)
+                );
+
+    glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
+    GLvoid * dat = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+    memcpy(dat, &m_pointLights[0], sizeof(Light) * std::min( m_pointLights.size(), static_cast<size_t>(m_maxLights)));
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     m_postEffectsBuffer.bind();
     m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
     glClear(GL_COLOR_BUFFER_BIT);
@@ -701,6 +735,12 @@ void Scene::draw()
     m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
     m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
     m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
+
+    GLuint lightBlockIndex = glGetUniformBlockIndex( id, "lightBuffer" );
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_lightBuffer);
+    glUniformBlockBinding(id, lightBlockIndex, 1);
+
+    slib->setRegisteredUniform("lbufLen", static_cast<int>(std::min(m_maxLights, m_pointLights.size())));
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -734,6 +774,7 @@ void Scene::draw()
                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
     slib->use("water");
+    slib->setRegisteredUniform("mouseWorldPos", mouseWorldPos);
     slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
     slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
     slib->setRegisteredUniform("lightDir", m_sunDir);
@@ -805,7 +846,9 @@ void Scene::draw()
 
             p.m_x = std::round(p.m_x);
             p.m_z = std::round(p.m_z);
-            p.m_y = m_grid.getTileHeight(p.m_x, p.m_z) / m_terrainHeightDivider;
+            p.m_y = m_grid.getTileHeight(p.m_x, p.m_z);
+            p.m_y = std::max(p.m_y, static_cast<float>(m_grid.getGlobalWaterLevel()));
+            p.m_y /= m_terrainHeightDivider;
 
             m_transform.setScale( m_mouseSelectionBoxScale.get() );
             m_transform.setPosition( m_mouseSelectionBoxPosition.get() );

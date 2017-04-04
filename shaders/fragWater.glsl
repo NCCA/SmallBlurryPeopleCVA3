@@ -11,6 +11,7 @@ in vec2 tile_uv_fs;
 in vec2 uv_fs;
 
 uniform mat4 MV;
+uniform vec4 mouseWorldPos;
 
 uniform sampler2D displacement;
 uniform sampler2D terrainPos;
@@ -154,6 +155,9 @@ void main()
     fragColour = mix(fragColour, vec4(directionalLightCol.xyz * (sunInts + moonInts) * 0.75, 1.0), clamp(dmul, 0.0, 1.0));
 
     outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
+
+    float md = distance(position_fs.xz, mouseWorldPos.xz) * 0.25;
+    fragColour = mix(vec4(0.0, 1.0, 1.0, 1.0), fragColour, clamp(md, 0.0, 1.0));
 
     /*fragColour.xyz = n;
     fragColour.a = 1.0;*/
