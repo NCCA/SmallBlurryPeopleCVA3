@@ -13,7 +13,7 @@
 int main()
 {
   Prefs* prefs = Prefs::instance();
-  prefs->init();
+  prefs->init("preferences.conf");
   prefs->printPrefs();
 
 

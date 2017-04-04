@@ -153,9 +153,9 @@ int Grid::getGlobalWaterLevel()
 
 float Grid::getInterpolatedHeight(float _x, float _y)
 {
-  float x0 = floor(_x);
+  float x0 = floor(_x + 0.5);
   float x1 = x0 + 1;
-  float y0 = floor(_y);
+  float y0 = floor(_y + 0.5);
   float y1 = y0 + 1;
 
   float h0 = m_tiles[x0 + m_w * y0].getHeight();
@@ -215,24 +215,24 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
 
 void Grid::setTileType(int _id, TileType _type)
 {
-	m_tiles[_id].setType(_type);
+  m_tiles[_id].setType(_type);
 }
 
 void Grid::setTileType(int _x, int _y, TileType _type)
 {
-	m_tiles[_x + m_w * _y].setType(_type);
+  m_tiles[_x + m_w * _y].setType(_type);
 }
 
 void Grid::setBuildState(int _id, float _value, TileType _type)
 {
-	m_tiles[_id].setBuildState(_value, _type);
-	m_has_changes = true;
+  m_tiles[_id].setBuildState(_value, _type);
+  m_has_changes = true;
 }
 
 void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
 {
-	m_tiles[_x + m_w * _y].setBuildState(_value, _type);
-	m_has_changes = true;
+  m_tiles[_x + m_w * _y].setBuildState(_value, _type);
+  m_has_changes = true;
 }
 
 bool Grid::hasChanges()

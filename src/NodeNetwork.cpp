@@ -182,7 +182,7 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
     {
       break;
     }
-    path.push_back(current_node->getPos());
+    path.push_back(current_node->getPos() + ngl::Vec2(0.5, 0.5));
     current_node = &(m_nodes[current_node->getParentID()]);
   }
   //printPath(path);

@@ -192,9 +192,9 @@ void Scene::initMeshInstances()
         {
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                      i,
-                                                      m_grid.getTileHeight(i, j) / m_terrainHeightDivider,
-                                                      j
+                                                      i+0.5,
+                                                      m_grid.getInterpolatedHeight(i+0.5, j+0.5) / m_terrainHeightDivider,
+                                                      j+0.5
                                                       ));
             meshCount++;
         }
@@ -795,8 +795,8 @@ void Scene::draw()
         {
             p = getTerrainPosAtMouse();
 
-            p.m_x = std::round(p.m_x);
-            p.m_z = std::round(p.m_z);
+            p.m_x = floor(p.m_x) + 0.5;
+            p.m_z = floor(p.m_z) + 0.5;
             p.m_y = m_grid.getTileHeight(p.m_x, p.m_z) / m_terrainHeightDivider;
 
             m_transform.setScale( m_mouseSelectionBoxScale.get() );
@@ -2020,7 +2020,10 @@ GLuint Scene::constructTerrain()
     }
 
     for(auto &vec : trimesh)
+    {
+      vec += ngl::Vec4(0.5, 0, 0.5, 0);
         uvmesh.push_back( ngl::Vec2(vec.m_x, vec.m_z) );
+    }
 
     std::cout << "constructTerrain end with\n";
 
