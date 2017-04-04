@@ -1,7 +1,6 @@
 #version 410 core
 
 #define shadowbuffer 0
-
 #define NUM_CASCADES 3
 
 in vec2 UV;
@@ -15,6 +14,18 @@ uniform sampler2D shadowDepths[NUM_CASCADES];
 uniform sampler2D linearDepth;
 
 layout (location = 0) out vec4 fragColour;
+
+struct light
+{
+    vec4 pos;
+    vec3 col;
+    float lum;
+};
+layout( std140 ) uniform lightBuffer
+{
+    light buf [512];
+} lbuf;
+uniform int lbufLen;
 
 uniform vec3 sunDir;
 uniform float sunInts;
@@ -107,10 +118,22 @@ float cnoise(vec3 P){
 }
 
 float shadowSample(float depth, vec2 smpl, ivec2 offset, int index)
-{  
+{
     if(depth > textureOffset(shadowDepths[index], smpl, offset).r)
         return 1.0f;
     return 0.0;
+}
+
+vec3 basicLight(vec4 fragPos, vec4 fragNormal, int lightIndex)
+{
+  vec4 lp = lbuf.buf[ lightIndex ].pos;
+  vec4 lv = lp - fragPos;
+  lv = normalize(lv);
+  float mul = dot( lv, fragNormal );
+  mul = clamp(mul, 0.0, 1.0);
+
+  vec3 base = lbuf.buf[ lightIndex ].col.xyz;
+  return (mul * lbuf.buf[ lightIndex ].lum * base) / distance(lp, fragPos);
 }
 
 void main()
@@ -174,11 +197,16 @@ void main()
         mul -= shadow;
     }
 
-    mul = max(mul, 0.2);
+    mul = max(mul, 0.35 / (sunmul + moonmul + 1.0));
 
 #if shadowbuffer == 0
     fragColour.xyz *= mul;
     fragColour.xyz *= directionalLightCol;
+
+    for(int i = 0; i < lbufLen; ++i)
+    {
+      fragColour.xyz += basicLight(texture(position, UV), texture(normal, UV), i);
+    }
 #endif
 
     //Fog

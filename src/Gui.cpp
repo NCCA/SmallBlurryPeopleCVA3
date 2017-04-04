@@ -9,9 +9,10 @@ constexpr char TEXT_PAUSE[2]  = {6, 0};
 constexpr char TEXT_SMILEY[2] = {29,0};
 //constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
 
-constexpr int MAX_AGE = 150;
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
+
+constexpr int MAX_AGE = 500;
 constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
@@ -21,12 +22,11 @@ Gui::Gui()
 
 void Gui::init(Scene *_scene, ngl::Vec2 _res, const std::string &_shader_name)
 {
-  m_note_id = 0;
   m_scene = _scene;
   m_shader_name = _shader_name;
   setResolution(_res);
   initGL();
-  createSceneButtons();
+  createStartMenuButtons();
   m_mouse_down = false;
 }
 
@@ -64,10 +64,17 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
 {
   Prefs *prefs = Prefs::instance();
   std::shared_ptr<Command> command(nullptr);
+
+  std::string button_text("");
+  if(m_selected_button)
+  {
+    button_text = m_selected_button->getText();
+  }
   switch (_action)
   {
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
+  case Action::PREFS_VALUE:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -86,7 +93,6 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new EscapeCommand(m_scene));
     break;
   case Action::ZOOMIN:
-    notify(std::to_string(m_note_id), ngl::Vec2(0,0));
     command.reset(new ZoomCommand(m_scene, 1));
     break;
   case Action::ZOOMOUT:
@@ -119,12 +125,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PREFERENCES:
     command.reset(new PrefsCommand(m_scene));
     break;
-  case Action::SETBOOLPREF:
-    if(m_selected_button)
-    {
-      command.reset(new SetPrefsCommand<bool>(m_selected_button->getText(), !prefs->getBoolPref(m_selected_button->getText())));
-      m_text_outdated = true;
-    }
+  case Action::TOGGLEBOOLPREF:
+    command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+    m_text_outdated = true;
     break;
   case Action::FORAGE:
     command.reset(new ForageCommand(m_scene->getActiveCharacter()));
@@ -133,6 +136,42 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     if(m_selected_button)
     {
       command.reset(new CentreNotificationCommand(m_scene, ((NotificationButton *)m_selected_button)->getMapPos()));
+    }
+    break;
+  case Action::INCR_PREFS:
+    switch(prefs->getTypeOfPref(button_text))
+    {
+    case PrefType::BOOL:
+      command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+      break;
+    case PrefType::INT:
+     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getIncValue(button_text)));
+      break;
+    case PrefType::FLOAT:
+     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getIncValue(button_text)));
+      break;
+    case PrefType::ERROR:
+      break;
+    case PrefType::STRING:
+      break;
+    }
+    break;
+  case Action::DECR_PREFS:
+    switch(prefs->getTypeOfPref(button_text))
+    {
+    case PrefType::BOOL:
+      command.reset(new SetPrefsCommand<bool>(button_text, !prefs->getBoolPref(button_text)));
+      break;
+    case PrefType::INT:
+     // command.reset(new SetPrefsCommand<int>(button_text, prefs->getIntPref(button_text)+prefs->getDecValue(button_text)));
+      break;
+    case PrefType::FLOAT:
+     // command.reset(new SetPrefsCommand<float>(button_text, prefs->getFloatPref(button_text)+prefs->getDecValue(button_text)));
+      break;
+    case PrefType::ERROR:
+      break;
+    case PrefType::STRING:
+      break;
     }
     break;
   }
@@ -190,6 +229,17 @@ void Gui::unpause()
   createSceneButtons();
 }
 
+void Gui::createStartMenuButtons()
+{
+  wipeButtons();
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "GAME TITLE");
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), TEXT_PLAY);
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
+
+  updateButtonArrays();
+}
+
 void Gui::createSceneButtons()
 {
   wipeButtons();
@@ -224,7 +274,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
@@ -233,7 +283,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(40,40), name);
+    addButton(Action::TOGGLEBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(40,40), name);
     y_pos += 50;
   }
   x_pos += 260;
@@ -242,7 +292,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
@@ -251,7 +301,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::TOGGLEBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
 
@@ -266,7 +316,7 @@ void Gui::addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ng
 void Gui::addNotification(const std::string &_text, ngl::Vec2 _map_pos)
 {
   ngl::Vec2 size(0,40);
-  size.m_x = std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+  size.m_x = getButtonLength(_text);
   moveNotifications(ngl::Vec2(0, 50));
   m_buttons.push_back(std::shared_ptr<NotificationButton>(new NotificationButton(Action::NOTIFY, XAlignment::RIGHT, YAlignment::BOTTOM, ngl::Vec2(m_win_w, m_win_h), ngl::Vec2(10,10), size, _text, _map_pos)));
 }
@@ -279,6 +329,7 @@ void Gui::removeButton(std::shared_ptr<Button> button)
     m_buttons.erase(it);
   }
   updateButtonArrays();
+
 }
 
 void Gui::updateButtonArrays()
@@ -361,16 +412,17 @@ void Gui::updateNotifications()
   std::array<int, DOUBLE_MAX_NOTES> ages{0};
   size_t i = 0;
   int shader_id = 0;
+  std::vector< std::shared_ptr<Button> > buttons_to_remove;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
-    if(b && b->getAction() == Action::NOTIFY)
+    if(b->getAction() == Action::NOTIFY)
     {
       uniform_needs_updating = true;
       ((NotificationButton *)b)->incrementAge();
       if(((NotificationButton *)b)->getAge() > MAX_AGE)
       {
-        removeButton(button);
+        buttons_to_remove.push_back(button);
       }
       else if(i < ages.size())
       {
@@ -382,11 +434,17 @@ void Gui::updateNotifications()
     }
     shader_id++;
   }
-  //if(uniform_needs_updating)
-  //{
+
+  for(std::shared_ptr<Button> &button : buttons_to_remove)
+  {
+    removeButton(button);
+  }
+
+  if(uniform_needs_updating)
+  {
     glUniform1iv(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "notification_ages"), DOUBLE_MAX_NOTES, &(ages[0]));
     glUniform1i(glGetUniformLocation(ngl::ShaderLib::instance()->getProgramID(m_shader_name), "max_notification_age"), MAX_AGE);
-  //}
+  }
 }
 
 void Gui::drawButtons()
@@ -398,9 +456,12 @@ void Gui::drawButtons()
   glDisable(GL_DEPTH_TEST);
 
   slib->use(m_shader_name);
+  updateNotifications();
   if(m_text_outdated)
   {
     updateText();
+    // need to update notification set if text has changed
+    updateNotifications();
   }
   slib->setRegisteredUniform("game_state", m_scene->getState());
   slib->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
@@ -469,7 +530,8 @@ void Gui::updateText()
     std::string text = "";
     switch(b->getAction())
     {
-    case Action::SETBOOLPREF:
+    case Action::TOGGLEBOOLPREF:
+    case Action::PREFS_VALUE:
       text = prefs->getPrefValueString(b->getText());
       break;
     default:
@@ -517,26 +579,29 @@ void Gui::updateActiveCharacter()
 
 void Gui::notify(const std::string &_text, ngl::Vec2 _pos)
 {
+  std::vector< std::shared_ptr<Button> > buttons_to_remove;
   int num_notifications = 1;
-  /*for(int i = m_buttons.size()-1 ; i>=0; i--)
+  for(int i = m_buttons.size()-1 ; i>=0; i--)
   {
     std::shared_ptr<Button> button(m_buttons[i]);
     if(button.get()->getAction() == Action::NOTIFY)
     {
       if(num_notifications*2 >= DOUBLE_MAX_NOTES)
       {
-        removeButton(button);
+        buttons_to_remove.push_back(button);
       }
       else
       {
         num_notifications++;
       }
     }
-
-  }*/
+  }
+  for(std::shared_ptr<Button> &button : buttons_to_remove)
+  {
+    removeButton(button);
+  }
   addNotification(_text, _pos);
   updateButtonArrays();
-  m_note_id++;
 }
 
 void Gui::moveNotifications(ngl::Vec2 _move_vec)
@@ -548,5 +613,29 @@ void Gui::moveNotifications(ngl::Vec2 _move_vec)
     {
       b->move(_move_vec);
     }
+  }
+}
+
+int Gui::getButtonLength(const std::string &_text)
+{
+  return std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+}
+
+void Gui::scrollButton(int _dir)
+{
+  switch(m_selected_button->getAction())
+  {
+  case Action::PREFS_VALUE:
+    if(_dir>0)
+    {
+      executeAction(Action::INCR_PREFS);
+    }
+    else
+    {
+      executeAction(Action::DECR_PREFS);
+    }
+    break;
+  default:
+    break;
   }
 }

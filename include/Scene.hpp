@@ -11,6 +11,7 @@
 #include "Character.hpp"
 #include "Inventory.hpp"
 #include "IVal.hpp"
+#include "Light.hpp"
 #include "Prefs.hpp"
 
 #include "Framebuffer.hpp"
@@ -32,6 +33,7 @@ enum Direction
 ///
 enum GameState
 {
+  START_MENU,
   MAIN,
   PAUSE,
   PREFERENCES
@@ -126,6 +128,10 @@ public:
     /// \brief togglePause switch between paused and unpaused mode
     ///
     void togglePause();
+    ///
+    /// \brief startGame leave main menu and start the game
+    ///
+    void startGame();
     ///
     /// \brief startMove set movement flag in given direction to true
     /// \param _d direction to move
@@ -318,14 +324,25 @@ private:
     /// \brief m_state current game state, MAIN, PAUSE, PREFERENCES etc
     ///
     GameState m_state;
+    ///
+    /// \brief m_game_started false if game is in title screen, true otherwise
+    ///
+    bool m_game_started;
 
     ///
     /// \brief m_movement_held which movement are currently held
     ///
     bool m_movement_held[4];
 
+    /// @brief Where the mouse selection box is.
     IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
+    /// @brief How the mouse selection box is scaled. For example, when hovering over a character it gets taller and thinner.
     IVal<ngl::Vec3> m_mouseSelectionBoxScale;
+
+    /// @brief Put your point lights in this vector and they'll get drawn as a part of the lighting pass.
+    std::vector<Light> m_pointLights;
+    const size_t m_maxLights = 512;
+    GLuint m_lightBuffer;
 };
 
 #endif//__SCENE_HPP__

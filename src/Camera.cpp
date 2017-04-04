@@ -16,8 +16,11 @@ Camera::Camera()
     m_up = ngl::Vec3(0.0f, 1.0f, 0.0f);
     m_fov = 60.0f;
 
-    m_maxPitch = 0.0f;
-    m_minPitch = -30.0f;
+    m_maxPitch = 60.0f;
+    m_minPitch = 0.0f;
+
+    m_minDolly = 10.0f;
+    m_maxDolly = 35.0f;
 }
 
 void Camera::calculateViewMat()
@@ -140,13 +143,18 @@ void Camera::moveScreenSpace(const ngl::Vec3 _d)
 
 void Camera::rotate(const float _pitch, const float _yaw)
 {
-    m_irot.incrEnd( ngl::Vec2(_pitch, _yaw) );
-    //m_targRot.m_x = std::max( std::min( m_targRot.m_x, m_maxPitch ), m_minPitch );
+    ngl::Vec2 targ = m_irot.getEnd();
+    targ.m_x = std::min( std::max( targ.m_x + _pitch, m_minPitch ), m_maxPitch );
+
+    m_irot.setEnd( ngl::Vec2(targ.m_x, targ.m_y + _yaw) );
 }
 
 void Camera::dolly(const float _d)
 {
-    m_iDolly.incrEnd( _d );
+    float dolly = m_iDolly.getEnd();
+    dolly += _d;
+    dolly = std::max( std::min( dolly, m_maxDolly ), m_minDolly );
+    m_iDolly.setEnd( dolly );
 }
 
 void Camera::setPos(const ngl::Vec3 _p)
