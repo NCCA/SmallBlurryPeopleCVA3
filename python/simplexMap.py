@@ -40,14 +40,13 @@ import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import noise.noise as n
+import utils.noise.noise as n
 
 #setting the seed for the noise generator
-gen = n.fractalNoise(4)
-
+gen = n.fractalNoise(seed_in)
 #setting up variables that will be passed to the game
-map_width = 100
-map_height = 100
+map_width = width_in
+map_height = height_in
 map_data = [[tileTypes["NONE"], 0] for i in range(map_width * map_height)]
 print map_data[0]
 #setting up noise function values
@@ -88,11 +87,11 @@ for x in range(map_width):
 
 #scattering some random stoerehouses
 for i in range(10):
-	#wtf is going on here
-	rand.seed(i)
-	x_rand = rand.randint(0, map_width)
-	y_rand = rand.randint(0, map_height)
-	if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
-		map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
+  #wtf is going on here
+  rand.seed(i)
+  x_rand = rand.randint(0, map_width)
+  y_rand = rand.randint(0, map_height)
+  if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
+    map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
 
 print map_data[0]
