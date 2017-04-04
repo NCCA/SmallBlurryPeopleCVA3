@@ -44,6 +44,14 @@ public:
 
     float getAspect() const {return m_aspect;}
 
+    /// @brief Setters to control the range of the cameras pitch.
+    void setMinPitch(const float _p) {m_minPitch = _p;}
+    void setMaxPitch(const float _p) {m_maxPitch = _p;}
+
+    /// @brief Setters to control the range of the cameras dollying
+    void setMinDolly(const float _d) {m_minDolly = _d;}
+    void setMaxDolly(const float _d) {m_maxDolly = _d;}
+
     /// @brief Set aspect ratio (x / y).
     void setAspect(const float _aspect) {m_aspect = _aspect;}
     /// @brief Set horizontal (?) field of view.
@@ -93,8 +101,7 @@ public:
 
     float getFocalDepth() const {return m_iFocalDepth.get();}
 
-    void immediateTransform(const ngl::Mat4 &_mat) {m_V *= _mat; m_VP = m_V * m_P;
-                                                        }
+    void immediateTransform(const ngl::Mat4 &_mat) {m_V *= _mat; m_VP = m_V * m_P;}
 private:
     /// @brief Holds the horizontal fov in degrees.
     float m_fov;
@@ -138,6 +145,10 @@ private:
     /// @brief Clamp rotation to these values.
     float m_minPitch;
     float m_maxPitch;
+
+    /// @brief Clamp dollying to these values.
+    float m_minDolly;
+    float m_maxDolly;
 
     /// @brief Target and current focal depth, for smooth camera
     IVal<float> m_iFocalDepth;

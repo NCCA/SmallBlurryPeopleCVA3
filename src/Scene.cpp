@@ -585,8 +585,8 @@ void Scene::draw()
     slib->use("deferredLight");
     GLuint id = slib->getProgramID("deferredLight");
     slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
-    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.1f, 1.0f) * 1.8f );
+    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.1f, 1.0f) );
     slib->setRegisteredUniform( "iGlobalTime", m_sunAngle.m_x * 8.0f );
     slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
@@ -784,16 +784,20 @@ void Scene::draw()
     Gui * g = Gui::instance();
     int charid = getCharIDAtMouse();
 
-    if(m_state == GameState::MAIN and !m_mouse_trans_active and !m_mouse_rot_active and !g->mousePos( Utility::getMousePos() ))
+    if(m_state == GameState::MAIN and
+            !m_mouse_trans_active and
+            !m_mouse_rot_active and
+            !g->mousePos( Utility::getMousePos() ))
     {
         glDisable(GL_CULL_FACE);
         m_transform.reset();
 
+        ngl::Vec4 tp = getTerrainPosAtMouse();
         ngl::Vec4 p;
         //Player is not hovering over a character.
         if(charid == -1)
         {
-            p = getTerrainPosAtMouse();
+            p = tp;
 
             p.m_x = std::round(p.m_x);
             p.m_z = std::round(p.m_z);
@@ -821,19 +825,22 @@ void Scene::draw()
         m_postEffectsBuffer.bind();
         m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
 
-        slib->use("mousebox");
-        slib->setRegisteredUniform("base", p.m_y);
-        slib->setRegisteredUniform("m", 0.025f);
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
-        drawAsset("debugBox", "", "mousebox");
+        if(tp.m_x != 0.0f and tp.m_z != 0.0f)
+        {
+            slib->use("mousebox");
+            slib->setRegisteredUniform("base", p.m_y);
+            slib->setRegisteredUniform("m", 0.025f);
+            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
+            drawAsset("debugBox", "", "mousebox");
 
-        AssetStore * a = AssetStore::instance();
-        ngl::Obj * k = a->getModel("debugBox");
-        k->bindVAO();
-        slib->setRegisteredUniform("m", 0.0125f);
-        glLineWidth(5.0f);
-        glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
-        glLineWidth(1.0f);
+            AssetStore * a = AssetStore::instance();
+            ngl::Obj * k = a->getModel("debugBox");
+            k->bindVAO();
+            slib->setRegisteredUniform("m", 0.0125f);
+            glLineWidth(5.0f);
+            glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
+            glLineWidth(1.0f);
+        }
         glBindVertexArray(0);
 
         m_postEffectsBuffer.unbind();
@@ -1298,13 +1305,15 @@ void Scene::mousePressEvent(const SDL_MouseButtonEvent &_event)
     //checks if the left button has been pressed down and flags start
     if(_event.button == SDL_BUTTON_LEFT)
     {
-        m_centre_camera = false;
+        //We want to break the camera following if the player drags, not just if they click.
+        //Going to try moving this bit elsewhere.
+        //m_centre_camera = false;
         m_mouse_trans_origin[0] = _event.x;
         m_mouse_trans_origin[1] = _event.y;
         //records position of mouse on press
         m_mouse_prev_pos[0] = _event.x;
         m_mouse_prev_pos[1] = _event.y;
-        m_mouse_trans_active=true;
+        m_mouse_trans_active = true;
         Gui::instance()->mouseDown();
     }
 
@@ -1354,19 +1363,8 @@ void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 
 void Scene::zoom(int _direction)
 {
-    {
-        //pans camera up and down
-        if(_direction > 0 && m_cam.getTargetDolly() > 10.0)
-        {
-            m_cam.rotate( -0.5f, 0.0f );
-            m_cam.dolly( -0.5f );
-        }
-        else if(_direction < 0 && m_cam.getTargetDolly() < 25)
-        {
-            m_cam.rotate( 0.5f, 0.0f );
-            m_cam.dolly( 0.5f );
-        }
-    }
+    m_cam.rotate(-1.0f * _direction, 0.0f);
+    m_cam.dolly(-0.5f * _direction);
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
