@@ -40,7 +40,7 @@ import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import noise.noise as n
+import utils.noise.noise as n
 
 #setting the seed for the noise generator
 gen = n.fractalNoise(seed_in)
