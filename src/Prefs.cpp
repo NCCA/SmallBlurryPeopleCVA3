@@ -37,6 +37,7 @@ void Prefs::restoreDefaultPrefs()
   //setting float values
   m_float_prefs["CHARACTER_SPEED"] = float_pref_t(0.1, IncType::X0_1);
   m_float_prefs["TIME_SCALE"] = float_pref_t(0.01, IncType::X0_01);
+  m_float_prefs["CHARACTER_BUILDING"] = float_pref_t(5.0, IncType::X0_1);
 
   //setting string values
   m_str_prefs["MAP_SCRIPT_PATH"] = str_pref_t("python/simplexMap.py", IncType::NONE);
@@ -79,6 +80,100 @@ IncType Prefs::getIncType(std::string _key)
     }
   }
   return IncType::NONE;
+}
+
+float Prefs::getFloatIncValue(const std::string &_key)
+{
+  return getFloatChangeValue(_key, 1);
+}
+
+float Prefs::getFloatDecValue(const std::string &_key)
+{
+  return getFloatChangeValue(_key, -1);
+}
+
+float Prefs::getFloatChangeValue(const std::string &_key, int _dir)
+{
+  float value = getFloatPref(_key);
+  if(_dir < 0) value /= 2.0f;
+  switch(getIncType(_key))
+  {
+  case IncType::NONE:
+    return 0.0f;
+    break;
+  case IncType::X1:
+    return 1.0f;
+    break;
+  case IncType::X10:
+    return 10.0f;
+    break;
+  case IncType::X100:
+    return 100.0f;
+    break;
+  case IncType::X1000:
+    return 1000.0f;
+    break;
+  case IncType::X0_1:
+    return 0.1f;
+    break;
+  case IncType::X0_01:
+    return 0.01f;
+    break;
+  case IncType::X0_001:
+    return 0.001f;
+    break;
+  case IncType::X0_0001:
+    return 0.0001f;
+    break;
+  case IncType::POW_2:
+    std::cout << "value is:" << value << std::endl;
+    return value;
+    break;
+  }
+  return 0.0f;
+}
+
+int Prefs::getIntIncValue(const std::string &_key)
+{
+  return getIntChangeValue(_key, 1);
+}
+
+int Prefs::getIntDecValue(const std::string &_key)
+{
+  return getIntChangeValue(_key, -1);
+}
+
+int Prefs::getIntChangeValue(const std::string &_key, int _dir)
+{
+  int value = getIntPref(_key);
+  if(_dir < 0) value /= 2;
+  switch(getIncType(_key))
+  {
+  case IncType::NONE:
+  case IncType::X0_1:
+  case IncType::X0_01:
+  case IncType::X0_001:
+  case IncType::X0_0001:
+    return 0;
+    break;
+  case IncType::X1:
+    return 1.0;
+    break;
+  case IncType::X10:
+    return 10;
+    break;
+  case IncType::X100:
+    return 100;
+    break;
+  case IncType::X1000:
+    return 1000;
+    break;
+  case IncType::POW_2:
+    std::cout << "value is:" << value << std::endl;
+    return value;
+    break;
+  }
+  return 0;
 }
 
 void Prefs::setIntPref(std::string _key, int _val)
@@ -272,6 +367,11 @@ std::string Prefs::getPrefValueString(const std::string &_key)
 int Prefs::getNumPrefs()
 {
   return m_int_prefs.size() + m_float_prefs.size() + m_bool_prefs.size() +  m_str_prefs.size();
+}
+
+int Prefs::getNumChangeablePrefs()
+{
+  return m_int_prefs.size() + m_float_prefs.size() + m_bool_prefs.size();
 }
 
 std::string Prefs::boolToString(bool _b)
