@@ -9,9 +9,10 @@ constexpr char TEXT_PAUSE[2]  = {6, 0};
 constexpr char TEXT_SMILEY[2] = {29,0};
 //constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
 
-constexpr int MAX_AGE = 150;
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
+
+constexpr int MAX_AGE = 300;
 constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
@@ -119,7 +120,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PREFERENCES:
     command.reset(new PrefsCommand(m_scene));
     break;
-  case Action::SETBOOLPREF:
+  case Action::TOGGLEBOOLPREF:
     if(m_selected_button)
     {
       command.reset(new SetPrefsCommand<bool>(m_selected_button->getText(), !prefs->getBoolPref(m_selected_button->getText())));
@@ -224,7 +225,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
@@ -233,7 +234,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(40,40), name);
+    addButton(Action::TOGGLEBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(40,40), name);
     y_pos += 50;
   }
   x_pos += 260;
@@ -242,7 +243,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
   x_pos += 320;
@@ -251,7 +252,7 @@ void Gui::createPrefsButtons()
   {
     name = p.first;
     addButton(Action::PASSIVE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos, y_pos), ngl::Vec2(200,40), name);
-    addButton(Action::SETBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
+    addButton(Action::TOGGLEBOOLPREF, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
 
@@ -478,7 +479,8 @@ void Gui::updateText()
     std::string text = "";
     switch(b->getAction())
     {
-    case Action::SETBOOLPREF:
+    case Action::TOGGLEBOOLPREF:
+    case Action::PREFS_VALUE:
       text = prefs->getPrefValueString(b->getText());
       break;
     default:
