@@ -355,8 +355,10 @@ void Scene::update()
       m_mouse_trans_origin = Utility::getMousePos();
 
       //Move the camera based on mouse translation.
-      m_cam.moveRight( mouse_distance.m_x * 0.025f );
-      m_cam.moveForward( -mouse_distance.m_y * 0.025f );
+      float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
+      cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
+      m_cam.moveRight( mouse_distance.m_x * cam_to_pivot_height);
+      m_cam.moveForward( -mouse_distance.m_y * cam_to_pivot_height);
       //---
 
       if(mouse_distance.lengthSquared() > Utility::Sqr(8.0f))
@@ -2253,7 +2255,10 @@ ngl::Vec3 Scene::getCamMoveVec()
         move.m_x += 1;
     if(m_movement_held[Direction::RIGHT])
         move.m_x -= 1;
-    move *= 0.3;
+    move *= 10;
+    float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
+    cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
+    move *= cam_to_pivot_height;
     return move;
 }
 
