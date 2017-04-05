@@ -23,14 +23,15 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_grid(_grid),
   m_world_inventory(_world_inventory),
   m_speed(0),
-	m_inventory(CharInventory::NONE),
-	m_called(0),
-	m_building_amount(0),
-	m_building_type(TileType::NONE)
+  m_inventory(CharInventory::NONE),
+  m_called(0),
+  m_building_amount(0),
+  m_building_type(TileType::NONE)
 {
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
 	m_building_amount = prefs->getIntPref("CHARACTER_BUILDING");
+
   //timer for actions
   m_timer.start();
 
@@ -46,14 +47,14 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 	//amount of berries collected
 	m_forage_amount = Utility::randInt(1,5);
 
-	//random colour
-	float red = Utility::randFlt(0, 1);
-	float blue = Utility::randFlt(0,1);
-	float green = Utility::randFlt(0,1);
+  //random colour
+  float red = Utility::randFlt(0, 1);
+  float blue = Utility::randFlt(0,1);
+  float green = Utility::randFlt(0,1);
 
   m_colour = ngl::Vec3(red, blue, green);
 
-	//random starting position
+  //random starting position
   bool valid = false;
   float x,y = 0;
 
@@ -71,7 +72,7 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
 
 void Character::setState(int _target_id)
 {
-	if(setTarget(_target_id))
+	if(setTarget(_target_id) || m_grid->getTileType(_target_id)== TileType::WATER)
 	{
 		m_target_id = _target_id;
 		resetCharacter();
@@ -453,15 +454,27 @@ void Character::update()
 			case(State::SLEEP):
 			{
 				float recover = (1.0 - m_stamina);
-				m_sleeping = true;
-				m_active = false;
-				if(m_timer.elapsed() >= 1000 * (recover*100))
+				if(recover > 0.01)
 				{
-					m_sleeping = false;
-					m_stamina = 1.0;
-					generalMessage(" has finished sleeping", m_pos);
-					findNearestEmptyTile();
-					completedAction();
+					m_sleeping = true;
+					m_active = false;
+					if(m_timer.elapsed() >= 1000 * (recover*100))
+					{
+						m_sleeping = false;
+						m_stamina = 1.0;
+						generalMessage(" has finished sleeping", m_pos);
+						findNearestEmptyTile();
+						completedAction();
+					}
+				}
+				else
+				{
+					if(m_timer.elapsed() >= 1000)
+					{
+						generalMessage(" doesn't need to sleep", m_pos);
+						findNearestEmptyTile();
+						completedAction();
+					}
 				}
 			}
 
@@ -600,17 +613,17 @@ bool Character::findNearestEmptyTile()
   std::vector<ngl::Vec2> neighbours;
   ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
-	if(m_grid->getTileType(target[0]+1, target[1]) == TileType::NONE)
-		neighbours.push_back(ngl::Vec2(target[0]+1, target[1]));
+  if(m_grid->getTileType(target[0]+1, target[1]) == TileType::NONE)
+    neighbours.push_back(ngl::Vec2(target[0]+1, target[1]));
 
-	if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
+  if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
     neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
 
-	if(m_grid->getTileType(target[0], target[1]+1) == TileType::NONE)
-		neighbours.push_back(ngl::Vec2(target[0], target[1]+1));
+  if(m_grid->getTileType(target[0], target[1]+1) == TileType::NONE)
+    neighbours.push_back(ngl::Vec2(target[0], target[1]+1));
 
-	if(m_grid->getTileType(target[0], target[1]-1) == TileType::NONE)
-		neighbours.push_back(ngl::Vec2(target[0], target[1]-1));
+  if(m_grid->getTileType(target[0], target[1]-1) == TileType::NONE)
+    neighbours.push_back(ngl::Vec2(target[0], target[1]-1));
 
 	if(findNearest(neighbours) == true)
 		return true;
@@ -629,36 +642,36 @@ bool Character::findNearestFishingTile()
   std::set<int> edge_tile_ids;
   std::set<int> water_tile_ids;
 
-	waterFloodfill(selection, edge_tile_ids, water_tile_ids);
+  waterFloodfill(selection, edge_tile_ids, water_tile_ids);
 
-	std::vector<ngl::Vec2> edge_vector;
+  std::vector<ngl::Vec2> edge_vector;
   for (auto edge: edge_tile_ids)
   {
     ngl::Vec2 coord = m_grid->idToCoord(edge);
     edge_vector.push_back(coord);
   }
 
-	distanceSort(0, edge_vector.size()-1, edge_vector);
+  distanceSort(0, edge_vector.size()-1, edge_vector);
 
-	for(auto edge : edge_vector)
-	{
-		int tile = m_grid->coordToId(edge);
-		if(setTarget(tile))
-		{
-			return true;
-		}
-	}
-	return false;
+  for(auto edge : edge_vector)
+  {
+    int tile = m_grid->coordToId(edge);
+    if(setTarget(tile))
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool Character::findNearestTree()
 {
-	bool found = false;
-	treeFloodfill(m_pos, found);
-	if (found == true)
-		return true;
-	else
-		return false;
+  bool found = false;
+  treeFloodfill(m_pos, found);
+  if (found == true)
+    return true;
+  else
+    return false;
 }
 
 void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found)
@@ -719,25 +732,25 @@ void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set
   //Check neighbouring tiles, call flood if water tile
   bool is_edge = false;
 
-	if (m_grid->getTileType(_coord.m_x, _coord.m_y) == TileType::WATER)
-		waterFloodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
+  if (m_grid->getTileType(_coord.m_x, _coord.m_y) == TileType::WATER)
+    waterFloodfill(ngl::Vec2(_coord.m_x-1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
   if (m_grid->getTileType(_coord.m_x-1, _coord.m_y) == TileType::WATER)
-		waterFloodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
+    waterFloodfill(ngl::Vec2(_coord.m_x+1, _coord.m_y), _edges, _water);
   else
     is_edge = true;
 
-	if(m_grid->getTileType(_coord.m_x, _coord.m_y-1) == TileType::WATER)
-		waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
+  if(m_grid->getTileType(_coord.m_x, _coord.m_y-1) == TileType::WATER)
+    waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y-1), _edges, _water);
   else
     is_edge = true;
 
-	if(m_grid->getTileType(_coord.m_x, _coord.m_y+1) == TileType::WATER)
-		waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
-	else
-		is_edge = true;
+  if(m_grid->getTileType(_coord.m_x, _coord.m_y+1) == TileType::WATER)
+    waterFloodfill(ngl::Vec2(_coord.m_x, _coord.m_y+1), _edges, _water);
+  else
+    is_edge = true;
 
   if(is_edge)
   {
@@ -755,23 +768,23 @@ void Character::distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &
  while (i <= j)
  {
 
-		 while (Utility::sqrDistance(_edges[i], m_pos) < pivot_dist) i++;
-		 while (Utility::sqrDistance(_edges[j], m_pos) > pivot_dist) j--;
+     while (Utility::sqrDistance(_edges[i], m_pos) < pivot_dist) i++;
+     while (Utility::sqrDistance(_edges[j], m_pos) > pivot_dist) j--;
 
-		 if (i <= j)
-		 {
-				 ngl::Vec2 tmpCoord = _edges[i];
-				 _edges[i] = _edges[j];
-				 _edges[j] = tmpCoord;
-				 i++;
-				 j--;
-		 }
+     if (i <= j)
+     {
+         ngl::Vec2 tmpCoord = _edges[i];
+         _edges[i] = _edges[j];
+         _edges[j] = tmpCoord;
+         i++;
+         j--;
+     }
  }
 
  if (io_left < j)
-	 distanceSort(io_left, j, _edges);
+   distanceSort(io_left, j, _edges);
  if (i < io_right)
-	 distanceSort (i, io_right, _edges);
+   distanceSort (i, io_right, _edges);
 }
 
 bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)

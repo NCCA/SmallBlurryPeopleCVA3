@@ -24,7 +24,7 @@ public:
 
   /// @brief updateScript loads the specified script and runs it to create a new map
   /// @param _script_path is the file path to the python script
-  void updateScript(std::string _script_path);
+  void updateScript(std::string _script_path, int _new_w = 100, int _new_h = 100, int _new_seed = 4);
 
   void printTrees();
   void printTypes();
@@ -42,13 +42,13 @@ public:
   bool isTileTraversable(int _x, int _y);
   bool isTileTraversable(int _id);
   int cutTileTrees(int _id, int _goal_amount);
+
 	void setTileType(int _id, TileType _type);
 	void setTileType(int _x, int _y, TileType _type);
 	void setBuildState(int _id, float _value, TileType _type);
 	void setBuildState(int _x, int _y, float _value, TileType _type);
 	float getBuildState(int _id);
 	float getBuildState(int _x, int _y);
-
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
@@ -72,7 +72,7 @@ public:
   int getGlobalMountainHeight();
   int getGlobalWaterLevel();
 
-	bool hasChanges();
+  bool hasChanges();
   void resetHasChanges();
 
 
@@ -80,7 +80,7 @@ public:
 private:
   /// @brief runs the given python script to generate a map
   /// @param [in] the script that will set values in m_map
-  void runCurrentScript();
+  void runCurrentScript(int _w, int _h, int _seed);
 
   /// @brief loads the script at the given path, returning the script in a single string
   /// @param [in] path to look for script

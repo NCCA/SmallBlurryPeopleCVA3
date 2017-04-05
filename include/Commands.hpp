@@ -9,27 +9,30 @@
 ///
 enum class Action
 {
-  PASSIVE,           //0
-  QUIT,              //1
-  BUILDHOUSE,        //2
-  BUILDSTORE,        //3
-  CENTRECAMERA,      //4
-  ESCAPE,            //5
-  ZOOMIN,            //6
-  ZOOMOUT,           //7
-  MOVEFORWARD,       //8
-  MOVEBACKWARD,      //9
-  MOVELEFT,          //10
-  MOVERIGHT,         //11
-  STOPFORWARD,       //12
-  STOPBACKWARD,      //13
-  STOPLEFT,          //14
-  STOPRIGHT,         //15
-  PREFERENCES,       //16
-  PASSIVE_CHARACTER, //17
-  SETBOOLPREF,       //18
-  FORAGE,            //19
-  NOTIFY             //20
+  PASSIVE,           // 0
+  QUIT,              // 1
+  BUILDHOUSE,        // 2
+  BUILDSTORE,        // 3
+  CENTRECAMERA,      // 4
+  ESCAPE,            // 5
+  ZOOMIN,            // 6
+  ZOOMOUT,           // 7
+  MOVEFORWARD,       // 8
+  MOVEBACKWARD,      // 9
+  MOVELEFT,          // 10
+  MOVERIGHT,         // 11
+  STOPFORWARD,       // 12
+  STOPBACKWARD,      // 13
+  STOPLEFT,          // 14
+  STOPRIGHT,         // 15
+  PREFERENCES,       // 16
+  PASSIVE_CHARACTER, // 17
+  TOGGLEBOOLPREF,    // 18
+  FORAGE,            // 19
+  NOTIFY,            // 20
+  PREFS_VALUE,       // 21
+  INCR_PREFS,        // 22
+  DECR_PREFS         // 23
 };
 
 ///

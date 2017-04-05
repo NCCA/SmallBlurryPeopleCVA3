@@ -19,13 +19,13 @@ Grid::Grid():
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
 }
 
-void Grid::updateScript(std::string _script_path)
+void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _new_seed)
 {
   loadScript(_script_path);
-  runCurrentScript();
+  runCurrentScript(_new_w, _new_h, _new_seed);
 }
 
-void Grid::runCurrentScript()
+void Grid::runCurrentScript(int _w, int _h, int _seed)
 {
   // init python stuff
   Py_Initialize();
@@ -46,8 +46,11 @@ void Grid::runCurrentScript()
   PyDict_SetItemString(py_tileTypes, "MOUNTAINS", PyInt_FromLong((long)TileType::MOUNTAINS));
   PyDict_SetItemString(py_tileTypes, "HOUSE", PyInt_FromLong((long)TileType::HOUSE));
   PyDict_SetItemString(py_tileTypes, "STOREHOUSE", PyInt_FromLong((long)TileType::STOREHOUSE));
-  PyDict_SetItemString(py_dict, "tileTypes", py_tileTypes);
-
+  PyDict_SetItemString(py_dict, "tileTypes_in", py_tileTypes);
+  PyDict_SetItemString(py_dict, "seed_in", PyInt_FromLong(_seed));
+  PyDict_SetItemString(py_dict, "width_in", PyInt_FromLong(_w));
+  PyDict_SetItemString(py_dict, "height_in", PyInt_FromLong(_h));
+  PyDict_SetItemString(py_dict, "from_game", PyBool_FromLong(1));
   //run the script held in the m_script string
   PyRun_SimpleString(m_script.c_str());
 
@@ -153,9 +156,9 @@ int Grid::getGlobalWaterLevel()
 
 float Grid::getInterpolatedHeight(float _x, float _y)
 {
-  float x0 = floor(_x);
+  float x0 = std::round(_x);
   float x1 = x0 + 1;
-  float y0 = floor(_y);
+  float y0 = std::round(_y);
   float y1 = y0 + 1;
 
   float h0 = m_tiles[x0 + m_w * y0].getHeight();
@@ -167,7 +170,7 @@ float Grid::getInterpolatedHeight(float _x, float _y)
   float h5 = h2 * (x1 - _x) + h3 * (_x - x0);
   float h6 = h4 * (y1 - _y) + h5 * (_y - y0);
 
-  return h6;
+  return h0;
 }
 
 
@@ -215,24 +218,24 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
 
 void Grid::setTileType(int _id, TileType _type)
 {
-	m_tiles[_id].setType(_type);
+  m_tiles[_id].setType(_type);
 }
 
 void Grid::setTileType(int _x, int _y, TileType _type)
 {
-	m_tiles[_x + m_w * _y].setType(_type);
+  m_tiles[_x + m_w * _y].setType(_type);
 }
 
 void Grid::setBuildState(int _id, float _value, TileType _type)
 {
-	m_tiles[_id].setBuildState(_value, _type);
-	m_has_changes = true;
+  m_tiles[_id].setBuildState(_value, _type);
+  m_has_changes = true;
 }
 
 void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
 {
-	m_tiles[_x + m_w * _y].setBuildState(_value, _type);
-	m_has_changes = true;
+  m_tiles[_x + m_w * _y].setBuildState(_value, _type);
+  m_has_changes = true;
 }
 
 float Grid::getBuildState(int _id)

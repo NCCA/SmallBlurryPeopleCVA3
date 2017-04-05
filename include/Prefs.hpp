@@ -15,6 +15,23 @@ enum class PrefType
   STRING
 };
 
+enum class IncType
+{
+  NONE,    //
+  X1,      //
+  X10,     //
+  X100,    //
+  X1000,   //
+  X0_1,    //
+  X0_01,   //
+  X0_001,  //
+  X0_0001, //
+  POW_2    //
+};
+
+
+
+
 ///
 /// \brief The Prefs class holds all of the preferences stored in the file preferences.conf
 /// the file is parsed by the PrefsParser class and the contentse are stored in 3 std::maps
@@ -40,6 +57,48 @@ public:
   /// \brief restoreDefaultPrefs clears the three maps and fills them with default values
   ///
   void restoreDefaultPrefs();
+
+  IncType getIncType(std::string _key);
+
+  ///
+  /// \brief getFloatIncValue get value for incrementing given preference
+  /// \param _key name of preference
+  /// \return float value to add to preference
+  ///
+  float getFloatIncValue(const std::string &_key);
+  ///
+  /// \brief getFloatDecValue get value for decrementing given preference
+  /// \param _key name of preference
+  /// \return float value to subtract from preference
+  ///
+  float getFloatDecValue(const std::string &_key);
+  ///
+  /// \brief getFloatChangeValue get float value required for changing given preference in given direction
+  /// \param _key name of preference
+  /// \param _dir positive or negative for up/down
+  /// \return value to add/subtract
+  ///
+  float getFloatChangeValue(const std::string &_key, int _dir);
+
+  ///
+  /// \brief getIntIncValue get value for incrementing given preference
+  /// \param _key name of preference
+  /// \return int value to add to preference
+  ///
+  int getIntIncValue(const std::string &_key);
+  ///
+  /// \brief getIntDecValue get value for decrementing given preference
+  /// \param _key name of preference
+  /// \return int value to subtract to preference
+  ///
+  int getIntDecValue(const std::string &_key);
+  ///
+  /// \brief getIntChangeValue get int value required for changing given preference in given direction
+  /// \param _key name of preference
+  /// \param _dir positive or negative for up/down
+  /// \return value to add/subtract
+  ///
+  int getIntChangeValue(const std::string &_key, int _dir);
 
   ///
   /// \brief setIntPref adds an integer preference key value pair to the interger preferences map
@@ -91,25 +150,25 @@ public:
   /// \brief getIntMap retrieves the whole integer preference map
   /// \return the map containing all of the integer preference key-value pairs
   ///
-  const std::map<std::string, int> &getIntMap();
+  const std::map<std::string, std::pair<int, IncType>> &getIntMap();
 
   ///
   /// \brief getFloatMap retrieves the entire float preference map
   /// \return the map containing all of the integer preference key-value pairs
   ///
-  const std::map<std::string, float>& getFloatMap();
+  const std::map<std::string, std::pair<float, IncType>>& getFloatMap();
 
   ///
   /// \brief getStrMap retrieves the entire string preference map
   /// \return the map containing all of the integer preference key-value pairs
   ///
-  const std::map<std::string, std::string>& getStrMap();
+  const std::map<std::string, std::pair<std::string, IncType>>& getStrMap();
 
   ///
   /// \brief getBoolMap retrieves the entire string preference map
   /// \return the map containing all of the boolean preference key-value pairs
   ///
-  const std::map<std::string, bool>& getBoolMap();
+  const std::map<std::string, std::pair<bool, IncType>>& getBoolMap();
 
   ///
   /// \brief printPrefs prints out all key-value pairs stored in the three maps
@@ -151,6 +210,11 @@ public:
   ///
   int getNumPrefs();
   ///
+  /// \brief getNumChangeablePrefs get number of preferences that can be changed by the Gui
+  /// \return number of prefs that can be changed by the Gui
+  ///
+  int getNumChangeablePrefs();
+  ///
   /// \brief boolToString convert bool to string for Gui
   /// \return string, either "0" or "1"
   ///
@@ -165,22 +229,22 @@ private:
   ///
   /// \brief m_int_prefs a std::map that maps string keys to integer preferences
   ///
-  std::map<std::string, int> m_int_prefs;
+  std::map<std::string, std::pair<int, IncType>> m_int_prefs;
 
   ///
   /// \brief m_float_prefs a std::map that maps string keys to float preferences
   ///
-  std::map<std::string, float> m_float_prefs;
+  std::map<std::string, std::pair<float, IncType>> m_float_prefs;
 
   ///
   /// \brief m_bool_prefs a std::map that maps string keys to boolean preferences
   ///
-  std::map<std::string, bool> m_bool_prefs;
+  std::map<std::string, std::pair<bool, IncType>> m_bool_prefs;
 
   ///
   /// \brief m_str_prefs a std::map that maps string keys to string preferences
   ///
-  std::map<std::string, std::string> m_str_prefs;
+  std::map<std::string, std::pair<std::string, IncType>> m_str_prefs;
 };
 
 #endif//__PREFS_HPP__
