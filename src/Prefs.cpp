@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 
 #include "Prefs.hpp"
 #include "PrefsParser.hpp"
@@ -343,6 +344,8 @@ std::string Prefs::getPrefValueString(const std::string &_key)
 {
   PrefType type = getTypeOfPref(_key);
   std::string str_out;
+  std::stringstream stream;
+  int num_decimals = 3;
   switch (type) {
   case PrefType::BOOL:
     str_out = boolToString(getBoolPref(_key));
@@ -351,7 +354,34 @@ std::string Prefs::getPrefValueString(const std::string &_key)
     str_out = std::to_string(getIntPref(_key));
     break;
   case PrefType::FLOAT:
-    str_out = std::to_string(getFloatPref(_key));
+    switch (getIncType(_key)) {
+    case IncType::NONE:
+    case IncType::X1:
+    case IncType::X10:
+    case IncType::X100:
+    case IncType::X1000:
+      num_decimals = 0;
+      break;
+    case IncType::X0_1:
+      num_decimals = 1;
+      break;
+    case IncType::X0_01:
+      num_decimals = 2;
+      break;
+    case IncType::X0_001:
+      num_decimals = 3;
+      break;
+    case IncType::X0_0001:
+      num_decimals = 4;
+      break;
+    case IncType::POW_2:
+      num_decimals = 3;
+      break;
+    default:
+      break;
+    }
+    stream << std::fixed << std::setprecision(num_decimals) << getFloatPref(_key);
+    str_out = stream.str();
     break;
   case PrefType::STRING:
     str_out = getStrPref(_key);

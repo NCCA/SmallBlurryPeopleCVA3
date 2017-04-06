@@ -32,7 +32,8 @@ enum class Action
   NOTIFY,            // 20
   PREFS_VALUE,       // 21
   INCR_PREFS,        // 22
-  DECR_PREFS         // 23
+  DECR_PREFS,        // 23
+  SAVE_PREFERENCES   // 24
 };
 
 ///
@@ -309,6 +310,14 @@ public:
 private:
   Scene *m_scene;
   ngl::Vec2 m_map_pos;
+};
+
+class SavePreferencesCommand : public Command
+{
+public:
+  SavePreferencesCommand();
+  ~SavePreferencesCommand() = default;
+  virtual void execute();
 };
 
 #endif//__COMMANDS_HPP__

@@ -29,9 +29,6 @@ enum class IncType
   POW_2    //
 };
 
-
-
-
 ///
 /// \brief The Prefs class holds all of the preferences stored in the file preferences.conf
 /// the file is parsed by the PrefsParser class and the contentse are stored in 3 std::maps

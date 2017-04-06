@@ -1,6 +1,6 @@
 #version 410 core
 
-#define BUTTON_TEXT_LENGTH 256
+#define BUTTON_TEXT_LENGTH 512
 #define DOUBLE_MAX_NOTES 10
 
 // actions
