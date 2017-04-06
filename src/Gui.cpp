@@ -105,10 +105,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new MoveCamCommand(m_scene, Direction::BACKWARDS, false));
     break;
   case Action::MOVELEFT:
-    command.reset(new MoveCamCommand(m_scene, Direction::LEFT, false));
+		command.reset(new MoveCamCommand(m_scene, Direction::LEFTWARDS, false));
     break;
   case Action::MOVERIGHT:
-    command.reset(new MoveCamCommand(m_scene, Direction::RIGHT, false));
+		command.reset(new MoveCamCommand(m_scene, Direction::RIGHTWARDS, false));
     break;
   case Action::STOPFORWARD:
     command.reset(new MoveCamCommand(m_scene, Direction::FORWARDS, true));
@@ -117,10 +117,10 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     command.reset(new MoveCamCommand(m_scene, Direction::BACKWARDS, true));
     break;
   case Action::STOPLEFT:
-    command.reset(new MoveCamCommand(m_scene, Direction::LEFT, true));
+		command.reset(new MoveCamCommand(m_scene, Direction::LEFTWARDS, true));
     break;
   case Action::STOPRIGHT:
-    command.reset(new MoveCamCommand(m_scene, Direction::RIGHT, true));
+		command.reset(new MoveCamCommand(m_scene, Direction::RIGHTWARDS, true));
     break;
   case Action::PREFERENCES:
     command.reset(new PrefsCommand(m_scene));

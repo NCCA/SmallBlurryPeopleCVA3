@@ -4,6 +4,7 @@
 #include "Grid.hpp"
 #include "Inventory.hpp"
 #include "ngl/Vec2.h"
+
 #include <QTime>
 #include <vector>
 #include <stack>
@@ -33,7 +34,7 @@ enum class CharInventory
 {
 	WOOD,
 	FISH,
-	BERRY,
+	BERRIES,
 	NONE
 };
 
@@ -59,24 +60,44 @@ public:
 	///
 	/// \brief setState, creates state stack for the character to execute
 	///
-	void setState();
+	void setState(int _target_id);
 	///
 	/// \brief buildState, tell character to start building on current square
 	/// \param _building type of building to build
 	///
 	void buildState(TileType _building);
+	///
+	/// \brief moveState, character moves to its target
+	///
 	void moveState();
+	///
+	/// \brief chopState, character collects wood from a tree
+	///
 	void chopState();
+	///
+	/// \brief fishState, character tries to catch a fish
+	///
 	void fishState();
+	///
+	/// \brief forageState, character finds tree to get berries
+	///
 	void forageState();
+	///
+	/// \brief storeState, character stores whatever is in its inventory
+	///
+	void storeState();
+	///
+	/// \brief sleepState, recovers character stamina and makes them inactive
+	///
+	void sleepState();
+	///
+	/// \brief idleState, randomly moves character while not active
+	///
+	void idleState();
 	///
 	/// \brief clearState, removes any actions in the state stack
 	///
 	void clearState() {m_state_stack.clear();}
-	///
-	/// \brief setIdleState, randomly moves character while not active
-	///
-	void setIdleState();
 	///
 	/// \brief update, updates character based on its current state
 	///
@@ -109,28 +130,6 @@ public:
   ///
 	bool setTarget(int _tile_id);
 	///
-	/// \brief findNearestStorage, finds the storage house closest to the character and sets it as the target
-	/// \return a boolean determining whether a storage house was found
-	///
-	bool findNearestStorage();
-	///
-	/// \brief findNearestEmptyTile, finds nearest neighbouring empty grid tile
-	/// \return a boolean determing whether a neighbouring empty tile was found
-	///
-	bool findNearestEmptyTile();
-	bool findNearestFishingTile();
-	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges);
-
-	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
-	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
-	bool findNearestTree();
-	///
-	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
-	/// \param _coord_data, vector containing vec2's of coordinates to sort through
-	/// \return a boolean determining if the shortest distance has been found
-	///
-	bool findNearest(std::vector<ngl::Vec2> _coord_data);
-	///
 	/// \brief getID, get the unique character id
 	/// \return m_id, character's id
 	///
@@ -160,6 +159,11 @@ public:
 	/// \return m_active, the boolean stored in the character determining if it is active or not
 	///
 	bool isActive() {return m_active;}
+	///
+	/// \brief isSleeping, returns whether the character is sleeping
+	/// \return m_sleeping, the boolean stored in the character determining if it is active or not
+	///
+	bool isSleeping() {return m_sleeping;}
 private:
 	///
 	/// \brief m_id_counter, counts how many objects have been created
@@ -178,9 +182,17 @@ private:
 	///
 	ngl::Vec3 m_colour;
 	///
+	/// \brief m_stamina, how much stamina the character has
+	///
+	float m_stamina;
+	///
 	/// @brief m_active, sets if the current character is selected
 	///
 	bool m_active;
+	///
+	/// \brief m_sleeping, checks if the character is sleeping and hence shouldn't be drawn
+	///
+	bool m_sleeping;
 	///
 	/// \brief m_grid, grid pointer to reference for pathfinding
 	///
@@ -198,9 +210,13 @@ private:
   ///
   int m_target_id;
 	///
-	/// \brief m_final_target_id, id of target character ends on after sequence
+	/// \brief m_dest_target_id, id of character's final destination or reoccuring destination
 	///
-	int m_final_target_id;
+	int m_dest_target_id;
+	///
+	/// \brief m_building_tile, tile to build on
+	///
+	int m_building_tile;
   ///
 	/// \brief m_speed, max speed of character
   ///
@@ -250,8 +266,37 @@ private:
 	///
 	int m_idle_target_id;
 
-	float m_building_amount;
+	int m_building_amount;
 	TileType m_building_type;
+
+	///
+	/// \brief findNearestStorage, finds the storage house closest to the character and sets it as the target
+	/// \return a boolean determining whether a storage house was found
+	///
+	bool findNearestStorage();
+	///
+	/// \brief findNearestEmptyTile, finds nearest neighbouring empty grid tile
+	/// \return a boolean determing whether a neighbouring empty tile was found
+	///
+	bool findNearestEmptyTile();
+	bool findNearestFishingTile();
+	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges);
+
+	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	bool findNearestTree();
+	///
+	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
+	/// \param _coord_data, vector containing vec2's of coordinates to sort through
+	/// \return a boolean determining if the shortest distance has been found
+	///
+	bool findNearest(std::vector<ngl::Vec2> _coord_data);
+
+	void resetCharacter();
+	void completedAction() {m_state_stack.pop_front(); m_timer.restart();}
+	void staminaMessage();
+	void generalMessage(std::string _print, int _id);
+	void generalMessage(std::string _print, ngl::Vec2 _coord);
 };
 
 #endif//__CHARACTER_HPP__

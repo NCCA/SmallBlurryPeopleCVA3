@@ -24,8 +24,8 @@ enum Direction
 {
   FORWARDS,
   BACKWARDS,
-  LEFT,
-  RIGHT
+	LEFTWARDS,
+	RIGHTWARDS
 };
 ///
 /// \brief The GameState enum refers to what state the game is currently in:
