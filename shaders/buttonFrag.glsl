@@ -30,6 +30,7 @@ const uint INCR_PREFS        = 22;
 const uint DECR_PREFS        = 23;
 const uint SAVE_PREFERENCES  = 24;
 const uint CHAR_STATE        = 25;
+const uint STAMINA_BAR       = 26;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -390,13 +391,18 @@ void main()
 //  vec2 button_inner = 0.5 - (border_size * 2) / (fragSize*fResolution);
 //  float radius = border_size;
 //  if(box(translate(fragUV, vec2(0.5)), button_inner, 0) <= 0)
-
-  if(box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2) <= 0)
+  float edge = box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2);
+  if(edge <= 0)
   {
     s = mix(button_highlight, button_color, fragUV.y);
+    if(fragAction == STAMINA_BAR)
+    {
+      s *= smoothstep(0.5+3.0/fragPixelSize.x, 0.5-3.0/fragPixelSize.x, fragUV.x);
+    }
   }
 
   s += centerText();
+
   float a = 1.0;
   if(fragAction == NOTIFY)
   {

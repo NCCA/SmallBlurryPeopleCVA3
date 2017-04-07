@@ -253,9 +253,12 @@ void Gui::createSceneButtons()
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "F");
-  addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
-  addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 50), ngl::Vec2(130, 40), "");
-  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
+  addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 110), ngl::Vec2(140, 40), m_scene->getActiveCharacterName());
+  addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
+  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), TEXT_SMILEY);
+
+  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 180), ngl::Vec2(190, 20), "stamina");
+
   updateButtonArrays();
 }
 
