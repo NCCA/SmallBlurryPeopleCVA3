@@ -150,6 +150,11 @@ public:
 	///
 	State getState();
 	///
+	/// \brief getStamina get character's stamina
+	/// \return character's stamina value
+	///
+	float getStamina() {return m_stamina;}
+	///
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position
 	///

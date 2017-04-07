@@ -257,7 +257,7 @@ void Gui::createSceneButtons()
   addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), TEXT_SMILEY);
 
-  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 180), ngl::Vec2(190, 20), "stamina");
+  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 180), ngl::Vec2(190, 20), "");
 
   updateButtonArrays();
 }
@@ -476,15 +476,17 @@ void Gui::drawButtons()
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
 
-  if(m_scene->getActiveCharacter())
+  Character *character = m_scene->getActiveCharacter();
+  if(character)
   {
-    slib->setRegisteredUniform("character_state", (int)m_scene->getActiveCharacter()->getState());
+    slib->setRegisteredUniform("character_state", (int)character->getState());
+    slib->setRegisteredUniform("character_stamina", character->getStamina());
   }
   else
   {
     slib->setRegisteredUniform("character_state", -1);
+    slib->setRegisteredUniform("character_stamina", 0.0f);
   }
-
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);

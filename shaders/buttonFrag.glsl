@@ -58,7 +58,8 @@ const int TEXT_NEWLINE = 10;
 float character(float ch, vec2 tp);
 vec3 charStateText(vec3);
 vec3 text(vec2 pos, int start_index, int end_index);
-vec3 centerText(vec2 tp);
+vec3 centerText();
+vec3 staminaText();
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 p, vec2 t);
 vec3 getIcon(vec2 pixel_uv);
@@ -76,6 +77,7 @@ uniform int max_notification_age;
 uniform uint button_text[BUTTON_TEXT_LENGTH];
 
 uniform int character_state;
+uniform float character_stamina;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -341,7 +343,16 @@ vec3 centerText()
   }
 }
 
-// modified functions end
+vec3 staminaText()
+{
+  float c = 0;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (1 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-7.0/4.0, 0.0));
+  //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
+  _s _t _a _m _i _n _a
+  return vec3(max(c, 0.0));
+}
 
 float box(vec2 position, vec2 size, float radius)
 {
@@ -397,12 +408,15 @@ void main()
     s = mix(button_highlight, button_color, fragUV.y);
     if(fragAction == STAMINA_BAR)
     {
-      s *= smoothstep(0.5+3.0/fragPixelSize.x, 0.5-3.0/fragPixelSize.x, fragUV.x);
+      s *= smoothstep(character_stamina+0.1/fragPixelSize.x, character_stamina-0.1/fragPixelSize.x, fragUV.x);
     }
   }
 
   s += centerText();
-
+  if(fragAction == STAMINA_BAR)
+  {
+    s += staminaText();
+  }
   float a = 1.0;
   if(fragAction == NOTIFY)
   {
