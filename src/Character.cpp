@@ -858,6 +858,13 @@ void Character::generalMessage(std::string _print, ngl::Vec2 _coord)
 	Gui::instance()->notify(message, _coord);
 }
 
+State Character::getState()
+{
+	// fix to return the current state
+	// might need safeguards if state stack is empty i dunno
+	return State::IDLE;
+}
+
 ngl::Vec3 Character::getPos()
 {
   //get grid height at character's position

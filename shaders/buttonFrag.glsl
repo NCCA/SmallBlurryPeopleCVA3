@@ -23,13 +23,31 @@ const uint STOPRIGHT         = 15;
 const uint PREFERENCES       = 16;
 const uint PASSIVE_CHARACTER = 17;
 const uint SETBOOLPREF       = 18;
-const uint FORAGE            = 19;
+const uint CHAR_FORAGE       = 19;
 const uint NOTIFY            = 20;
+const uint PREFS_VALUE       = 21;
+const uint INCR_PREFS        = 22;
+const uint DECR_PREFS        = 23;
+const uint SAVE_PREFERENCES  = 24;
+const uint CHAR_STATE        = 25;
 
 //game states
 const uint STATE_MAIN  = 0;
 const uint STATE_PAUSE = 1;
 const uint STATE_PREFS = 2;
+
+// character states
+const int CHOP_WOOD = 0;
+const int STORE     = 1;
+const int FISH      = 2;
+const int FORAGE    = 3;
+const int COLLECT   = 4;
+const int GET_WOOD  = 5;
+const int BUILD     = 6;
+const int SLEEP     = 7;
+const int MOVE      = 8;
+const int REPEAT    = 9;
+const int IDLE      = 10;
 
 // character exceptions
 const int TEXT_CROSS = 32;
@@ -37,8 +55,9 @@ const int TEXT_NEWLINE = 10;
 
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp);
-vec3 text(vec2 pos);
-vec3 centerText();
+vec3 charStateText(vec3);
+vec3 text(vec2 pos, int start_index, int end_index);
+vec3 centerText(vec2 tp);
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 p, vec2 t);
 vec3 getIcon(vec2 pixel_uv);
@@ -54,6 +73,8 @@ uniform int notification_ages[DOUBLE_MAX_NOTES];
 uniform int max_notification_age;
 
 uniform uint button_text[BUTTON_TEXT_LENGTH];
+
+uniform int character_state;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -176,6 +197,68 @@ float character(float ch, vec2 tp)
     //return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
 }
 
+float charStateText(vec2 tp)
+{
+  float c = 0.0;
+  if(character_state == CHOP_WOOD)
+  {
+    tp = translate(tp, vec2(-8.0/4.0, 0.0));//-(fragPixelPos.y + (fragPixelSize.y)/2.0)));
+    _C _h _o _p _p _i _n _g
+    //_M
+  }
+  else if(character_state == STORE)
+  {
+    tp = translate(tp, vec2(-7.0/4.0, 0.0));
+    _S _t _o _r _i _n _g
+  }
+  else if(character_state == FISH)
+  {
+    tp = translate(tp, vec2(-7.0/4.0, 0.0));
+    _F _i _s _h _i _n _g
+  }
+  else if(character_state == FORAGE)
+  {
+    tp = translate(tp, vec2(-8.0/4.0, 0.0));
+    _F _o _r _a _g _i _n _g
+  }
+  else if(character_state == COLLECT)
+  {
+    tp = translate(tp, vec2(-10.0/4.0, 0.0));
+    _C _o _l _l _e _c _t _i _n _g
+  }
+  else if(character_state == GET_WOOD)
+  {
+    tp = translate(tp, vec2(-12.0/4.0, 0.0));
+    _G _e _t _t _i _n _g __ _w _o _o _d
+  }
+  else if(character_state == BUILD)
+  {
+    tp = translate(tp, vec2(-8.0/4.0, 0.0));
+    _B _u _i _l _d _i _n _g
+  }
+  else if(character_state == SLEEP)
+  {
+    tp = translate(tp, vec2(-8.0/4.0, 0.0));
+    _S _l _e _e _p _i _n _g
+  }
+  else if(character_state == MOVE)
+  {
+    tp = translate(tp, vec2(-10.0/4.0, 0.0));
+    _T _r _a _v _e _l _l _i _n _g
+  }
+  else if(character_state == REPEAT)
+  {
+    tp = translate(tp, vec2(-9.0/4.0, 0.0));
+    _R _e _p _e _a _t _i _n _g
+  }
+  else if(character_state == IDLE)
+  {
+    tp = translate(tp, vec2(-4.0/4.0, 0.0));
+    _I _d _l _e
+  }
+  return c;
+}
+
 vec3 text(vec2 pos, int start_index, int end_index)
 {
   vec2 tp0 = pos / FONT_SIZE;  // original position
@@ -183,17 +266,24 @@ vec3 text(vec2 pos, int start_index, int end_index)
 
   float c = 0.0;
   //_Q _U _I _T
-  int button_id = 0;
-  for(int i=start_index; i<end_index; i++)
+  if(fragAction == CHAR_STATE)
   {
-   if(button_text[i] == TEXT_NEWLINE)
-   {
-     _newline;
-   }
-   else
-   {
-     S(button_text[i]);
-   }
+    c += float(charStateText(tp));
+  }
+  else
+  {
+    int button_id = 0;
+    for(int i=start_index; i<end_index; i++)
+    {
+     if(button_text[i] == TEXT_NEWLINE)
+     {
+       _newline;
+     }
+     else
+     {
+       S(button_text[i]);
+     }
+    }
   }
   return vec3(max(c, 0.0));
 }

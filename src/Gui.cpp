@@ -75,6 +75,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
   case Action::PREFS_VALUE:
+  case Action::CHAR_STATE:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -253,6 +254,7 @@ void Gui::createSceneButtons()
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "F");
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
+  addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 50), ngl::Vec2(130, 40), "");
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
   updateButtonArrays();
 }
@@ -470,6 +472,16 @@ void Gui::drawButtons()
 
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
+
+  if(m_scene->getActiveCharacter())
+  {
+    slib->setRegisteredUniform("character_state", (int)m_scene->getActiveCharacter()->getState());
+  }
+  else
+  {
+    slib->setRegisteredUniform("character_state", -1);
+  }
+
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
