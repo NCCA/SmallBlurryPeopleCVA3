@@ -347,8 +347,8 @@ vec3 staminaText()
 {
   float c = 0;
   vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
-  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (1 - 1) * FONT_SIZE)/2.0)));
-  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-7.0/4.0, 0.0));
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-7.0/8.0, 0.0));
   //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
   _s _t _a _m _i _n _a
   return vec3(max(c, 0.0));
@@ -408,15 +408,25 @@ void main()
     s = mix(button_highlight, button_color, fragUV.y);
     if(fragAction == STAMINA_BAR)
     {
+      vec3 temp = s;
       s *= smoothstep(character_stamina+0.1/fragPixelSize.x, character_stamina-0.1/fragPixelSize.x, fragUV.x);
+      s.r = temp.g;
+      s.g = temp.b;
+      s.b = temp.r;
     }
   }
+
 
   s += centerText();
   if(fragAction == STAMINA_BAR)
   {
-    s += staminaText();
+    if(fragMousedOver > 0)
+    {
+      s += staminaText();
+    }
+
   }
+
   float a = 1.0;
   if(fragAction == NOTIFY)
   {
