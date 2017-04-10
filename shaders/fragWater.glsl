@@ -1,5 +1,6 @@
 #version 410 core
 
+#define FOG_DIVISOR 256.0
 #define STEP_DIST 0.05
 
 layout (location = 0) out vec4 fragColour;
@@ -112,6 +113,8 @@ void main()
     mul += 1.0;
     mul /= 2.0;
 
+    outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
+
     ///Specular///
     //Surface to cam
     vec3 eyeVec = normalize(camPos - position_fs.xyz);
@@ -154,7 +157,9 @@ void main()
     dmul += 1.0 / ((0.15 + waterDepth) * 8.0);
     fragColour = mix(fragColour, vec4(directionalLightCol.xyz * (sunInts + moonInts) * 0.75, 1.0), clamp(dmul, 0.0, 1.0));
 
-    outDepth = vec4(gl_FragCoord.z / gl_FragCoord.w);
+    ///Merge with fog colour.
+    float a = clamp(outDepth.r / FOG_DIVISOR, 0.0, 1.0);
+    fragColour.xyz = mix(fragColour.xyz, 0.8 * directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
 
     float md = distance(position_fs.xz, mouseWorldPos.xz) * 0.25;
     fragColour = mix(vec4(0.0, 1.0, 1.0, 1.0), fragColour, clamp(md, 0.0, 1.0));

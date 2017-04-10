@@ -3,6 +3,8 @@
 #define shadowbuffer 0
 #define NUM_CASCADES 3
 
+#define FOG_DIVISOR 256.0
+
 in vec2 UV;
 
 uniform float cascades[NUM_CASCADES + 1];
@@ -210,7 +212,7 @@ void main()
 #endif
 
     //Fog
-    float a = clamp(texture(linearDepth, UV).r / 128.0, 0.0, 1.0);
+    float a = clamp(texture(linearDepth, UV).r / FOG_DIVISOR, 0.0, 1.0);
     fragColour.xyz = mix(fragColour.xyz, 0.8 * directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
     //fragColour.xyz = vec3(texture(linearDepth, UV).r);
 
