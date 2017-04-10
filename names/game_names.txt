@@ -7,7 +7,6 @@ Jacob
 Ava
 William
 Isabella
-Ethan
 Mia
 James
 Abigail
@@ -17,8 +16,10 @@ Michael
 Charlotte
 Benjamin
 Harper
-Memechael
-Macey
 Lola
 Ethan
 Hila
+Pat
+Matt
+Gavin
+Susan

@@ -71,23 +71,24 @@ int GridTile::cutTrees(int _goal_amount)
 void GridTile::setBuildState(float _value, TileType _type)
 {
 	m_build_state += _value;
-
 	std::cout<<"Building Done: "<<(m_build_state * 100)<<"%"<<std::endl;
 
-	if(m_build_state >= 0.0 && m_build_state < 0.5)
+	if (_type == TileType::HOUSE)
 	{
-		m_type = TileType::FOUNDATION_A;
-	}
-	else if(m_build_state >= 0.5 && m_build_state < 1.0)
-	{
-		m_type = TileType::FOUNDATION_B;
-	}
-
-	else if (m_build_state >= 1.0)
-	{
-		if (_type == TileType::HOUSE)
+		if(m_build_state >= 0.0 && m_build_state < 0.5)
+			m_type = TileType::FOUNDATION_A;
+		else if(m_build_state >= 0.5 && m_build_state < 1.0)
+			m_type = TileType::FOUNDATION_B;
+		else if(m_build_state >= 1.0)
 			m_type = TileType::HOUSE;
-		else if(_type == TileType::STOREHOUSE)
+	}
+	else if (_type == TileType::STOREHOUSE)
+	{
+		if(m_build_state >= 0.0 && m_build_state < 0.5)
+			m_type = TileType::FOUNDATION_C;
+		else if(m_build_state >= 0.5 && m_build_state < 1.0)
+			m_type = TileType::FOUNDATION_D;
+		else if(m_build_state >= 1.0)
 			m_type = TileType::STOREHOUSE;
 	}
 }

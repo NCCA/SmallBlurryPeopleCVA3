@@ -13,7 +13,7 @@
 
 /// \file Character.hpp
 /// \brief The character refers to the grid for pathfinding and keeps track of a target
-/// for pathfinding. It is responsible for updating and drawing itself.
+/// for pathfinding. It is responsible for updating itself.
 
 enum class State
 {
@@ -21,10 +21,16 @@ enum class State
 	STORE,
 	FISH,
 	FORAGE,
-	COLLECT,
+	COLLECT_WOOD,
+	COLLECT_BERRIES,
+	COLLECT_FISH,
 	GET_WOOD,
+	GET_BERRIES,
+	GET_FISH,
 	BUILD,
 	SLEEP,
+	EAT_BERRIES,
+	EAT_FISH,
 	MOVE,
 	REPEAT,
 	IDLE
@@ -90,6 +96,14 @@ public:
 	/// \brief sleepState, recovers character stamina and makes them inactive
 	///
 	void sleepState();
+	///
+	/// \brief eatBerries, character eats berries and restores stamina
+	///
+	void eatBerriesState();
+	///
+	/// \brief eatFish, character eats fish and restores stamina
+	///
+	void eatFishState();
 	///
 	/// \brief idleState, randomly moves character while not active
 	///
@@ -265,12 +279,16 @@ private:
 	/// \brief m_idle_target_id, grid id that the character moves around while idle
 	///
 	int m_idle_target_id;
-
-	int m_building_amount;
-	TileType m_building_type;
-
 	///
-	/// \brief findNearestStorage, finds the storage house closest to the character and sets it as the target
+	/// \brief m_building_amount, how many times it takes to build a house or storage house
+	///
+	int m_building_amount;
+	///
+	/// \brief m_building_type, the type of building the character is building
+	///
+	TileType m_building_type;
+	///
+	/// \brief findNearestStorage, finds a storage house close to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found
 	///
 	bool findNearestStorage();
@@ -279,23 +297,74 @@ private:
 	/// \return a boolean determing whether a neighbouring empty tile was found
 	///
 	bool findNearestEmptyTile();
+	///
+	/// \brief findNearestFishingTile, finds a tile on the edge of water for the character to fish from
+	/// \return a boolean determining if a tile to fish from was found
+	///
 	bool findNearestFishingTile();
-	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_edges);
-
-	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
-	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	///
+	/// \brief findNearestTree, find a tree close to the character for foraging
+	/// \return a boolean determining whether a tree tile was found
+	///
 	bool findNearestTree();
+	///
+	/// \brief waterFloodfill, uses a flood fill algorithm to find the edges of a body of water
+	/// \param _coord, the current tile's coordinate
+	/// \param _edges, a vector of tile id's that are the edge of the water
+	/// \param _water, a vector of tile id's that are water tiles
+	///
+	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+	///
+	/// \brief treeFloodfill, finds a nearby tree using a flood fill algorithm
+	/// \param _coord, the current tile's coordinate
+	/// \param _found, when a tree is found then the flood fill is exited
+	///
+	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	///
+	/// \brief distanceSort, sorts a vector based on the squared distance from a character
+	/// \param io_left, the index of the first element in the sub-section of the vector
+	/// \param io_right, the index of the last element in the sub-section of the vector
+	/// \param _vector, vector of tile positions
+	///
+	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_vector);
 	///
 	/// \brief findNearest, finds the shortest distance for a character in a vector of given coordinates
 	/// \param _coord_data, vector containing vec2's of coordinates to sort through
 	/// \return a boolean determining if the shortest distance has been found
 	///
 	bool findNearest(std::vector<ngl::Vec2> _coord_data);
-
+	///
+	/// \brief findFirstPath, finds path to tiles, if a path is find then the function is exited
+	/// \param _vector, vector of tile coordinates
+	/// \return
+	///
+	bool findFirstPath(std::vector<ngl::Vec2> _vector);
+	///
+	/// \brief resetCharacter, clears a characters stack and resets their speed, used when changing from
+	/// a character's idle state where the character's speed is reduced
+	///
 	void resetCharacter();
+	///
+	/// \brief completedAction, when a state has been completed it is removed from the stack and the
+	/// internal timer is reset
+	///
 	void completedAction() {m_state_stack.pop_front(); m_timer.restart();}
+	///
+	/// \brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
+	/// complete a task
+	///
 	void staminaMessage();
+	///
+	/// \brief generalMessage, for sending a message to the UI
+	/// \param _print, message being printed by the UI
+	/// \param _id, tile id of where the camera will move to
+	///
 	void generalMessage(std::string _print, int _id);
+	///
+	/// \brief generalMessage, for sending a message to the UI
+	/// \param _print, message being printed by the UI
+	/// \param _coord, coordinate of where the camera will move to
+	///
 	void generalMessage(std::string _print, ngl::Vec2 _coord);
 };
 

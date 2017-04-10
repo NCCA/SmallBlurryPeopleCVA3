@@ -12,7 +12,9 @@ enum class TileType{
   HOUSE,
 	STOREHOUSE,
 	FOUNDATION_A,
-	FOUNDATION_B
+	FOUNDATION_B,
+	FOUNDATION_C,
+	FOUNDATION_D
 };
 
 /// @class GridTile

@@ -113,17 +113,25 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
     store->loadMesh("debugBox", "box.obj");
+
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
+
     store->loadMesh("house", "house/stilt_house.obj" );
 		store->loadTexture("house_d", "house/stilt_house_diff.tif" );
 		store->loadMesh("foundation_A", "house/start_building.obj");
 		store->loadTexture("foundation_A_d", "house/start_building_diff.tif");
     store->loadMesh("foundation_B", "house/mid_way_building.obj");
 		store->loadTexture("foundation_B_d", "house/mid_way_building_diff.tif");
+
+		store->loadMesh("storehouse", "storeHouse/storehouse.obj");
+		store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
+		store->loadMesh("foundation_C", "house/start_building.obj");
+		store->loadTexture("foundation_C_d", "house/start_building_diff.tif");
+		store->loadMesh("foundation_D", "house/mid_way_building.obj");
+		store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
+
     store->loadMesh("person", "person/person.obj");
-		store->loadMesh("storehouse", "storeHouse/storeHouse.obj");
-    store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
 
     store->loadTexture("grass", "terrain/grass.png");
     store->loadTexture("rock", "terrain/rock.png");
@@ -197,7 +205,7 @@ void Scene::initMeshInstances()
 {
     int meshCount = 0;
     //m_meshPositions.clear()
-		m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_B) + 1, std::vector<ngl::Vec3>());
+		m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getW(); ++i)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
@@ -331,11 +339,15 @@ void Scene::readNameFile()
 void Scene::createCharacter()
 {
   int numberNames = m_file_names.size();
+	//pick random name
   std::random_device rnd;
   std::mt19937 mt_rand(rnd());
   std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
   int name_chosen = nameNo(mt_rand);
+	//create character with random name
   m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+	//remove name from list so no multiples
+	m_file_names.erase(m_file_names.begin() + name_chosen);
 }
 
 void Scene::update()
@@ -1059,6 +1071,12 @@ void Scene::drawMeshes()
 				case static_cast<int>(TileType::FOUNDATION_B):
 						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset);
 						break;
+				case static_cast<int>(TileType::FOUNDATION_C):
+						drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset);
+						break;
+				case static_cast<int>(TileType::FOUNDATION_D):
+						drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset);
+						break;
         default:
             break;
         }
@@ -1114,6 +1132,12 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 								break;
 						case static_cast<int>(TileType::FOUNDATION_B):
 								drawAsset("foundation_B", "foundation_B_d", "diffuse");
+								break;
+						case static_cast<int>(TileType::FOUNDATION_C):
+								drawAsset("foundation_C", "foundation_C_d", "diffuse");
+								break;
+						case static_cast<int>(TileType::FOUNDATION_D):
+								drawAsset("foundation_D", "foundation_D_d", "diffuse");
 								break;
             default:
                 break;
@@ -1345,6 +1369,12 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 						break;
 				case static_cast<int>(TileType::FOUNDATION_B):
 						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset, m_shadowMat[_index]);
+						break;
+				case static_cast<int>(TileType::FOUNDATION_C):
+						drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset, m_shadowMat[_index] );
+						break;
+				case static_cast<int>(TileType::FOUNDATION_D):
+						drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset, m_shadowMat[_index]);
 						break;
         default:
             break;
