@@ -21,7 +21,7 @@ public:
   ///
   /// \brief update calculate behaviours for baddie
   ///
-  void update();
+  void update(ngl::Vec3 closest_Target);
   ///
   /// \brief move, moves baddie along its path
   /// \return true if baddie reaches target

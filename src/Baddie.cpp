@@ -16,7 +16,7 @@ Baddie::Baddie(Grid *_grid) :
   findPath(ngl::Vec2(m_grid->getW()/2, m_grid->getH()/2));
 }
 
-void Baddie::update()
+void Baddie::update(ngl::Vec3 closest_Target)
 {
   if(move())
   {

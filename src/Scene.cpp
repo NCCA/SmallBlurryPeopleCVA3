@@ -443,7 +443,7 @@ void Scene::update()
 
 		for(Baddie &baddie : m_baddies)
 		{
-			baddie.update();
+			baddie.update(m_characters[0].getPos());
 		}
 
 
