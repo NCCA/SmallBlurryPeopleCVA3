@@ -2,6 +2,7 @@
 #include "NodeNetwork.hpp"
 #include "Prefs.hpp"
 #include "ngl/NGLStream.h"
+#include "Utility.hpp"
 
 Baddie::Baddie(Grid *_grid) :
   m_grid(_grid),
@@ -57,7 +58,7 @@ bool Baddie::move()
     dist_moved += aim_vec.length();
     m_pos += aim_vec;
   }
-
+  updateRot();
   if(m_path.size() <= 0)
   {
     return true;
@@ -110,4 +111,13 @@ ngl::Vec3 Baddie::getPos()
   //get grid height at baddie's position
   float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
+}
+
+void Baddie::updateRot()
+{
+  if(m_path.size() > 0)
+  {
+    ngl::Vec2 dir = m_path.back() - m_pos;
+    m_rot = Utility::degrees(atan2(dir.m_x, dir.m_y));
+  }
 }

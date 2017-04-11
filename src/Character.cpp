@@ -757,8 +757,6 @@ bool Character::move()
     dist_moved += aim_vec.length();
     m_pos += aim_vec;
   }
-
-
   updateRot();
   if(m_path.size() <= 0)
   {
@@ -1117,7 +1115,7 @@ void Character::updateRot()
   if(m_path.size() > 0)
   {
     ngl::Vec2 dir = m_path.back() - m_pos;
-    m_rot = atan2(dir.m_x, dir.m_y);
+    m_rot = Utility::degrees(atan2(dir.m_x, dir.m_y));
   }
 }
 

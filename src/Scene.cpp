@@ -1106,7 +1106,7 @@ void Scene::drawMeshes()
 					ngl::Vec3 pos = character.getPos();
 					pos.m_y /= m_terrainHeightDivider;
 					m_transform.setPosition(pos);
-					m_transform.setRotation(0, Utility::degrees(character.getRot()), 0);
+					m_transform.setRotation(0, character.getRot(), 0);
 					slib->use("colour");
 					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
 					drawAsset( "person", "", "colour");
@@ -1117,6 +1117,7 @@ void Scene::drawMeshes()
       ngl::Vec3 pos = baddie.getPos();
       pos.m_y /= m_terrainHeightDivider;
       m_transform.setPosition(pos);
+      m_transform.setRotation(0, baddie.getRot(), 0);
       m_transform.setScale(2.0f, 2.0f, 2.0f);
       slib->use("colour");
       slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));

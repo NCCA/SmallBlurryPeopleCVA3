@@ -236,7 +236,7 @@ private:
   ///
 	ngl::Vec2 m_pos;
 	///
-	/// \brief m_rot character's rotation to face current direction
+	/// \brief m_rot character's rotation to face current direction (degrees)
 	///
 	float m_rot;
   ///
