@@ -718,6 +718,7 @@ void Character::update()
     //if a character isn't active they are idle
     idleState();
   }
+  std::cout << "stamina for " << m_name << " is " << m_stamina << std::endl;
 }
 
 bool Character::move()
