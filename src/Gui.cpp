@@ -76,6 +76,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PASSIVE_CHARACTER:
   case Action::PREFS_VALUE:
   case Action::CHAR_STATE:
+  case Action::STAMINA_BAR:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -485,7 +486,7 @@ void Gui::drawButtons()
   else
   {
     slib->setRegisteredUniform("character_state", -1);
-    slib->setRegisteredUniform("character_stamina", 0.0f);
+    slib->setRegisteredUniform("character_stamina", 1.0f);
   }
   if(m_mouse_down)
   {

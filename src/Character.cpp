@@ -484,6 +484,7 @@ void Character::update()
   {
 		idleState();
   }
+  std::cout << "stamina for " << m_name << " is " << m_stamina << std::endl;
 }
 
 bool Character::move()

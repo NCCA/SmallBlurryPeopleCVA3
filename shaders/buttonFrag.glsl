@@ -408,8 +408,10 @@ void main()
     s = mix(button_highlight, button_color, fragUV.y);
     if(fragAction == STAMINA_BAR)
     {
+      float mult = smoothstep(character_stamina+3/fragPixelSize.x, character_stamina-3/fragPixelSize.x, fragUV.x);
+      mult = min(mult + 0.3, 1);
+      s *= mult;
       vec3 temp = s;
-      s *= smoothstep(character_stamina+0.1/fragPixelSize.x, character_stamina-0.1/fragPixelSize.x, fragUV.x);
       s.r = temp.g;
       s.g = temp.b;
       s.b = temp.r;
