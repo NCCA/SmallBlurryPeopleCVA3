@@ -10,11 +10,11 @@ enum class TileType{
   WATER,
   MOUNTAINS,
   HOUSE,
-	STOREHOUSE,
-	FOUNDATION_A,
-	FOUNDATION_B,
-	FOUNDATION_C,
-	FOUNDATION_D
+  STOREHOUSE,
+  FOUNDATION_A,
+  FOUNDATION_B,
+  FOUNDATION_C,
+  FOUNDATION_D
 };
 
 /// @class GridTile
@@ -49,16 +49,23 @@ public:
 
   int cutTrees(int _goal_amount);
 
-	void setBuildState(float _value, TileType _type);
+  void setBuildState(float _value, TileType _type);
 
-	float getBuildState() {return m_build_state;}
+  float getBuildState() {return m_build_state;}
+
+  void addOccupant();
+
+  void removeOccupant();
+
+  int getOccupants();
 
 private:
   int m_id;
   TileType m_type = TileType::NONE;
   int m_height;
   int m_trees = 0;
-	float m_build_state;
+  float m_build_state = 0.0;
+  int m_occupants = 0;
 };
 
 

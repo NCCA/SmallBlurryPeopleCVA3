@@ -34,8 +34,9 @@ void Prefs::restoreDefaultPrefs()
   m_int_prefs["WATER_MAP_RES"] = int_pref_t(1024, IncType::POW_2);
   m_int_prefs["X_RES"] = int_pref_t(1920, IncType::X10);
   m_int_prefs["Y_RES"] = int_pref_t(1080, IncType::X10);
-	m_int_prefs["CHARACTER_BUILDING"] = int_pref_t(6, IncType::X1);
-	m_int_prefs["NUMBER_OF_CHARACTERS"] = int_pref_t(5, IncType::X1);
+  m_int_prefs["CHARACTER_BUILDING"] = int_pref_t(6, IncType::X1);
+  m_int_prefs["NUMBER_OF_CHARACTERS"] = int_pref_t(5, IncType::X1);
+  m_int_prefs["MAX_TILE_OCCUPANTS"] = int_pref_t(4, IncType::X1);
 
   //setting float values
   m_float_prefs["CHARACTER_SPEED"] = float_pref_t(0.1, IncType::X0_1);

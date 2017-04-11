@@ -240,12 +240,12 @@ void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
 
 float Grid::getBuildState(int _id)
 {
-	return m_tiles[_id].getBuildState();
+  return m_tiles[_id].getBuildState();
 }
 
 float Grid::getBuildState(int _x, int _y)
 {
-	return m_tiles[_x + m_w * _y].getBuildState();
+  return m_tiles[_x + m_w * _y].getBuildState();
 }
 
 bool Grid::hasChanges()
@@ -256,4 +256,34 @@ bool Grid::hasChanges()
 void Grid::resetHasChanges()
 {
   m_has_changes = false;
+}
+
+void Grid::addOccupant(int _id)
+{
+  m_tiles[_id].addOccupant();
+}
+
+void Grid::addOccupant(int _x, int _y)
+{
+  m_tiles[_x + m_w * _y].addOccupant();
+}
+
+void Grid::removeOccupant(int _id)
+{
+  m_tiles[_id].removeOccupant();
+}
+
+void Grid::removeOccupant(int _x, int _y)
+{
+  m_tiles[_x + m_w * _y].removeOccupant();
+}
+
+int Grid::getOccupants(int _id)
+{
+  return m_tiles[_id].getOccupants();
+}
+
+int Grid::getOccupants(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getOccupants();
 }

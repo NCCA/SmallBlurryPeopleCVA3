@@ -24,7 +24,7 @@ public:
 
   /// @brief updateScript loads the specified script and runs it to create a new map
   /// @param _script_path is the file path to the python script
-  void updateScript(std::string _script_path, int _new_w = 200, int _new_h = 200, int _new_seed = 4);
+  void updateScript(std::string _script_path, int _new_w = 20, int _new_h = 20, int _new_seed = 4);
 
   void printTrees();
   void printTypes();
@@ -43,12 +43,18 @@ public:
   bool isTileTraversable(int _id);
   int cutTileTrees(int _id, int _goal_amount);
 
-	void setTileType(int _id, TileType _type);
-	void setTileType(int _x, int _y, TileType _type);
-	void setBuildState(int _id, float _value, TileType _type);
-	void setBuildState(int _x, int _y, float _value, TileType _type);
-	float getBuildState(int _id);
-	float getBuildState(int _x, int _y);
+  void setTileType(int _id, TileType _type);
+  void setTileType(int _x, int _y, TileType _type);
+  void setBuildState(int _id, float _value, TileType _type);
+  void setBuildState(int _x, int _y, float _value, TileType _type);
+  float getBuildState(int _id);
+  float getBuildState(int _x, int _y);
+  void addOccupant(int _id);
+  void addOccupant(int _x, int _y);
+  void removeOccupant(int _id);
+  void removeOccupant(int _x, int _y);
+  int getOccupants(int _id);
+  int getOccupants(int _x, int _y);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
