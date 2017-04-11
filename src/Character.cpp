@@ -301,7 +301,7 @@ void Character::eatFishState()
 }
 
 void Character::idleState()
-{/*
+{
   if (m_called == 0)
   {
     m_idle_target_id = m_target_id;
@@ -310,10 +310,12 @@ void Character::idleState()
 
   ngl::Vec2 idle_pos = m_grid->idToCoord(m_idle_target_id);
   int dist = 5;
-
+  int max_attempts = 10;
   bool valid = false;
-  while(!valid)
+  int attempt_number = 0;
+  while(!valid && attempt_number<max_attempts)
   {
+    attempt_number++;
     int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
     int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
     int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
@@ -322,12 +324,19 @@ void Character::idleState()
     int x = Utility::randInt(x_min_range, x_max_range);
     int y = Utility::randInt(y_min_range, y_max_range);
     valid = setTarget(ngl::Vec2(x,y));
+    // if target tile is not traversable (eg if target is tree)
+    // this stops them from idly moving through trees and then getting stuck
+    if(!m_grid->isTileTraversable(m_target_id))
+    {
+      valid = false;
+      m_target_id = m_grid->coordToId(m_pos);
+    }
   }
 
-  if(m_stamina <= 1.0)
-    m_stamina+= 0.001;
+  if(m_stamina < 1.0)
+    m_stamina += 0.001;
   m_state_stack.push_back(State::MOVE);
-  m_called++;*/
+  m_called++;
 }
 
 void Character::update()
@@ -718,7 +727,6 @@ void Character::update()
     //if a character isn't active they are idle
     idleState();
   }
-  std::cout << "stamina for " << m_name << " is " << m_stamina << std::endl;
 }
 
 bool Character::move()
@@ -761,7 +769,6 @@ std::vector<ngl::Vec2> Character::findPath(int _target_id)
 {
   NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
   return network.findPath();
-
 }
 
 ngl::Vec2 Character::calcAimVec(float *dist)
