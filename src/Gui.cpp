@@ -75,6 +75,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
   case Action::PREFS_VALUE:
+  case Action::CHAR_STATE:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -176,6 +177,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
     }
     m_text_outdated = true;
     break;
+  case Action::SAVE_PREFERENCES:
+    command.reset(new SavePreferencesCommand);
+    break;
   }
   return command;
 }
@@ -249,8 +253,12 @@ void Gui::createSceneButtons()
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "F");
-  addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 100), ngl::Vec2(130, 40), m_scene->getActiveCharacterName());
-  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(150, 100), ngl::Vec2(40, 40), TEXT_SMILEY);
+  addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 110), ngl::Vec2(140, 40), m_scene->getActiveCharacterName());
+  addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
+  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), TEXT_SMILEY);
+
+  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 180), ngl::Vec2(190, 20), "");
+
   updateButtonArrays();
 }
 
@@ -269,6 +277,7 @@ void Gui::createPrefsButtons()
   float y0 = 10;
   float y_pos = 10;
   float x_pos = 10;
+  int num_prefs = prefs->getNumChangeablePrefs();
   std::string name = "";
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
@@ -297,6 +306,10 @@ void Gui::createPrefsButtons()
     addButton(Action::PREFS_VALUE, XAlignment::LEFT, YAlignment::TOP, ngl::Vec2(x_pos + 210, y_pos), ngl::Vec2(100,40), name);
     y_pos += 50;
   }
+  std::string save_prefs("SAVE PREFERENCES");
+  addButton(Action::SAVE_PREFERENCES, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 60), ngl::Vec2(getButtonLength(save_prefs), 40), save_prefs);
+  std::string prefs_warning("You will need to SAVE PREFERENCES and restart the game for some settings to take effect");
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0,10), ngl::Vec2(getButtonLength(prefs_warning), 40), prefs_warning);
 
   updateButtonArrays();
 }
@@ -462,6 +475,18 @@ void Gui::drawButtons()
 
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
+
+  Character *character = m_scene->getActiveCharacter();
+  if(character)
+  {
+    slib->setRegisteredUniform("character_state", (int)character->getState());
+    slib->setRegisteredUniform("character_stamina", character->getStamina());
+  }
+  else
+  {
+    slib->setRegisteredUniform("character_state", -1);
+    slib->setRegisteredUniform("character_stamina", 0.0f);
+  }
   if(m_mouse_down)
   {
     slib->setRegisteredUniform("mouseOver", -1);
@@ -540,7 +565,7 @@ void Gui::updateText()
     // add a 0 value for break
     button_text.push_back(0);
   }
-
+  std::cout << "button text size: " << button_text.size() << std::endl;
   if(button_text.size() > BUTTON_TEXT_LENGTH)
   {
     std::cerr << "button text of size " << button_text.size() << " too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;
@@ -611,7 +636,7 @@ void Gui::moveNotifications(ngl::Vec2 _move_vec)
 
 int Gui::getButtonLength(const std::string &_text)
 {
-  return std::max(_text.length() * (FONT_SIZE+4) * FONT_SPACE, 40.0f);
+  return std::max((_text.length()+2) * (FONT_SIZE) * FONT_SPACE, 40.0f);
 }
 
 void Gui::scrollButton(int _dir)

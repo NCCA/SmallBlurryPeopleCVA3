@@ -141,3 +141,15 @@ void CentreNotificationCommand::execute()
 {
   m_scene->focusCamToGridPos(m_map_pos);
 }
+
+//------------------------------------------------------------//
+// Save Preferences Command
+//------------------------------------------------------------//
+
+SavePreferencesCommand::SavePreferencesCommand()
+{}
+
+void SavePreferencesCommand::execute()
+{
+  Prefs::instance()->savePrefs();
+}

@@ -15,7 +15,7 @@
 /// \brief The character refers to the grid for pathfinding and keeps track of a target
 /// for pathfinding. It is responsible for updating itself.
 
-enum class State
+enum State
 {
 	CHOP_WOOD,
 	STORE,
@@ -158,6 +158,16 @@ public:
 	/// \return m_colour, character's colour
 	///
 	ngl::Vec3 getColour() {return m_colour;}
+	///
+	/// \brief getState get character's current state
+	/// \return character's current state
+	///
+	State getState();
+	///
+	/// \brief getStamina get character's stamina
+	/// \return character's stamina value
+	///
+	float getStamina() {return m_stamina;}
 	///
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position

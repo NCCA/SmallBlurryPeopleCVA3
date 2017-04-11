@@ -9,7 +9,7 @@
 #include "Commands.hpp"
 #include "Scene.hpp"
 
-constexpr unsigned int BUTTON_TEXT_LENGTH = 256;
+constexpr unsigned int BUTTON_TEXT_LENGTH = 2048;
 
 ///
 /// \brief The Gui class contains button positions and managing their use

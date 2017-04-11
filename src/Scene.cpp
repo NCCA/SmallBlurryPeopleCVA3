@@ -751,6 +751,12 @@ void Scene::draw()
     slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
     slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
     slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+    slib->setRegisteredUniform( "iP", m_cam.getP().inverse() );
+    slib->setRegisteredUniform( "iMV", m_cam.getV().inverse() );
+
+    //Draw god rays here.
+    //To-do: Add preference bool to control drawing of god rays.
+    slib->setRegisteredUniform( "drawGodRays", true);
 
     slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
     for( size_t i = 0; i < cascadeDistances.size(); ++i )

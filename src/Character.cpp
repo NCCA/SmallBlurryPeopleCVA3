@@ -536,7 +536,7 @@ void Character::update()
 					//set final destination as the new target for the character
 					m_target_id = m_dest_target_id;
 					m_path = findPath(m_target_id);
-					//setTarget(m_target_id);
+					//setTarget(m_target_id);/////////// DOESNT WORK FOR SOME REASON??///////////////
 					//remove state from stack
 					completedAction();
 				}
@@ -564,11 +564,11 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 1000)
 				{
-					//character has berries in inventory
+					//character has fish in inventory
 					m_inventory = CharInventory::FISH;
 					generalMessage(" collected a fish", m_pos);
 
-					//take berries from universal storage
+					//take fish from universal storage
 					m_world_inventory->takeFish(1);
 					findNearestEmptyTile();
 					//remove state from stack
@@ -617,8 +617,10 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 3000)
 				{
+					//take berries away from inventory
 					m_inventory = CharInventory::NONE;
 
+					//add onto stamina
 					m_stamina += 0.2;
 					if (m_stamina >= 1.0)
 						m_stamina = 1.0;
@@ -633,8 +635,10 @@ void Character::update()
 			{
 				if(m_timer.elapsed() >= 3000)
 				{
+					//take fish from inventory
 					m_inventory = CharInventory::NONE;
 
+					//add onto stamina
 					m_stamina += 0.5;
 					if (m_stamina >= 1.0)
 						m_stamina = 1.0;
@@ -829,6 +833,7 @@ bool Character::findNearestStorage()
 	//sort vector based on distance from character's position
 	distanceSort(0, storage_houses.size()-1, storage_houses);
 
+	//set the storehouse with the shortest path as the target
 	if(	findNearest(storage_houses) == true)
 		return true;
 	else
@@ -858,6 +863,7 @@ bool Character::findNearestEmptyTile()
   if(m_grid->getTileType(target[0], target[1]-1) == TileType::NONE)
     neighbours.push_back(ngl::Vec2(target[0], target[1]-1));
 
+	//find tile with the shortest distance to the character's current position
 	if(findNearest(neighbours) == true)
 		return true;
 	else
@@ -872,11 +878,14 @@ bool Character::findNearestFishingTile()
 {
   ngl::Vec2 selection = m_grid->idToCoord(m_target_id);
 
+	//set of tiles that make the edge of the body of water
   std::set<int> edge_tile_ids;
+	//set of tiles that make up the body of water
   std::set<int> water_tile_ids;
 
   waterFloodfill(selection, edge_tile_ids, water_tile_ids);
 
+	//create a vector of vec2's from the set
   std::vector<ngl::Vec2> edge_vector;
   for (auto edge: edge_tile_ids)
   {
@@ -1090,6 +1099,7 @@ void Character::resetCharacter()
 
 void Character::staminaMessage()
 {
+	//message printed when the character doesnt have enough stamina to perform an action
 	std::string message = m_name + " doesn't have enough stamina";
 	Gui::instance()->notify(message, m_pos);
 	m_state_stack.clear();
@@ -1102,7 +1112,14 @@ void Character::generalMessage(std::string _print, int _id)
 
 void Character::generalMessage(std::string _print, ngl::Vec2 _coord)
 {
+	//general message using the character's name
 	std::string message = m_name + _print;
 	Gui::instance()->notify(message, _coord);
 }
 
+State Character::getState()
+{
+	// fix to return the current state
+	// might need safeguards if state stack is empty i dunno
+	return State::IDLE;
+}
