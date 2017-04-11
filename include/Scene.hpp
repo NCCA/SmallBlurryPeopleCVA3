@@ -9,6 +9,7 @@
 #include "Grid.hpp"
 #include "Camera.hpp"
 #include "Character.hpp"
+#include "Baddie.hpp"
 #include "Inventory.hpp"
 #include "IVal.hpp"
 #include "Light.hpp"
@@ -180,6 +181,10 @@ private:
     std::vector<std::string> m_file_names;
     /// @brief Vector of character objects that have been created
     std::vector<Character> m_characters;
+    ///
+    /// \brief m_baddies vector of baddie objects
+    ///
+    std::vector<Baddie> m_baddies;
 
     ///
     /// \brief m_active_char_id id used to keep track of active character, more stable than using addresses

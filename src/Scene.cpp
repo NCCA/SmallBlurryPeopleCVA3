@@ -96,6 +96,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
         createCharacter();
     }
 
+    m_baddies.push_back(Baddie(&m_grid));
+
     initialiseFramebuffers();
 
     m_shadowMat.assign(3, ngl::Mat4());
@@ -438,6 +440,11 @@ void Scene::update()
 				 Gui::instance()->updateActiveCharacter();
 			 }
 		 }
+
+		for(Baddie &baddie : m_baddies)
+		{
+			baddie.update();
+		}
 
 
     //m_sunAngle.m_x = 150.0f;
@@ -1100,6 +1107,16 @@ void Scene::drawMeshes()
 					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
 					drawAsset( "person", "", "colour");
 			}
+    }
+    for(Baddie &baddie : m_baddies)
+    {
+      ngl::Vec3 pos = baddie.getPos();
+      pos.m_y /= m_terrainHeightDivider;
+      m_transform.setPosition(pos);
+      m_transform.setScale(2.0f, 2.0f, 2.0f);
+      slib->use("colour");
+      slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+      drawAsset("person", "", "colour");
     }
 }
 
@@ -2363,7 +2380,8 @@ GameState Scene::getState()
 void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 {
     std::cout << "moved camera" << std::endl;
-    m_cam.setPos(ngl::Vec3(_pos.m_x, 0, _pos.m_y));
+    // negative values needed?
+    m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()

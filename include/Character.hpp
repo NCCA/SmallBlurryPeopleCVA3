@@ -118,12 +118,9 @@ public:
   void update();
   ///
 	/// \brief move, moves character along its path
+	/// \return true if gets to target
   ///
-	bool move();
-  ///
-	/// \brief draw, draws character with openGL
-  ///
-  void draw();
+  bool move();
   ///
 	/// \brief findPath, pathfinding function to get nodes for pathfinding
   ///

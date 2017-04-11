@@ -19,6 +19,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Framebuffer.cpp \
          $$PWD/src/Gui.cpp \
          $$PWD/src/Button.cpp \
+         $$PWD/src/Baddie.cpp \
          $$PWD/src/Utility.cpp \
          $$PWD/src/Commands.cpp \
          $$PWD/src/Prefs.cpp \
@@ -40,6 +41,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Framebuffer.hpp \
          $$PWD/include/Gui.hpp \
          $$PWD/include/Button.hpp \
+         $$PWD/include/Baddie.hpp \
          $$PWD/include/Utility.hpp \
          $$PWD/include/Commands.hpp \
          $$PWD/include/Prefs.hpp \
