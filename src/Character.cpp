@@ -735,7 +735,7 @@ bool Character::move()
   if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
   {
     // if character can see point after next, remove the next point so character heads directly to the furtherst one they can see
-    // done on a one by one basis so it does all happen in the same frame as pathfinding, not super slow that way but marginally better this way
+    // done on a one by one basis so it does all happen in the same frame as pathfinding, wouldn't be super slow that way but marginally better this way
     m_path.pop_back();
   }
 
@@ -758,6 +758,8 @@ bool Character::move()
     m_pos += aim_vec;
   }
 
+
+  updateRot();
   if(m_path.size() <= 0)
   {
     return true;
@@ -1108,6 +1110,15 @@ ngl::Vec3 Character::getPos()
   //get grid height at character's position
   float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
+}
+
+void Character::updateRot()
+{
+  if(m_path.size() > 0)
+  {
+    ngl::Vec2 dir = m_path.back() - m_pos;
+    m_rot = atan2(dir.m_x, dir.m_y);
+  }
 }
 
 void Character::resetCharacter()

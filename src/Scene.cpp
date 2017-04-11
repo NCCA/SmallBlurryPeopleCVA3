@@ -1099,13 +1099,14 @@ void Scene::drawMeshes()
         offset += instances;
     }
 
-    for(auto &character : m_characters)
+    for(Character &character : m_characters)
     {
 			if(character.isSleeping() == false)
 			{
 					ngl::Vec3 pos = character.getPos();
 					pos.m_y /= m_terrainHeightDivider;
 					m_transform.setPosition(pos);
+					m_transform.setRotation(0, Utility::degrees(character.getRot()), 0);
 					slib->use("colour");
 					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
 					drawAsset( "person", "", "colour");

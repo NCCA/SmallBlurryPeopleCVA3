@@ -171,6 +171,15 @@ public:
 	///
 	ngl::Vec3 getPos();
 	///
+	/// \brief updateRot update m_rot, eg if direction has changed
+	///
+	void updateRot();
+	///
+	/// \brief getRot return rotation of character
+	/// \return m_rot
+	///
+	float getRot() {return m_rot;}
+	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
 	///
@@ -226,6 +235,10 @@ private:
 	/// \brief m_pos, character position
   ///
 	ngl::Vec2 m_pos;
+	///
+	/// \brief m_rot character's rotation to face current direction
+	///
+	float m_rot;
   ///
 	/// \brief m_target_id, id of target tile on grid
   ///
