@@ -527,6 +527,8 @@ void Scene::update()
 
 void Scene::draw()
 {
+  if(m_game_started)
+  {
     //---------------------------//
     //           SETUP           //
     //---------------------------//
@@ -948,6 +950,7 @@ void Scene::draw()
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+  }
 
     //---------------------------//
     //          BUTTONS          //
