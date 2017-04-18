@@ -139,6 +139,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("rock", "terrain/rock.png");
     store->loadTexture("snow", "terrain/snow.png");
 
+		store->loadMesh("tombstone", "tombstone/tombstone.obj");
+		store->loadTexture("tombstone_d", "tombstone/tombstone_diff.tif");
+
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
 
@@ -435,10 +438,32 @@ void Scene::update()
       character.update();
 			if (character.isSleeping() && character.getID() == m_active_char_id)
 			{
-				 std::cout<<"sleeping"<<std::endl;
+				//check if character is sleeping, if it is, dont make it the active character
 				 m_active_char_id = -1;
 				 Gui::instance()->updateActiveCharacter();
 			 }
+			else if (character.getHealth() <= 0.0)
+			{
+				std::string message = character.getName() + " has died!";
+				ngl::Vec2 pos = {character.getPos()[0], character.getPos()[2]};
+				Gui::instance()->notify(message, pos );
+				//check if character has health, if it doesn't remove the character
+				if (m_active_char_id == character.getID())
+				{
+					m_active_char_id = -1;
+					Gui::instance()->updateActiveCharacter();
+				}
+				//ID's start from 1 so negate 1 to get index in vector m_characters
+				int index = (character.getID() - 1);
+				//add name back to available list
+				m_file_names.push_back(character.getName());
+				//add position to tombstone positions
+				ngl::Vec3 stone_pos(character.getPos());
+				stone_pos.m_y /= m_terrainHeightDivider;
+				m_tombstones.push_back(stone_pos);
+				//remove character from vector
+				m_characters.erase(m_characters.begin() + index);
+			}
 		 }
 
 		for(Baddie &baddie : m_baddies)
@@ -1076,7 +1101,7 @@ void Scene::drawMeshes()
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
 						drawInstances( "house", "house_d", "diffuse", instances, offset);
@@ -1109,9 +1134,16 @@ void Scene::drawMeshes()
 					m_transform.setRotation(0, character.getRot(), 0);
 					slib->use("colour");
 					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-					drawAsset( "person", "", "colour");
+					drawAsset("person", "", "colour");
 			}
     }
+
+		for(auto &stone : m_tombstones)
+		{
+			m_transform.setPosition(stone);
+			drawAsset( "tombstone", "tombstone_d", "diffuse");
+		}
+
     for(Baddie &baddie : m_baddies)
     {
       ngl::Vec3 pos = baddie.getPos();
@@ -1150,7 +1182,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
                 drawAsset( "mountain", "mountain_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuse" );
+								drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::HOUSE):
 								drawAsset( "house", "house_d", "diffuse");
@@ -1179,11 +1211,18 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         ngl::Vec3 pos = character.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
+				m_transform.setRotation(0, character.getRot(), 0);
         slib->use("colour");
         slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset( "person", "", "colour");
+				drawAsset( "person", "", "colour");
 			}
     }
+
+		for(auto &stone : m_tombstones)
+		{
+				m_transform.setPosition(stone);
+				drawAsset( "tombstone", "tombstone_d", "diffuse");
+		}
 }
 
 void Scene::quit()
@@ -1387,7 +1426,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
+						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::HOUSE):
 						drawInstances( "house", "house_d", "diffuse", instances, offset, m_shadowMat[_index] );
@@ -1418,6 +1457,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         ngl::Vec3 pos = character.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
+				m_transform.setRotation(0, character.getRot(), 0);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = store->getModel( "person" );
@@ -1425,6 +1465,16 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         k->draw();
 			}
     }
+
+		for(auto &stone : m_tombstones)
+		{
+				m_transform.setPosition(stone);
+				ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+
+				ngl::Obj * k = store->getModel( "tombstone" );
+				loadMatricesToShader( m_transform.getMatrix(), mvp );
+				k->draw();
+		}
 
 
     //Tweaking the shadow matrix so that it can be used for shading.

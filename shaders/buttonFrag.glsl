@@ -38,17 +38,26 @@ const uint STATE_PAUSE = 1;
 const uint STATE_PREFS = 2;
 
 // character states
-const int CHOP_WOOD = 0;
-const int STORE     = 1;
-const int FISH      = 2;
-const int FORAGE    = 3;
-const int COLLECT   = 4;
-const int GET_WOOD  = 5;
-const int BUILD     = 6;
-const int SLEEP     = 7;
-const int MOVE      = 8;
-const int REPEAT    = 9;
-const int IDLE      = 10;
+const int CHOP_WOOD      = 0;
+const int STORE          = 1;
+const int FISH           = 2;
+const int FORAGE         = 3;
+//not needed as done too fast to read message
+/*
+const int CHECK_WOOD     = 4;
+const int CHECK_BERRIES  = 5;
+const int CHECK_FISH     = 6;
+const int REPEAT         = 15;
+*/
+const int GET_WOOD       = 7;
+const int GET_BERRIES    = 8;
+const int GET_FISH       = 9;
+const int BUILD          = 10;
+const int SLEEP          = 11;
+const int EAT_BERRIES    = 12;
+const int EAT_FISH       = 13;
+const int MOVE           = 14;
+const int IDLE           = 16;
 
 // character exceptions
 const int TEXT_CROSS = 32;
@@ -224,16 +233,21 @@ float charStateText(vec2 tp)
     tp = translate(tp, vec2(-8.0/4.0, 0.0));
     _F _o _r _a _g _i _n _g
   }
-  else if(character_state == COLLECT)
-  {
-    tp = translate(tp, vec2(-10.0/4.0, 0.0));
-    _C _o _l _l _e _c _t _i _n _g
-  }
   else if(character_state == GET_WOOD)
   {
     tp = translate(tp, vec2(-12.0/4.0, 0.0));
     _G _e _t _t _i _n _g __ _w _o _o _d
   }
+	else if(character_state == GET_BERRIES)
+	{
+		tp = translate(tp, vec2(-15.0/4.0, 0.0));
+		_G _e _t _t _i _n _g __ _b _e _r _r _i _e _s
+	}
+	else if(character_state == GET_FISH)
+	{
+		tp = translate(tp, vec2(-12.0/4.0, 0.0));
+		_G _e _t _t _i _n _g __ _f _i _s _h
+	}
   else if(character_state == BUILD)
   {
     tp = translate(tp, vec2(-8.0/4.0, 0.0));
@@ -244,21 +258,32 @@ float charStateText(vec2 tp)
     tp = translate(tp, vec2(-8.0/4.0, 0.0));
     _S _l _e _e _p _i _n _g
   }
+	else if(character_state == EAT_BERRIES)
+	{
+		tp = translate(tp, vec2(-17.0/4.0, 0.0));
+		_E _a _t _i _n _g __ _b _e _r _r _i _e _s
+	}
+	else if(character_state == EAT_FISH)
+	{
+		tp = translate(tp, vec2(-14.0/4.0, 0.0));
+		_E _a _t _i _n _g __ _f _i _s _h
+	}
   else if(character_state == MOVE)
   {
     tp = translate(tp, vec2(-10.0/4.0, 0.0));
     _T _r _a _v _e _l _l _i _n _g
   }
-  else if(character_state == REPEAT)
-  {
-    tp = translate(tp, vec2(-9.0/4.0, 0.0));
-    _R _e _p _e _a _t _i _n _g
-  }
-  else if(character_state == IDLE)
+/*  else if(character_state == IDLE)
   {
     tp = translate(tp, vec2(-4.0/4.0, 0.0));
     _I _d _l _e
   }
+	*/
+	else if(character_state == IDLE)
+	{
+		tp = translate(tp, vec2(1.0/4.0, 0.0));
+		__
+	}
   return c;
 }
 

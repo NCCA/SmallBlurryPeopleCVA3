@@ -177,10 +177,16 @@ private:
     Grid m_grid;
     Inventory m_world_inventory;
 
-    /// @brief Vector of available names for characters
+		/// @brief m_file_names, vector of available names for characters
     std::vector<std::string> m_file_names;
-    /// @brief Vector of character objects that have been created
+		///
+		/// @brief m_character, vector of characters that have been created
+		///
     std::vector<Character> m_characters;
+		///
+		/// \brief m_tombstones, vector of positions for tombstones
+		///
+		std::vector<ngl::Vec3> m_tombstones;
     ///
     /// \brief m_baddies vector of baddie objects
     ///
