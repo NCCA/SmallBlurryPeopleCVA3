@@ -18,6 +18,7 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_id(m_id_counter++),
   m_name(_name),
   m_stamina(1.0),
+	m_health(1.0),
   m_active(false),
   m_sleeping(false),
   m_idle(true),
@@ -80,7 +81,6 @@ void Character::setState(int _target_id)
   if(setTarget(_target_id) || m_grid->getTileType(_target_id)== TileType::WATER)
   {
     m_target_id = _target_id;
-
     m_called = 0;
 
     //create different state stacks depending on grid tile clicked on
@@ -381,8 +381,11 @@ void Character::idleState()
 void Character::update()
 {
   std::string message;
-  /***** CHECK AMOUNT *****/
-  m_hunger -= 0.001;
+	if(m_timer.elapsed() >= 1000)
+	{
+		/***** REMOVE HEALTH, FOR CHECKING *****/
+		m_health -= 0.001 * m_id;
+	}
   //check if states are still in stack
   if(m_state_stack.size() > 0)
   {
@@ -673,9 +676,9 @@ void Character::update()
           m_inventory = CharInventory::NONE;
 
           //add onto stamina
-          m_hunger += 0.2;
-          if (m_hunger >= 1.0)
-            m_hunger = 1.0;
+					m_health += 0.2;
+					if (m_health >= 1.0)
+						m_health = 1.0;
 
           generalMessage(" ate berries", m_pos);
           completedAction();
@@ -691,9 +694,9 @@ void Character::update()
           m_inventory = CharInventory::NONE;
 
           //add onto stamina
-          m_hunger += 0.5;
-          if (m_hunger >= 1.0)
-            m_hunger = 1.0;
+					m_health += 0.5;
+					if (m_health >= 1.0)
+						m_health = 1.0;
 
           generalMessage(" ate a fish", m_pos);
           completedAction();
@@ -720,8 +723,8 @@ void Character::update()
 
       case(State::IDLE):
       {
-        //character doesnt move after an action for 3 seconds
-        if(m_timer.elapsed() >= 3000)
+				//character doesnt move after an action for a second
+				if(m_timer.elapsed() >= 1000)
         {
           //remove state from stack
           completedAction();
@@ -868,11 +871,6 @@ bool Character::setTarget(int _tile_id)
     else
       return false;
   }
-  else
-  {
-    Gui::instance()->notify("There are too many people there :(", m_grid->idToCoord(_tile_id));
-    return false;
-  }
   else if (m_idle)
   {
       //if the chosen tile isnt equal to the target and isnt equal to the character's pos
@@ -889,6 +887,11 @@ bool Character::setTarget(int _tile_id)
       else
         return false;
   }
+	else
+	{
+		Gui::instance()->notify("There are too many people there :(", m_grid->idToCoord(_tile_id));
+		return false;
+	}
 }
 
 bool Character::findNearestStorage()
@@ -1227,10 +1230,14 @@ void Character::generalMessage(std::string _print, ngl::Vec2 _coord)
 
 State Character::getState()
 {
-  // fix to return the current state
-  // might need safeguards if state stack is empty i dunno
+	//return the character's current state
   if (!m_idle)
+	{
+		if(m_state_stack.size() == 0)
+			return State::IDLE;
+		else
       return m_state_stack[0];
+	}
   else
     return State::IDLE;
 }

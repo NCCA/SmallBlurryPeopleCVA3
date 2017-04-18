@@ -21,9 +21,9 @@ enum State
 	STORE,
 	FISH,
 	FORAGE,
-    CHECK_WOOD,
-    CHECK_BERRIES,
-    CHECK_FISH,
+	CHECK_WOOD,
+	CHECK_BERRIES,
+	CHECK_FISH,
 	GET_WOOD,
 	GET_BERRIES,
 	GET_FISH,
@@ -33,7 +33,8 @@ enum State
 	EAT_FISH,
 	MOVE,
 	REPEAT,
-    IDLE
+	IDLE
+
 };
 
 enum class CharInventory
@@ -50,19 +51,14 @@ class Character
 {
 public:
 	///
-	/// \brief ctor, sets reference to grid and initialised values
-	/// \param [in] _grid, pointer to the grid to reference for pathfinding
-	///
-  Character(Grid *_grid);
-	///
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
 	///
 	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
 	///
-	/// \brief default destructor
+	/// \brief destructor
 	///
-    ~Character() = default;
+	~Character() = default;
 	///
 	/// \brief setState, creates state stack for the character to execute
 	///
@@ -115,30 +111,30 @@ public:
 	///
 	/// \brief update, updates character based on its current state
 	///
-    void update();
-     ///
+	void update();
+	///
 	/// \brief move, moves character along its path
 	/// \return true if gets to target
-    ///
-    bool move();
-    ///
+	///
+	bool move();
+	///
 	/// \brief findPath, pathfinding function to get nodes for pathfinding
-    ///
+	///
 	std::vector<ngl::Vec2> findPath(int _target_id);
-    ///
+	///
 	/// \brief calcAimVec, calculate vector towards next point
 	/// \return
-    ///
-    ngl::Vec2 calcAimVec(float *dist_squared);
-    ///
+	///
+	ngl::Vec2 calcAimVec(float *dist_squared);
+	///
 	/// \brief setTarget, set a new target position based on a position
 	/// \param _target_pos, the position to pathfind to
-    ///
+	///
 	bool setTarget(ngl::Vec2 _target_pos);
-    ///
+	///
 	/// \brief setTarget, set a new target based on the grid tile id
 	/// \param _tile_id, the tile id to pathfind to
-    ///
+	///
 	bool setTarget(int _tile_id);
 	///
 	/// \brief getID, get the unique character id
@@ -165,11 +161,16 @@ public:
 	/// \return character's stamina value
 	///
 	float getStamina() {return m_stamina;}
-    ///
-    /// \brief getHunger, get character's hunger
-    /// \return character's hunger value
-    ///
-    float getHunger() {return m_hunger;}
+	///
+	/// \brief gethealth, get character's health
+	/// \return character's health value
+	///
+	float getHealth() {return m_health;}
+	///
+	/// \brief takeHealth, take health away from a character
+	/// \param m_amount, amount of health to take away
+	///
+	void takeHealth(float m_amount) {m_health -= m_amount;}
 	///
 	/// \brief getPos, get character's position
 	/// \return m_pos, character's position
@@ -196,23 +197,24 @@ public:
 	bool isActive() {return m_active;}
 	///
 	/// \brief isSleeping, returns whether the character is sleeping
-    /// \return m_sleeping, the boolean stored in the character determining if it is sleeping or not
+	/// \return m_sleeping, the boolean stored in the character determining if it is sleeping or not
 	///
 	bool isSleeping() {return m_sleeping;}
-    ///
-    /// \brief isIdle, returns whether the character is idle
-    /// \return m_idle, the boolean stored in the character determining if it is idle or not
-    ///
-    bool isIdle() {return m_idle;}
+	///
+	/// \brief isIdle, returns whether the character is idle
+	/// \return m_idle, the boolean stored in the character determining if it is idle or not
+	///
+	bool isIdle() {return m_idle;}
+
 private:
 	///
-	/// \brief m_id_counter, counts how many objects have been created
+	/// \brief m_id_counter, counts how many characters have been created
 	///
 	static int m_id_counter;
 	///
-	/// \brief m_id, current object's id
+	/// \brief m_id, current character's id
 	///
-	const int m_id;
+	int m_id;
 	///
 	/// @brief m_name, current character's name
 	///
@@ -225,10 +227,10 @@ private:
 	/// \brief m_stamina, how much stamina the character has
 	///
 	float m_stamina;
-    ///
-    /// \brief m_hunger, how hungry the character is: 1 = no hunger, 0 = very hungry/dead
-    ///
-    float m_hunger;
+	///
+	/// \brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
+	///
+	float m_health;
 	///
 	/// @brief m_active, sets if the current character is selected
 	///
@@ -240,7 +242,7 @@ private:
 	///
 	/// \brief m_grid, grid pointer to reference for pathfinding
 	///
-    Grid *m_grid;
+	Grid *m_grid;
 	///
 	/// \brief m_world_inventory, inventory in store houses around the map
 	///
@@ -253,10 +255,10 @@ private:
 	/// \brief m_rot character's rotation to face current direction (degrees)
 	///
 	float m_rot;
-    ///
+	///
 	/// \brief m_target_id, id of target tile on grid
-    ///
-    int m_target_id;
+	///
+	int m_target_id;
 	///
 	/// \brief m_dest_target_id, id of character's final destination or reoccuring destination
 	///
@@ -265,13 +267,13 @@ private:
 	/// \brief m_building_tile, tile to build on
 	///
 	int m_building_tile;
-    ///
+	///
 	/// \brief m_speed, max speed of character
-    ///
-    float m_speed;
-    ///
+	///
+	float m_speed;
+	///
 	/// \brief m_path, vector of target positions for movement
-    ///
+	///
 	std::vector<ngl::Vec2> m_path;
 	///
 	/// \brief m_timer, timer for characters actions such as chopping wood and building
@@ -313,10 +315,10 @@ private:
 	/// \brief m_idle_target_id, grid id that the character moves around while idle
 	///
 	int m_idle_target_id;
-    ///
-    /// \brief m_idle, set when character is idle, for checking if idle
-    ///
-    bool m_idle;
+	///
+	/// \brief m_idle, set when character is idle, for checking if idle
+	///
+	bool m_idle;
 	///
 	/// \brief m_building_amount, how many times it takes to build a house or storage house
 	///
