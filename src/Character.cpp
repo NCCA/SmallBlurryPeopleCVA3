@@ -381,11 +381,13 @@ void Character::idleState()
 void Character::update()
 {
   std::string message;
+	/***** REMOVE HEALTH, FOR CHECKING *****/
+	/*
 	if(m_timer.elapsed() >= 1000)
 	{
-		/***** REMOVE HEALTH, FOR CHECKING *****/
 		m_health -= 0.001 * m_id;
 	}
+	*/
   //check if states are still in stack
   if(m_state_stack.size() > 0)
   {
