@@ -218,7 +218,6 @@ void Character::forageState()
 
     //find nearby tree
     if(findNearestTree())
-    //if(findNearestEmptyTile())
     {
       //random number of berries collected based on foraging skill
       int berry_amount = m_forage_amount + Utility::randInt(0, 2);
