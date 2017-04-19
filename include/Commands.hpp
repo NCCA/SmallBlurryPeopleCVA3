@@ -36,7 +36,8 @@ enum class Action
   SAVE_PREFERENCES,  // 24
   CHAR_STATE,        // 25
   /// NEED TO PUT DIFFERENT BARS IN HERE, HEALTH? FATIGUE? HAPPINESS?
-  STAMINA_BAR        // 26
+  STAMINA_BAR,       // 26
+  HEALTH_BAR         // 27
 };
 
 ///

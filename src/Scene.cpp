@@ -552,15 +552,15 @@ void Scene::update()
 
 void Scene::draw()
 {
+  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+  glClearColor(0.0,0.0,0.0,0.0);
+
   if(m_game_started)
   {
     //---------------------------//
     //           SETUP           //
     //---------------------------//
     m_debugPoints.clear();
-
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-    glClearColor(0.0,0.0,0.0,0.0);
 
     m_transform.reset();
     glEnable(GL_DEPTH_TEST);
@@ -975,6 +975,10 @@ void Scene::draw()
 
     glBindVertexArray(m_screenQuad);
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+  }
+  else
+  {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
     //---------------------------//

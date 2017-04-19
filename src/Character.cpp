@@ -18,7 +18,7 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_id(m_id_counter++),
   m_name(_name),
   m_stamina(1.0),
-	m_health(1.0),
+  m_health(1.0),
   m_active(false),
   m_sleeping(false),
   m_idle(true),

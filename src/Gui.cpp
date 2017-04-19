@@ -12,7 +12,7 @@ constexpr char TEXT_SMILEY[2] = {29,0};
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
 
-constexpr int MAX_AGE = 500;
+constexpr int MAX_AGE = 300;
 constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
@@ -77,6 +77,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::PREFS_VALUE:
   case Action::CHAR_STATE:
   case Action::STAMINA_BAR:
+  case Action::HEALTH_BAR:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -258,8 +259,8 @@ void Gui::createSceneButtons()
   addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
   addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), TEXT_SMILEY);
 
-  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 180), ngl::Vec2(190, 20), "");
-
+  addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 190), ngl::Vec2(190, 20), "");
+  addButton(Action::HEALTH_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 160), ngl::Vec2(190, 20), "");
   updateButtonArrays();
 }
 
@@ -480,13 +481,19 @@ void Gui::drawButtons()
   Character *character = m_scene->getActiveCharacter();
   if(character)
   {
+    slib->setRegisteredUniform("character_selected", true);
     slib->setRegisteredUniform("character_state", (int)character->getState());
     slib->setRegisteredUniform("character_stamina", character->getStamina());
+    slib->setRegisteredUniform("character_health", character->getHealth());
+    slib->setRegisteredUniform("character_color", character->getColour());
   }
   else
   {
+    slib->setRegisteredUniform("character_selected", false);
     slib->setRegisteredUniform("character_state", -1);
     slib->setRegisteredUniform("character_stamina", 1.0f);
+    slib->setRegisteredUniform("character_health", 1.0f);
+    slib->setRegisteredUniform("character_color", ngl::Vec3(0.7, 0.1, 0.0));
   }
   if(m_mouse_down)
   {

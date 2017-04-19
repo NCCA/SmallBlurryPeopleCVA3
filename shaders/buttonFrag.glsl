@@ -31,6 +31,7 @@ const uint DECR_PREFS        = 23;
 const uint SAVE_PREFERENCES  = 24;
 const uint CHAR_STATE        = 25;
 const uint STAMINA_BAR       = 26;
+const uint HEALTH_BAR        = 27;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -69,9 +70,14 @@ vec3 charStateText(vec3);
 vec3 text(vec2 pos, int start_index, int end_index);
 vec3 centerText();
 vec3 staminaText();
+vec3 healthText();
 float box(vec2 position, vec2 size, float radius);
-vec2 translate(vec2 p, vec2 t);
+vec2 translate(vec2 nglp, vec2 t);
 vec3 getIcon(vec2 pixel_uv);
+float loadingBar(float value, float uv_x);
+vec3 shiftRGB(vec3 c, int up_down);
+bool buttonRequiresCharacter();
+bool buttonUsesCharacterColor();
 
 layout(location = 0) out vec4 outColour;
 
@@ -85,8 +91,11 @@ uniform int max_notification_age;
 
 uniform uint button_text[BUTTON_TEXT_LENGTH];
 
+uniform bool character_selected;
 uniform int character_state;
 uniform float character_stamina;
+uniform float character_health;
+uniform vec3 character_color;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -100,8 +109,7 @@ flat in int fragId;
 const float border_size = 7;
 const vec3 border_color = vec3(1,1,0);
 const vec3 button_selected = vec3(0.1, 0.2, 0.2);
-vec3 button_color = vec3(0.7, 0.1, 0.0);
-vec3 button_highlight = vec3(0.9, 0.7, 0.4);
+vec3 def_button_color = vec3(0.7, 0.1, 0.0);
 
 //---------------------------------------------------------
 // text functions modified from
@@ -273,17 +281,17 @@ float charStateText(vec2 tp)
     tp = translate(tp, vec2(-10.0/4.0, 0.0));
     _T _r _a _v _e _l _l _i _n _g
   }
-/*  else if(character_state == IDLE)
+  else if(character_state == IDLE)
   {
     tp = translate(tp, vec2(-4.0/4.0, 0.0));
     _I _d _l _e
   }
-	*/
+  /*
 	else if(character_state == IDLE)
 	{
 		tp = translate(tp, vec2(1.0/4.0, 0.0));
 		__
-	}
+  }*/
   return c;
 }
 
@@ -373,9 +381,20 @@ vec3 staminaText()
   float c = 0;
   vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
   vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
-  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-7.0/8.0, 0.0));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
   //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
   _s _t _a _m _i _n _a
+  return vec3(max(c, 0.0));
+}
+
+vec3 healthText()
+{
+  float c = 0;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
+  //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
+  _h _e _a _l _t _h
   return vec3(max(c, 0.0));
 }
 
@@ -402,6 +421,53 @@ vec3 getIcon(vec2 pixel_uv)
   return s;
 }
 
+float loadingBar(float value, float uv_x)
+{
+  float mult = smoothstep(value+3/fragPixelSize.x, value-3/fragPixelSize.x, uv_x);
+  return min(mult + 0.3, 1);
+}
+
+vec3 shiftRGB(vec3 c, int up_down)
+{
+  if(up_down > 0)
+  {
+    return c.brg;
+  }
+  else if(up_down < 0)
+  {
+    return c.gbr;
+  }
+  else
+  {
+    return c;
+  }
+}
+
+bool buttonRequiresCharacter()
+{
+  if(buttonUsesCharacterColor()
+     || fragAction == STAMINA_BAR
+     || fragAction == HEALTH_BAR)
+  {
+    return true;
+  }
+  return false;
+}
+
+bool buttonUsesCharacterColor()
+{
+  if(   fragAction == PASSIVE_CHARACTER
+     || fragAction == CHAR_STATE
+     || fragAction == CHAR_FORAGE
+     || fragAction == BUILDHOUSE
+     || fragAction == BUILDSTORE
+     || fragAction == CENTRECAMERA)
+  {
+    return true;
+  }
+  return false;
+}
+
 void main()
 {
   //vec2 buttonUV = (gl_FragCoord.xy - posCoord) / sizeCoord;
@@ -414,45 +480,60 @@ void main()
   vec2 button_inner = button_pixel_size/2 - border_size;
 
 
-  if(box(translate(pixel_uv, button_pixel_size/2), button_pixel_size/2, border_size*3) > 0)
+  if(box(translate(pixel_uv, button_pixel_size/2), button_pixel_size/2, border_size*3) > 0
+     || buttonRequiresCharacter() && !character_selected)
   {
     discard;
   }
 
-  if(fragMousedOver > 0)
-  {
-    button_color += button_selected;
-    button_highlight += button_selected;
-  }
+  //if(fragMousedOver > 0)
+  //{
+  //  button_color+= button_selected;
+  //  button_highlight += button_selected;
+  //}
 //  vec2 button_inner = 0.5 - (border_size * 2) / (fragSize*fResolution);
 //  float radius = border_size;
 //  if(box(translate(fragUV, vec2(0.5)), button_inner, 0) <= 0)
   float edge = box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2);
   if(edge <= 0)
   {
+    vec3 button_color = def_button_color;
+    if(buttonUsesCharacterColor())
+    {
+      button_color = character_color - vec3(0.2, 0.2, 0.2);
+    }
+    vec3 button_highlight = button_color + vec3(0.4, 0.4, 0.4);
     s = mix(button_highlight, button_color, fragUV.y);
     if(fragAction == STAMINA_BAR)
     {
-      float mult = smoothstep(character_stamina+3/fragPixelSize.x, character_stamina-3/fragPixelSize.x, fragUV.x);
-      mult = min(mult + 0.3, 1);
-      s *= mult;
-      vec3 temp = s;
-      s.r = temp.g;
-      s.g = temp.b;
-      s.b = temp.r;
+      s *= loadingBar(character_stamina, fragUV.x);
+      s = shiftRGB(s, -1);
+    }
+    else if(fragAction == HEALTH_BAR)
+    {
+      s *= loadingBar(character_health, fragUV.x);
+      //s = shiftRGB(s, 0);
+    }
+
+    if(fragMousedOver > 0)
+    {
+      if(fragAction == STAMINA_BAR)
+      {
+        s += staminaText();
+      }
+      else if(fragAction == HEALTH_BAR)
+      {
+        s += healthText();
+      }
+      else
+      {
+        s += button_selected;
+      }
     }
   }
 
 
   s += centerText();
-  if(fragAction == STAMINA_BAR)
-  {
-    if(fragMousedOver > 0)
-    {
-      s += staminaText();
-    }
-
-  }
 
   float a = 1.0;
   if(fragAction == NOTIFY)
