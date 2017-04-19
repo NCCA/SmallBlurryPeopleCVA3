@@ -515,14 +515,18 @@ void Scene::update()
 
     ngl::Vec3 off (0.0f, 0.5f, 0.0f);
     for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
     for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
     for(auto &c : m_characters)
     {
-        ngl::Vec3 vec = c.getPos() + off;
-        vec.m_y /= m_terrainHeightDivider;
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.25f) );
+        //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+        if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
+        {
+            ngl::Vec3 vec = c.getPos() + off;
+            vec.m_y /= m_terrainHeightDivider;
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+        }
     }
 }
 
@@ -608,10 +612,10 @@ void Scene::draw()
         //---------------------------//
         //          RAY DIR          //
         //---------------------------//
+        m_utilityBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-        m_utilityBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
         m_transform.reset();
         m_transform.setPosition(m_cam.getPos());
         drawAsset("raySphere", "", "fragNormals");
@@ -795,7 +799,7 @@ void Scene::draw()
         if(shouldDrawMouseBox)
         {
             m_pointLights.push_back(
-                        Light(mlpos,ngl::Vec3(0.0,1.0,1.0),0.15f)
+                        Light(mlpos,ngl::Vec3(0.0,1.0,1.0),0.5f)
                         );
         }
 
@@ -1020,7 +1024,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    glBindVertexArray(m_screenQuad);
+    /*glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1035,7 +1039,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }
+    }*/
 
     /*slib->use("colour");
     for(auto &p : m_debugPoints)

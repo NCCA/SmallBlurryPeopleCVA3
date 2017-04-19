@@ -155,7 +155,9 @@ vec3 basicLight(vec4 fragPos, vec3 fragNormal, int lightIndex)
   mul = clamp(mul, 0.0, 1.0);
 
   vec3 base = lbuf.buf[ lightIndex ].col.xyz;
-  return (mul * lbuf.buf[ lightIndex ].lum * base) / distance(lp, fragPos);
+  d = distance(lp, fragPos);
+  d *= d;
+  return (mul * lbuf.buf[ lightIndex ].lum * base) / (1.0 + d);
 }
 
 void main()
@@ -209,8 +211,9 @@ void main()
   //GODRAYS
   if(drawGodRays)
   {
-    //Step length is nbow variable, it shortens when in shadow and lengthens when not.
-    float stepLength = 0.1;
+    //Step length is now variable, it shortens when in shadow and lengthens when not.
+    //Edit, this did NOT work
+    float stepLength = 0.05;
     float rayLen = distance(camPos, fragPos);
     float curLen = 0.0;
     vec3 rayDir = getEyeRay();
@@ -237,12 +240,6 @@ void main()
       shadow += shadowSample(depth, sposition.xy, ivec2(-1, 0), cascadeIndex);
       shadow /= 5.0;
 
-      if(shadow > 0.2)
-        stepLength = 0.05;
-      else
-        stepLength += 0.01;
-      stepLength = clamp(stepLength, 0.05, 0.25);
-
       lum += 1.15 - 1.0 * shadow * curLen;
 
       count++;
@@ -251,6 +248,8 @@ void main()
     lum /= count;
     lum = max(0.15, lum);
     mul *= lum;
+    /*fragColour = vec4(lum,lum,lum,1.0);
+    return;*/
   }
 
   mul = max(mul, 0.35 / (sunmul + moonmul + 1.0));
