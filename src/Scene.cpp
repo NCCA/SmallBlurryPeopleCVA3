@@ -933,7 +933,6 @@ void Scene::draw()
         //  DRAW BOX WHERE MOUSE IS  //
         //---------------------------//
         int charid = getCharIDAtMouse();
-        std::cout << "cid " << charid << '\n';
 
         if(shouldDrawMouseBox)
         {
