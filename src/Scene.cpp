@@ -66,6 +66,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
     createShader("mousebox", "vertDeferredData", "fragMousebox");
+    createShader("fragNormals", "vertDeferredData", "fragNormal");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -90,8 +91,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-		int m_char_num = m_prefs->getIntPref("NUMBER_OF_CHARACTERS");
-		for (int i = 0; i<m_char_num; i++)
+    int m_char_num = m_prefs->getIntPref("NUMBER_OF_CHARACTERS");
+    for (int i = 0; i<m_char_num; i++)
     {
         createCharacter();
     }
@@ -114,24 +115,25 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
+    store->loadMesh("raySphere", "raySphere.obj");
     store->loadMesh("debugBox", "box.obj");
 
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
 
     store->loadMesh("house", "house/stilt_house.obj" );
-		store->loadTexture("house_d", "house/stilt_house_diff.tif" );
-		store->loadMesh("foundation_A", "house/start_building.obj");
-		store->loadTexture("foundation_A_d", "house/start_building_diff.tif");
+    store->loadTexture("house_d", "house/stilt_house_diff.tif" );
+    store->loadMesh("foundation_A", "house/start_building.obj");
+    store->loadTexture("foundation_A_d", "house/start_building_diff.tif");
     store->loadMesh("foundation_B", "house/mid_way_building.obj");
-		store->loadTexture("foundation_B_d", "house/mid_way_building_diff.tif");
+    store->loadTexture("foundation_B_d", "house/mid_way_building_diff.tif");
 
-		store->loadMesh("storehouse", "storeHouse/storehouse.obj");
-		store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
-		store->loadMesh("foundation_C", "house/start_building.obj");
-		store->loadTexture("foundation_C_d", "house/start_building_diff.tif");
-		store->loadMesh("foundation_D", "house/mid_way_building.obj");
-		store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
+    store->loadMesh("storehouse", "storeHouse/storehouse.obj");
+    store->loadTexture("storehouse_d", "storeHouse/storehouse_diff.png");
+    store->loadMesh("foundation_C", "house/start_building.obj");
+    store->loadTexture("foundation_C_d", "house/start_building_diff.tif");
+    store->loadMesh("foundation_D", "house/mid_way_building.obj");
+    store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
 
@@ -139,8 +141,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("rock", "terrain/rock.png");
     store->loadTexture("snow", "terrain/snow.png");
 
-		store->loadMesh("tombstone", "tombstone/tombstone.obj");
-		store->loadTexture("tombstone_d", "tombstone/tombstone_diff.tif");
+    store->loadMesh("tombstone", "tombstone/tombstone.obj");
+    store->loadTexture("tombstone_d", "tombstone/tombstone_diff.tif");
 
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
@@ -210,7 +212,7 @@ void Scene::initMeshInstances()
 {
     int meshCount = 0;
     //m_meshPositions.clear()
-		m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
+    m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getW(); ++i)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
@@ -265,16 +267,17 @@ void Scene::initialiseFramebuffers()
     m_mainBuffer.unbind();
 
     std::cout << "Initalising id framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
-    m_pickBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
-    m_pickBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT0 );
-    m_pickBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
-    m_pickBuffer.addDepthAttachment( "depth" );
-    if(!m_pickBuffer.checkComplete())
+    m_utilityBuffer.initialise( m_viewport.m_x, m_viewport.m_y );
+    m_utilityBuffer.addTexture( "terrainpos", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT0 );
+    m_utilityBuffer.addTexture( "charid", GL_RED_INTEGER, GL_R16I, GL_COLOR_ATTACHMENT1, GL_INT );
+    m_utilityBuffer.addTexture("rayDir", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT2);
+    m_utilityBuffer.addDepthAttachment( "depth" );
+    if(!m_utilityBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
         exit(EXIT_FAILURE);
     }
-    m_pickBuffer.unbind();
+    m_utilityBuffer.unbind();
 
     std::cout << "Initalising shadow framebuffer to " << shadowResolution << " by " << shadowResolution << '\n';
     m_shadowBuffer.initialise( shadowResolution, shadowResolution );
@@ -318,209 +321,209 @@ void Scene::initialiseFramebuffers()
 
 void Scene::readNameFile()
 {
-  std::ifstream namesFile;
-  namesFile.open("names/game_names.txt");
+    std::ifstream namesFile;
+    namesFile.open("names/game_names.txt");
 
-  if(!namesFile.is_open())
-  {
-      std::cerr<<"Couldnt open file\n";
-      exit(EXIT_FAILURE);
-  }
+    if(!namesFile.is_open())
+    {
+        std::cerr<<"Couldnt open file\n";
+        exit(EXIT_FAILURE);
+    }
 
-  int lineNo = 0;
-  std::string lineBuffer;
-  while (!namesFile.eof())
-  {
-      std::getline(namesFile, lineBuffer, '\n');
-      if(lineBuffer.size() != 0)
-      {
-          m_file_names.push_back(lineBuffer);
-          lineNo++;
-      }
-  }
-  namesFile.close();
+    int lineNo = 0;
+    std::string lineBuffer;
+    while (!namesFile.eof())
+    {
+        std::getline(namesFile, lineBuffer, '\n');
+        if(lineBuffer.size() != 0)
+        {
+            m_file_names.push_back(lineBuffer);
+            lineNo++;
+        }
+    }
+    namesFile.close();
 }
 
 void Scene::createCharacter()
 {
-  int numberNames = m_file_names.size();
-	//pick random name
-  std::random_device rnd;
-  std::mt19937 mt_rand(rnd());
-  std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-  int name_chosen = nameNo(mt_rand);
-	//create character with random name
-  m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
-	//remove name from list so no multiples
-	m_file_names.erase(m_file_names.begin() + name_chosen);
+    int numberNames = m_file_names.size();
+    //pick random name
+    std::random_device rnd;
+    std::mt19937 mt_rand(rnd());
+    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
+    int name_chosen = nameNo(mt_rand);
+    //create character with random name
+    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+    //remove name from list so no multiples
+    m_file_names.erase(m_file_names.begin() + name_chosen);
 }
 
 void Scene::update()
 {
-	//Gui::instance()->updateNotifications();
-	if (m_grid.hasChanges())
-	{
-			initMeshInstances();
-			m_grid.resetHasChanges();
-	}
-
-	if(m_state == GameState::MAIN)
-	{
-    //translates
-    if(m_mouse_trans_active)
+    //Gui::instance()->updateNotifications();
+    if (m_grid.hasChanges())
     {
-      //Compute distance to mouse origin
-      ngl::Vec2 mouse_distance = Utility::getMousePos();
-      mouse_distance -= m_mouse_trans_origin;
-
-      m_mouse_trans_origin = Utility::getMousePos();
-
-      //Move the camera based on mouse translation.
-      float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
-      cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
-      m_cam.moveRight( mouse_distance.m_x * cam_to_pivot_height);
-      m_cam.moveForward( -mouse_distance.m_y * cam_to_pivot_height);
-      //---
-
-      if(mouse_distance.lengthSquared() > Utility::Sqr(8.0f))
-        m_centre_camera = false;
-    }
-    //rotates
-    else if(m_mouse_rot_active)
-    {
-      int mouse_origin = 0;
-      int mouse_distance = 0;
-      SDL_GetMouseState(&mouse_origin, nullptr);
-      mouse_distance = mouse_origin - m_mouse_rot_origin;
-      m_mouse_rot_origin = mouse_origin;
-
-      //Rotate the camera based on mouse movement.
-      m_cam.rotate(0.0f, mouse_distance * 0.125f);
-      //---
+        initMeshInstances();
+        m_grid.resetHasChanges();
     }
 
-    //---
-
-    if(m_centre_camera == true)
+    if(m_state == GameState::MAIN)
     {
-      for (Character &character : m_characters)
-        if (character.isActive())
-          m_cam.setPos(-character.getPos());
+        //translates
+        if(m_mouse_trans_active)
+        {
+            //Compute distance to mouse origin
+            ngl::Vec2 mouse_distance = Utility::getMousePos();
+            mouse_distance -= m_mouse_trans_origin;
+
+            m_mouse_trans_origin = Utility::getMousePos();
+
+            //Move the camera based on mouse translation.
+            float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
+            cam_to_pivot_height *= cam_to_pivot_height * 0.00003f;
+            m_cam.moveRight( mouse_distance.m_x * cam_to_pivot_height);
+            m_cam.moveForward( -mouse_distance.m_y * cam_to_pivot_height);
+            //---
+
+            if(mouse_distance.lengthSquared() > Utility::Sqr(8.0f))
+                m_centre_camera = false;
+        }
+        //rotates
+        else if(m_mouse_rot_active)
+        {
+            int mouse_origin = 0;
+            int mouse_distance = 0;
+            SDL_GetMouseState(&mouse_origin, nullptr);
+            mouse_distance = mouse_origin - m_mouse_rot_origin;
+            m_mouse_rot_origin = mouse_origin;
+
+            //Rotate the camera based on mouse movement.
+            m_cam.rotate(0.0f, mouse_distance * 0.125f);
+            //---
+        }
+
+        //---
+
+        if(m_centre_camera == true)
+        {
+            for (Character &character : m_characters)
+                if (character.isActive())
+                    m_cam.setPos(-character.getPos());
+        }
+        else
+        {
+            m_cam.moveScreenSpace(getCamMoveVec());
+        }
+
+        //Terrain-height correction0
+        ngl::Vec3 cxyz = m_cam.getPos();
+        int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
+        int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
+        cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
+        ngl::Vec3 cp = m_cam.getTargPos();
+        //Grab the y component of the current tile, use that as the target y for the camera.
+        m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
+        //---
+
+
+        //Recalculate view matrix.
+        m_cam.updateSmoothCamera();
+        m_cam.clearTransforms();
+        m_cam.calculateViewMat();
+        //---
+
+        //Update mouse selection box.
+        m_mouseSelectionBoxPosition.update();
+        m_mouseSelectionBoxScale.update();
+
+        for(Character &character : m_characters)
+        {
+            character.update();
+            if (character.isSleeping() && character.getID() == m_active_char_id)
+            {
+                //check if character is sleeping, if it is, dont make it the active character
+                m_active_char_id = -1;
+                Gui::instance()->updateActiveCharacter();
+            }
+            else if (character.getHealth() <= 0.0)
+            {
+                std::string message = character.getName() + " has died!";
+                ngl::Vec2 pos = {character.getPos()[0], character.getPos()[2]};
+                Gui::instance()->notify(message, pos );
+                //check if character has health, if it doesn't remove the character
+                if (m_active_char_id == character.getID())
+                {
+                    m_active_char_id = -1;
+                    Gui::instance()->updateActiveCharacter();
+                }
+                //ID's start from 1 so negate 1 to get index in vector m_characters
+                int index = (character.getID() - 1);
+                //add name back to available list
+                m_file_names.push_back(character.getName());
+                //add position to tombstone positions
+                ngl::Vec3 stone_pos(character.getPos());
+                stone_pos.m_y /= m_terrainHeightDivider;
+                m_tombstones.push_back(stone_pos);
+                //remove character from vector
+                m_characters.erase(m_characters.begin() + index);
+            }
+        }
+
+        for(Baddie &baddie : m_baddies)
+        {
+            baddie.update(m_characters[0].getPos());
+        }
+
+
+        //m_sunAngle.m_x = 150.0f;
+        m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
+        m_sunAngle.m_x += 0.01f;
+        if(m_sunAngle.m_x > 360.0f)
+        {
+            m_day++;
+            m_sunAngle.m_x = 0.0f;
+            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
+        }
+        //std::cout << m_sunAngle.m_x << '\n';
+
+        m_season = (m_day % 365) / 365.0f;
+
+        ngl::Transformation t;
+        t.setRotation( m_sunAngle );
+        m_sunDir = t.getMatrix().getForwardVector();
+        m_sunDir.normalize();
+
+        //1 = Midday
+        //0 = Sunrise/sunset
+        //-1 = Midnight
+        float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
+        //Map to range 0.5PI to -0.5PI
+        a *= M_PI / 2.0;
+
+        float t_midday = 0.5f * sin(a) + 0.5f;
+        float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
+        float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
+
+        m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
+                t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
+                t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+
+        m_directionalLightCol /= t_midday + t_midnight + t_sundown;
     }
-    else
+
+    m_pointLights.clear();
+
+    ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+    for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
+        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+    for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+    for(auto &c : m_characters)
     {
-      m_cam.moveScreenSpace(getCamMoveVec());
+        ngl::Vec3 vec = c.getPos() + off;
+        vec.m_y /= m_terrainHeightDivider;
+        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.25f) );
     }
-
-    //Terrain-height correction
-    ngl::Vec3 cxyz = m_cam.getPos();
-    int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
-    int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-    cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
-    ngl::Vec3 cp = m_cam.getTargPos();
-    //Grab the y component of the current tile, use that as the target y for the camera.
-    m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
-    //---
-
-
-    //Recalculate view matrix.
-    m_cam.updateSmoothCamera();
-    m_cam.clearTransforms();
-    m_cam.calculateViewMat();
-    //---
-
-    //Update mouse selection box.
-    m_mouseSelectionBoxPosition.update();
-    m_mouseSelectionBoxScale.update();
-
-    for(Character &character : m_characters)
-    {
-      character.update();
-			if (character.isSleeping() && character.getID() == m_active_char_id)
-			{
-				//check if character is sleeping, if it is, dont make it the active character
-				 m_active_char_id = -1;
-				 Gui::instance()->updateActiveCharacter();
-			 }
-			else if (character.getHealth() <= 0.0)
-			{
-				std::string message = character.getName() + " has died!";
-				ngl::Vec2 pos = {character.getPos()[0], character.getPos()[2]};
-				Gui::instance()->notify(message, pos );
-				//check if character has health, if it doesn't remove the character
-				if (m_active_char_id == character.getID())
-				{
-					m_active_char_id = -1;
-					Gui::instance()->updateActiveCharacter();
-				}
-				//ID's start from 1 so negate 1 to get index in vector m_characters
-				int index = (character.getID() - 1);
-				//add name back to available list
-				m_file_names.push_back(character.getName());
-				//add position to tombstone positions
-				ngl::Vec3 stone_pos(character.getPos());
-				stone_pos.m_y /= m_terrainHeightDivider;
-				m_tombstones.push_back(stone_pos);
-				//remove character from vector
-				m_characters.erase(m_characters.begin() + index);
-			}
-		 }
-
-		for(Baddie &baddie : m_baddies)
-		{
-			baddie.update(m_characters[0].getPos());
-		}
-
-
-    //m_sunAngle.m_x = 150.0f;
-    m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-    m_sunAngle.m_x += 0.01f;
-    if(m_sunAngle.m_x > 360.0f)
-    {
-      m_day++;
-      m_sunAngle.m_x = 0.0f;
-      //std::cout << "Day " << m_day << " Season " << m_season << '\n';
-    }
-    //std::cout << m_sunAngle.m_x << '\n';
-
-    m_season = (m_day % 365) / 365.0f;
-
-    ngl::Transformation t;
-    t.setRotation( m_sunAngle );
-    m_sunDir = t.getMatrix().getForwardVector();
-    m_sunDir.normalize();
-
-    //1 = Midday
-    //0 = Sunrise/sunset
-    //-1 = Midnight
-    float a = m_sunDir.dot( ngl::Vec3(0.0f, 1.0f, 0.0f) );
-    //Map to range 0.5PI to -0.5PI
-    a *= M_PI / 2.0;
-
-    float t_midday = 0.5f * sin(a) + 0.5f;
-    float t_midnight = 0.5f * sin(a + M_PI) + 0.5f;
-    float t_sundown = 0.5f * sin(a * 2.0f + M_PI / 2.0f) + 0.5f;
-
-    m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
-            t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-            t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
-
-    m_directionalLightCol /= t_midday + t_midnight + t_sundown;
-  }
-
-  m_pointLights.clear();
-
-  ngl::Vec3 off (0.0f, 0.5f, 0.0f);
-  for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
-      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-  for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-  for(auto &c : m_characters)
-  {
-      ngl::Vec3 vec = c.getPos() + off;
-      vec.m_y /= m_terrainHeightDivider;
-      m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.25f) );
-  }
 }
 
 //I'm sorry this function is so long :(
@@ -530,6 +533,11 @@ void Scene::update()
 //  --
 //  UTILITY ID DRAW         : Draws out utility textures from the scene. Currently this is CHARACTER IDS and TERRAIN WORLD POSITION.
 //                            This can all be queried to find what the user is mousing-over.
+//  RAY DIR                 : For some of the shading stages, I cast rays out into the world. Unprojecting from the viewport to the world is
+//                            pretty tedious, and pretty costly in a fragment shader. In an effort to lower the overhead, I draw the normals
+//                            of a sphere to a texture to be queried later (which gives nearly the same result as projection). Although
+//                            texture sampling can be expensive my hope is that it is cheaper than doing matrix multiplications on every
+//                            fragment on screen a couple of times per frame.
 //  SHADOW PASS             : This section draws shadow maps for the sun/moon. These maps are later referenced when lighting is applied.
 //  REFLECTIONS             : The scene is drawn upside down, to be used for reflections later on. This is accomplished by scaling the camera by -1 in the y
 //                            then drawing as usual.
@@ -552,396 +560,416 @@ void Scene::update()
 
 void Scene::draw()
 {
-  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-  glClearColor(0.0,0.0,0.0,0.0);
+    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+    glClearColor(0.0,0.0,0.0,0.0);
 
-  if(m_game_started)
-  {
-    //---------------------------//
-    //           SETUP           //
-    //---------------------------//
-    m_debugPoints.clear();
-
-    m_transform.reset();
-    glEnable(GL_DEPTH_TEST);
-
-    ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
-
-    //---------------------------//
-    // UTILITY ID DRAW //
-    //---------------------------//
-    //Draw to pick buffer.
-    m_pickBuffer.bind();
-    m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    slib->use("terrainPick");
-    glBindVertexArray(m_terrainVAO);
-    loadMatricesToShader();
-    glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
-    glBindVertexArray(0);
-    m_pickBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    slib->use("charPick");
-
-    //Draw characters...
-    for(auto &ch : m_characters)
+    if(m_game_started)
     {
-			if(ch.isSleeping() == false)
-			{
-        ngl::Vec3 pos = ch.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-        slib->setRegisteredUniform("id", ch.getID());
-        drawAsset( "person", "", "");
-			}
-    }
+        //---------------------------//
+        //           SETUP           //
+        //---------------------------//
+        m_debugPoints.clear();
 
-    m_pickBuffer.unbind();
+        m_transform.reset();
+        glEnable(GL_DEPTH_TEST);
 
-    //---------------------------//
-    //  SHADOW PASS  //
-    //---------------------------//
-    ngl::Vec3 s = m_sunDir;
-    //Flip if the moon is up.
-    if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
-        s = -s;
+        ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
 
-    glViewport(0, 0, m_prefs->getIntPref("SHADOW_MAP_RES"), m_prefs->getIntPref("SHADOW_MAP_RES"));
+        //---------------------------//
+        // UTILITY ID DRAW //
+        //---------------------------//
+        //Draw to pick buffer.
+        m_utilityBuffer.bind();
+        m_utilityBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //The intervals at which we will draw into shadow buffers.
-    std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
+        slib->use("terrainPick");
+        glBindVertexArray(m_terrainVAO);
+        loadMatricesToShader();
+        glDrawArraysEXT(GL_TRIANGLES, 0, m_terrainVAOSize);
+        glBindVertexArray(0);
+        m_utilityBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto boxes = generateOrthoShadowMatrices( cascadeDistances );
-
-    //Render a pass from each AABB
-    size_t index = 0;
-    for(size_t i = 0; i < boxes.first.size(); ++i)
-    {
-        //std::cout << "Shadowpass for " << index << '\n';
-        shadowPass( boxes.first[i], boxes.second[i], i );
-        index++;
-    }
-
-    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
-
-    //---------------------------//
-    //         REFLECTIONS       //
-    //---------------------------//
-    glCullFace(GL_FRONT);
-    m_transform.reset();
-
-    m_mainBuffer.bind();
-    m_mainBuffer.activeColourAttachments();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    ngl::Mat4 camFlip;
-    camFlip.scale(1.0f, -1.0f, 1.0f);
-    ngl::Mat4 camMove;
-    camMove.translate(0.0f, -2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
-
-    //Flip camera upside down.
-
-    //m_cam.clearTransforms();
-    //m_cam.calculateViewMat();
-    m_cam.immediateTransform(camFlip);
-    m_cam.immediateTransform(camMove);
-
-    drawTerrain();
-
-    drawMeshes();
-
-    m_postEffectsBuffer.bind();
-    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glCullFace(GL_BACK);
-
-    drawSky();
-
-    camMove.translate(0.0f, 2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
-
-    //Flip camera right way up.
-    //m_cam.clearTransforms();
-    //m_cam.calculateViewMat();
-    m_cam.immediateTransform(camMove);
-    m_cam.immediateTransform(camFlip);
-
-    //Light reflections
-    glBindVertexArray(m_screenQuad);
-
-    slib->use("deferredLight");
-    GLuint id = slib->getProgramID("deferredLight");
-    slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.2f, 1.0f) * 1.8f );
-    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.2f, 1.0f) );
-    slib->setRegisteredUniform( "iGlobalTime", m_sunAngle.m_x * 8.0f );
-    slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
-    slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
-    slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
-    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
-
-    slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
-    for( size_t i = 0; i < cascadeDistances.size(); ++i )
-        slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
-
-    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
-    m_mainBuffer.bindTexture(id, "normal", "normal", 1);
-    m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
-    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
-    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
-    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    glBindVertexArray(0);
-
-    glEnable(GL_DEPTH_TEST);
-
-    m_postEffectsBuffer.unbind();
-
-    //---------------------------//
-    //       DISPLACEMENT       //
-    //---------------------------//
-    //Base
-    m_displacementBuffer.bind();
-    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
-
-    glBindVertexArray(m_screenQuad);
-
-    slib->use("waterDisplacement");
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    //Normals
-    m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-
-    slib->use("waterDisplacementNormal");
-    id = slib->getProgramID("waterDisplacementNormal");
-    m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    m_displacementBuffer.unbind();
-
-    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
-
-    //---------------------------//
-    //  RAW DATA PASS //
-    //---------------------------//
-    m_transform.reset();
-    m_mainBuffer.bind();
-    m_mainBuffer.activeColourAttachments();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    drawTerrain();
-
-    drawMeshes();
-
-    m_mainBuffer.unbind();
-
-    //This gives opengl error 1282. I guess you can't specify draw buffers for the back buffer?
-    //m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-
-    //---------------------------//
-    //            SKY            //
-    //---------------------------//
-    drawSky();
-
-    //---------------------------//
-    //          LIGHTING         //
-    //---------------------------//
-    //Pass lights to shader.
-    m_pointLights.push_back(
-                Light(mouseWorldPos + ngl::Vec4(0.0, 2.0, 0.0, 0.0),ngl::Vec3(0.0,1.0,1.0),0.5f)
-                );
-
-    glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
-    GLvoid * dat = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-    memcpy(dat, &m_pointLights[0], sizeof(Light) * std::min( m_pointLights.size(), static_cast<size_t>(m_maxLights)));
-    glUnmapBuffer(GL_UNIFORM_BUFFER);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    m_postEffectsBuffer.bind();
-    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    slib->use("deferredLight");
-    id = slib->getProgramID("deferredLight");
-    slib->setRegisteredUniform("sunDir", m_sunDir );
-    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
-    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
-    slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
-    slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
-    slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
-    slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
-    slib->setRegisteredUniform( "iP", m_cam.getP().inverse() );
-    slib->setRegisteredUniform( "iMV", m_cam.getV().inverse() );
-
-    //Draw god rays here.
-    //To-do: Add preference bool to control drawing of god rays.
-    slib->setRegisteredUniform( "drawGodRays", true);
-
-    slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
-    for( size_t i = 0; i < cascadeDistances.size(); ++i )
-        slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
-
-    m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
-    m_mainBuffer.bindTexture(id, "normal", "normal", 1);
-    m_mainBuffer.bindTexture(id, "position", "position", 2);
-    m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
-    m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
-    m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
-    m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
-
-    GLuint lightBlockIndex = glGetUniformBlockIndex( id, "lightBuffer" );
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_lightBuffer);
-    glUniformBlockBinding(id, lightBlockIndex, 1);
-
-    slib->setRegisteredUniform("lbufLen", static_cast<int>(std::min(m_maxLights, m_pointLights.size())));
-
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    m_postEffectsBuffer.unbind();
-
-    //---------------------------//
-    //    DEFERRED BLUR PASS     //
-    //---------------------------//
-    slib->use("bokeh");
-
-    id = slib->getProgramID("bokeh");
-    m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-    m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
-    slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
-
-    glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-
-    //---------------------------//
-    //      FORWARD SHADING      //
-    //---------------------------//
-    m_postEffectsBuffer.bind();
-    m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-
-    //Copy depth buffer from main buffer to back buffer.
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
-    glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
-                      GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-    slib->use("water");
-    slib->setRegisteredUniform("mouseWorldPos", mouseWorldPos);
-    slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
-    slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
-    slib->setRegisteredUniform("lightDir", m_sunDir);
-    slib->setRegisteredUniform("camPos", m_cam.getPos());
-    slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
-    slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
-    slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
-    slib->setRegisteredUniform("waterDimensions", waterDimensions);
-
-    id = slib->getProgramID("water");
-    m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
-    m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
-    m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
-    m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
-    glBindVertexArray(m_unitSquareVAO);
-    m_transform.reset();
-
-    //Unit size of each water tile.
-    int scale = 10;
-    for(int i = 0; i < m_grid.getW(); i += scale)
-    {
-        for(int j = 0; j < m_grid.getH(); j += scale)
+        slib->use("charPick");
+        //Draw characters...
+        for(auto &ch : m_characters)
         {
-            ngl::Vec3 pos (i, m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, j);
-            bounds waterBounds;
-            waterBounds.first = pos + ngl::Vec3(-scale, -1.0f, -scale);
-            waterBounds.second = pos + ngl::Vec3(scale, 1.0f, scale);
-
-            bool br = false;
-            for(auto &b : boxes.first)
-                br = (br or Utility::boxIntersectBox(b, waterBounds));
-
-            if(!br)
-                continue;
-
-            m_transform.setScale(scale, scale, 1.0f);
-            m_transform.setRotation(90.0f, 0.0f, 0.0f);
-            m_transform.setPosition(pos);
-            slib->setRegisteredUniform("MV", m_transform.getMatrix() * m_cam.getV());
-            loadMatricesToShader();
-            glDrawArraysEXT(GL_PATCHES, 0, 4);
+            if(ch.isSleeping() == false)
+            {
+                ngl::Vec3 pos = ch.getPos();
+                pos.m_y /= m_terrainHeightDivider;
+                m_transform.setPosition(pos);
+                slib->setRegisteredUniform("id", ch.getID());
+                drawAsset( "person", "", "");
+            }
         }
-    }
 
-    glBindVertexArray(0);
-
-    m_postEffectsBuffer.unbind();
-
-    //---------------------------//
-    //  DRAW BOX WHERE MOUSE IS  //
-    //---------------------------//
-    Gui * g = Gui::instance();
-    int charid = getCharIDAtMouse();
-
-    if(m_state == GameState::MAIN and
-            !m_mouse_trans_active and
-            !m_mouse_rot_active and
-            !g->mousePos( Utility::getMousePos() ))
-    {
+        //---------------------------//
+        //          RAY DIR          //
+        //---------------------------//
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
+        m_utilityBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
+        m_transform.reset();
+        m_transform.setPosition(m_cam.getPos());
+        drawAsset("raySphere", "", "fragNormals");
+        m_utilityBuffer.unbind();
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+
+        //---------------------------//
+        //  SHADOW PASS  //
+        //---------------------------//
+        ngl::Vec3 s = m_sunDir;
+        //Flip if the moon is up.
+        if(s.dot(ngl::Vec3( 0.0f, 1.0f, 0.0f )) < 0.0f)
+            s = -s;
+
+        glViewport(0, 0, m_prefs->getIntPref("SHADOW_MAP_RES"), m_prefs->getIntPref("SHADOW_MAP_RES"));
+
+        //The intervals at which we will draw into shadow buffers.
+        std::vector<float> cascadeDistances = {0.5f, 16.0f, 64.0f, 128.0f};
+
+        auto boxes = generateOrthoShadowMatrices( cascadeDistances );
+
+        //Render a pass from each AABB
+        size_t index = 0;
+        for(size_t i = 0; i < boxes.first.size(); ++i)
+        {
+            //std::cout << "Shadowpass for " << index << '\n';
+            shadowPass( boxes.first[i], boxes.second[i], i );
+            index++;
+        }
+
+        glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+        //---------------------------//
+        //         REFLECTIONS       //
+        //---------------------------//
+        glCullFace(GL_FRONT);
         m_transform.reset();
 
-        ngl::Vec4 tp = getTerrainPosAtMouse();
-        ngl::Vec4 p;
-        //Player is not hovering over a character.
-        if(charid == -1)
+        m_mainBuffer.bind();
+        m_mainBuffer.activeColourAttachments();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        ngl::Mat4 camFlip;
+        camFlip.scale(1.0f, -1.0f, 1.0f);
+        ngl::Mat4 camMove;
+        camMove.translate(0.0f, -2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
+
+        //Flip camera upside down.
+
+        //m_cam.clearTransforms();
+        //m_cam.calculateViewMat();
+        m_cam.immediateTransform(camFlip);
+        m_cam.immediateTransform(camMove);
+
+        drawTerrain();
+
+        drawMeshes();
+
+        m_postEffectsBuffer.bind();
+        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glCullFace(GL_BACK);
+
+        drawSky();
+
+        camMove.translate(0.0f, 2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
+
+        //Flip camera right way up.
+        //m_cam.clearTransforms();
+        //m_cam.calculateViewMat();
+        m_cam.immediateTransform(camMove);
+        m_cam.immediateTransform(camFlip);
+
+        //Light reflections
+        glBindVertexArray(m_screenQuad);
+
+        slib->use("deferredLight");
+        GLuint id = slib->getProgramID("deferredLight");
+        slib->setRegisteredUniform("sunDir", m_sunDir );
+        slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.2f, 1.0f) * 1.8f );
+        slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.2f, 1.0f) );
+        slib->setRegisteredUniform( "iGlobalTime", m_sunAngle.m_x * 8.0f );
+        slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
+        slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
+        slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
+        slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+
+        slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
+        for( size_t i = 0; i < cascadeDistances.size(); ++i )
+            slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
+
+        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+        m_mainBuffer.bindTexture(id, "normal", "normal", 1);
+        m_mainBuffer.bindTexture(id, "position", "position", 2);
+        m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
+        m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
+        m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
+        m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        glBindVertexArray(0);
+
+        glEnable(GL_DEPTH_TEST);
+
+        m_postEffectsBuffer.unbind();
+
+        //---------------------------//
+        //       DISPLACEMENT       //
+        //---------------------------//
+        //Base
+        m_displacementBuffer.bind();
+        m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT0});
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glViewport(0, 0, m_prefs->getIntPref("WATER_MAP_RES"), m_prefs->getIntPref("WATER_MAP_RES"));
+
+        glBindVertexArray(m_screenQuad);
+
+        slib->use("waterDisplacement");
+        slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        //Normals
+        m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
+        slib->use("waterDisplacementNormal");
+        id = slib->getProgramID("waterDisplacementNormal");
+        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        m_displacementBuffer.unbind();
+
+        glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+        //---------------------------//
+        //  RAW DATA PASS //
+        //---------------------------//
+        m_transform.reset();
+        m_mainBuffer.bind();
+        m_mainBuffer.activeColourAttachments();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        drawMeshes();
+
+        drawTerrain();
+
+        m_mainBuffer.unbind();
+
+        //This gives opengl error 1282. I guess you can't specify draw buffers for the back buffer?
+        //m_mainBuffer.activeColourAttachments( {GL_COLOR_ATTACHMENT0} );
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        //---------------------------//
+        //            SKY            //
+        //---------------------------//
+        drawSky();
+
+        //---------------------------//
+        //          LIGHTING         //
+        //---------------------------//
+        //Pass lights to shader.
+        ngl::Vec4 mlpos = m_mouseSelectionBoxPosition.get();
+        mlpos += ngl::Vec4(0.0, 2.0, 0.0, 0.0);
+        Gui * g = Gui::instance();
+        ngl::Vec4 mouseTerrainPos = getTerrainPosAtMouse();
+        bool shouldDrawMouseBox = (m_state == GameState::MAIN and
+                                   !m_mouse_trans_active and
+                                   !m_mouse_rot_active and
+                                   !g->mousePos( Utility::getMousePos() ) and
+                                   mouseTerrainPos.m_x != 0.0f and
+                mouseTerrainPos.m_z != 0.0f
+                );
+
+        if(shouldDrawMouseBox)
         {
-            p = tp;
-
-            p.m_x = floor(p.m_x) + 0.5;
-            p.m_z = floor(p.m_z) + 0.5;
-            p.m_y = m_grid.getTileHeight(p.m_x, p.m_z);
-            p.m_y = std::max(p.m_y, static_cast<float>(m_grid.getGlobalWaterLevel()));
-            p.m_y /= m_terrainHeightDivider;
-
-            m_transform.setScale( m_mouseSelectionBoxScale.get() );
-            m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
-            m_mouseSelectionBoxScale.setEnd(ngl::Vec3(1.0f, 2.0f, 1.0f));
+            m_pointLights.push_back(
+                        Light(mlpos,ngl::Vec3(0.0,1.0,1.0),0.15f)
+                        );
         }
-        else
-        {
-            for(auto &c : m_characters)
-                if(c.getID() == charid)
-                    p = c.getPos();
 
-            p.m_y /= m_terrainHeightDivider;
-
-            m_transform.setScale( m_mouseSelectionBoxScale.get() );
-            m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
-            m_mouseSelectionBoxScale.setEnd(ngl::Vec3(0.25f, 8.0f, 0.25f));
-        }
-        p.m_y -= 1.0f;
-        m_mouseSelectionBoxPosition.setEnd(ngl::Vec3(p.m_x, p.m_y, p.m_z));
+        glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
+        GLvoid * dat = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+        memcpy(dat, &m_pointLights[0], sizeof(Light) * std::min( m_pointLights.size(), static_cast<size_t>(m_maxLights)));
+        glUnmapBuffer(GL_UNIFORM_BUFFER);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         m_postEffectsBuffer.bind();
         m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        if(tp.m_x != 0.0f and tp.m_z != 0.0f)
+        slib->use("deferredLight");
+        id = slib->getProgramID("deferredLight");
+        slib->setRegisteredUniform("sunDir", m_sunDir );
+        slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
+        slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+        slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+        slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
+        slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
+        slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
+        slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+
+        //Draw god rays here.
+        //To-do: Add preference bool to control drawing of god rays.
+        slib->setRegisteredUniform( "drawGodRays", true);
+
+        slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
+        for( size_t i = 0; i < cascadeDistances.size(); ++i )
+            slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
+
+        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+        m_mainBuffer.bindTexture(id, "normal", "normal", 1);
+        m_mainBuffer.bindTexture(id, "position", "position", 2);
+        m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
+        m_shadowBuffer.bindTexture( id, "depth[0]", "shadowDepths[0]", 4 );
+        m_shadowBuffer.bindTexture( id, "depth[1]", "shadowDepths[1]", 5 );
+        m_shadowBuffer.bindTexture( id, "depth[2]", "shadowDepths[2]", 6 );
+        m_utilityBuffer.bindTexture( id, "rayDir", "rayDir", 7 );
+
+        GLuint lightBlockIndex = glGetUniformBlockIndex( id, "lightBuffer" );
+        glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_lightBuffer);
+        glUniformBlockBinding(id, lightBlockIndex, 1);
+
+        slib->setRegisteredUniform("lbufLen", static_cast<int>(std::min(m_maxLights, m_pointLights.size())));
+
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        m_postEffectsBuffer.unbind();
+
+        //---------------------------//
+        //    DEFERRED BLUR PASS     //
+        //---------------------------//
+        slib->use("bokeh");
+
+        id = slib->getProgramID("bokeh");
+        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+        m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+        slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
+
+        glBindVertexArray(m_screenQuad);
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        //---------------------------//
+        //      FORWARD SHADING      //
+        //---------------------------//
+        m_postEffectsBuffer.bind();
+        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+
+        //Copy depth buffer from main buffer to back buffer.
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
+        glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                          GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+        slib->use("water");
+        slib->setRegisteredUniform("mouseWorldPos", mlpos);
+        slib->setRegisteredUniform("drawMouseGlow", shouldDrawMouseBox);
+        slib->setRegisteredUniform("gEyeWorldPos", m_cam.getPos());
+        slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+        slib->setRegisteredUniform("lightDir", m_sunDir);
+        slib->setRegisteredUniform("camPos", m_cam.getPos());
+        slib->setRegisteredUniform( "sunInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)), 0.0f, 1.0f) * 1.8f );
+        slib->setRegisteredUniform( "moonInts", Utility::clamp(m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)), 0.0f, 1.0f) );
+        slib->setRegisteredUniform( "directionalLightCol", m_directionalLightCol );
+        slib->setRegisteredUniform("waterDimensions", waterDimensions);
+
+        id = slib->getProgramID("water");
+        m_displacementBuffer.bindTexture( id, "waterDisplacement", "displacement", 0 );
+        m_mainBuffer.bindTexture( id, "position", "terrainPos", 1 );
+        m_postEffectsBuffer.bindTexture( id, "reflection", "waterReflection", 2 );
+        m_displacementBuffer.bindTexture(id, "waterNormal", "normal", 3);
+        glBindVertexArray(m_unitSquareVAO);
+        m_transform.reset();
+
+        //Unit size of each water tile.
+        int scale = 10;
+        for(int i = 0; i < m_grid.getW(); i += scale)
         {
+            for(int j = 0; j < m_grid.getH(); j += scale)
+            {
+                ngl::Vec3 pos (i, m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, j);
+                bounds waterBounds;
+                waterBounds.first = pos + ngl::Vec3(-scale, -1.0f, -scale);
+                waterBounds.second = pos + ngl::Vec3(scale, 1.0f, scale);
+
+                bool br = false;
+                for(auto &b : boxes.first)
+                    br = (br or Utility::boxIntersectBox(b, waterBounds));
+
+                if(!br)
+                    continue;
+
+                m_transform.setScale(scale, scale, 1.0f);
+                m_transform.setRotation(90.0f, 0.0f, 0.0f);
+                m_transform.setPosition(pos);
+                slib->setRegisteredUniform("MV", m_transform.getMatrix() * m_cam.getV());
+                loadMatricesToShader();
+                glDrawArraysEXT(GL_PATCHES, 0, 4);
+            }
+        }
+
+        glBindVertexArray(0);
+
+        m_postEffectsBuffer.unbind();
+
+        //---------------------------//
+        //  DRAW BOX WHERE MOUSE IS  //
+        //---------------------------//
+        int charid = getCharIDAtMouse();
+        std::cout << "cid " << charid << '\n';
+
+        if(shouldDrawMouseBox)
+        {
+            glDisable(GL_CULL_FACE);
+            m_transform.reset();
+
+            ngl::Vec4 p;
+            //Player is not hovering over a character.
+            if(charid == -1)
+            {
+                p = mouseTerrainPos;
+
+                p.m_x = floor(p.m_x) + 0.5;
+                p.m_z = floor(p.m_z) + 0.5;
+                p.m_y = m_grid.getTileHeight(p.m_x, p.m_z);
+                p.m_y = std::max(p.m_y, static_cast<float>(m_grid.getGlobalWaterLevel()));
+                p.m_y /= m_terrainHeightDivider;
+
+                m_transform.setScale( m_mouseSelectionBoxScale.get() );
+                m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+                m_mouseSelectionBoxScale.setEnd(ngl::Vec3(1.0f, 2.0f, 1.0f));
+            }
+            else
+            {
+                for(auto &c : m_characters)
+                    if(c.getID() == charid)
+                        p = c.getPos();
+
+                p.m_y /= m_terrainHeightDivider;
+
+                m_transform.setScale( m_mouseSelectionBoxScale.get() );
+                m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+                m_mouseSelectionBoxScale.setEnd(ngl::Vec3(0.25f, 8.0f, 0.25f));
+            }
+            p.m_y -= 1.0f;
+            m_mouseSelectionBoxPosition.setEnd(ngl::Vec3(p.m_x, p.m_y, p.m_z));
+
+            m_postEffectsBuffer.bind();
+            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+
             slib->use("mousebox");
             slib->setRegisteredUniform("base", p.m_y);
             slib->setRegisteredUniform("m", 0.025f);
@@ -955,31 +983,30 @@ void Scene::draw()
             glLineWidth(5.0f);
             glDrawArraysEXT(GL_LINE_STRIP, 0, k->getMeshSize());
             glLineWidth(1.0f);
+            glBindVertexArray(0);
+
+            m_postEffectsBuffer.unbind();
+
+            glEnable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
         }
-        glBindVertexArray(0);
 
-        m_postEffectsBuffer.unbind();
+        //---------------------------//
+        //     FORWARD BLUR PASS     //
+        //---------------------------//
+        slib->use("bokeh");
 
-        glEnable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
+        id = slib->getProgramID("bokeh");
+        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+        m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+
+        glBindVertexArray(m_screenQuad);
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
     }
-
-    //---------------------------//
-    //     FORWARD BLUR PASS     //
-    //---------------------------//
-    slib->use("bokeh");
-
-    id = slib->getProgramID("bokeh");
-    m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-    m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
-
-    glBindVertexArray(m_screenQuad);
-    glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-  }
-  else
-  {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  }
+    else
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 
     //---------------------------//
     //          BUTTONS          //
@@ -993,7 +1020,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    /*glBindVertexArray(m_screenQuad);
+    glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1002,13 +1029,15 @@ void Scene::draw()
         m_transform.setScale(0.25, 0.25, 1.0);
 
         slib->use("debugTexture");
-        m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
+        GLuint id = slib->getProgramID("debugTexture");
+        m_utilityBuffer.bindTexture( id, "charid", "tex", 0);
+        //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
     }
 
-    slib->use("colour");
+    /*slib->use("colour");
     for(auto &p : m_debugPoints)
         p.m_w = 1.0;
 
@@ -1054,8 +1083,7 @@ void Scene::drawSky()
     glBindVertexArray(m_screenQuad);
 
     slib->use("sky");
-    slib->setRegisteredUniform("iMV", m_cam.getV().inverse());
-    slib->setRegisteredUniform("iP", m_cam.getP().inverse());
+    m_utilityBuffer.bindTexture(slib->getProgramID("sky"), "rayDir", "rayDir", 0);
     slib->setRegisteredUniform("camPos", m_cam.getPos());
     slib->setRegisteredUniform( "sunDir", m_sunDir );
 
@@ -1079,6 +1107,9 @@ void Scene::drawTerrain()
     float difference = snowLevel - waterLevel;
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
+
+    //We shouldn't transform the terrain, this stops us from doing it accidentally.
+    m_transform.reset();
 
     glBindVertexArray(m_terrainVAO);
     loadMatricesToShader();
@@ -1105,59 +1136,60 @@ void Scene::drawMeshes()
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
-						drawInstances( "house", "house_d", "diffuse", instances, offset);
+            drawInstances( "house", "house_d", "diffuse", instances, offset);
             break;
-				case static_cast<int>(TileType::FOUNDATION_A):
-						drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset);
-						break;
-				case static_cast<int>(TileType::FOUNDATION_B):
-						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset);
-						break;
-				case static_cast<int>(TileType::FOUNDATION_C):
-						drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset);
-						break;
-				case static_cast<int>(TileType::FOUNDATION_D):
-						drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset);
-						break;
+        case static_cast<int>(TileType::FOUNDATION_A):
+            drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset);
+            break;
+        case static_cast<int>(TileType::FOUNDATION_B):
+            drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset);
+            break;
+        case static_cast<int>(TileType::FOUNDATION_C):
+            drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset);
+            break;
+        case static_cast<int>(TileType::FOUNDATION_D):
+            drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset);
+            break;
         default:
             break;
         }
         offset += instances;
     }
 
+    slib->use("colour");
+    m_transform.reset();
     for(Character &character : m_characters)
     {
-			if(character.isSleeping() == false)
-			{
-					ngl::Vec3 pos = character.getPos();
-					pos.m_y /= m_terrainHeightDivider;
-					m_transform.setPosition(pos);
-					m_transform.setRotation(0, character.getRot(), 0);
-					slib->use("colour");
-					slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-					drawAsset("person", "", "colour");
-			}
+        if(character.isSleeping() == false)
+        {
+            ngl::Vec3 pos = character.getPos();
+            pos.m_y /= m_terrainHeightDivider;
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, character.getRot(), 0);
+            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+            drawAsset("person", "", "");
+        }
     }
 
-		for(auto &stone : m_tombstones)
-		{
-			m_transform.setPosition(stone);
-			drawAsset( "tombstone", "tombstone_d", "diffuse");
-		}
+    for(auto &stone : m_tombstones)
+    {
+        m_transform.setPosition(stone);
+        drawAsset( "tombstone", "tombstone_d", "diffuse");
+    }
 
     for(Baddie &baddie : m_baddies)
     {
-      ngl::Vec3 pos = baddie.getPos();
-      pos.m_y /= m_terrainHeightDivider;
-      m_transform.setPosition(pos);
-      m_transform.setRotation(0, baddie.getRot(), 0);
-      m_transform.setScale(2.0f, 2.0f, 2.0f);
-      slib->use("colour");
-      slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-      drawAsset("person", "", "colour");
+        ngl::Vec3 pos = baddie.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(2.0f, 2.0f, 2.0f);
+        slib->use("colour");
+        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        drawAsset("person", "", "");
     }
 }
 
@@ -1186,23 +1218,23 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
                 drawAsset( "mountain", "mountain_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-								drawAsset( "storehouse", "storehouse_d", "diffuse" );
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::HOUSE):
-								drawAsset( "house", "house_d", "diffuse");
+                drawAsset( "house", "house_d", "diffuse");
                 break;
-						case static_cast<int>(TileType::FOUNDATION_A):
-								drawAsset("foundation_A", "foundation_A_d", "diffuse");
-								break;
-						case static_cast<int>(TileType::FOUNDATION_B):
-								drawAsset("foundation_B", "foundation_B_d", "diffuse");
-								break;
-						case static_cast<int>(TileType::FOUNDATION_C):
-								drawAsset("foundation_C", "foundation_C_d", "diffuse");
-								break;
-						case static_cast<int>(TileType::FOUNDATION_D):
-								drawAsset("foundation_D", "foundation_D_d", "diffuse");
-								break;
+            case static_cast<int>(TileType::FOUNDATION_A):
+                drawAsset("foundation_A", "foundation_A_d", "diffuse");
+                break;
+            case static_cast<int>(TileType::FOUNDATION_B):
+                drawAsset("foundation_B", "foundation_B_d", "diffuse");
+                break;
+            case static_cast<int>(TileType::FOUNDATION_C):
+                drawAsset("foundation_C", "foundation_C_d", "diffuse");
+                break;
+            case static_cast<int>(TileType::FOUNDATION_D):
+                drawAsset("foundation_D", "foundation_D_d", "diffuse");
+                break;
             default:
                 break;
             }
@@ -1210,23 +1242,23 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &character : m_characters)
     {
-			if(character.isSleeping() == false)
-			{
-        ngl::Vec3 pos = character.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-				m_transform.setRotation(0, character.getRot(), 0);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-				drawAsset( "person", "", "colour");
-			}
+        if(character.isSleeping() == false)
+        {
+            ngl::Vec3 pos = character.getPos();
+            pos.m_y /= m_terrainHeightDivider;
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, character.getRot(), 0);
+            slib->use("colour");
+            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+            drawAsset( "person", "", "");
+        }
     }
 
-		for(auto &stone : m_tombstones)
-		{
-				m_transform.setPosition(stone);
-				drawAsset( "tombstone", "tombstone_d", "diffuse");
-		}
+    for(auto &stone : m_tombstones)
+    {
+        m_transform.setPosition(stone);
+        drawAsset( "tombstone", "tombstone_d", "diffuse");
+    }
 }
 
 void Scene::quit()
@@ -1430,23 +1462,23 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::HOUSE):
-						drawInstances( "house", "house_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances( "house", "house_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
-				case static_cast<int>(TileType::FOUNDATION_A):
-						drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset, m_shadowMat[_index] );
-						break;
-				case static_cast<int>(TileType::FOUNDATION_B):
-						drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset, m_shadowMat[_index]);
-						break;
-				case static_cast<int>(TileType::FOUNDATION_C):
-						drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset, m_shadowMat[_index] );
-						break;
-				case static_cast<int>(TileType::FOUNDATION_D):
-						drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset, m_shadowMat[_index]);
-						break;
+        case static_cast<int>(TileType::FOUNDATION_A):
+            drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            break;
+        case static_cast<int>(TileType::FOUNDATION_B):
+            drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset, m_shadowMat[_index]);
+            break;
+        case static_cast<int>(TileType::FOUNDATION_C):
+            drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            break;
+        case static_cast<int>(TileType::FOUNDATION_D):
+            drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset, m_shadowMat[_index]);
+            break;
         default:
             break;
         }
@@ -1456,29 +1488,29 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
-			if(character.isSleeping() == false)
-			{
-        ngl::Vec3 pos = character.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-				m_transform.setRotation(0, character.getRot(), 0);
-        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+        if(character.isSleeping() == false)
+        {
+            ngl::Vec3 pos = character.getPos();
+            pos.m_y /= m_terrainHeightDivider;
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, character.getRot(), 0);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-        ngl::Obj * k = store->getModel( "person" );
-        loadMatricesToShader( m_transform.getMatrix(), mvp );
-        k->draw();
-			}
+            ngl::Obj * k = store->getModel( "person" );
+            loadMatricesToShader( m_transform.getMatrix(), mvp );
+            k->draw();
+        }
     }
 
-		for(auto &stone : m_tombstones)
-		{
-				m_transform.setPosition(stone);
-				ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+    for(auto &stone : m_tombstones)
+    {
+        m_transform.setPosition(stone);
+        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-				ngl::Obj * k = store->getModel( "tombstone" );
-				loadMatricesToShader( m_transform.getMatrix(), mvp );
-				k->draw();
-		}
+        ngl::Obj * k = store->getModel( "tombstone" );
+        loadMatricesToShader( m_transform.getMatrix(), mvp );
+        k->draw();
+    }
 
 
     //Tweaking the shadow matrix so that it can be used for shading.
@@ -1551,21 +1583,21 @@ void Scene::mouseReleaseEvent (const SDL_MouseButtonEvent &_event)
 
 void Scene::wheelEvent(const SDL_MouseWheelEvent &_event)
 {
-  Gui *gui = Gui::instance();
-  if(gui->mousePos(Utility::getMousePos()))
-  {
-    gui->scrollButton(_event.y);
-  }
-  else
-  {
-    Gui::instance()->executeAction(_event.y > 0 ? Action::ZOOMIN : Action::ZOOMOUT);
-  }
+    Gui *gui = Gui::instance();
+    if(gui->mousePos(Utility::getMousePos()))
+    {
+        gui->scrollButton(_event.y);
+    }
+    else
+    {
+        Gui::instance()->executeAction(_event.y > 0 ? Action::ZOOMIN : Action::ZOOMOUT);
+    }
 }
 
 void Scene::zoom(int _direction)
 {
-  m_cam.rotate(-1.0f * _direction, 0.0f);
-  m_cam.dolly(-0.5f * _direction);
+    m_cam.rotate(-1.0f * _direction, 0.0f);
+    m_cam.dolly(-0.5f * _direction);
 }
 
 void Scene::keyDownEvent(const SDL_KeyboardEvent &_event)
@@ -1669,7 +1701,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     slib->setRegisteredUniform("bgl_dim", m_viewport);
 
     m_mainBuffer = Framebuffer();
-    m_pickBuffer = Framebuffer();
+    m_utilityBuffer = Framebuffer();
     m_shadowBuffer = Framebuffer();
     m_postEffectsBuffer = Framebuffer();
 
@@ -1729,7 +1761,7 @@ void Scene::mouseSelection()
                 {
                     if(character.isActive() == true)
                     {
-												character.setState(target_id);
+                        character.setState(target_id);
                     }
                 }
             }
@@ -1740,7 +1772,7 @@ void Scene::mouseSelection()
             }
         }
         glReadBuffer(GL_NONE);
-        m_pickBuffer.unbind();
+        m_utilityBuffer.unbind();
     }
 }
 
@@ -2208,7 +2240,7 @@ GLuint Scene::constructTerrain()
 
     for(auto &vec : trimesh)
     {
-      vec += ngl::Vec4(0.5, 0, 0.5, 0);
+        vec += ngl::Vec4(0.5, 0, 0.5, 0);
         uvmesh.push_back( ngl::Vec2(vec.m_x, vec.m_z) );
     }
 
@@ -2364,9 +2396,9 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
-  m_state = GameState::MAIN;
-  m_game_started = true;
-  Gui::instance()->unpause();
+    m_state = GameState::MAIN;
+    m_game_started = true;
+    Gui::instance()->unpause();
 }
 
 void Scene::startMove(Direction _d)
@@ -2386,9 +2418,9 @@ ngl::Vec3 Scene::getCamMoveVec()
         move.m_z -= 1;
     if(m_movement_held[Direction::BACKWARDS])
         move.m_z += 1;
-		if(m_movement_held[Direction::LEFTWARDS])
+    if(m_movement_held[Direction::LEFTWARDS])
         move.m_x += 1;
-		if(m_movement_held[Direction::RIGHTWARDS])
+    if(m_movement_held[Direction::RIGHTWARDS])
         move.m_x -= 1;
     move *= 10;
     float cam_to_pivot_height = abs(m_cam.getPivot().m_y - m_cam.getPos().m_y) + 20;
@@ -2405,30 +2437,30 @@ void Scene::prefsMode()
 
 void Scene::escapeState()
 {
-  Gui *gui = Gui::instance();
-  switch (m_state) {
-  case GameState::START_MENU:
-    startGame();
-    break;
-  case GameState::MAIN:
-  case GameState::PAUSE:
-    togglePause();
-    break;
-  case GameState::PREFERENCES:
-    if(m_game_started)
-    {
-      m_state = GameState::PAUSE;
-      gui->pause();
+    Gui *gui = Gui::instance();
+    switch (m_state) {
+    case GameState::START_MENU:
+        startGame();
+        break;
+    case GameState::MAIN:
+    case GameState::PAUSE:
+        togglePause();
+        break;
+    case GameState::PREFERENCES:
+        if(m_game_started)
+        {
+            m_state = GameState::PAUSE;
+            gui->pause();
+        }
+        else
+        {
+            m_state = GameState::START_MENU;
+            gui->createStartMenuButtons();
+        }
+        break;
+    default:
+        break;
     }
-    else
-    {
-      m_state = GameState::START_MENU;
-      gui->createStartMenuButtons();
-    }
-    break;
-  default:
-    break;
-  }
 }
 
 GameState Scene::getState()
@@ -2445,7 +2477,7 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()
 {
-    m_pickBuffer.bind();
+    m_utilityBuffer.bind();
     GLuint grid_texID = getTerrainPickTexture();
     glBindTexture(GL_TEXTURE_2D, grid_texID);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -2455,7 +2487,7 @@ ngl::Vec4 Scene::getTerrainPosAtMouse()
 
     // x, window height - y
     glReadPixels(mouse_coords.m_x, (m_viewport.m_y - mouse_coords.m_y), 1, 1, GL_RGBA, GL_FLOAT, &grid_coord.m_x);
-    m_pickBuffer.unbind();
+    m_utilityBuffer.unbind();
 
     //std::cout << "wmp = " << grid_coord << '\n';
     return grid_coord;
@@ -2463,7 +2495,7 @@ ngl::Vec4 Scene::getTerrainPosAtMouse()
 
 int Scene::getCharIDAtMouse()
 {
-    m_pickBuffer.bind();
+    m_utilityBuffer.bind();
 
     ngl::Vec2 mousePos = Utility::getMousePos();
 
@@ -2476,7 +2508,7 @@ int Scene::getCharIDAtMouse()
 
     glReadPixels(mousePos.m_x, (m_viewport.m_y - mousePos.m_y), 1, 1, GL_RED_INTEGER, GL_INT, &red);
 
-    m_pickBuffer.unbind();
+    m_utilityBuffer.unbind();
 
     return red - 1;
 }

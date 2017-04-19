@@ -4,7 +4,6 @@
 #define NUM_CASCADES 3
 
 #define FOG_DIVISOR 256.0
-#define GODRAY_STEPLEN 0.05
 
 in vec2 UV;
 
@@ -17,6 +16,7 @@ uniform sampler2D normal;
 uniform sampler2D position;
 uniform sampler2D shadowDepths[NUM_CASCADES];
 uniform sampler2D linearDepth;
+uniform sampler2D rayDir;
 
 layout (location = 0) out vec4 fragColour;
 
@@ -39,9 +39,6 @@ uniform float waterLevel;
 uniform vec3 directionalLightCol;
 uniform float iGlobalTime;
 
-uniform mat4 iP;
-uniform mat4 iMV;
-
 uniform mat4 shadowMatrix[NUM_CASCADES];
 
 vec3 moonColour = vec3(0.3, 0.6, 0.8);
@@ -50,13 +47,7 @@ uniform vec4 camPos;
 
 vec3 getEyeRay()
 {
-  vec2 uv = (UV - 0.5) * 2.0;
-  vec4 deviceNorm = vec4(uv, 0.0, 1.0);
-  //Project to eye space
-  vec3 eyeNorm = normalize( (iP * deviceNorm).xyz );
-  //Project to world space.
-  vec3 worldNorm = normalize( iMV * vec4(eyeNorm, 0.0) ).xyz;
-  return worldNorm;
+  return texture(rayDir, UV).xyz;
 }
 
 //Noise functions from https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
@@ -138,13 +129,26 @@ float cnoise(vec3 P){
 float shadowSample(float depth, vec2 smpl, ivec2 offset, int index)
 {
   if(depth > textureOffset(shadowDepths[index], smpl, offset).r)
-    return 1.0f;
+    return 1.0;
   return 0.0;
+}
+
+float distanceSquared(vec3 _a, vec3 _b)
+{
+  return (_b.x - _a.x) * (_b.x - _a.x) +
+      (_b.y - _a.y) * (_b.y - _a.y) +
+      (_b.z - _a.z) * (_b.z - _a.z);
 }
 
 vec3 basicLight(vec4 fragPos, vec3 fragNormal, int lightIndex)
 {
   vec4 lp = lbuf.buf[ lightIndex ].pos;
+  float d = distanceSquared(fragPos.xyz, lp.xyz);
+
+  //Light cutoff threshold
+  if(lbuf.buf[ lightIndex ].lum / d < 0.001)
+    return vec3(0.0);
+
   vec4 lv = lp - fragPos;
   lv = normalize(lv);
   float mul = dot( lv, vec4(fragNormal.xyz, 0.0) );
@@ -201,11 +205,57 @@ void main()
     mul -= shadow;
   }
 
-  mul = max(mul, 0.35 / (sunmul + moonmul + 1.0));
-
 #if shadowbuffer == 0
+  //GODRAYS
+  if(drawGodRays)
+  {
+    //Step length is nbow variable, it shortens when in shadow and lengthens when not.
+    float stepLength = 0.1;
+    float rayLen = distance(camPos, fragPos);
+    float curLen = 0.0;
+    vec3 rayDir = getEyeRay();
+    float lum = 0.0;
+    int count = 0;
+    while(curLen < rayLen && curLen < 24.0)
+    {
+      int cascadeIndex = -1;
+      if(curLen > cascades[0] && curLen < cascades[1])
+        cascadeIndex = 0;
+      else if(curLen < cascades[2])
+        cascadeIndex = 1;
+      else if(curLen < cascades[3])
+        cascadeIndex = 2;
+
+      vec3 rayPos = camPos.xyz + curLen * rayDir;
+      vec4 sposition = shadowMatrix[cascadeIndex] * vec4(rayPos.xyz, 1.0);
+      float depth = sposition.z - bias;
+
+      float shadow = shadowSample(depth, sposition.xy, ivec2(0, 0), cascadeIndex);
+      shadow += shadowSample(depth, sposition.xy, ivec2(0, 1), cascadeIndex);
+      shadow += shadowSample(depth, sposition.xy, ivec2(1, 0), cascadeIndex);
+      shadow += shadowSample(depth, sposition.xy, ivec2(0, -1), cascadeIndex);
+      shadow += shadowSample(depth, sposition.xy, ivec2(-1, 0), cascadeIndex);
+      shadow /= 5.0;
+
+      if(shadow > 0.2)
+        stepLength = 0.05;
+      else
+        stepLength += 0.01;
+      stepLength = clamp(stepLength, 0.05, 0.25);
+
+      lum += 1.15 - 1.0 * shadow * curLen;
+
+      count++;
+      curLen += stepLength;
+    }
+    lum /= count;
+    lum = max(0.15, lum);
+    mul *= lum;
+  }
+
+  mul = max(mul, 0.35 / (sunmul + moonmul + 1.0));
   fragColour.xyz *= mul;
-  fragColour.xyz *= directionalLightCol;
+  fragColour.xyz *= directionalLightCol; 
 
   for(int i = 0; i < lbufLen; ++i)
   {
@@ -234,45 +284,7 @@ void main()
   fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
 
-  if(drawGodRays)
-  {
-    //GOD RAYS
-    float rayLen = distance(camPos, fragPos);
-    float curLen = 0.0;
-    vec3 rayDir = getEyeRay();
-    float lum = 0.0;
-    int count = 0;
-    while(curLen < rayLen && curLen < 32.0)
-    {
-      int cascadeIndex = -1;
-      if(curLen > cascades[0] && curLen < cascades[1])
-        cascadeIndex = 0;
-      else if(curLen < cascades[2])
-        cascadeIndex = 1;
-      else if(curLen < cascades[3])
-        cascadeIndex = 2;
-
-      vec3 rayPos = camPos.xyz + curLen * rayDir;
-      vec4 sposition = shadowMatrix[cascadeIndex] * vec4(rayPos.xyz, 1.0);
-      float depth = sposition.z - bias;
-
-      float shadow = shadowSample(depth, sposition.xy, ivec2(0, 0), cascadeIndex);
-      shadow += shadowSample(depth, sposition.xy, ivec2(0, 1), cascadeIndex);
-      shadow += shadowSample(depth, sposition.xy, ivec2(1, 0), cascadeIndex);
-      shadow += shadowSample(depth, sposition.xy, ivec2(0, -1), cascadeIndex);
-      shadow += shadowSample(depth, sposition.xy, ivec2(-1, 0), cascadeIndex);
-      shadow /= 5.0;
-
-      lum += 1.5 - 1.0 * shadow * curLen;
-
-      count++;
-      curLen += GODRAY_STEPLEN;
-    }
-    lum /= count;
-    lum = max(0.05, lum);
-    fragColour.xyz *= lum;
-  }
-  //fragColour.xyz = vec3(fragDepth.r);
+  //fragColour.xyz = vec3(fragDepth / 16.0);
 
   fragColour.a = 1.0;
 }

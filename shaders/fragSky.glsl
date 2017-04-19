@@ -7,8 +7,8 @@ layout(location = 0) out vec4 outColour;
 in vec4 position;
 in vec2 UV;
 
-uniform mat4 iP;
-uniform mat4 iMV;
+uniform sampler2D rayDir;
+
 uniform vec2 iResolution;
 uniform vec3 camPos;
 
@@ -108,13 +108,7 @@ float cnoise(vec3 P){
 
 vec3 getEyeRay()
 {
-    vec2 uv = (UV - 0.5) * 2.0;
-    vec4 deviceNorm = vec4(uv, 0.0, 1.0);
-    //Project to eye space
-    vec3 eyeNorm = normalize( (iP * deviceNorm).xyz );
-    //Project to world space.
-    vec3 worldNorm = normalize( iMV * vec4(eyeNorm, 0.0) ).xyz;
-    return worldNorm;
+  return texture(rayDir, UV).xyz;
 }
 
 float phase(float alpha, float g)

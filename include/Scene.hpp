@@ -226,7 +226,7 @@ private:
     /// @brief framebuffer to store data for the deferred rendering pipeline
     Framebuffer m_mainBuffer;
     /// @brief framebuffer to store id and positional data, to be clicked on
-    Framebuffer m_pickBuffer;
+    Framebuffer m_utilityBuffer;
     /// @brief buffer to store depth for shadowing
     Framebuffer m_shadowBuffer;
     /// @brief buffer to store displacement map, currently for water only.
@@ -261,11 +261,11 @@ private:
 
     /// @brief Wrapper for getTerrainPickTexture, returns the encoded world pos of the "terrainpos" texture at the mouse position.
     ngl::Vec4 getTerrainPosAtMouse();
-    GLuint getTerrainPickTexture() {return m_pickBuffer.get("terrainpos");}
+    GLuint getTerrainPickTexture() {return m_utilityBuffer.get("terrainpos");}
 
     /// @brief Wrapper for getTerrainPickTexture, returns the encoded id of the "charid" texture at the mouse position.
     int getCharIDAtMouse();
-    GLuint getCharPickTexture() {return m_pickBuffer.get("charid");}
+    GLuint getCharPickTexture() {return m_utilityBuffer.get("charid");}
 
     std::pair<std::vector<bounds>, std::vector<bounds> > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
     void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
