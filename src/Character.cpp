@@ -18,8 +18,9 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_id(m_id_counter++),
   m_name(_name),
   m_stamina(1.0),
-  m_health(1.0),
-  m_active(false),
+	m_health(1.0),
+	m_hunger(1.0),
+	m_active(false),
   m_sleeping(false),
   m_idle(true),
   m_grid(_grid),
@@ -126,7 +127,7 @@ void Character::buildState(TileType _building)
       //Start building the building type at current position
       if(findNearestEmptyTile())
       {
-        m_dest_target_id = m_building_tile;
+				m_dest_target_id = m_target_id;
         m_building_type = _building;
         //create cycle of states: move to storehouse, collect wood, build
         for(int i =0; i<iterations; i++)
@@ -380,13 +381,20 @@ void Character::idleState()
 void Character::update()
 {
   std::string message;
-	/***** REMOVE HEALTH, FOR CHECKING *****/
-	/*
-	if(m_timer.elapsed() >= 1000)
+	//remove health if hunger is too low, take away from health
+	//************NEED TO MAKE SECOND TIMER FOR THESE****************//
+	if(m_hunger == 0.0)
 	{
-		m_health -= 0.001 * m_id;
+		if(m_timer.elapsed() >= 1000)
+			m_health -= 0.001;
 	}
-	*/
+	if(m_timer.elapsed() >= 10000)
+	{
+		std::cout<<"HUNGER: "<<m_hunger<<std::endl;
+		m_hunger-= 0.001;
+		if (m_hunger < 0.0)
+			m_hunger = 0;
+	}
   //check if states are still in stack
   if(m_state_stack.size() > 0)
   {
@@ -440,19 +448,16 @@ void Character::update()
           if (m_inventory == CharInventory::WOOD)
           {
             m_world_inventory->addWood(1);
-            generalMessage(" deposited wood", m_target_id);
           }
           //if the character is holding fish, add to inventory
           else if (m_inventory == CharInventory::FISH)
           {
             m_world_inventory->addFish(1);
-            generalMessage(" deposited a fish", m_target_id);
           }
           //if the character is holding berries, add to inventory
           else if (m_inventory == CharInventory::BERRIES)
           {
             m_world_inventory->addBerries(5);
-            generalMessage(" deposited berries", m_target_id);
           }
 
           //reset character inventory
@@ -584,7 +589,6 @@ void Character::update()
         {
           //character has wood in inventory
           m_inventory = CharInventory::WOOD;
-          generalMessage(" collected wood", m_pos);
 
           //take wood from universal storage
           m_world_inventory->takeWood(1);
@@ -605,7 +609,6 @@ void Character::update()
         {
           //character has berries in inventory
           m_inventory = CharInventory::BERRIES;
-          generalMessage(" collected berries", m_pos);
 
           //take berries from universal storage
           m_world_inventory->takeBerries(5);
@@ -622,7 +625,6 @@ void Character::update()
         {
           //character has fish in inventory
           m_inventory = CharInventory::FISH;
-          generalMessage(" collected a fish", m_pos);
 
           //take fish from universal storage
           m_world_inventory->takeFish(1);
@@ -676,8 +678,12 @@ void Character::update()
           //take berries away from inventory
           m_inventory = CharInventory::NONE;
 
-          //add onto stamina
+					//add onto hunger
+					m_hunger += 0.2;
 					m_health += 0.2;
+					//check and clamp to 1.0
+					if (m_hunger >= 1.0)
+						m_hunger = 1.0;
 					if (m_health >= 1.0)
 						m_health = 1.0;
 
@@ -694,8 +700,12 @@ void Character::update()
           //take fish from inventory
           m_inventory = CharInventory::NONE;
 
-          //add onto stamina
+					//add onto hunger
+					m_hunger += 0.5;
 					m_health += 0.5;
+					//check and clamp to 1.0
+					if (m_hunger >= 1.0)
+						m_hunger = 1.0;
 					if (m_health >= 1.0)
 						m_health = 1.0;
 

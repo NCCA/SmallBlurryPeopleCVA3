@@ -232,6 +232,10 @@ private:
 	///
 	float m_health;
 	///
+	/// \brief m_hunger, how hungry the character is, 1 = full, 0 = hungry
+	///
+	float m_hunger;
+	///
 	/// @brief m_active, sets if the current character is selected
 	///
 	bool m_active;
