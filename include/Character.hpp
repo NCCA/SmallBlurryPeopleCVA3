@@ -177,6 +177,11 @@ public:
 	///
 	ngl::Vec3 getPos();
 	///
+	/// \brief getPos2d return characters position on grid, ignoring height
+	/// \return 2d position vector
+	///
+	ngl::Vec2 getPos2d() const {return m_pos;}
+	///
 	/// \brief updateRot update m_rot, eg if direction has changed
 	///
 	void updateRot();

@@ -91,6 +91,7 @@ T Sqr(T _x)
 {
     return _x * _x;
 }
+
 }
 
 #endif

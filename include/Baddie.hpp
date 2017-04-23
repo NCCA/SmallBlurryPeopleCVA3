@@ -4,7 +4,8 @@
 #include "ngl/Vec2.h"
 #include "ngl/Vec3.h"
 #include "Grid.hpp"
-#include "vector"
+#include <vector>
+#include "Character.hpp"
 
 class Baddie
 {
@@ -21,7 +22,7 @@ public:
   ///
   /// \brief update calculate behaviours for baddie
   ///
-  void update(ngl::Vec3 closest_Target);
+  void update(const std::vector<Character> &m_characters);
   ///
   /// \brief move, moves baddie along its path
   /// \return true if baddie reaches target
@@ -32,7 +33,6 @@ public:
   /// \return vector to target
   ///
   ngl::Vec2 calcAimVec(float *dist_squared);
-
 	///
 	/// \brief setTarget, set a new target position based on a position
 	/// \param _target_pos, the position to pathfind to
@@ -57,6 +57,12 @@ public:
 	/// \return m_rot (degrees)
 	///
 	float getRot() {return m_rot;}
+	///
+	/// \brief targetBest set target to the character it can find a path to
+	/// \param _characters vector of characters
+	/// \return true if path found
+	///
+	bool targetBest(const std::vector<Character> &_characters);
 private:
   ///
   /// \brief m_pos position of baddie

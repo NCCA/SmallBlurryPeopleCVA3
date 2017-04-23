@@ -3,6 +3,7 @@
 #include "Prefs.hpp"
 #include "ngl/NGLStream.h"
 #include "Utility.hpp"
+#include <algorithm>
 
 Baddie::Baddie(Grid *_grid) :
   m_grid(_grid),
@@ -12,16 +13,16 @@ Baddie::Baddie(Grid *_grid) :
   m_target_id = m_grid->coordToId(m_pos);
   m_health = 1.0f;
   Prefs* prefs = Prefs::instance();
-  m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.8;
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED");// * 0.25;
 
-  findPath(ngl::Vec2(m_grid->getW()/2, m_grid->getH()/2));
+  setTarget(ngl::Vec2(m_grid->getW()/2, m_grid->getH()/2));
 }
 
-void Baddie::update(ngl::Vec3 closest_Target)
+void Baddie::update(const std::vector<Character> &m_characters)
 {
   if(move())
   {
-    //newRandomTarget();
+    targetBest(m_characters);
   }
 
   //setTarget(target);
@@ -88,6 +89,7 @@ bool Baddie::setTarget(ngl::Vec2 _target_pos)
 {
   if(m_target_id != m_grid->coordToId(_target_pos))
   {
+    m_target_id = m_grid->coordToId(_target_pos);
     findPath(_target_pos);
   }
   if(m_path.size() <= 0)
@@ -121,3 +123,15 @@ void Baddie::updateRot()
     m_rot = Utility::degrees(atan2(dir.m_x, dir.m_y));
   }
 }
+
+bool Baddie::targetBest(const std::vector<Character> &_characters)
+{
+  std::vector<ngl::Vec2> positions;
+  for(const Character &c : _characters)
+  {
+    positions.push_back(c.getPos2d());
+  }
+  return false;
+}
+
+
