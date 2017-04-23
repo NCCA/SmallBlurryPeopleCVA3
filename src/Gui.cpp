@@ -310,7 +310,7 @@ void Gui::createPrefsButtons()
   }
   std::string save_prefs("SAVE PREFERENCES");
   addButton(Action::SAVE_PREFERENCES, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 60), ngl::Vec2(getButtonLength(save_prefs), 40), save_prefs);
-  std::string prefs_warning("You will need to SAVE PREFERENCES and restart the game for some settings to take effect");
+  std::string prefs_warning("You will need to SAVE PREFERENCES and restart the game for most settings to take effect");
   addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0,10), ngl::Vec2(getButtonLength(prefs_warning), 40), prefs_warning);
 
   updateButtonArrays();

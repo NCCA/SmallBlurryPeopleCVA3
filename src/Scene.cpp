@@ -1014,6 +1014,7 @@ void Scene::draw()
     //---------------------------//
     //          BUTTONS          //
     //---------------------------//
+    glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
     Gui::instance()->drawButtons();
 
