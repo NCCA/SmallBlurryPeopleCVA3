@@ -481,7 +481,7 @@ void main()
 
 
   if(box(translate(pixel_uv, button_pixel_size/2), button_pixel_size/2, border_size*3) > 0
-     || buttonRequiresCharacter() && !character_selected)
+     || (buttonRequiresCharacter() && !character_selected))
   {
     discard;
   }

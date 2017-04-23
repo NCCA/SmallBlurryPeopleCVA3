@@ -337,7 +337,6 @@ void Gui::removeButton(std::shared_ptr<Button> button)
     m_buttons.erase(it);
   }
   updateButtonArrays();
-
 }
 
 void Gui::updateButtonArrays()
@@ -355,19 +354,22 @@ void Gui::updateButtonArrays()
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     Button *b = button.get();
-    b->updatePos(res);
-    positions.push_back(b->getPos());
-    sizes.push_back(b->getSize());
-    shader_ids.push_back(shader_id);
-    actions.push_back(b->getAction());
-    if(b->getAction() == Action::NOTIFY)
+    if(b)
     {
-      notification_uniform_needs_updating = true;
-      if(notification_ages_index < notification_ages.size())
+      b->updatePos(res);
+      positions.push_back(b->getPos());
+      sizes.push_back(b->getSize());
+      shader_ids.push_back(shader_id);
+      actions.push_back(b->getAction());
+      if(b->getAction() == Action::NOTIFY)
       {
-        notification_ages[notification_ages_index] = shader_id;
-        notification_ages[notification_ages_index+1] = ((NotificationButton *)b)->getAge();
-        notification_ages_index+=2;
+        notification_uniform_needs_updating = true;
+        if(notification_ages_index < notification_ages.size())
+        {
+          notification_ages[notification_ages_index] = shader_id;
+          notification_ages[notification_ages_index+1] = ((NotificationButton *)b)->getAge();
+          notification_ages_index+=2;
+        }
       }
     }
     shader_id++;
@@ -503,7 +505,13 @@ void Gui::drawButtons()
   {
     if(m_selected_button)
     {
-      slib->setRegisteredUniform("mouseOver", m_selected_button->getID());
+      int id = m_selected_button->getID();
+      int index = 0;
+      while(m_buttons[index]->getID() != id)
+      {
+        index++;
+      }
+      slib->setRegisteredUniform("mouseOver", index);
     }
     else
     {
