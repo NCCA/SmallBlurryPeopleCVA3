@@ -232,6 +232,10 @@ private:
 	///
 	float m_health;
 	///
+	/// \brief m_hunger, how hungry the character is, 1 = full, 0 = hungry
+	///
+	float m_hunger;
+	///
 	/// @brief m_active, sets if the current character is selected
 	///
 	bool m_active;
@@ -276,9 +280,12 @@ private:
 	///
 	std::vector<ngl::Vec2> m_path;
 	///
-	/// \brief m_timer, timer for characters actions such as chopping wood and building
+	/// \brief m_action_timer, timer for characters actions such as chopping wood and building
 	///
-	QTime m_timer;
+	QTime m_action_timer;
+	QTime m_hunger_timer;
+	QTime m_health_timer;
+	QTime m_stamina_timer;
 	///
 	/// \brief m_state_stack, stack containing sequence of states to reach an end goal, such as chopping wood
 	///
@@ -359,7 +366,7 @@ private:
 	/// \param _coord, the current tile's coordinate
 	/// \param _found, when a tree is found then the flood fill is exited
 	///
-	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	void treeFloodfill(ngl::Vec2 _coord, bool &_found, std::vector<ngl::Vec2> &_found_coords);
 	///
 	/// \brief distanceSort, sorts a vector based on the squared distance from a character
 	/// \param io_left, the index of the first element in the sub-section of the vector
@@ -388,7 +395,7 @@ private:
 	/// \brief completedAction, when a state has been completed it is removed from the stack and the
 	/// internal timer is reset
 	///
-	void completedAction() {m_state_stack.pop_front(); m_timer.restart();}
+	void completedAction() {m_state_stack.pop_front(); m_action_timer.restart();}
 	///
 	/// \brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
 	/// complete a task
