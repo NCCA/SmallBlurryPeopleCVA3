@@ -280,9 +280,12 @@ private:
 	///
 	std::vector<ngl::Vec2> m_path;
 	///
-	/// \brief m_timer, timer for characters actions such as chopping wood and building
+	/// \brief m_action_timer, timer for characters actions such as chopping wood and building
 	///
-	QTime m_timer;
+	QTime m_action_timer;
+	QTime m_hunger_timer;
+	QTime m_health_timer;
+	QTime m_stamina_timer;
 	///
 	/// \brief m_state_stack, stack containing sequence of states to reach an end goal, such as chopping wood
 	///
@@ -392,7 +395,7 @@ private:
 	/// \brief completedAction, when a state has been completed it is removed from the stack and the
 	/// internal timer is reset
 	///
-	void completedAction() {m_state_stack.pop_front(); m_timer.restart();}
+	void completedAction() {m_state_stack.pop_front(); m_action_timer.restart();}
 	///
 	/// \brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
 	/// complete a task

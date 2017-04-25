@@ -17,6 +17,7 @@ int Character::m_id_counter(1);
 Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name):
   m_id(m_id_counter++),
   m_name(_name),
+	m_speed(0),
   m_stamina(1.0),
 	m_health(1.0),
 	m_hunger(1.0),
@@ -25,7 +26,6 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_idle(true),
   m_grid(_grid),
   m_world_inventory(_world_inventory),
-  m_speed(0),
   m_inventory(CharInventory::NONE),
   m_called(0),
   m_building_amount(0),
@@ -37,7 +37,10 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_building_amount = prefs->getIntPref("CHARACTER_BUILDING");
 
   //timer for actions
-  m_timer.start();
+	m_action_timer.start();
+	m_hunger_timer.start();
+	m_health_timer.start();
+	m_stamina_timer.start();
 
   //create random times for abilities
   //wood chopping speed
@@ -236,8 +239,8 @@ void Character::forageState()
       m_state_stack.push_back(State::IDLE);
       generalMessage(" has started foraging", m_dest_target_id);
     }
-    else
-        generalMessage(" can't find a tree", m_pos);
+		else
+			generalMessage(" can't find a tree", m_pos);
   }
   else
     staminaMessage();
@@ -326,53 +329,36 @@ void Character::idleState()
   if (m_called == 0)
   {
     //set the idle target to the character's current target
-    m_idle_target_id = m_target_id;
+		m_idle_target_id = m_grid->coordToId(m_pos);
     m_speed /= 10;
   }
 
   ngl::Vec2 idle_pos = m_grid->idToCoord(m_idle_target_id);
   int dist = 5;
-  int max_attempts = 10;
+	int max_attempts = 10;
   bool valid = false;
   int attempt_number = 0;
-
 
   while(!valid && attempt_number<max_attempts)
   {
     attempt_number++;
-    // if target tile is not traversable (eg if target is tree)
-    // this stops them from idly moving through trees and then getting stuck
 
-    /**** WOULDN'T THIS BE CHECKED WHEN SET TARGET IS CALLED? ****/
-    if(!m_grid->isTileTraversable(m_target_id))
-    {
-      valid = false;
-      m_target_id = m_grid->coordToId(m_pos);
-    }
-    else
-    {
-        //find the maximum range the character can move in the x and y direction
-        int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
-        int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
-        int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
-        int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, m_grid->getH());
+		//find the maximum range the character can move in the x and y direction
+		int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
+		int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
+		int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
+		int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, m_grid->getH());
 
-        //find a random coordinate from these ranges
-        int x = Utility::randInt(x_min_range, x_max_range);
-        int y = Utility::randInt(y_min_range, y_max_range);
-        valid = setTarget(ngl::Vec2(x,y));
-    }
+		//find a random coordinate from these ranges
+		int x = Utility::randInt(x_min_range, x_max_range);
+		int y = Utility::randInt(y_min_range, y_max_range);
+		valid = setTarget(ngl::Vec2(x,y));
   }
-
-  //slightly regain stamina being idle
-  if(m_stamina < 1.0)
-    m_stamina += 0.01;
-
   //create stack if path found
   if(valid)
-  {
-      m_state_stack.push_back(State::MOVE);
-      m_state_stack.push_back(State::IDLE);
+	{
+		m_state_stack.push_back(State::MOVE);
+		m_state_stack.push_back(State::IDLE);
   }
 
   m_called++;
@@ -381,20 +367,39 @@ void Character::idleState()
 void Character::update()
 {
   std::string message;
-	//remove health if hunger is too low, take away from health
-	//************NEED TO MAKE SECOND TIMER FOR THESE****************//
-	if(m_hunger == 0.0)
+	//take away health if hunger is too low
+	if(m_hunger == 0.0 && m_health_timer.elapsed() >= 1000)
 	{
-		if(m_timer.elapsed() >= 1000)
-			m_health -= 0.001;
+		m_health -= 0.01;
+		if(m_health < 0.0)
+			m_health = 0.0;
+		m_health_timer.restart();
 	}
-	if(m_timer.elapsed() >= 10000)
+	else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 1000)
 	{
-		std::cout<<"HUNGER: "<<m_hunger<<std::endl;
-		m_hunger-= 0.001;
+		m_health += 0.05;
+		if(m_health > 1.0)
+			m_health = 1.0;
+		m_health_timer.restart();
+	}
+
+	//take away hunger over time
+	if(m_hunger > 0.0 && m_hunger_timer.elapsed() >= 1000)
+	{
+		m_hunger-= 0.01;
 		if (m_hunger < 0.0)
 			m_hunger = 0;
+		m_hunger_timer.restart();
 	}
+
+	//recover stamina when idle
+	if(m_stamina < 1.0 && m_idle == true && m_stamina_timer.elapsed() >= 1000)
+	{
+		std::cout<<"STAMINA"<<m_stamina<<std::endl;
+		m_stamina += 0.005;
+		m_stamina_timer.restart();
+	}
+
   //check if states are still in stack
   if(m_state_stack.size() > 0)
   {
@@ -415,7 +420,7 @@ void Character::update()
       case(State::CHOP_WOOD):
       {
         //when chopping speed has been reached, gain a piece of wood
-        if(m_timer.elapsed() >= 1000 * m_chopping_speed)
+				if(m_action_timer.elapsed() >= 1000 * m_chopping_speed)
         {
           int wood_taken = m_grid->cutTileTrees(m_dest_target_id, 1);
           if (wood_taken == 1)
@@ -442,7 +447,7 @@ void Character::update()
 
       case(State::STORE):
       {
-        if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //if the character is holding wood, add to inventory
           if (m_inventory == CharInventory::WOOD)
@@ -472,7 +477,7 @@ void Character::update()
       case(State::FISH):
       {
         //when fishing speed reached, gain piece of fish
-        if(m_timer.elapsed() >= 1000 * m_fishing_speed)
+				if(m_action_timer.elapsed() >= 1000 * m_fishing_speed)
         {
           //take away stamina
           m_stamina -= 0.3;
@@ -501,7 +506,7 @@ void Character::update()
 
       case(State::FORAGE):
       {
-        if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //take away stamina
           m_stamina -= 0.1;
@@ -537,7 +542,7 @@ void Character::update()
           m_state_stack.pop_front();
           m_state_stack.pop_front();
           m_state_stack.pop_front();
-          m_timer.restart();
+					m_action_timer.restart();
         }
         break;
       }
@@ -557,7 +562,7 @@ void Character::update()
           m_state_stack.pop_front();
           m_state_stack.pop_front();
           m_state_stack.pop_front();
-          m_timer.restart();
+					m_action_timer.restart();
         }
         break;
       }
@@ -577,7 +582,7 @@ void Character::update()
           m_state_stack.pop_front();
           m_state_stack.pop_front();
           m_state_stack.pop_front();
-          m_timer.restart();
+					m_action_timer.restart();
         }
         break;
       }
@@ -585,7 +590,7 @@ void Character::update()
 
       case(State::GET_WOOD):
       {
-        if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //character has wood in inventory
           m_inventory = CharInventory::WOOD;
@@ -605,7 +610,7 @@ void Character::update()
 
       case(State::GET_BERRIES):
       {
-        if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //character has berries in inventory
           m_inventory = CharInventory::BERRIES;
@@ -621,7 +626,7 @@ void Character::update()
 
       case(State::GET_FISH):
       {
-        if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //character has fish in inventory
           m_inventory = CharInventory::FISH;
@@ -646,7 +651,7 @@ void Character::update()
           storeState();
         }
 
-        if(m_timer.elapsed() >= 1000 * m_building_speed)
+				if(m_action_timer.elapsed() >= 1000 * m_building_speed)
         {
           //take away stamina
           m_stamina -= 0.3;
@@ -673,19 +678,16 @@ void Character::update()
 
       case(State::EAT_BERRIES):
       {
-        if(m_timer.elapsed() >= 3000)
+				if(m_action_timer.elapsed() >= 3000)
         {
           //take berries away from inventory
           m_inventory = CharInventory::NONE;
 
 					//add onto hunger
 					m_hunger += 0.2;
-					m_health += 0.2;
 					//check and clamp to 1.0
 					if (m_hunger >= 1.0)
 						m_hunger = 1.0;
-					if (m_health >= 1.0)
-						m_health = 1.0;
 
           generalMessage(" ate berries", m_pos);
           completedAction();
@@ -695,19 +697,16 @@ void Character::update()
 
       case(State::EAT_FISH):
       {
-        if(m_timer.elapsed() >= 3000)
+				if(m_action_timer.elapsed() >= 3000)
         {
           //take fish from inventory
           m_inventory = CharInventory::NONE;
 
 					//add onto hunger
 					m_hunger += 0.5;
-					m_health += 0.5;
 					//check and clamp to 1.0
 					if (m_hunger >= 1.0)
 						m_hunger = 1.0;
-					if (m_health >= 1.0)
-						m_health = 1.0;
 
           generalMessage(" ate a fish", m_pos);
           completedAction();
@@ -735,7 +734,7 @@ void Character::update()
       case(State::IDLE):
       {
 				//character doesnt move after an action for a second
-				if(m_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= 1000)
         {
           //remove state from stack
           completedAction();
@@ -753,7 +752,7 @@ void Character::update()
           m_sleeping = true;
           //character is no longer the active character
           m_active = false;
-          if(m_timer.elapsed() >= 1000 * (recover*100))
+					if(m_action_timer.elapsed() >= 1000 * (recover*10))
           {
             m_sleeping = false;
             m_stamina = 1.0;
@@ -766,7 +765,7 @@ void Character::update()
         else
         {
           //if stamina is full
-          if(m_timer.elapsed() >= 1000)
+					if(m_action_timer.elapsed() >= 1000)
           {
             generalMessage(" doesn't need to sleep", m_pos);
             findNearestEmptyTile();
@@ -786,6 +785,11 @@ void Character::update()
 
     idleState();
   }
+	else
+	{
+		if(!m_idle)
+				m_idle = true;
+	}
 }
 
 bool Character::move()
@@ -860,6 +864,8 @@ bool Character::setTarget(int _tile_id)
   int target_occupants = m_grid->getOccupants(_tile_id);
 
   int m_old_target = m_target_id;
+	std::cout<<"old_target"<< m_old_target<<std::endl;
+	std::cout<<"new target"<<_tile_id<<std::endl;
   //check how many people are on a tile, if max number of people reached, then the target is invalid
   //if the character isnt idle
   if (target_occupants < occupant_limit && !m_idle)
@@ -876,6 +882,7 @@ bool Character::setTarget(int _tile_id)
       {
         m_grid->addOccupant(_tile_id);
         m_grid->removeOccupant(m_old_target);
+				m_grid->removeOccupant(m_dest_target_id);
         return true;
       }
     }
@@ -1001,8 +1008,6 @@ bool Character::findNearestTree()
   if (found == true)
   {
     if(findNearestEmptyTile())
-    //m_target_id = m_dest_target_id;
-    //setTarget(m_target_id);
       return true;
     else
       return false;
@@ -1139,7 +1144,18 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
   //if the vector is not empty
   if (_coord_data.size() > 0)
   {
-    //set the first element to the target id and shortest path
+		for(auto coord : _coord_data)
+		{
+			std::cout<<"\nCOORD "<< m_grid->coordToId(coord)<<std::endl;
+			std::cout<<"POS "<<m_grid->coordToId(m_pos)<<std::endl;
+			//checks if current target is equal to the any of the coordinates
+			if(m_grid->coordToId(m_pos) == m_grid->coordToId(coord))
+			{
+				return true;
+			}
+		}
+
+		//set the first element to the target id and shortest path
     m_target_id = m_grid->coordToId(_coord_data[0]);
     std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
     //erase the first element in the vector
@@ -1210,8 +1226,6 @@ void Character::updateRot()
 void Character::resetCharacter()
 {
   //clear states
-  std::cout << "reset called" << std::endl;
-
   m_idle = false;
   m_state_stack.clear();
   //reset speed
@@ -1243,12 +1257,7 @@ State Character::getState()
 {
 	//return the character's current state
   if (!m_idle)
-	{
-		if(m_state_stack.size() == 0)
-			return State::IDLE;
-		else
-      return m_state_stack[0];
-	}
+		return m_state_stack[0];
   else
     return State::IDLE;
 }
