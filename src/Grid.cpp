@@ -117,7 +117,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-  return _coord.m_x + m_w * _coord.m_y;
+	return (int)(_coord.m_x + m_w * (int)_coord.m_y);
 }
 
 void Grid::loadScript(std::string _script_path)

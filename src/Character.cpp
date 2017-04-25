@@ -223,6 +223,7 @@ void Character::forageState()
     //find nearby tree
     if(findNearestTree())
     {
+			//m_dest_target_id = m_target_id;
       //random number of berries collected based on foraging skill
       int berry_amount = m_forage_amount + Utility::randInt(0, 2);
       //create cycle of states: move to tree, forage berries, store berries
@@ -864,8 +865,6 @@ bool Character::setTarget(int _tile_id)
   int target_occupants = m_grid->getOccupants(_tile_id);
 
   int m_old_target = m_target_id;
-	std::cout<<"old_target"<< m_old_target<<std::endl;
-	std::cout<<"new target"<<_tile_id<<std::endl;
   //check how many people are on a tile, if max number of people reached, then the target is invalid
   //if the character isnt idle
   if (target_occupants < occupant_limit && !m_idle)
@@ -882,7 +881,6 @@ bool Character::setTarget(int _tile_id)
       {
         m_grid->addOccupant(_tile_id);
         m_grid->removeOccupant(m_old_target);
-				m_grid->removeOccupant(m_dest_target_id);
         return true;
       }
     }
@@ -1004,9 +1002,12 @@ bool Character::findNearestFishingTile()
 bool Character::findNearestTree()
 {
   bool found = false;
-  treeFloodfill(m_pos, found);
+	std::vector<ngl::Vec2> tree_coords;
+	treeFloodfill(m_pos, found, tree_coords);
   if (found == true)
   {
+		findNearest(tree_coords);
+		m_dest_target_id = m_target_id;
     if(findNearestEmptyTile())
       return true;
     else
@@ -1068,12 +1069,15 @@ void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set
   }
 }
 
-void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found)
+void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found, std::vector<ngl::Vec2> &_found_coords)
 {
   /***** MAYBE ADD VECTOR SO LIST OF TREES CAN BE FOUND, THEN FIND SHORTEST PATH? *****/
   //if a tree has been found
   if (_found == true)
+	{
+		_found_coords.push_back(_coord);
     return;
+	}
 
   //if the coordinate is outside the grid space
   if(_coord.m_x >= m_grid->getW() ||
@@ -1100,10 +1104,10 @@ void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found)
   else
   {
     //recursive search
-    treeFloodfill(ngl::Vec2 (_coord.m_x-1, _coord.m_y), _found);
-    treeFloodfill(ngl::Vec2 (_coord.m_x+1, _coord.m_y), _found);
-    treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y-1), _found);
-    treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y+1), _found);
+		treeFloodfill(ngl::Vec2 (_coord.m_x-1, _coord.m_y), _found, _found_coords);
+		treeFloodfill(ngl::Vec2 (_coord.m_x+1, _coord.m_y), _found, _found_coords);
+		treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y-1), _found, _found_coords);
+		treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y+1), _found, _found_coords);
   }
 }
 
@@ -1151,6 +1155,11 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
 			//checks if current target is equal to the any of the coordinates
 			if(m_grid->coordToId(m_pos) == m_grid->coordToId(coord))
 			{
+				std::cout<<"m_target"<< m_target_id<<std::endl;
+				m_target_id = m_grid->coordToId(m_pos);
+				m_path = findPath(m_target_id);
+				std::cout<<"m_target2"<< m_target_id<<std::endl;
+				std::cout<<"m_pos"<<m_grid->coordToId(m_pos)<<std::endl;
 				return true;
 			}
 		}

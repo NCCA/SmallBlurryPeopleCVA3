@@ -366,7 +366,7 @@ private:
 	/// \param _coord, the current tile's coordinate
 	/// \param _found, when a tree is found then the flood fill is exited
 	///
-	void treeFloodfill(ngl::Vec2 _coord, bool &_found);
+	void treeFloodfill(ngl::Vec2 _coord, bool &_found, std::vector<ngl::Vec2> &_found_coords);
 	///
 	/// \brief distanceSort, sorts a vector based on the squared distance from a character
 	/// \param io_left, the index of the first element in the sub-section of the vector

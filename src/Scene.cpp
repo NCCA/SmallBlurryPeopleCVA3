@@ -1139,7 +1139,7 @@ void Scene::drawMeshes()
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "house_d", "diffuse", instances, offset);
@@ -1172,27 +1172,28 @@ void Scene::drawMeshes()
             pos.m_y /= m_terrainHeightDivider;
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
-            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-            drawAsset("person", "", "");
+						slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+						drawAsset("person", "", "");
         }
     }
 
+		for(Baddie &baddie : m_baddies)
+		{
+				ngl::Vec3 pos = baddie.getPos();
+				pos.m_y /= m_terrainHeightDivider;
+				m_transform.setPosition(pos);
+				m_transform.setRotation(0, baddie.getRot(), 0);
+				m_transform.setScale(2.0f, 2.0f, 2.0f);
+				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				drawAsset("person", "", "");
+		}
+
     for(auto &stone : m_tombstones)
     {
-        m_transform.setPosition(stone);
-        drawAsset( "tombstone", "tombstone_d", "diffuse");
-    }
-
-    for(Baddie &baddie : m_baddies)
-    {
-        ngl::Vec3 pos = baddie.getPos();
-        pos.m_y /= m_terrainHeightDivider;
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, baddie.getRot(), 0);
-        m_transform.setScale(2.0f, 2.0f, 2.0f);
-        slib->use("colour");
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        drawAsset("person", "", "");
+			m_transform.setPosition(stone);
+			//slib->use("diffuse");
+			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+			drawAsset("tombstone", "", "");
     }
 }
 
@@ -1259,8 +1260,10 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &stone : m_tombstones)
     {
+				//slib->use("diffuse");
         m_transform.setPosition(stone);
-        drawAsset( "tombstone", "tombstone_d", "diffuse");
+				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+				drawAsset( "tombstone", "", "");
     }
 }
 
