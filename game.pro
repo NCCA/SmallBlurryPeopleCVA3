@@ -25,7 +25,8 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Prefs.cpp \
          $$PWD/src/PrefsParser.cpp \
          $$PWD/src/IVal.cpp \
-         $$PWD/src/Light.cpp
+         $$PWD/src/Light.cpp \
+         $$PWD/src/ParticleSystem.cpp
 
 
 HEADERS+=$$PWD/include/Scene.hpp \
@@ -47,7 +48,8 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Prefs.hpp \
          $$PWD/include/PrefsParser.hpp \
          $$PWD/include/IVal.hpp \
-         $$PWD/include/Light.hpp
+         $$PWD/include/Light.hpp \
+         $$PWD/include/ParticleSystem.hpp
 
 QMAKE_CXXFLAGS+=$$system(sdl2-config --cflags)
 QMAKE_CXXFLAGS+=$$system(python2.7-config --cflags)

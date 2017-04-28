@@ -35,8 +35,12 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
+    m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f)
 {
+    ngl::Random * rnd = ngl::Random::instance();
+    rnd->setSeed();
+
     m_prefs = Prefs::instance();
     AssetStore *store = AssetStore::instance();
     m_viewport = _viewport;
@@ -67,6 +71,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
     createShader("mousebox", "vertDeferredData", "fragMousebox");
     createShader("fragNormals", "vertDeferredData", "fragNormal");
+    createShader("clouds", "vertBillboard", "fragCloud", "geoBillboard");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -144,6 +149,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadMesh("tombstone", "tombstone/tombstone.obj");
     store->loadTexture("tombstone_d", "tombstone/tombstone_diff.tif");
 
+    store->loadTexture("cloud0", "cloud/cloud0.png");
+    store->loadTexture("cloud1", "cloud/cloud1.png");
+    store->loadTexture("cloud2", "cloud/cloud2.png");
+    store->loadTexture("sphericalNormal", "cloud/sphericalNormal.png");
+
     std::cout << "Constructing terrain...\n";
     m_terrainVAO = constructTerrain();
 
@@ -206,6 +216,43 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    //Number of clouds.
+    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+    //Number of particles per cloud.
+    int num_cloud_particles = 32;
+
+    for(int i = 0; i < num_clouds; ++i)
+    {
+        ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
+                + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
+        m_cloudParticles.m_pos.push_back( p );
+        m_cloudParticles.m_vel.push_back(ngl::Vec3());
+        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(4.0f) + 0.5f );
+        m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+    }
+
+    for(int i = 0; i < num_clouds; ++i)
+    {
+        for(int j = 0; j < num_cloud_particles; ++j)
+        {
+            ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
+            m_cloudParticles.m_pos.push_back(p);
+            m_cloudParticles.m_vel.push_back(ngl::Vec3());
+            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(4.0f) + 0.5f );
+            m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+        }
+    }
+
+    glGenVertexArrays(1, &m_cloudParticlesVAO);
+    glBindVertexArray(m_cloudParticlesVAO);
+    m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
+    setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
+    m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
+    setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
+    m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
+    setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+    glBindVertexArray(0);
 }
 
 void Scene::initMeshInstances()
@@ -506,7 +553,7 @@ void Scene::update()
 
         m_directionalLightCol = t_midday * ngl::Vec3(0.95f, 0.95f, 1.0f) +
                 t_midnight * ngl::Vec3(0.3f, 0.6f, 0.8f) +
-                t_sundown * ngl::Vec3(1.0f, 0.8f, 0.1f);
+                t_sundown * ngl::Vec3(1.0f, 0.6f, 0.1f);
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
     }
@@ -526,6 +573,97 @@ void Scene::update()
             ngl::Vec3 vec = c.getPos() + off;
             vec.m_y /= m_terrainHeightDivider;
             m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+        }
+    }
+
+    glBindVertexArray(m_cloudParticlesVAO);
+
+    //Create a VAO for the clouds.
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
+                 &m_cloudParticles.m_pos[0].m_x,
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_scale.size(),
+                 &m_cloudParticles.m_scale[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_time.size(),
+                 &m_cloudParticles.m_time[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
+
+    glBindVertexArray(0);
+
+    //Update velocity
+    for(auto &vec : m_cloudParticles.m_vel)
+    {
+        vec += m_windDirection.get() * 0.001f;
+        vec -= vec * 0.01f;
+    }
+    //Update position
+    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+    {
+        m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
+    }
+
+    for(auto &t : m_cloudParticles.m_time)
+    {
+        t += 0.01f;
+        if(t > 3.0f)
+            t -= 3.0f;
+    }
+
+    //Simple wrapping
+    for(auto &vec : m_cloudParticles.m_pos)
+    {
+        if(vec.m_x < 0.0f)
+            vec.m_x += m_grid.getW();
+        else if(vec.m_x > m_grid.getW())
+            vec.m_x -= m_grid.getW();
+
+        if(vec.m_z < 0.0f)
+            vec.m_z += m_grid.getH();\
+        else if(vec.m_z > m_grid.getH())
+            vec.m_z -= m_grid.getH();
+    }
+
+    ngl::Random * rnd = ngl::Random::instance();
+
+    if(rnd->randomPositiveNumber() > 0.99f)
+    {
+        ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
+        v.m_y /= 6.0f;
+
+        m_windDirection.setEnd( v );
+    }
+
+    m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
+
+    //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+    for(int i = 0; i < 4; ++i)
+    {
+        for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
+        {
+            ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+            ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+            if(diffc.lengthSquared() < diffn.lengthSquared())
+            {
+                std::swap(m_cloudParticles.m_pos[i], m_cloudParticles.m_pos[i+1]);
+                std::swap(m_cloudParticles.m_vel[i], m_cloudParticles.m_vel[i+1]);
+                std::swap(m_cloudParticles.m_scale[i], m_cloudParticles.m_scale[i+1]);
+                std::swap(m_cloudParticles.m_time[i], m_cloudParticles.m_time[i+1]);
+            }
         }
     }
 }
@@ -826,7 +964,7 @@ void Scene::draw()
 
         //Draw god rays here.
         //To-do: Add preference bool to control drawing of god rays.
-        slib->setRegisteredUniform( "drawGodRays", true);
+        slib->setRegisteredUniform( "drawGodRays", false);
 
         slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
@@ -924,6 +1062,22 @@ void Scene::draw()
                 glDrawArraysEXT(GL_PATCHES, 0, 4);
             }
         }
+
+        glDepthMask(false);
+        slib->use("clouds");
+        slib->setRegisteredUniform("camPos", m_cam.getPos());
+        slib->setRegisteredUniform("directionalLightCol", m_directionalLightCol);
+        slib->setRegisteredUniform("lightDir", m_sunDir);
+        bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud0"), "t0", 0);
+        bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud1"), "t1", 1);
+        bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud2"), "t2", 2);
+        bindTextureToShader("clouds", AssetStore::instance()->getTexture("sphericalNormal"), "normalMap", 3);
+
+        glBindVertexArray(m_cloudParticlesVAO);
+        m_transform.reset();
+        loadMatricesToShader();
+        glDrawArraysEXT(GL_POINTS, 0, m_cloudParticles.size());
+        glDepthMask(true);
 
         glBindVertexArray(0);
 
@@ -2087,6 +2241,19 @@ GLuint Scene::createBuffer2f(std::vector<ngl::Vec2> _vec)
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(ngl::Vec2) * _vec.size(),
                  &_vec[0].m_x,
+            GL_STATIC_DRAW
+            );
+    return buffer;
+}
+
+GLuint Scene::createBuffer1f(std::vector<float> _vec)
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * _vec.size(),
+                 &_vec[0],
             GL_STATIC_DRAW
             );
     return buffer;
