@@ -13,6 +13,7 @@
 #include "Inventory.hpp"
 #include "IVal.hpp"
 #include "Light.hpp"
+#include "ParticleSystem.hpp"
 #include "Prefs.hpp"
 
 #include "Framebuffer.hpp"
@@ -257,6 +258,7 @@ private:
     GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
     GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
+    GLuint createBuffer1f(std::vector<float> _vec);
     void setBufferLocation(GLuint _buffer, int _index, int _size);
 
     /// @brief Wrapper for getTerrainPickTexture, returns the encoded world pos of the "terrainpos" texture at the mouse position.
@@ -278,6 +280,14 @@ private:
     int m_day;
     /// @brief 0 = January 1st, 1 = December 31st.
     float m_season;
+
+    /// @brief This drives the clouds
+    IVal<ngl::Vec3> m_windDirection;
+    ParticleSystem m_cloudParticles;
+    GLuint m_cloudParticlesVAO;
+    GLuint m_cloudParticlesPositionVBO;
+    GLuint m_cloudParticlesScaleVBO;
+    GLuint m_cloudParticlesTimeVBO;
 
     std::vector<ngl::Mat4> m_shadowMat;
 

@@ -173,6 +173,7 @@ void main()
     vec3 nitrogenAccumulation = vec3(0.0, 0.0, 0.0);
     vec3 aerosolAccumulation = vec3(0.0, 0.0, 0.0);
 
+    float dmul = 0.0;
     for(int i = 0; i < stepCount; i++)
     {
         float sdist = stepLength * float(i);
@@ -181,8 +182,6 @@ void main()
                     position, sunDir, surfaceHeight - 0.35
                     );
         float sdepth = computeDepth(position, sunDir);
-
-        float dmul = (cnoise( position * 8.0 ) + 1.0) * 8.0;
 
         //Avsorb light for the ray. From the sun, to the sample position.
         vec3 influx = absorb(sdepth, sunColour, lightScatterMul) /* extinction*/;
@@ -216,6 +215,7 @@ void main()
                 );
 
     outColour.rgb = clamp(outColour.rgb, vec3(0.0), vec3(1.0));
+
     outColour.a = 1.0;
 
     /*outColour.rgb = vec3(aerosol);
