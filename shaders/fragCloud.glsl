@@ -10,8 +10,10 @@ in vec4 normal_fs;
 in vec4 position_fs;
 in vec2 UV_fs;
 in float time_fs;
+in float alpha_fs;
 
-in mat3 TBN;
+in vec3 tangent_fs;
+in vec3 bitangent_fs;
 
 uniform mat4 M;
 
@@ -28,9 +30,10 @@ uniform sampler2D normalMap;
 
 void main()
 {
-  vec3 n = TBN * texture(normalMap, UV_fs).xyz;
+  vec3 n = texture(normalMap, UV_fs).xyz;
+  n = normalize(n * 2.0 - 1.0);
+  n = mat3(tangent_fs, bitangent_fs, normal_fs.xyz) * n;
   n = -n;
-  n.y = -n.y;
 
   if(time_fs > 0.0 && time_fs < 1.0)
     outColour = mix(texture(t0, UV_fs), texture(t1, UV_fs), vec4(time_fs));
@@ -39,8 +42,8 @@ void main()
   else if(time_fs > 2.0)
     outColour = mix(texture(t2, UV_fs), texture(t0, UV_fs), vec4(time_fs - 2.0));
 
-  /*if(outColour.a == 0.0)
-    discard;*/
+  if(outColour.a == 0.0)
+    discard;
 
   float a = distance(camPos, position_fs.xyz);
   a /= 8.0;
@@ -50,15 +53,13 @@ void main()
   outColour.xyz = directionalLightCol;
 
   float m = dot(n, lightDir);
-  m *= 0.25;
-  m += 1.5;
-  m = clamp(m, 0.8, 1.0);
+  m *= 0.5;
+  m += 1.0;
+  m = clamp(m, 0.0, 1.0);
   outColour.xyz *= m;
-  /*outColour.xyz = vec3(m);
-  outColour.a = 1.0;*/
+  //outColour.a = 1.0;
 
-  /*outColour.xyz = vec3(del);
-  outColour.a = 1.0;*/
+  outColour.a *= alpha_fs;
 
   outNormal.xyz = n;
   outPosition = position_fs;

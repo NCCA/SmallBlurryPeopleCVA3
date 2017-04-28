@@ -228,7 +228,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
                 + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
         m_cloudParticles.m_pos.push_back( p );
         m_cloudParticles.m_vel.push_back(ngl::Vec3());
-        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(4.0f) + 0.5f );
+        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
         m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
     }
 
@@ -239,10 +239,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
             ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
             m_cloudParticles.m_pos.push_back(p);
             m_cloudParticles.m_vel.push_back(ngl::Vec3());
-            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(4.0f) + 0.5f );
+            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
             m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
         }
     }
+    m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
 
     glGenVertexArrays(1, &m_cloudParticlesVAO);
     glBindVertexArray(m_cloudParticlesVAO);
@@ -252,6 +253,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
     m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
     setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+    m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
+    setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
     glBindVertexArray(0);
 }
 
@@ -603,6 +606,14 @@ void Scene::update()
             );
     setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
 
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_alpha.size(),
+                 &m_cloudParticles.m_alpha[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
+
     glBindVertexArray(0);
 
     //Update velocity
@@ -613,9 +624,7 @@ void Scene::update()
     }
     //Update position
     for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-    {
         m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
-    }
 
     for(auto &t : m_cloudParticles.m_time)
     {
@@ -624,18 +633,51 @@ void Scene::update()
             t -= 3.0f;
     }
 
-    //Simple wrapping
-    for(auto &vec : m_cloudParticles.m_pos)
+    //Simple wrapping, now with alpha fading when out of bounds.
+    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
     {
-        if(vec.m_x < 0.0f)
-            vec.m_x += m_grid.getW();
-        else if(vec.m_x > m_grid.getW())
-            vec.m_x -= m_grid.getW();
+        auto vec = m_cloudParticles.m_pos[i];
+        auto vel = m_cloudParticles.m_vel[i];
+        auto alpha = m_cloudParticles.m_alpha[i];
 
-        if(vec.m_z < 0.0f)
-            vec.m_z += m_grid.getH();\
-        else if(vec.m_z > m_grid.getH())
-            vec.m_z -= m_grid.getH();
+        bool fading = false;
+
+        if(vec.m_x < 0.0f and vel.m_x < 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_x += m_grid.getW();
+        }
+        else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
+        }
+
+        if(vec.m_z < 0.0f and vel.m_z < 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_z += m_grid.getH();
+        }
+        else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
+        }
+
+        if(!fading)
+            m_cloudParticles.m_alpha[i] += 0.005f;
+
+        m_cloudParticles.m_alpha[i] = Utility::clamp(
+                    m_cloudParticles.m_alpha[i], 0.0f, 1.0f
+                    );
     }
 
     ngl::Random * rnd = ngl::Random::instance();
@@ -663,6 +705,7 @@ void Scene::update()
                 std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
                 std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
                 std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
             }
         }
     }
@@ -1294,7 +1337,7 @@ void Scene::drawMeshes()
             drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "house_d", "diffuse", instances, offset);
@@ -1327,28 +1370,28 @@ void Scene::drawMeshes()
             pos.m_y /= m_terrainHeightDivider;
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
-						slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-						drawAsset("person", "", "");
+            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+            drawAsset("person", "", "");
         }
     }
 
-		for(Baddie &baddie : m_baddies)
-		{
-				ngl::Vec3 pos = baddie.getPos();
-				pos.m_y /= m_terrainHeightDivider;
-				m_transform.setPosition(pos);
-				m_transform.setRotation(0, baddie.getRot(), 0);
-				m_transform.setScale(2.0f, 2.0f, 2.0f);
-				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				drawAsset("person", "", "");
-		}
+    for(Baddie &baddie : m_baddies)
+    {
+        ngl::Vec3 pos = baddie.getPos();
+        pos.m_y /= m_terrainHeightDivider;
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(2.0f, 2.0f, 2.0f);
+        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        drawAsset("person", "", "");
+    }
 
     for(auto &stone : m_tombstones)
     {
-			m_transform.setPosition(stone);
-			//slib->use("diffuse");
-			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-			drawAsset("tombstone", "", "");
+        m_transform.setPosition(stone);
+        //slib->use("diffuse");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+        drawAsset("tombstone", "", "");
     }
 }
 
@@ -1415,10 +1458,10 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &stone : m_tombstones)
     {
-				//slib->use("diffuse");
+        //slib->use("diffuse");
         m_transform.setPosition(stone);
-				slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-				drawAsset( "tombstone", "", "");
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+        drawAsset( "tombstone", "", "");
     }
 }
 

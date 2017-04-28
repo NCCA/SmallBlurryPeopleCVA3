@@ -288,6 +288,7 @@ private:
     GLuint m_cloudParticlesPositionVBO;
     GLuint m_cloudParticlesScaleVBO;
     GLuint m_cloudParticlesTimeVBO;
+    GLuint m_cloudParticlesAlphaVBO;
 
     std::vector<ngl::Mat4> m_shadowMat;
 

@@ -12,6 +12,8 @@ struct ParticleSystem
     std::vector<ngl::Vec3> m_vel;
     std::vector<float> m_scale;
     std::vector<float> m_time;
+    std::vector<float> m_alpha;
+
     size_t size() const {return m_pos.size();}
 };
 
