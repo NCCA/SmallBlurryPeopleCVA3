@@ -43,8 +43,8 @@ import gameUtils.mapViewer.mapViewer as mv
 import gameUtils.helperFunctions.helperFunctions as hf
 
 #parameters from game
-map_width = 100
-map_height = 100
+map_width = 20
+map_height = 20
 map_seed = 4
 tileTypes = {"NONE": 0,
              "TREES": 1,
@@ -66,6 +66,8 @@ if "tileTypes_in" in globals():
 
 
 
+map_width = 20
+map_height = 20
 
 
 #setting the seed for the noise generator
@@ -92,7 +94,7 @@ water_height = 90
 for x in range(map_width):
   for y in range(map_height):
     noise = int(gen.fractal(x, y, octaves, persistence, freq, min, max))
-    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)/16.0
+    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)/20.0
     #setting terrain types
     if noise > peak_height:
       map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
@@ -119,8 +121,8 @@ for i in range(10):
   if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
     map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
 
-water_height = 90/16
-mountain_height = 170/16
+water_height = 90/20.0
+mountain_height = 170/20.0
 
 if "from_game" not in globals():
   print "not from game"

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
 #include "GridTile.hpp"
@@ -12,6 +13,14 @@
 /// The Grid class is a wrapper around a std::vector of Tile enums. The Tile enums illustrate
 /// what is contained within each cell of the map, which can be used by other classes for
 /// rendering and path finding.
+
+
+struct TerrainData
+{
+  std::shared_ptr<std::vector<ngl::Vec4>> m_trimesh;
+  std::shared_ptr<std::vector<ngl::Vec3>> m_normesh;
+  std::shared_ptr<std::vector<ngl::Vec2>> m_uvmesh;
+};
 
 /// @class Grid
 /// @brief A wrapper around a std::vector used to store map information
@@ -80,6 +89,7 @@ public:
 
   bool hasChanges();
   void resetHasChanges();
+  TerrainData generateTerrain();
 
 
 
@@ -92,6 +102,8 @@ private:
   /// @param [in] path to look for script
   /// @return a string containing the python script to be run
   void loadScript(std::string _script_path);
+
+
 
   /// @brief width of the grid
   int m_w;

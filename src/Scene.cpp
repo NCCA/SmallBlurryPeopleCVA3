@@ -2303,7 +2303,7 @@ void Scene::setBufferLocation(GLuint _buffer, int _index, int _size)
 }
 
 GLuint Scene::constructTerrain()
-{
+{/*
     std::cout << "constructTerrain start\n";
 
     std::vector<std::vector<ngl::Vec3>> faces;
@@ -2320,29 +2320,6 @@ GLuint Scene::constructTerrain()
             faces[i].push_back(face);
         }
     }
-
-    //Smooth
-    /*const int iterations = 128;
-    const float hardness = 0.02f;
-    for(int it = 0; it < iterations; ++it)
-    {
-        for(int i = 1; i < m_grid.getW() - 1; ++i)
-        {
-            for(int j = 1; j < m_grid.getH() - 1; ++j)
-            {
-                float ay = 0.0f;
-                for(int y = -1; y <= 1; ++y)
-                    for(int x = -1; x <= 1; ++x)
-                        ay += faces[i + x][j + y].m_y;
-
-                ay /= 9.0f;
-
-                float dy = faces[i][j].m_y - ay;
-
-                faces[i][j].m_y -= hardness * dy;
-            }
-        }
-    }*/
 
     //Calculate face normals
     for(size_t i = 0; i < faces.size(); ++i)
@@ -2454,12 +2431,28 @@ GLuint Scene::constructTerrain()
     std::cout << "constructTerrain end with\n";
 
     std::cout << trimesh.size() << " vertices\n" << normesh.size() << " normals\n" << uvmesh.size() << " uvs\n";
-
+*/
     /*for(auto &i : trimesh)
         std::cout << i << '\n';*/
 
     //exit(EXIT_SUCCESS);
-    m_terrainVAOSize = trimesh.size();
+  TerrainData data = m_grid.generateTerrain();
+  std::vector<ngl::Vec4> trimesh = *data.m_trimesh.get();
+  std::vector<ngl::Vec3> normesh = *data.m_normesh.get();
+  std::vector<ngl::Vec2> uvmesh;
+
+  for(auto &vec : trimesh)
+  {
+      vec += ngl::Vec4(0.5, 0, 0.5, 0);
+      uvmesh.push_back( ngl::Vec2(vec.m_x, vec.m_z) );
+  }
+
+  for (auto v: trimesh)
+  {
+    std::cout << v << std::endl;
+  }
+
+    m_terrainVAOSize = (*data.m_trimesh.get()).size();
     return createVAO(
                 trimesh,
                 normesh,

@@ -5,6 +5,7 @@
 #include <streambuf>
 #include <Python.h>
 #include "ngl/Random.h"
+#include "ngl/NGLStream.h"
 #include "Grid.hpp"
 #include "Prefs.hpp"
 
@@ -117,7 +118,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-	return (int)(_coord.m_x + m_w * (int)_coord.m_y);
+  return (int)(_coord.m_x + m_w * (int)_coord.m_y);
 }
 
 void Grid::loadScript(std::string _script_path)
@@ -286,4 +287,83 @@ int Grid::getOccupants(int _id)
 int Grid::getOccupants(int _x, int _y)
 {
   return m_tiles[_x + m_w * _y].getOccupants();
+}
+
+TerrainData Grid::generateTerrain()
+{
+  std::cout << "\n\n\n\n\n\n\n\n\n\n\n Generating Terrain \n\n\n\n\n\n\n\n\n\n " << std::endl;
+  //create empty containers
+  TerrainData data_set;
+  auto trimesh = std::make_shared<std::vector<ngl::Vec4>>();
+  auto normesh = std::make_shared<std::vector<ngl::Vec3>>();
+  auto uvmesh = std::make_shared<std::vector<ngl::Vec2>>();
+
+  data_set.m_trimesh = trimesh;
+  data_set.m_normesh = normesh;
+  data_set.m_uvmesh = uvmesh;
+  std::cout << "A" << std::endl;
+  for (size_t y = 0; y < m_h; y++)
+  {
+    for (size_t x = 0; x < m_w; x++)
+    {
+      std::cout << "B: working on tile " << x << ", " << y << std::endl;
+      std::cout << "constructing points" << std::endl;
+
+      ngl::Vec3 p0(x-0.5f, Grid::getInterpolatedHeight((float)x-0.5f, (float)y-0.5f), y-0.5f);
+      ngl::Vec3 p1(x+0.5f, Grid::getInterpolatedHeight((float)x+0.5f, (float)y-0.5f), y-0.5f);
+      ngl::Vec3 p2(x+0.5f, Grid::getInterpolatedHeight((float)x+0.5f, (float)y+0.5f), y+0.5f);
+      ngl::Vec3 p3(x-0.5f, Grid::getInterpolatedHeight((float)x-0.5f, (float)y+0.5f), y+0.5f);
+
+      //ngl::Vec3 p0(x-0.5f, Grid::getTileHeight(x, y), y-0.5f);
+      //ngl::Vec3 p1(x+0.5f, Grid::getTileHeight(x, y), y-0.5f);
+      //ngl::Vec3 p2(x+0.5f, Grid::getTileHeight(x, y), y+0.5f);
+      //ngl::Vec3 p3(x-0.5f, Grid::getTileHeight(x, y), y+0.5f);
+
+      std::cout << "constructing edges" << std::endl;
+      ngl::Vec3 e01 = p1 - p0;
+      ngl::Vec3 e03 = p3 - p0;
+      ngl::Vec3 e21 = p1 - p2;
+      ngl::Vec3 e23 = p3 - p2;
+
+      std::cout << "constructing normals" << std::endl;
+      ngl::Vec3 n1 = e03.cross(e01);
+      ngl::Vec3 n2 = e23.cross(e21);
+
+      std::cout << "constructing uvs" << std::endl;
+      //ngl::Vec2 uv0(p0.m_x + 0.5, p0.m_z + 0.5);
+      //ngl::Vec2 uv1(p1.m_x + 0.5, p1.m_z + 0.5);
+      //ngl::Vec2 uv2(p2.m_x + 0.5, p2.m_z + 0.5);
+      //ngl::Vec2 uv3(p3.m_x + 0.5, p3.m_z + 0.5);
+      ngl::Vec2 uv0(p0.m_x, p0.m_z);
+      ngl::Vec2 uv1(p1.m_x, p1.m_z);
+      ngl::Vec2 uv2(p2.m_x, p2.m_z);
+      ngl::Vec2 uv3(p3.m_x, p3.m_z);
+
+      //t1
+      std::cout << "filling t1" << std::endl;
+      std::cout << p0 << std::endl;
+      trimesh->push_back(p3);
+      trimesh->push_back(p1);
+      trimesh->push_back(p0);
+      normesh->push_back(n1);
+      normesh->push_back(n1);
+      normesh->push_back(n1);
+      uvmesh->push_back(uv3);
+      uvmesh->push_back(uv1);
+      uvmesh->push_back(uv0);
+
+      //t2
+      std::cout << "filling t2" << std::endl;
+      trimesh->push_back(p3);
+      trimesh->push_back(p2);
+      trimesh->push_back(p1);
+      normesh->push_back(n2);
+      normesh->push_back(n2);
+      normesh->push_back(n2);
+      uvmesh->push_back(uv3);
+      uvmesh->push_back(uv2);
+      uvmesh->push_back(uv1);
+    }
+  }
+  return data_set;
 }
