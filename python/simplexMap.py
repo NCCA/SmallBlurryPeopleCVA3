@@ -65,7 +65,8 @@ if "tileTypes_in" in globals():
   tileTypes = tileTypes_in
 
 
-
+map_width = 20
+map_height = 20
 
 
 #setting the seed for the noise generator

@@ -207,6 +207,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     initMeshInstances();
 
+
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
 
@@ -260,6 +261,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
 void Scene::initMeshInstances()
 {
+
     int meshCount = 0;
     //m_meshPositions.clear()
     m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
@@ -269,7 +271,7 @@ void Scene::initMeshInstances()
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             m_meshPositions.at( index ).push_back(ngl::Vec3(
                                                       i+0.5,
-                                                      m_grid.getInterpolatedHeight(i+0.5, j+0.5),
+                                                      m_heigh_tracer.getHeight(i+0.5, j+0.5),
                                                       j+0.5
                                                       ));
             meshCount++;
@@ -2460,6 +2462,8 @@ GLuint Scene::constructTerrain()
 
     //exit(EXIT_SUCCESS);
     m_terrainVAOSize = trimesh.size();
+
+    m_heigh_tracer = TerrainHeightTracer(trimesh, normesh);
     return createVAO(
                 trimesh,
                 normesh,

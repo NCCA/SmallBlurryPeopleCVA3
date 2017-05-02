@@ -15,6 +15,7 @@
 #include "Light.hpp"
 #include "ParticleSystem.hpp"
 #include "Prefs.hpp"
+#include "TerrainHeightTracer.hpp"
 
 #include "Framebuffer.hpp"
 
@@ -350,6 +351,8 @@ private:
     ///
     bool m_game_started;
 
+
+
     ///
     /// \brief m_movement_held which movement are currently held
     ///
@@ -364,6 +367,8 @@ private:
     std::vector<Light> m_pointLights;
     const size_t m_maxLights = 512;
     GLuint m_lightBuffer;
+
+    TerrainHeightTracer m_heigh_tracer;
 };
 
 #endif//__SCENE_HPP__
