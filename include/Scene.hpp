@@ -26,8 +26,8 @@ enum Direction
 {
   FORWARDS,
   BACKWARDS,
-	LEFTWARDS,
-	RIGHTWARDS
+  LEFTWARDS,
+  RIGHTWARDS
 };
 ///
 /// \brief The GameState enum refers to what state the game is currently in:
@@ -178,16 +178,16 @@ private:
     Grid m_grid;
     Inventory m_world_inventory;
 
-		/// @brief m_file_names, vector of available names for characters
+    /// @brief m_file_names, vector of available names for characters
     std::vector<std::string> m_file_names;
-		///
-		/// @brief m_character, vector of characters that have been created
-		///
+    ///
+    /// @brief m_character, vector of characters that have been created
+    ///
     std::vector<Character> m_characters;
-		///
-		/// \brief m_tombstones, vector of positions for tombstones
-		///
-		std::vector<ngl::Vec3> m_tombstones;
+    ///
+    /// \brief m_tombstones, vector of positions for tombstones
+    ///
+    std::vector<ngl::Vec3> m_tombstones;
     ///
     /// \brief m_baddies vector of baddie objects
     ///
@@ -214,7 +214,6 @@ private:
     /// @brief stores mouse position when pressed down to check if mouse has moved at release
     ngl::Vec2 m_mouse_prev_pos;
 
-    const float m_terrainHeightDivider = 16.0f;
     /// @brief terrain base mesh
     GLuint m_terrainVAO;
     /// @brief vert count of terrain mesh

@@ -77,7 +77,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("waterLevel", m_grid.getGlobalWaterLevel() / m_terrainHeightDivider);
+    slib->setRegisteredUniform("waterLevel", m_grid.getGlobalWaterLevel());
 
     slib->use("water");
     GLint tlvl = 0;
@@ -269,7 +269,7 @@ void Scene::initMeshInstances()
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             m_meshPositions.at( index ).push_back(ngl::Vec3(
                                                       i+0.5,
-                                                      m_grid.getInterpolatedHeight(i+0.5, j+0.5) / m_terrainHeightDivider,
+                                                      m_grid.getInterpolatedHeight(i+0.5, j+0.5),
                                                       j+0.5
                                                       ));
             meshCount++;
@@ -469,7 +469,7 @@ void Scene::update()
         ngl::Vec3 cxyz = m_cam.getPos();
         int x = Utility::clamp(std::round(cxyz.m_x),0,m_grid.getW()-1);
         int y = Utility::clamp(std::round(cxyz.m_z),0,m_grid.getH()-1);
-        cxyz.m_y = m_grid.getTileHeight(x, y) / m_terrainHeightDivider;
+        cxyz.m_y = m_grid.getTileHeight(x, y);
         ngl::Vec3 cp = m_cam.getTargPos();
         //Grab the y component of the current tile, use that as the target y for the camera.
         m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
@@ -512,7 +512,6 @@ void Scene::update()
                 m_file_names.push_back(character.getName());
                 //add position to tombstone positions
                 ngl::Vec3 stone_pos(character.getPos());
-                stone_pos.m_y /= m_terrainHeightDivider;
                 m_tombstones.push_back(stone_pos);
                 //remove character from vector
                 m_characters.erase(m_characters.begin() + index);
@@ -574,7 +573,6 @@ void Scene::update()
         if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
         {
             ngl::Vec3 vec = c.getPos() + off;
-            vec.m_y /= m_terrainHeightDivider;
             m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
         }
     }
@@ -783,7 +781,6 @@ void Scene::draw()
             if(ch.isSleeping() == false)
             {
                 ngl::Vec3 pos = ch.getPos();
-                pos.m_y /= m_terrainHeightDivider;
                 m_transform.setPosition(pos);
                 slib->setRegisteredUniform("id", ch.getID());
                 drawAsset( "person", "", "");
@@ -843,7 +840,7 @@ void Scene::draw()
         ngl::Mat4 camFlip;
         camFlip.scale(1.0f, -1.0f, 1.0f);
         ngl::Mat4 camMove;
-        camMove.translate(0.0f, -2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
+        camMove.translate(0.0f, -2.0f * m_grid.getGlobalWaterLevel(), 0.0f);
 
         //Flip camera upside down.
 
@@ -864,7 +861,7 @@ void Scene::draw()
 
         drawSky();
 
-        camMove.translate(0.0f, 2.0f * m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, 0.0f);
+        camMove.translate(0.0f, 2.0f * m_grid.getGlobalWaterLevel(), 0.0f);
 
         //Flip camera right way up.
         //m_cam.clearTransforms();
@@ -1085,7 +1082,7 @@ void Scene::draw()
         {
             for(int j = 0; j < m_grid.getH(); j += scale)
             {
-                ngl::Vec3 pos (i, m_grid.getGlobalWaterLevel() / m_terrainHeightDivider, j);
+                ngl::Vec3 pos (i, m_grid.getGlobalWaterLevel(), j);
                 bounds waterBounds;
                 waterBounds.first = pos + ngl::Vec3(-scale, -1.0f, -scale);
                 waterBounds.second = pos + ngl::Vec3(scale, 1.0f, scale);
@@ -1146,7 +1143,6 @@ void Scene::draw()
                 p.m_z = floor(p.m_z) + 0.5;
                 p.m_y = m_grid.getTileHeight(p.m_x, p.m_z);
                 p.m_y = std::max(p.m_y, static_cast<float>(m_grid.getGlobalWaterLevel()));
-                p.m_y /= m_terrainHeightDivider;
 
                 m_transform.setScale( m_mouseSelectionBoxScale.get() );
                 m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
@@ -1157,8 +1153,6 @@ void Scene::draw()
                 for(auto &c : m_characters)
                     if(c.getID() == charid)
                         p = c.getPos();
-
-                p.m_y /= m_terrainHeightDivider;
 
                 m_transform.setScale( m_mouseSelectionBoxScale.get() );
                 m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
@@ -1302,9 +1296,9 @@ void Scene::drawTerrain()
     bindTextureToShader("terrain", store->getTexture("rock"), "rock", 1);
     bindTextureToShader("terrain", store->getTexture("snow"), "snow", 2);
 
-    float waterLevel = m_grid.getGlobalWaterLevel() / m_terrainHeightDivider;
+    float waterLevel = m_grid.getGlobalWaterLevel();
     slib->setRegisteredUniform( "waterlevel", waterLevel);
-    float snowLevel = m_grid.getGlobalMountainHeight() / m_terrainHeightDivider;
+    float snowLevel = m_grid.getGlobalMountainHeight();
     float difference = snowLevel - waterLevel;
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
@@ -1367,7 +1361,6 @@ void Scene::drawMeshes()
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-            pos.m_y /= m_terrainHeightDivider;
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
@@ -1378,7 +1371,6 @@ void Scene::drawMeshes()
     for(Baddie &baddie : m_baddies)
     {
         ngl::Vec3 pos = baddie.getPos();
-        pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
         m_transform.setRotation(0, baddie.getRot(), 0);
         m_transform.setScale(2.0f, 2.0f, 2.0f);
@@ -1447,7 +1439,6 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-            pos.m_y /= m_terrainHeightDivider;
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->use("colour");
@@ -1695,7 +1686,6 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-            pos.m_y /= m_terrainHeightDivider;
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
@@ -1891,7 +1881,7 @@ void Scene::resize(const ngl::Vec2 &_dim)
     slib->setRegisteredUniform("viewport", m_viewport);
 
     slib->use("deferredLight");
-    slib->setRegisteredUniform("waterLevel", m_grid.getGlobalWaterLevel() / m_terrainHeightDivider);
+    slib->setRegisteredUniform("waterLevel", m_grid.getGlobalWaterLevel());
 
     slib->use("water");
     GLint tlvl = 0;
@@ -2325,7 +2315,7 @@ GLuint Scene::constructTerrain()
         faces.push_back( std::vector<ngl::Vec3>() );
         for(int j = 0; j < m_grid.getH(); ++j)
         {
-            float height = m_grid.getTileHeight(i, j) / m_terrainHeightDivider;
+            float height = m_grid.getTileHeight(i, j);
             ngl::Vec3 face (i, height, j);
             faces[i].push_back(face);
         }

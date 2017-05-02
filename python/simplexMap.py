@@ -92,7 +92,7 @@ water_height = 90
 for x in range(map_width):
   for y in range(map_height):
     noise = int(gen.fractal(x, y, octaves, persistence, freq, min, max))
-    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)
+    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)/16.0
     #setting terrain types
     if noise > peak_height:
       map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
@@ -119,7 +119,8 @@ for i in range(10):
   if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
     map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
 
-print map_data[0]
+water_height = 90/16
+mountain_height = 170/16
 
 if "from_game" not in globals():
   print "not from game"
