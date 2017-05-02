@@ -7,6 +7,7 @@
 #include "ngl/Random.h"
 #include "Grid.hpp"
 #include "Prefs.hpp"
+#include "Utility.hpp"
 
 /// @file Grid.cpp
 /// @brief source code for the Grid class
@@ -117,7 +118,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-	return (int)(_coord.m_x + m_w * (int)_coord.m_y);
+  return (int)(_coord.m_x + m_w * (int)_coord.m_y);
 }
 
 void Grid::loadScript(std::string _script_path)
@@ -156,10 +157,11 @@ int Grid::getGlobalWaterLevel()
 
 float Grid::getInterpolatedHeight(float _x, float _y)
 {
-  float x0 = std::round(_x);
-  float x1 = x0 + 1;
-  float y0 = std::round(_y);
-  float y1 = y0 + 1;
+  float x0 = Utility::clamp(std::round(_x), 0, m_w-1);
+  float x1 = Utility::clamp(x0 + 1, 0, m_w);
+  float y0 = Utility::clamp(std::round(_y), 0, m_h-1);
+  float y1 = Utility::clamp(y0 + 1, 0, m_h);
+
 
   float h0 = m_tiles[x0 + m_w * y0].getHeight();
   float h1 = m_tiles[x1 + m_w * y0].getHeight();
