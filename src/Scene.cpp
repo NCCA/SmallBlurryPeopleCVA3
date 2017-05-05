@@ -115,8 +115,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     std::cout << "Loading assets...\n";
 
-    store->loadMesh("mountain", "mountain/mountain.obj");
-    store->loadTexture("mountain_d", "mountain/mountain_diff.png");
+    //store->loadMesh("mountain", "mountain/mountain.obj");
+    //store->loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
@@ -269,12 +269,34 @@ void Scene::initMeshInstances()
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             int index = static_cast<int>( m_grid.getTileType(i, j) );
-            m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                      i+0.5,
-                                                      m_height_tracer.getHeight(i+0.5, j+0.5),
-                                                      j+0.5
-                                                      ));
-            meshCount++;
+            if (index == static_cast<int>(TileType::TREES))
+            {
+              //get num trees
+              int num_trees = m_grid.getNumTrees(i, j);
+              //get position vector
+              std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
+              //for i in trees:
+                for (int n = 0; n < num_trees; n++)
+                {
+                  //push back tree
+                  ngl::Vec2 p = positions[n];
+                  m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                            i+0.5+p[0],
+                                                            m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                                                            j+0.5+p[1]
+                                                            ));
+                  //increment meshCount
+                  meshCount++;
+                }
+            }
+            else{
+              m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                        i+0.5,
+                                                        m_height_tracer.getHeight(i+0.5, j+0.5),
+                                                        j+0.5
+                                                        ));
+              meshCount++;
+            }
         }
 
     //Generate TBO for mesh instancing.
@@ -1332,9 +1354,6 @@ void Scene::drawMeshes()
         case static_cast<int>(TileType::TREES):
             drawInstances( "tree", "tree_d", "diffuse", instances, offset );
             break;
-        case static_cast<int>(TileType::MOUNTAINS):
-            drawInstances( "mountain", "mountain_d", "diffuse", instances, offset );
-            break;
         case static_cast<int>(TileType::STOREHOUSE):
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
@@ -1412,9 +1431,6 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
             {
             case static_cast<int>(TileType::TREES):
                 drawAsset( "tree", "tree_d", "diffuse" );
-                break;
-            case static_cast<int>(TileType::MOUNTAINS):
-                drawAsset( "mountain", "mountain_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
                 drawAsset( "storehouse", "storehouse_d", "diffuse" );
@@ -1658,9 +1674,6 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         {
         case static_cast<int>(TileType::TREES):
             drawInstances( "tree", "tree_d", "diffuse", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::MOUNTAINS):
-            drawInstances( "mountain", "mountain_d", "diffuse", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
             drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );

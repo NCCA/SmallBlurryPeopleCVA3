@@ -8,6 +8,7 @@
 #include "Grid.hpp"
 #include "Prefs.hpp"
 #include "Utility.hpp"
+#include "Prefs.hpp"
 
 /// @file Grid.cpp
 /// @brief source code for the Grid class
@@ -63,11 +64,13 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   py_map = PyDict_GetItemString(py_dict, "map_data");
   //std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
   //create an empty grid with each tile's id set
+
+
   for (int i = 0; i < m_w * m_h; i++)
   {
     m_tiles.push_back(GridTile(i));
   }
-
+  int max_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
   //get grid values from the script
   for(int i = 0; i <  m_w * m_h; i++)
   {
@@ -78,7 +81,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
     std::cout << height << std::endl;
     if (t == TileType::TREES)
     {
-      m_tiles[i].setNumTrees(9);
+      m_tiles[i].setNumTrees(max_trees);
     }
   }
 
@@ -288,4 +291,14 @@ int Grid::getOccupants(int _id)
 int Grid::getOccupants(int _x, int _y)
 {
   return m_tiles[_x + m_w * _y].getOccupants();
+}
+
+std::vector<ngl::Vec2> Grid::getTreePositions(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getTreePositions();
+}
+
+int Grid::getNumTrees(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getNumTrees();
 }

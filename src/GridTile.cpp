@@ -1,9 +1,26 @@
 #include "GridTile.hpp"
+#include "Prefs.hpp"
 #include <iostream>
+
+const float perm[] = {-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4};
 
 GridTile::GridTile(int _id):
   m_id(_id)
 {
+  //generate random tree positions for the tile
+  int num_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
+  for (int i = 0; i < num_trees; i++)
+  {
+    _id *= _id;
+    _id += i * 5;
+
+    int x = (_id + i * 5)%9;
+    int y = (_id + i * 13)%9;
+
+    ngl::Vec2 pos(perm[x], perm[y]);
+
+    m_tree_positions.push_back(pos);
+  }
 }
 
 bool GridTile::isTraversable()
@@ -109,4 +126,8 @@ int GridTile::getOccupants()
   return m_occupants;
 }
 
+std::vector<ngl::Vec2> GridTile::getTreePositions()
+{
+  return m_tree_positions;
+}
 

@@ -41,6 +41,7 @@ public:
   int getTileId(int _x, int _y);
   bool isTileTraversable(int _x, int _y);
   bool isTileTraversable(int _id);
+  std::vector<ngl::Vec2> getTreePositions(int _x, int _y);
   int cutTileTrees(int _id, int _goal_amount);
 
   void setTileType(int _id, TileType _type);
@@ -55,6 +56,7 @@ public:
   void removeOccupant(int _x, int _y);
   int getOccupants(int _id);
   int getOccupants(int _x, int _y);
+  int getNumTrees(int _x, int _y);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
