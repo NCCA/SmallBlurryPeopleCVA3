@@ -4,6 +4,7 @@
 #include "ngl/Vec2.h"
 #include "ngl/Vec3.h"
 #include "Grid.hpp"
+#include "TerrainHeightTracer.hpp"
 #include "vector"
 
 class Baddie
@@ -13,7 +14,7 @@ public:
   /// \brief Baddie constructor to create baddie at edge of map
   /// \param _grid grid to use
   ///
-  Baddie(Grid *_grid);
+  Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid);
   ///
   /// \brief default destructor
   ///
@@ -33,31 +34,32 @@ public:
   ///
   ngl::Vec2 calcAimVec(float *dist_squared);
 
-	///
-	/// \brief setTarget, set a new target position based on a position
-	/// \param _target_pos, the position to pathfind to
-	///
-	bool setTarget(ngl::Vec2 _target_pos);
-	///
-	/// \brief findPath find path to given position
-	/// \param _target position to aim for
-	///
-	void findPath(ngl::Vec2 _target);
-	///
-	/// \brief getPos return current pos
-	/// \return m_pos as a vec3 using m_pos.m_x, height and m_pos.m_y
-	///
-	ngl::Vec3 getPos();
-	///
-	/// \brief updateRot update character's rotations
-	///
-	void updateRot();
-	///
-	/// \brief getRot get character's rotation
-	/// \return m_rot (degrees)
-	///
-	float getRot() {return m_rot;}
+  ///
+  /// \brief setTarget, set a new target position based on a position
+  /// \param _target_pos, the position to pathfind to
+  ///
+  bool setTarget(ngl::Vec2 _target_pos);
+  ///
+  /// \brief findPath find path to given position
+  /// \param _target position to aim for
+  ///
+  void findPath(ngl::Vec2 _target);
+  ///
+  /// \brief getPos return current pos
+  /// \return m_pos as a vec3 using m_pos.m_x, height and m_pos.m_y
+  ///
+  ngl::Vec3 getPos();
+  ///
+  /// \brief updateRot update character's rotations
+  ///
+  void updateRot();
+  ///
+  /// \brief getRot get character's rotation
+  /// \return m_rot (degrees)
+  ///
+  float getRot() {return m_rot;}
 private:
+  TerrainHeightTracer *m_height_tracer;
   ///
   /// \brief m_pos position of baddie
   ///

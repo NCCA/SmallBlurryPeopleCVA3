@@ -368,7 +368,7 @@ private:
     const size_t m_maxLights = 512;
     GLuint m_lightBuffer;
 
-    TerrainHeightTracer m_heigh_tracer;
+    TerrainHeightTracer m_height_tracer;
 };
 
 #endif//__SCENE_HPP__

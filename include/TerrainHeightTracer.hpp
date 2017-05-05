@@ -8,7 +8,7 @@ class TerrainHeightTracer
 {
 public:
   TerrainHeightTracer() = default;
-  TerrainHeightTracer(std::vector<ngl::Vec4> _trimesh, std::vector<ngl::Vec3> _normesh);
+  TerrainHeightTracer(std::vector<ngl::Vec4> _trimesh);
   float getHeight(double _x, double _y);
 private:
   std::vector<ngl::Vec4> m_trimesh;

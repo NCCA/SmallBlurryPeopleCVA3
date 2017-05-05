@@ -17,7 +17,7 @@
 #include <ngl/AABB.h>
 
 //This should be the same as the size of the map, for now.
-const ngl::Vec2 waterDimensions (50.0f, 50.0f);
+const ngl::Vec2 waterDimensions (20.0f, 20.0f);
 
 const int shadowResolution = 4096;
 const int waterResolution = 1024;
@@ -102,7 +102,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
         createCharacter();
     }
 
-    m_baddies.push_back(Baddie(&m_grid));
+    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid));
 
     initialiseFramebuffers();
 
@@ -271,7 +271,7 @@ void Scene::initMeshInstances()
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             m_meshPositions.at( index ).push_back(ngl::Vec3(
                                                       i+0.5,
-                                                      m_heigh_tracer.getHeight(i+0.5, j+0.5),
+                                                      m_height_tracer.getHeight(i+0.5, j+0.5),
                                                       j+0.5
                                                       ));
             meshCount++;
@@ -405,7 +405,7 @@ void Scene::createCharacter()
     std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
     //create character with random name
-    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+    m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen]));
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
@@ -1143,11 +1143,12 @@ void Scene::draw()
 
                 p.m_x = floor(p.m_x) + 0.5;
                 p.m_z = floor(p.m_z) + 0.5;
-                p.m_y = m_grid.getTileHeight(p.m_x, p.m_z);
+                p.m_y = m_height_tracer.getHeight(p.m_x, p.m_z);
                 p.m_y = std::max(p.m_y, static_cast<float>(m_grid.getGlobalWaterLevel()));
-
+                ngl::Vec3 pos = m_mouseSelectionBoxPosition.get();
+                pos[1] = m_height_tracer.getHeight(pos[0], pos[2]);
                 m_transform.setScale( m_mouseSelectionBoxScale.get() );
-                m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+                m_transform.setPosition( pos );
                 m_mouseSelectionBoxScale.setEnd(ngl::Vec3(1.0f, 2.0f, 1.0f));
             }
             else
@@ -1156,8 +1157,10 @@ void Scene::draw()
                     if(c.getID() == charid)
                         p = c.getPos();
 
+                ngl::Vec3 pos = m_mouseSelectionBoxPosition.get();
+                pos[1] = m_height_tracer.getHeight(pos[0], pos[2]);
                 m_transform.setScale( m_mouseSelectionBoxScale.get() );
-                m_transform.setPosition( m_mouseSelectionBoxPosition.get() );
+                m_transform.setPosition( pos );
                 m_mouseSelectionBoxScale.setEnd(ngl::Vec3(0.25f, 8.0f, 0.25f));
             }
             p.m_y -= 1.0f;
@@ -1441,6 +1444,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
+
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->use("colour");
@@ -2463,7 +2467,7 @@ GLuint Scene::constructTerrain()
     //exit(EXIT_SUCCESS);
     m_terrainVAOSize = trimesh.size();
 
-    m_heigh_tracer = TerrainHeightTracer(trimesh, normesh);
+    m_height_tracer = TerrainHeightTracer(trimesh);
     return createVAO(
                 trimesh,
                 normesh,
