@@ -7,6 +7,8 @@
 #include "ngl/Random.h"
 #include "Grid.hpp"
 #include "Prefs.hpp"
+#include "Utility.hpp"
+#include "Prefs.hpp"
 
 /// @file Grid.cpp
 /// @brief source code for the Grid class
@@ -62,11 +64,13 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   py_map = PyDict_GetItemString(py_dict, "map_data");
   //std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
   //create an empty grid with each tile's id set
+
+
   for (int i = 0; i < m_w * m_h; i++)
   {
     m_tiles.push_back(GridTile(i));
   }
-
+  int max_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
   //get grid values from the script
   for(int i = 0; i <  m_w * m_h; i++)
   {
@@ -77,7 +81,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
     std::cout << height << std::endl;
     if (t == TileType::TREES)
     {
-      m_tiles[i].setNumTrees(9);
+      m_tiles[i].setNumTrees(max_trees);
     }
   }
 
@@ -117,7 +121,7 @@ ngl::Vec2 Grid::idToCoord(int _tileId)
 
 int Grid::coordToId(ngl::Vec2 _coord)
 {
-	return (int)(_coord.m_x + m_w * (int)_coord.m_y);
+  return (int)(_coord.m_x + m_w * (int)_coord.m_y);
 }
 
 void Grid::loadScript(std::string _script_path)
@@ -156,10 +160,11 @@ int Grid::getGlobalWaterLevel()
 
 float Grid::getInterpolatedHeight(float _x, float _y)
 {
-  float x0 = std::round(_x);
-  float x1 = x0 + 1;
-  float y0 = std::round(_y);
-  float y1 = y0 + 1;
+  float x0 = Utility::clamp(std::round(_x), 0, m_w-1);
+  float x1 = Utility::clamp(x0 + 1, 0, m_w);
+  float y0 = Utility::clamp(std::round(_y), 0, m_h-1);
+  float y1 = Utility::clamp(y0 + 1, 0, m_h);
+
 
   float h0 = m_tiles[x0 + m_w * y0].getHeight();
   float h1 = m_tiles[x1 + m_w * y0].getHeight();
@@ -286,4 +291,14 @@ int Grid::getOccupants(int _id)
 int Grid::getOccupants(int _x, int _y)
 {
   return m_tiles[_x + m_w * _y].getOccupants();
+}
+
+std::vector<ngl::Vec2> Grid::getTreePositions(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getTreePositions();
+}
+
+int Grid::getNumTrees(int _x, int _y)
+{
+  return m_tiles[_x + m_w * _y].getNumTrees();
 }

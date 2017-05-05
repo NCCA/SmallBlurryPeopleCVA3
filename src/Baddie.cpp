@@ -4,7 +4,8 @@
 #include "ngl/NGLStream.h"
 #include "Utility.hpp"
 
-Baddie::Baddie(Grid *_grid) :
+Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid) :
+  m_height_tracer(_height_tracer),
   m_grid(_grid),
 	m_combat(false),
   m_path()
@@ -124,7 +125,7 @@ void Baddie::fightState()
 ngl::Vec3 Baddie::getPos()
 {
   //get grid height at baddie's position
-  float height = m_grid->getInterpolatedHeight(m_pos[0], m_pos[1]);
+  float height = m_height_tracer->getHeight(m_pos[0], m_pos[1]);
   return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
 

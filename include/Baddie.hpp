@@ -4,6 +4,7 @@
 #include "ngl/Vec2.h"
 #include "ngl/Vec3.h"
 #include "Grid.hpp"
+#include "TerrainHeightTracer.hpp"
 #include "vector"
 
 class Baddie
@@ -13,7 +14,7 @@ public:
   /// \brief Baddie constructor to create baddie at edge of map
   /// \param _grid grid to use
   ///
-  Baddie(Grid *_grid);
+  Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid);
   ///
   /// \brief default destructor
   ///
@@ -32,7 +33,6 @@ public:
   /// \return vector to target
   ///
   ngl::Vec2 calcAimVec(float *dist_squared);
-
 	///
 	/// \brief setTarget, set a new target position based on a position
 	/// \param _target_pos, the position to pathfind to
@@ -72,6 +72,7 @@ public:
 	///
 	void fightState();
 private:
+  TerrainHeightTracer *m_height_tracer;
   ///
   /// \brief m_pos position of baddie
   ///

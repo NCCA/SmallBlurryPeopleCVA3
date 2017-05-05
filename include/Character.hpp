@@ -4,6 +4,7 @@
 #include "Grid.hpp"
 #include "Inventory.hpp"
 #include "Baddie.hpp"
+#include "TerrainHeightTracer.hpp"
 #include "ngl/Vec2.h"
 
 #include <QTime>
@@ -37,15 +38,14 @@ enum State
 	FIGHT,
 	REPEAT,
 	IDLE
-
 };
 
 enum class CharInventory
 {
-	WOOD,
-	FISH,
-	BERRIES,
-	NONE
+  WOOD,
+  FISH,
+  BERRIES,
+  NONE
 };
 
 /// \class Character
@@ -57,7 +57,7 @@ public:
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
 	///
-	Character(Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
+	Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
 	///
 	/// \brief destructor
 	///
@@ -331,10 +331,6 @@ private:
 	///
 	int m_building_speed;
 	///
-	/// \brief m_fishing_speed, how long it takes the character to get a fish
-	///
-	int m_fishing_speed;
-	///
 	/// \brief m_fishing_catch, likeyhood of catching a fish
 	///
 	int m_fishing_catch;
@@ -366,6 +362,10 @@ private:
 	/// \brief m_building_type, the type of building the character is building
 	///
 	TileType m_building_type;
+	///
+	/// \brief m_height_tracer, for grid height
+	///
+	TerrainHeightTracer *m_height_tracer;
 	///
 	/// \brief findNearestStorage, finds a storage house close to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found

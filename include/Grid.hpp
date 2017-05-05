@@ -24,7 +24,8 @@ public:
 
   /// @brief updateScript loads the specified script and runs it to create a new map
   /// @param _script_path is the file path to the python script
-	void updateScript(std::string _script_path, int _new_w = 20, int _new_h = 20, int _new_seed = 4);
+
+  void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 4);
 
   void printTrees();
   void printTypes();
@@ -41,6 +42,7 @@ public:
   int getTileId(int _x, int _y);
   bool isTileTraversable(int _x, int _y);
   bool isTileTraversable(int _id);
+  std::vector<ngl::Vec2> getTreePositions(int _x, int _y);
   int cutTileTrees(int _id, int _goal_amount);
 
   void setTileType(int _id, TileType _type);
@@ -55,6 +57,7 @@ public:
   void removeOccupant(int _x, int _y);
   int getOccupants(int _id);
   int getOccupants(int _x, int _y);
+  int getNumTrees(int _x, int _y);
 
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile

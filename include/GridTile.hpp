@@ -1,6 +1,9 @@
 #ifndef __GRIDTILE_HPP__
 #define __GRIDTILE_HPP__
 
+#include "ngl/Vec2.h"
+#include <vector>
+
 /// @file GridTile.hpp
 /// @brief The GridTile class is a storage space for the data contained in each tile of the map
 
@@ -59,6 +62,9 @@ public:
 
   int getOccupants();
 
+  std::vector<ngl::Vec2> getTreePositions();
+
+
 private:
   int m_id;
   TileType m_type = TileType::NONE;
@@ -66,6 +72,7 @@ private:
   int m_trees = 0;
   float m_build_state = 0.0;
   int m_occupants = 0;
+  std::vector<ngl::Vec2> m_tree_positions;
 };
 
 
