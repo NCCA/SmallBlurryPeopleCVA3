@@ -175,7 +175,7 @@ float Grid::getInterpolatedHeight(float _x, float _y)
   float h5 = h2 * (x1 - _x) + h3 * (_x - x0);
   float h6 = h4 * (y1 - _y) + h5 * (_y - y0);
 
-  return h0;
+  return h6;
 }
 
 
