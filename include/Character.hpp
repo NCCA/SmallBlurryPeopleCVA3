@@ -3,6 +3,7 @@
 
 #include "Grid.hpp"
 #include "Inventory.hpp"
+#include "Baddie.hpp"
 #include "ngl/Vec2.h"
 
 #include <QTime>
@@ -32,6 +33,8 @@ enum State
 	EAT_BERRIES,
 	EAT_FISH,
 	MOVE,
+	TRACK,
+	FIGHT,
 	REPEAT,
 	IDLE
 
@@ -54,7 +57,7 @@ public:
 	/// @brief ctor, sets reference to grid and initialised values
 	/// @param [in] _grid, pointer to the grid to reference for pathfinding
 	///
-	Character(Grid *_grid, Inventory *_world_inventory, std::string _name);
+	Character(Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
 	///
 	/// \brief destructor
 	///
@@ -64,6 +67,10 @@ public:
 	///
 	void setState(int _target_id);
 	///
+	/// \brief isBaddie, checks if an empty square has been selected or a enemy
+	///
+	void isBaddie();
+	///
 	/// \brief buildState, tell character to start building on current square
 	/// \param _building type of building to build
 	///
@@ -72,6 +79,10 @@ public:
 	/// \brief moveState, character moves to its target
 	///
 	void moveState();
+	///
+	/// \brief fightState, character fights enemy
+	///
+	void fightState();
 	///
 	/// \brief chopState, character collects wood from a tree
 	///
@@ -251,9 +262,17 @@ private:
 	/// \brief m_world_inventory, inventory in store houses around the map
 	///
 	Inventory *m_world_inventory;
-    ///
+	///
+	/// \brief m_baddies, vector of baddies in world
+	///
+	std::vector<Baddie> *m_baddies;
+	///
+	/// \brief m_target_baddie, current enemy
+	///
+	Baddie *m_target_baddie;
+	///
 	/// \brief m_pos, character position
-    ///
+	/// ///
 	ngl::Vec2 m_pos;
 	///
 	/// \brief m_rot character's rotation to face current direction (degrees)
@@ -283,8 +302,17 @@ private:
 	/// \brief m_action_timer, timer for characters actions such as chopping wood and building
 	///
 	QTime m_action_timer;
+	///
+	/// \brief m_hunger_timer, timer for how fast hunger depletes and regenerates
+	///
 	QTime m_hunger_timer;
+	///
+	/// \brief m_health_timer, timer for how fast health depletes and regenerates
+	///
 	QTime m_health_timer;
+	///
+	/// \brief m_stamina_timer, timer for how fast stamina depletes and regenerates
+	///
 	QTime m_stamina_timer;
 	///
 	/// \brief m_state_stack, stack containing sequence of states to reach an end goal, such as chopping wood
@@ -314,6 +342,10 @@ private:
 	/// \brief m_forage_amount, how many berries they find
 	///
 	int m_forage_amount;
+	///
+	/// \brief m_attack_power, how much the character hits for
+	///
+	int m_attack_power;
 	///
 	/// \brief allows for checking if this is the first time the character has been set idle between actions
 	///

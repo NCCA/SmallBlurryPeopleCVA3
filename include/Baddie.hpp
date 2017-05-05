@@ -57,6 +57,20 @@ public:
 	/// \return m_rot (degrees)
 	///
 	float getRot() {return m_rot;}
+	///
+	/// \brief getHealth, get baddie's health
+	/// \return m_health
+	///
+	float getHealth() {return m_health;}
+	///
+	/// \brief takeHealth, remove health from baddie
+	/// \param _amount, amount to take off health
+	///
+	void takeHealth(float _amount) {m_health -= _amount;}
+	///
+	/// \brief setFightState, sets baddie into a fighting state
+	///
+	void fightState();
 private:
   ///
   /// \brief m_pos position of baddie
@@ -74,6 +88,10 @@ private:
   /// \brief m_speed speed of character
   ///
   float m_speed;
+	///
+	/// \brief m_combat, if the character is in combat
+	///
+	bool m_combat;
   ///
   /// \brief m_path, vector of target positions for movement
   ///

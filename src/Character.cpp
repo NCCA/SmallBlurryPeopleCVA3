@@ -14,7 +14,7 @@
 
 int Character::m_id_counter(1);
 
-Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name):
+Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies):
   m_id(m_id_counter++),
   m_name(_name),
 	m_speed(0),
@@ -26,6 +26,8 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_idle(true),
   m_grid(_grid),
   m_world_inventory(_world_inventory),
+	m_baddies(_baddies),
+	m_target_baddie(NULL),
   m_inventory(CharInventory::NONE),
   m_called(0),
   m_building_amount(0),
@@ -53,6 +55,8 @@ Character::Character(Grid *_grid, Inventory *_world_inventory, std::string _name
   m_fishing_speed = Utility::randInt(m_fishing_catch,5);
   //amount of berries collected
   m_forage_amount = Utility::randInt(1,5);
+	//amount character hits for
+	m_attack_power = Utility::randInt(5,10);
 
   //random colour
   float red = Utility::randFlt(0, 1);
@@ -93,7 +97,8 @@ void Character::setState(int _target_id)
     else if (m_grid->getTileType(m_target_id) == TileType::WATER)
       fishState();
     else if (m_grid->getTileType(m_target_id) == TileType::NONE)
-      moveState();
+			isBaddie();
+			//moveState();
     else if (m_grid->getTileType(m_target_id) == TileType::HOUSE)
       sleepState();
     else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
@@ -106,6 +111,29 @@ void Character::setState(int _target_id)
   else
     //if the tile is unreachable
     generalMessage(" can't get there!", _target_id);
+}
+
+void Character::isBaddie()
+{
+	ngl::Vec2 selection = m_grid->idToCoord(m_target_id);
+	bool found = false;
+	for (auto &baddie : *m_baddies)
+	{
+		ngl::Vec2 baddiePos = ngl::Vec2(baddie.getPos()[0] - 0.5, baddie.getPos()[2] - 0.5);
+		if(baddiePos.m_x >= (selection.m_x - 0.5) &&
+			 baddiePos.m_x <= (selection.m_x + 0.5) &&
+			 baddiePos.m_y >= (selection.m_y - 0.5) &&
+			 baddiePos.m_y <= (selection.m_y + 0.5))
+		{
+			found = true;
+			m_target_baddie = &baddie;
+		}
+	}
+
+	if (found == true)
+		fightState();
+	else
+		moveState();
 }
 
 void Character::buildState(TileType _building)
@@ -155,8 +183,15 @@ void Character::buildState(TileType _building)
 void Character::moveState()
 {
    //move character to target and wait
-    m_state_stack.push_back(State::MOVE);
-    m_state_stack.push_back(State::IDLE);
+	m_state_stack.push_back(State::MOVE);
+	m_state_stack.push_back(State::IDLE);
+}
+
+void Character::fightState()
+{
+	m_state_stack.push_back(State::TRACK);
+	m_state_stack.push_back(State::FIGHT);
+	generalMessage(" is going to fight!", m_target_id);
 }
 
 void Character::chopState()
@@ -418,271 +453,304 @@ void Character::update()
         break;
       }
 
-      case(State::CHOP_WOOD):
-      {
-        //when chopping speed has been reached, gain a piece of wood
+			case(State::TRACK):
+			{
+				if (move())
+				{
+					ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
+					int baddieID = m_grid->coordToId(baddiePos);
+					if (m_grid->coordToId(m_pos) == baddieID)
+						{
+							completedAction();
+							m_target_baddie->fightState();
+						}
+					else
+						setTarget(baddieID);
+					break;
+				}
+			}
+
+			case(State::FIGHT):
+			{
+				if(m_action_timer.elapsed() >= 1000)
+				{
+					m_target_baddie->takeHealth(0.01 * m_attack_power);
+					m_action_timer.restart();
+					if(m_target_baddie->getHealth() <= 0.0)
+					{
+						Gui::instance()->notify("Enemy defeated", m_pos);
+						completedAction();
+					}
+				}
+				break;
+			}
+
+			case(State::CHOP_WOOD):
+			{
+				//when chopping speed has been reached, gain a piece of wood
 				if(m_action_timer.elapsed() >= 1000 * m_chopping_speed)
-        {
-          int wood_taken = m_grid->cutTileTrees(m_dest_target_id, 1);
-          if (wood_taken == 1)
-          {
-            //take stamina away
-            m_stamina -= 0.1;
-            m_inventory = CharInventory::WOOD;
-            generalMessage(" got a piece of wood", m_pos);
+				{
+					std::cout<<"TIMER: "<<m_action_timer.elapsed()<<std::endl;
+					int wood_taken = m_grid->cutTileTrees(m_dest_target_id, 1);
+					if (wood_taken == 1)
+					{
+						//take stamina away
+						m_stamina -= 0.1;
+						m_inventory = CharInventory::WOOD;
+						generalMessage(" got a piece of wood", m_pos);
 
-            //remove the state from the stack
-            completedAction();
-            //finds nearest storage house and sets as target
-            findNearestStorage();
-          }
-          else
-          {
-            //no wood left to chop
-            Gui::instance()->notify("There's no tree left", m_grid->idToCoord(m_dest_target_id));
-            m_state_stack.clear();
-          }
-        }
-        break;
-      }
+						//remove the state from the stack
+						completedAction();
+						//finds nearest storage house and sets as target
+						findNearestStorage();
+					}
+					else
+					{
+						//no wood left to chop
+						Gui::instance()->notify("There's no tree left", m_grid->idToCoord(m_dest_target_id));
+						m_state_stack.clear();
+					}
+				}
+				break;
+			}
 
-      case(State::STORE):
-      {
+			case(State::STORE):
+			{
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //if the character is holding wood, add to inventory
-          if (m_inventory == CharInventory::WOOD)
-          {
-            m_world_inventory->addWood(1);
-          }
-          //if the character is holding fish, add to inventory
-          else if (m_inventory == CharInventory::FISH)
-          {
-            m_world_inventory->addFish(1);
-          }
-          //if the character is holding berries, add to inventory
-          else if (m_inventory == CharInventory::BERRIES)
-          {
-            m_world_inventory->addBerries(5);
-          }
+				{
+					//if the character is holding wood, add to inventory
+					if (m_inventory == CharInventory::WOOD)
+					{
+						m_world_inventory->addWood(1);
+					}
+					//if the character is holding fish, add to inventory
+					else if (m_inventory == CharInventory::FISH)
+					{
+						m_world_inventory->addFish(1);
+					}
+					//if the character is holding berries, add to inventory
+					else if (m_inventory == CharInventory::BERRIES)
+					{
+						m_world_inventory->addBerries(5);
+					}
 
-          //reset character inventory
-          m_inventory = CharInventory::NONE;
-          //find nearest empty tile to the storage house
-          findNearestEmptyTile();
-          completedAction();
-        }
-        break;
-      }
+					//reset character inventory
+					m_inventory = CharInventory::NONE;
+					//find nearest empty tile to the storage house
+					findNearestEmptyTile();
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::FISH):
-      {
-        //when fishing speed reached, gain piece of fish
+			case(State::FISH):
+			{
+				//when fishing speed reached, gain piece of fish
 				if(m_action_timer.elapsed() >= 1000 * m_fishing_speed)
-        {
-          //take away stamina
-          m_stamina -= 0.3;
-          //random chance of catching a fish
-          ngl::Random *rand = ngl::Random::instance();
-          int fish_rand = rand->randomPositiveNumber(10);
-          if(fish_rand % m_fishing_catch == 0)
-          {
-            //character has fish in inventory
-            m_inventory=CharInventory::FISH;
-            generalMessage(" caught a fish", m_pos);
-            //remove state from stack
-            completedAction();
-            //find nearest storage house and sets as target
-            findNearestStorage();
-          }
-          else
-          {
-            //if no fish is caught
-            generalMessage(" didn't catch a fish", m_pos);
-            m_state_stack.clear();
-          }
-        }
-        break;
-      }
+				{
+					//take away stamina
+					m_stamina -= 0.3;
+					//random chance of catching a fish
+					ngl::Random *rand = ngl::Random::instance();
+					int fish_rand = rand->randomPositiveNumber(10);
+					if(fish_rand % m_fishing_catch == 0)
+					{
+						//character has fish in inventory
+						m_inventory=CharInventory::FISH;
+						generalMessage(" caught a fish", m_pos);
+						//remove state from stack
+						completedAction();
+						//find nearest storage house and sets as target
+						findNearestStorage();
+					}
+					else
+					{
+						//if no fish is caught
+						generalMessage(" didn't catch a fish", m_pos);
+						m_state_stack.clear();
+					}
+				}
+				break;
+			}
 
-      case(State::FORAGE):
-      {
+			case(State::FORAGE):
+			{
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //take away stamina
-          m_stamina -= 0.1;
-          //character has berries in inventory
-          m_inventory = CharInventory::BERRIES;
-          generalMessage(" got berries", m_pos);
-          //remove state from stack
-          completedAction();
-          //find nearest storage house and sets as target
-          findNearestStorage();
-        }
-        break;
-      }
+				{
+					//take away stamina
+					m_stamina -= 0.1;
+					//character has berries in inventory
+					m_inventory = CharInventory::BERRIES;
+					generalMessage(" got berries", m_pos);
+					//remove state from stack
+					completedAction();
+					//find nearest storage house and sets as target
+					findNearestStorage();
+				}
+				break;
+			}
 
-      case(State::CHECK_WOOD):
-      {
-        //if the character isnt carrying wood, collect wood
-        if (m_inventory != CharInventory::WOOD)
-        {
-          //if storage house found, remove state from stack
-          if(findNearestStorage() && m_world_inventory->getWoodInventory() >= 1)
-            completedAction();
-          else
-          {
-            //no wood in storage house
-            Gui::instance()->notify("There's not enough wood to build", m_pos);
-            m_state_stack.clear();
-          }
-        }
-        else
-        {
-          //remove collect, move and get_wood states if character holding wood
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
+			case(State::CHECK_WOOD):
+			{
+				//if the character isnt carrying wood, collect wood
+				if (m_inventory != CharInventory::WOOD)
+				{
+					//if storage house found, remove state from stack
+					if(findNearestStorage() && m_world_inventory->getWoodInventory() >= 1)
+						completedAction();
+					else
+					{
+						//no wood in storage house
+						Gui::instance()->notify("There's not enough wood to build", m_pos);
+						m_state_stack.clear();
+					}
+				}
+				else
+				{
+					//remove collect, move and get_wood states if character holding wood
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
 					m_action_timer.restart();
-        }
-        break;
-      }
+				}
+				break;
+			}
 
-      case(State::CHECK_BERRIES):
-      {
-        //if the character isnt carrying berries, collect berries
-        if (m_inventory != CharInventory::BERRIES)
-        {
-          //if storage house found, remove state from stack
-          if(findNearestStorage())
-            completedAction();
-        }
-        else
-        {
-          //remove collect, move and get_berries states if character holding berries
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
+			case(State::CHECK_BERRIES):
+			{
+				//if the character isnt carrying berries, collect berries
+				if (m_inventory != CharInventory::BERRIES)
+				{
+					//if storage house found, remove state from stack
+					if(findNearestStorage())
+						completedAction();
+				}
+				else
+				{
+					//remove collect, move and get_berries states if character holding berries
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
 					m_action_timer.restart();
-        }
-        break;
-      }
+				}
+				break;
+			}
 
-      case(State::CHECK_FISH):
-      {
-        //if the character isnt carrying a fish, collect fish
-        if (m_inventory != CharInventory::FISH)
-        {
-          //if storage house found, remove state from stack
-          if(findNearestStorage())
-            completedAction();
-        }
-        else
-        {
-          //remove collect, move and get_fish states if character holding fish
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
-          m_state_stack.pop_front();
+			case(State::CHECK_FISH):
+			{
+				//if the character isnt carrying a fish, collect fish
+				if (m_inventory != CharInventory::FISH)
+				{
+					//if storage house found, remove state from stack
+					if(findNearestStorage())
+						completedAction();
+				}
+				else
+				{
+					//remove collect, move and get_fish states if character holding fish
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
+					m_state_stack.pop_front();
 					m_action_timer.restart();
-        }
-        break;
-      }
+				}
+				break;
+			}
 
 
-      case(State::GET_WOOD):
-      {
+			case(State::GET_WOOD):
+			{
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //character has wood in inventory
-          m_inventory = CharInventory::WOOD;
+				{
+					//character has wood in inventory
+					m_inventory = CharInventory::WOOD;
 
-          //take wood from universal storage
-          m_world_inventory->takeWood(1);
-          //set final destination as the new target for the character
-          m_target_id = m_dest_target_id;
-          m_path = findPath(m_target_id);
-          //setTarget(m_target_id);
-          /********DOESNT WORK FOR SOME REASON??*******/
-          //remove state from stack
-          completedAction();
-        }
-        break;
-      }
+					//take wood from universal storage
+					m_world_inventory->takeWood(1);
+					//set final destination as the new target for the character
+					m_target_id = m_dest_target_id;
+					m_path = findPath(m_target_id);
+					//setTarget(m_target_id);
+					/********DOESNT WORK FOR SOME REASON??*******/
+					//remove state from stack
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::GET_BERRIES):
-      {
+			case(State::GET_BERRIES):
+			{
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //character has berries in inventory
-          m_inventory = CharInventory::BERRIES;
+				{
+					//character has berries in inventory
+					m_inventory = CharInventory::BERRIES;
 
-          //take berries from universal storage
-          m_world_inventory->takeBerries(5);
-          findNearestEmptyTile();
-          //remove state from stack
-          completedAction();
-        }
-        break;
-      }
+					//take berries from universal storage
+					m_world_inventory->takeBerries(5);
+					findNearestEmptyTile();
+					//remove state from stack
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::GET_FISH):
-      {
+			case(State::GET_FISH):
+			{
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //character has fish in inventory
-          m_inventory = CharInventory::FISH;
+				{
+					//character has fish in inventory
+					m_inventory = CharInventory::FISH;
 
-          //take fish from universal storage
-          m_world_inventory->takeFish(1);
-          findNearestEmptyTile();
-          //remove state from stack
-          completedAction();
-        }
-        break;
-      }
+					//take fish from universal storage
+					m_world_inventory->takeFish(1);
+					findNearestEmptyTile();
+					//remove state from stack
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::BUILD):
-      {
-        //check in case building has been finished by another character
-        if(m_grid->getBuildState(m_building_tile) >= 1.0)
-        {
-          m_building_type = TileType::NONE;
-          m_state_stack.clear();
-          //put wood back that isnt used
-          storeState();
-        }
+			case(State::BUILD):
+			{
+				//check in case building has been finished by another character
+				if(m_grid->getBuildState(m_building_tile) >= 1.0)
+				{
+					m_building_type = TileType::NONE;
+					m_state_stack.clear();
+					//put wood back that isnt used
+					storeState();
+				}
 
 				if(m_action_timer.elapsed() >= 1000 * m_building_speed)
-        {
-          //take away stamina
-          m_stamina -= 0.3;
-          m_inventory = CharInventory::NONE;
+				{
+					//take away stamina
+					m_stamina -= 0.3;
+					m_inventory = CharInventory::NONE;
 
-          //amount of building complete
-          float percentage = 1.0/m_building_amount;
-          m_grid->setBuildState(m_building_tile, percentage, m_building_type);
+					//amount of building complete
+					float percentage = 1.0/m_building_amount;
+					m_grid->setBuildState(m_building_tile, percentage, m_building_type);
 
-          //if charaters has finished building
-          if(m_grid->getBuildState(m_building_tile) >= 1.0)
-          {
-            Gui::instance()->notify("Building complete!", m_grid->idToCoord(m_building_tile));
-            m_building_type = TileType::NONE;
-          }
+					//if charaters has finished building
+					if(m_grid->getBuildState(m_building_tile) >= 1.0)
+					{
+						Gui::instance()->notify("Building complete!", m_grid->idToCoord(m_building_tile));
+						m_building_type = TileType::NONE;
+					}
 
-          completedAction();
-          if (m_stamina < 0.3)
-            //if not enough stamina to build again
-            staminaMessage();
-        }
-        break;
-      }
+					completedAction();
+					if (m_stamina < 0.3)
+						//if not enough stamina to build again
+						staminaMessage();
+				}
+				break;
+			}
 
-      case(State::EAT_BERRIES):
-      {
+			case(State::EAT_BERRIES):
+			{
 				if(m_action_timer.elapsed() >= 3000)
-        {
-          //take berries away from inventory
-          m_inventory = CharInventory::NONE;
+				{
+					//take berries away from inventory
+					m_inventory = CharInventory::NONE;
 
 					//add onto hunger
 					m_hunger += 0.2;
@@ -690,18 +758,18 @@ void Character::update()
 					if (m_hunger >= 1.0)
 						m_hunger = 1.0;
 
-          generalMessage(" ate berries", m_pos);
-          completedAction();
-        }
-        break;
-      }
+					generalMessage(" ate berries", m_pos);
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::EAT_FISH):
-      {
+			case(State::EAT_FISH):
+			{
 				if(m_action_timer.elapsed() >= 3000)
-        {
-          //take fish from inventory
-          m_inventory = CharInventory::NONE;
+				{
+					//take fish from inventory
+					m_inventory = CharInventory::NONE;
 
 					//add onto hunger
 					m_hunger += 0.5;
@@ -709,72 +777,72 @@ void Character::update()
 					if (m_hunger >= 1.0)
 						m_hunger = 1.0;
 
-          generalMessage(" ate a fish", m_pos);
-          completedAction();
-        }
-        break;
-      }
+					generalMessage(" ate a fish", m_pos);
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::REPEAT):
-      {
-        //repeat for foraging and chopping wood (have same stamina)
-        if(m_stamina >= 0.1)
-        {
-          m_target_id = m_dest_target_id;
-          //find nearest empty tile to the destination target
-          findNearestEmptyTile();
-          //remove state from stack
-          completedAction();
-        }
-        else
-          //if not enough stamina
-          staminaMessage();
-        break;
-      }
+			case(State::REPEAT):
+			{
+				//repeat for foraging and chopping wood (have same stamina)
+				if(m_stamina >= 0.1)
+				{
+					m_target_id = m_dest_target_id;
+					//find nearest empty tile to the destination target
+					findNearestEmptyTile();
+					//remove state from stack
+					completedAction();
+				}
+				else
+					//if not enough stamina
+					staminaMessage();
+				break;
+			}
 
-      case(State::IDLE):
-      {
+			case(State::IDLE):
+			{
 				//character doesnt move after an action for a second
 				if(m_action_timer.elapsed() >= 1000)
-        {
-          //remove state from stack
-          completedAction();
-        }
-        break;
-      }
+				{
+					//remove state from stack
+					completedAction();
+				}
+				break;
+			}
 
-      case(State::SLEEP):
-      {
-        //how long to sleep to recover stamina
-        float recover = (1.0 - m_stamina);
-        if(recover > 0)
-        {
-          //character isn't drawn when m_sleeping is true
-          m_sleeping = true;
-          //character is no longer the active character
-          m_active = false;
+			case(State::SLEEP):
+			{
+				//how long to sleep to recover stamina
+				float recover = (1.0 - m_stamina);
+				if(recover > 0)
+				{
+					//character isn't drawn when m_sleeping is true
+					m_sleeping = true;
+					//character is no longer the active character
+					m_active = false;
 					if(m_action_timer.elapsed() >= 1000 * (recover*10))
-          {
-            m_sleeping = false;
-            m_stamina = 1.0;
-            generalMessage(" has finished sleeping", m_pos);
-            findNearestEmptyTile();
-            //remove state from stack
-            completedAction();
-          }
-        }
-        else
-        {
-          //if stamina is full
+					{
+						m_sleeping = false;
+						m_stamina = 1.0;
+						generalMessage(" has finished sleeping", m_pos);
+						findNearestEmptyTile();
+						//remove state from stack
+						completedAction();
+					}
+				}
+				else
+				{
+					//if stamina is full
 					if(m_action_timer.elapsed() >= 1000)
-          {
-            generalMessage(" doesn't need to sleep", m_pos);
-            findNearestEmptyTile();
-            //remove state from stack
-            completedAction();
-          }
-        }
-      }
+					{
+						generalMessage(" doesn't need to sleep", m_pos);
+						findNearestEmptyTile();
+						//remove state from stack
+						completedAction();
+					}
+				}
+			}
 
     }
   }

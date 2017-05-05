@@ -6,23 +6,32 @@
 
 Baddie::Baddie(Grid *_grid) :
   m_grid(_grid),
+	m_combat(false),
   m_path()
 {
-  m_pos = ngl::Vec2(0.5,0.5);
+	m_pos = ngl::Vec2(0,0);
   m_target_id = m_grid->coordToId(m_pos);
   m_health = 1.0f;
   Prefs* prefs = Prefs::instance();
-  m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.8;
+	m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
-  findPath(ngl::Vec2(m_grid->getW()/2, m_grid->getH()/2));
+	setTarget(ngl::Vec2(10, 10));
 }
 
 void Baddie::update(ngl::Vec3 closest_Target)
 {
-  if(move())
-  {
-    //newRandomTarget();
-  }
+	if(m_combat == false)
+	{
+		if(move())
+		{
+				setTarget(ngl::Vec2(Utility::randInt(0, 50), Utility::randInt(0,50)));
+			//newRandomTarget();
+		}
+	}
+	else
+	{
+		setTarget(m_pos);
+	}
 
   //setTarget(target);
 
@@ -104,6 +113,12 @@ void Baddie::findPath(ngl::Vec2 _target)
 {
   NodeNetwork network(m_grid, m_pos, _target);
   m_path = network.findPath();
+}
+
+void Baddie::fightState()
+{
+	//to be filled with stuff later
+	m_combat = true;
 }
 
 ngl::Vec3 Baddie::getPos()

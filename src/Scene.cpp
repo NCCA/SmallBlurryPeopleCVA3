@@ -403,7 +403,7 @@ void Scene::createCharacter()
     std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
     //create character with random name
-    m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen]));
+		m_characters.push_back(Character(&m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
@@ -519,9 +519,12 @@ void Scene::update()
             }
         }
 
-        for(Baddie &baddie : m_baddies)
+				for(int i=0; i<m_baddies.size(); i++)
         {
-            baddie.update(m_characters[0].getPos());
+					if(m_baddies[i].getHealth() > 0.0)
+						m_baddies[i].update(m_characters[0].getPos());
+					else
+						m_baddies.erase(m_baddies.begin() + i);
         }
 
 
@@ -1377,6 +1380,8 @@ void Scene::drawMeshes()
 
     for(Baddie &baddie : m_baddies)
     {
+			if(baddie.getHealth() > 0.0)
+			{
         ngl::Vec3 pos = baddie.getPos();
         pos.m_y /= m_terrainHeightDivider;
         m_transform.setPosition(pos);
@@ -1384,6 +1389,7 @@ void Scene::drawMeshes()
         m_transform.setScale(2.0f, 2.0f, 2.0f);
         slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
         drawAsset("person", "", "");
+			}
     }
 
     for(auto &stone : m_tombstones)
