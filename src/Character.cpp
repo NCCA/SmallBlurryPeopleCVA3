@@ -15,24 +15,20 @@
 int Character::m_id_counter(1);
 
 Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies):
-  m_id(m_id_counter++),
+	AI(_height_tracer, _grid),
+	m_id(m_id_counter++),
   m_name(_name),
-  m_speed(0),
   m_stamina(1.0),
-  m_health(1.0),
   m_hunger(1.0),
   m_active(false),
   m_sleeping(false),
-  m_idle(true),
-  m_grid(_grid),
   m_world_inventory(_world_inventory),
 	m_baddies(_baddies),
-	m_target_baddie(NULL),
+	m_target_baddie(nullptr),
   m_inventory(CharInventory::NONE),
   m_called(0),
   m_building_amount(0),
-  m_building_type(TileType::NONE),
-  m_height_tracer(_height_tracer)
+	m_building_type(TileType::NONE)
 {
   //get values from preferences
   Prefs* prefs = Prefs::instance();
@@ -87,7 +83,6 @@ void Character::setState(int _target_id)
   //if the target is reachable or a water tile
   if(setTarget(_target_id) || m_grid->getTileType(_target_id)== TileType::WATER)
   {
-    m_target_id = _target_id;
     m_called = 0;
 
     //create different state stacks depending on grid tile clicked on
@@ -97,9 +92,11 @@ void Character::setState(int _target_id)
       fishState();
     else if (m_grid->getTileType(m_target_id) == TileType::NONE)
 			isBaddie();
-			//moveState();
     else if (m_grid->getTileType(m_target_id) == TileType::HOUSE)
       sleepState();
+		else if (m_grid->getTileType(m_target_id) == TileType::STOREHOUSE)
+			if(m_inventory != CharInventory::NONE)
+				storeState();
     else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
              m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
       buildState(TileType::HOUSE);
@@ -387,7 +384,7 @@ void Character::idleState()
     //find a random coordinate from these ranges
     int x = Utility::randInt(x_min_range, x_max_range);
     int y = Utility::randInt(y_min_range, y_max_range);
-    valid = setTarget(ngl::Vec2(x,y));
+		valid = setTarget(ngl::Vec2(x,y));
   }
   //create stack if path found
   if(valid)
@@ -445,7 +442,7 @@ void Character::update()
     {
       case(State::MOVE):
       {
-        if (move())
+				if (move())
         {
           //when the target has been reached, remove the state from the stack
           completedAction();
@@ -530,7 +527,7 @@ void Character::update()
 				else
 				{
 					//no wood left to chop
-					generalMessage(" finished chopping wood", m_grid->idToCoord(m_dest_target_id));
+					generalMessage(" finished chopping wood", m_dest_target_id);
 					m_state_stack.clear();
 				}
 				break;
@@ -689,10 +686,7 @@ void Character::update()
 					//take wood from universal storage
 					m_world_inventory->takeWood(1);
 					//set final destination as the new target for the character
-					m_target_id = m_dest_target_id;
-					m_path = findPath(m_target_id);
-					//setTarget(m_target_id);
-					/********DOESNT WORK FOR SOME REASON??*******/
+					setTarget(m_dest_target_id);
 					//remove state from stack
 					completedAction();
 				}
@@ -877,123 +871,6 @@ void Character::update()
   {
     if(!m_idle)
         m_idle = true;
-  }
-}
-
-bool Character::move()
-{
-  // check whether the next point is necessary or if character has line of sight to the second point in list
-  if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
-  {
-    // if character can see point after next, remove the next point so character heads directly to the furtherst one they can see
-    // done on a one by one basis so it does all happen in the same frame as pathfinding, wouldn't be super slow that way but marginally better this way
-    m_path.pop_back();
-  }
-
-  // move by distance up to speed
-  float dist_moved = 0;
-  while(m_path.size() > 0 && dist_moved < m_speed)
-  {
-    float dist = 1;
-    ngl::Vec2 aim_vec = calcAimVec(&dist);
-    if(dist < m_speed)
-    {
-      aim_vec *= dist;
-      m_path.pop_back();
-    }
-    else
-    {
-      aim_vec *= m_speed;
-    }
-    dist_moved += aim_vec.length();
-    m_pos += aim_vec;
-  }
-  updateRot();
-  if(m_path.size() <= 0)
-  {
-    return true;
-  }
-  else return false;
-}
-
-std::vector<ngl::Vec2> Character::findPath(int _target_id)
-{
-  NodeNetwork network(m_grid, m_pos, m_grid->idToCoord(_target_id));
-  return network.findPath();
-}
-
-ngl::Vec2 Character::calcAimVec(float *dist)
-{
-  ngl::Vec2 aim_vec(0,0);
-  if(m_path.size() > 0)
-  {
-   aim_vec = m_path.back() - m_pos;
-  }
-  if(dist)
-  {
-    *dist = aim_vec.length();
-  }
-  if(aim_vec != ngl::Vec2(0,0))
-  {
-    aim_vec.normalize();
-  }
-  return aim_vec;
-}
-
-bool Character::setTarget(ngl::Vec2 _target_pos)
-{
-  // convert to tile id
-  return setTarget(m_grid->coordToId(_target_pos));
-}
-
-bool Character::setTarget(int _tile_id)
-{
-  int occupant_limit = Prefs::instance()->getIntPref("MAX_TILE_OCCUPANTS");
-  int target_occupants = m_grid->getOccupants(_tile_id);
-
-  int m_old_target = m_target_id;
-  //check how many people are on a tile, if max number of people reached, then the target is invalid
-  //if the character isnt idle
-  if (target_occupants < occupant_limit && !m_idle)
-  {
-    //if the chosen tile isnt equal to the target and isnt equal to the character's pos
-    if(_tile_id != m_target_id && _tile_id != m_grid->coordToId(m_pos))
-    {
-      m_target_id = _tile_id;
-      m_path = findPath(m_target_id);
-      //if no path was found, return false
-      if(m_path.size() <= 0)
-        return false;
-      else
-      {
-        m_grid->addOccupant(_tile_id);
-        m_grid->removeOccupant(m_old_target);
-        return true;
-      }
-    }
-    else
-      return false;
-  }
-  else if (m_idle)
-  {
-      //if the chosen tile isnt equal to the target and isnt equal to the character's pos
-      if(_tile_id != m_target_id && _tile_id != m_grid->coordToId(m_pos))
-      {
-        m_target_id = _tile_id;
-        m_path = findPath(m_target_id);
-        //if no path was found, return false
-        if(m_path.size() <= 0)
-          return false;
-        else
-          return true;
-      }
-      else
-        return false;
-  }
-  else
-  {
-    Gui::instance()->notify("There are too many people there :(", m_grid->idToCoord(_tile_id));
-    return false;
   }
 }
 
@@ -1240,15 +1117,16 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
       //checks if current target is equal to the any of the coordinates
       if(m_grid->coordToId(m_pos) == m_grid->coordToId(coord))
       {
-        m_target_id = m_grid->coordToId(m_pos);
-        m_path = findPath(m_target_id);
+				setTarget(m_pos);
+			 // m_target_id = m_grid->coordToId(m_pos);
+				//findPath(m_target_id);
         return true;
       }
     }
 
     //set the first element to the target id and shortest path
     m_target_id = m_grid->coordToId(_coord_data[0]);
-    std::vector<ngl::Vec2> shortest_path = findPath(m_target_id);
+		std::vector<ngl::Vec2> shortest_path = getPath(m_target_id);
     //erase the first element in the vector
     _coord_data.erase(_coord_data.begin());
 
@@ -1259,7 +1137,7 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
       {
         //compare the current elemets path length to the shortest_path's length
         int id = m_grid->coordToId(coord);
-        std::vector<ngl::Vec2> path = findPath(id);
+				std::vector<ngl::Vec2> path = getPath(id);
         //if shorter path, set as target
         if (shortest_path.size() == 0 && path.size() > shortest_path.size())
         {
@@ -1291,27 +1169,11 @@ bool Character::findFirstPath(std::vector<ngl::Vec2> _vector)
   for(auto element: _vector)
   {
     //if a path is found, return out of the function
-    if(setTarget(element))
+		if(setTarget(element))
       return true;
   }
   //if no path found to any coordinate in the vector
   return false;
-}
-
-ngl::Vec3 Character::getPos()
-{
-  float height = m_height_tracer->getHeight(m_pos.m_x, m_pos.m_y);
-  ngl::Vec3 pos_3d(m_pos.m_x, height, m_pos.m_y);
-  return pos_3d;
-}
-
-void Character::updateRot()
-{
-  if(m_path.size() > 0)
-  {
-    ngl::Vec2 dir = m_path.back() - m_pos;
-    m_rot = Utility::degrees(atan2(dir.m_x, dir.m_y));
-  }
 }
 
 void Character::resetCharacter()

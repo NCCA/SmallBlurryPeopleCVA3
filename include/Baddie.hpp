@@ -1,13 +1,15 @@
 #ifndef __BADDIE_HPP__
 #define __BADDIE_HPP__
 
+#include "AI.hpp"
+
 #include "ngl/Vec2.h"
 #include "ngl/Vec3.h"
 #include "Grid.hpp"
 #include "TerrainHeightTracer.hpp"
 #include "vector"
 
-class Baddie
+class Baddie : public AI
 {
 public:
   ///
@@ -22,89 +24,20 @@ public:
   ///
   /// \brief update calculate behaviours for baddie
   ///
-  void update(ngl::Vec3 closest_Target);
-  ///
-  /// \brief move, moves baddie along its path
-  /// \return true if baddie reaches target
-  ///
-  bool move();
-  ///
-  /// \brief calcAimVec, calculate vector towards next point
-  /// \return vector to target
-  ///
-  ngl::Vec2 calcAimVec(float *dist_squared);
-	///
-	/// \brief setTarget, set a new target position based on a position
-	/// \param _target_pos, the position to pathfind to
-	///
-	bool setTarget(ngl::Vec2 _target_pos);
-	///
-	/// \brief findPath find path to given position
-	/// \param _target position to aim for
-	///
-	void findPath(ngl::Vec2 _target);
-	///
-	/// \brief getPos return current pos
-	/// \return m_pos as a vec3 using m_pos.m_x, height and m_pos.m_y
-	///
-	ngl::Vec3 getPos();
-	///
-	/// \brief updateRot update character's rotations
-	///
-	void updateRot();
-	///
-	/// \brief getRot get character's rotation
-	/// \return m_rot (degrees)
-	///
-	float getRot() {return m_rot;}
-	///
-	/// \brief getHealth, get baddie's health
-	/// \return m_health
-	///
-	float getHealth() {return m_health;}
-	///
-	/// \brief takeHealth, remove health from baddie
-	/// \param _amount, amount to take off health
-	///
-	void takeHealth(float _amount) {m_health -= _amount;}
+	void update();
 	///
 	/// \brief setFightState, sets baddie into a fighting state
 	///
 	void fightState();
+	///
+	/// \brief idleState, sets baddie to not be in a fithing state
+	///
+	void idleState() {m_combat = false;}
 private:
-  TerrainHeightTracer *m_height_tracer;
-  ///
-  /// \brief m_pos position of baddie
-  ///
-  ngl::Vec2 m_pos;
-  ///
-  /// \brief m_grid pointer to grid baddie is on
-  ///
-  Grid *m_grid;
-  ///
-  /// \brief m_health float between 0..1 for health value
-  ///
-  float m_health;
-  ///
-  /// \brief m_speed speed of character
-  ///
-  float m_speed;
 	///
 	/// \brief m_combat, if the character is in combat
 	///
 	bool m_combat;
-  ///
-  /// \brief m_path, vector of target positions for movement
-  ///
-  std::vector<ngl::Vec2> m_path;
-  ///
-  /// \brief m_target_id target tile id
-  ///
-  int m_target_id;
-  ///
-  /// \brief m_rot rotation in degrees of baddie
-  ///
-  float m_rot;
 };
 
 #endif//__BADDIE_HPP__

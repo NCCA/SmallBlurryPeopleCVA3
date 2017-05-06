@@ -3,6 +3,7 @@
 
 #include "Grid.hpp"
 #include "Inventory.hpp"
+#include "AI.hpp"
 #include "Baddie.hpp"
 #include "TerrainHeightTracer.hpp"
 #include "ngl/Vec2.h"
@@ -42,15 +43,15 @@ enum State
 
 enum class CharInventory
 {
-  WOOD,
-  FISH,
-  BERRIES,
-  NONE
+	WOOD,
+	FISH,
+	BERRIES,
+	NONE
 };
 
 /// \class Character
 /// \brief Information for ingame characters, containing position, states and targets
-class Character
+class Character : public AI
 {
 public:
 	///
@@ -124,30 +125,6 @@ public:
 	///
 	void update();
 	///
-	/// \brief move, moves character along its path
-	/// \return true if gets to target
-	///
-	bool move();
-	///
-	/// \brief findPath, pathfinding function to get nodes for pathfinding
-	///
-	std::vector<ngl::Vec2> findPath(int _target_id);
-	///
-	/// \brief calcAimVec, calculate vector towards next point
-	/// \return
-	///
-	ngl::Vec2 calcAimVec(float *dist_squared);
-	///
-	/// \brief setTarget, set a new target position based on a position
-	/// \param _target_pos, the position to pathfind to
-	///
-	bool setTarget(ngl::Vec2 _target_pos);
-	///
-	/// \brief setTarget, set a new target based on the grid tile id
-	/// \param _tile_id, the tile id to pathfind to
-	///
-	bool setTarget(int _tile_id);
-	///
 	/// \brief getID, get the unique character id
 	/// \return m_id, character's id
 	///
@@ -173,30 +150,6 @@ public:
 	///
 	float getStamina() {return m_stamina;}
 	///
-	/// \brief gethealth, get character's health
-	/// \return character's health value
-	///
-	float getHealth() {return m_health;}
-	///
-	/// \brief takeHealth, take health away from a character
-	/// \param m_amount, amount of health to take away
-	///
-	void takeHealth(float m_amount) {m_health -= m_amount;}
-	///
-	/// \brief getPos, get character's position
-	/// \return m_pos, character's position
-	///
-	ngl::Vec3 getPos();
-	///
-	/// \brief updateRot update m_rot, eg if direction has changed
-	///
-	void updateRot();
-	///
-	/// \brief getRot return rotation of character
-	/// \return m_rot
-	///
-	float getRot() {return m_rot;}
-	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
 	///
@@ -211,11 +164,6 @@ public:
 	/// \return m_sleeping, the boolean stored in the character determining if it is sleeping or not
 	///
 	bool isSleeping() {return m_sleeping;}
-	///
-	/// \brief isIdle, returns whether the character is idle
-	/// \return m_idle, the boolean stored in the character determining if it is idle or not
-	///
-	bool isIdle() {return m_idle;}
 
 private:
 	///
@@ -239,10 +187,6 @@ private:
 	///
 	float m_stamina;
 	///
-	/// \brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
-	///
-	float m_health;
-	///
 	/// \brief m_hunger, how hungry the character is, 1 = full, 0 = hungry
 	///
 	float m_hunger;
@@ -254,10 +198,6 @@ private:
 	/// \brief m_sleeping, checks if the character is sleeping and hence shouldn't be drawn
 	///
 	bool m_sleeping;
-	///
-	/// \brief m_grid, grid pointer to reference for pathfinding
-	///
-	Grid *m_grid;
 	///
 	/// \brief m_world_inventory, inventory in store houses around the map
 	///
@@ -271,18 +211,6 @@ private:
 	///
 	Baddie *m_target_baddie;
 	///
-	/// \brief m_pos, character position
-	/// ///
-	ngl::Vec2 m_pos;
-	///
-	/// \brief m_rot character's rotation to face current direction (degrees)
-	///
-	float m_rot;
-	///
-	/// \brief m_target_id, id of target tile on grid
-	///
-	int m_target_id;
-	///
 	/// \brief m_dest_target_id, id of character's final destination or reoccuring destination
 	///
 	int m_dest_target_id;
@@ -290,18 +218,6 @@ private:
 	/// \brief m_building_tile, tile to build on
 	///
 	int m_building_tile;
-	///
-	/// \brief m_speed, max speed of character
-	///
-	float m_speed;
-	///
-	/// \brief m_path, vector of target positions for movement
-	///
-	std::vector<ngl::Vec2> m_path;
-	///
-	/// \brief m_action_timer, timer for characters actions such as chopping wood and building
-	///
-	QTime m_action_timer;
 	///
 	/// \brief m_hunger_timer, timer for how fast hunger depletes and regenerates
 	///
@@ -339,10 +255,6 @@ private:
 	///
 	int m_forage_amount;
 	///
-	/// \brief m_attack_power, how much the character hits for
-	///
-	int m_attack_power;
-	///
 	/// \brief allows for checking if this is the first time the character has been set idle between actions
 	///
 	int m_called;
@@ -351,10 +263,6 @@ private:
 	///
 	int m_idle_target_id;
 	///
-	/// \brief m_idle, set when character is idle, for checking if idle
-	///
-	bool m_idle;
-	///
 	/// \brief m_building_amount, how many times it takes to build a house or storage house
 	///
 	int m_building_amount;
@@ -362,10 +270,6 @@ private:
 	/// \brief m_building_type, the type of building the character is building
 	///
 	TileType m_building_type;
-	///
-	/// \brief m_height_tracer, for grid height
-	///
-	TerrainHeightTracer *m_height_tracer;
 	///
 	/// \brief findNearestStorage, finds a storage house close to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found

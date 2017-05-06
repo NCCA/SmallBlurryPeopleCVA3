@@ -102,7 +102,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
         createCharacter();
     }
 
-    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid));
+		m_baddies.push_back(Baddie(&m_height_tracer, &m_grid));
 
     initialiseFramebuffers();
 
@@ -546,7 +546,7 @@ void Scene::update()
 				for(int i=0; i<m_baddies.size(); i++)
         {
 					if(m_baddies[i].getHealth() > 0.0)
-						m_baddies[i].update(m_characters[0].getPos());
+						m_baddies[i].update();
 					else
 						m_baddies.erase(m_baddies.begin() + i);
         }
@@ -1476,6 +1476,19 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         }
     }
 
+		for(Baddie &baddie : m_baddies)
+		{
+			if(baddie.getHealth() > 0.0)
+			{
+				ngl::Vec3 pos = baddie.getPos();
+				m_transform.setPosition(pos);
+				m_transform.setRotation(0, baddie.getRot(), 0);
+				m_transform.setScale(2.0f, 2.0f, 2.0f);
+				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				drawAsset("person", "", "");
+			}
+		}
+
     for(auto &stone : m_tombstones)
     {
         //slib->use("diffuse");
@@ -1721,6 +1734,22 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
             k->draw();
         }
     }
+
+		for(Baddie &baddie : m_baddies)
+		{
+			if(baddie.getHealth() > 0.0)
+			{
+				ngl::Vec3 pos = baddie.getPos();
+				m_transform.setPosition(pos);
+				m_transform.setRotation(0, baddie.getRot(), 0);
+				m_transform.setScale(2.0f, 2.0f, 2.0f);
+				ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+
+				ngl::Obj * k = store->getModel( "person" );
+				loadMatricesToShader( m_transform.getMatrix(), mvp );
+				k->draw();
+			}
+		}
 
     for(auto &stone : m_tombstones)
     {

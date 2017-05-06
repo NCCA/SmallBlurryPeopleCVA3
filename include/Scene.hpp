@@ -8,6 +8,7 @@
 #include "AssetStore.hpp"
 #include "Grid.hpp"
 #include "Camera.hpp"
+#include "AI.hpp"
 #include "Character.hpp"
 #include "Baddie.hpp"
 #include "Inventory.hpp"
@@ -184,16 +185,15 @@ private:
     ///
     /// @brief m_character, vector of characters that have been created
     ///
-    std::vector<Character> m_characters;
+		std::vector<Character> m_characters;
     ///
-    /// \brief m_tombstones, vector of positions for tombstones
+		/// \brief m_tombstones, vector of positions for tombstones
     ///
     std::vector<ngl::Vec3> m_tombstones;
     ///
     /// \brief m_baddies vector of baddie objects
     ///
-    std::vector<Baddie> m_baddies;
-
+		std::vector<Baddie> m_baddies;
     ///
     /// \brief m_active_char_id id used to keep track of active character, more stable than using addresses
     ///
