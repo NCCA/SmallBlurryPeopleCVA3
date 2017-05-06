@@ -92,17 +92,18 @@ void Character::setState(int _target_id)
       fishState();
     else if (m_grid->getTileType(m_target_id) == TileType::NONE)
 			isBaddie();
+		else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
+						 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
+				buildState(TileType::HOUSE);
     else if (m_grid->getTileType(m_target_id) == TileType::HOUSE)
       sleepState();
+		else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_C ||
+						 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_D)
+			buildState(TileType::STOREHOUSE);
 		else if (m_grid->getTileType(m_target_id) == TileType::STOREHOUSE)
 			if(m_inventory != CharInventory::NONE)
 				storeState();
-    else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
-             m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
-      buildState(TileType::HOUSE);
-    else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_C ||
-             m_grid->getTileType(m_target_id) == TileType::FOUNDATION_D)
-      buildState(TileType::STOREHOUSE);
+
   }
   else
     //if the tile is unreachable
