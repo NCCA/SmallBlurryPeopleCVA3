@@ -1,4 +1,5 @@
 #include "Character.hpp"
+#include "Baddie.hpp"
 
 #include "Node.hpp"
 #include "NodeNetwork.hpp"
@@ -36,7 +37,6 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_building_amount = prefs->getIntPref("CHARACTER_BUILDING");
 
   //timer for actions
-  m_action_timer.start();
   m_hunger_timer.start();
   m_health_timer.start();
   m_stamina_timer.start();
@@ -124,11 +124,12 @@ void Character::isBaddie()
 		{
 			found = true;
 			m_target_baddie = &baddie;
+			m_target_baddie->stopSearching();
 		}
 	}
 
 	if (found == true)
-		fightState();
+		attackState();
 	else
 		moveState();
 }
@@ -184,11 +185,20 @@ void Character::moveState()
 	m_state_stack.push_back(State::IDLE);
 }
 
-void Character::fightState()
+void Character::attackState()
 {
 	m_state_stack.push_back(State::TRACK);
 	m_state_stack.push_back(State::FIGHT);
 	generalMessage(" is going to fight!", m_target_id);
+}
+void Character::invadedState(Baddie *_target)
+{
+	//set target baddie to one attacking
+	m_target_baddie = _target;
+	//idle characters can be attacked, so need to reset
+	resetCharacter();
+	m_state_stack.push_back(State::FIGHT);
+	generalMessage(" is being attacked!", m_target_id);
 }
 
 void Character::chopState()
@@ -408,9 +418,9 @@ void Character::update()
 			m_health = 0.0;
     m_health_timer.restart();
   }
-  else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 1000)
+	else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 100)
   {
-    m_health += 0.05;
+		m_health += 0.001;
     if(m_health > 1.0)
       m_health = 1.0;
     m_health_timer.restart();
@@ -453,22 +463,21 @@ void Character::update()
 
 			case(State::TRACK):
 			{
-				if (move())
+				ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
+				int baddieID = m_grid->coordToId(baddiePos);
+				if (m_grid->coordToId(m_pos) == baddieID)
+					{
+					//if reached enemy, initiate fighting
+						m_target_baddie->invadedState(this);
+						completedAction();
+					}
+				else
 				{
-					ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
-					int baddieID = m_grid->coordToId(baddiePos);
-					//if the characters position is the same as the enemy
-					if (m_grid->coordToId(m_pos) == baddieID)
-						{
-						//if reached enemy, initiate fighting
-							m_target_baddie->fightState();
-							completedAction();
-						}
-					else
-						//set target to enemy's new position
-						setTarget(baddieID);
-					break;
+					//set target to enemy's new position
+					setTarget(baddieID);
+					move();
 				}
+					break;
 			}
 
 			case(State::FIGHT):
@@ -499,6 +508,11 @@ void Character::update()
 						//finished action
 						Gui::instance()->notify("Enemy defeated", m_pos);
 						completedAction();
+					}
+					else if(m_health <= 0.0)
+					{
+						//if character dies
+						m_state_stack.clear();
 					}
 				}
 				break;

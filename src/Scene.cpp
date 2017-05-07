@@ -100,9 +100,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     for (int i = 0; i<m_char_num; i++)
     {
         createCharacter();
-    }
+		}
 
-		m_baddies.push_back(Baddie(&m_height_tracer, &m_grid));
+		m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
 
     initialiseFramebuffers();
 
@@ -1359,7 +1359,7 @@ void Scene::drawMeshes()
             drawInstances( "tree", "tree_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "house_d", "diffuse", instances, offset);
@@ -1383,11 +1383,11 @@ void Scene::drawMeshes()
     }
 
     slib->use("colour");
-    m_transform.reset();
     for(Character &character : m_characters)
     {
         if(character.isSleeping() == false)
         {
+						m_transform.reset();
             ngl::Vec3 pos = character.getPos();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
@@ -1400,6 +1400,7 @@ void Scene::drawMeshes()
     {
 			if(baddie.getHealth() > 0.0)
 			{
+				m_transform.reset();
         ngl::Vec3 pos = baddie.getPos();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, baddie.getRot(), 0);
@@ -1411,10 +1412,11 @@ void Scene::drawMeshes()
 
     for(auto &stone : m_tombstones)
     {
-        m_transform.setPosition(stone);
-        //slib->use("diffuse");
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-        drawAsset("tombstone", "", "");
+			m_transform.reset();
+			m_transform.setPosition(stone);
+			//slib->use("diffuse");
+			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+			drawAsset("tombstone", "", "");
     }
 }
 
@@ -1440,7 +1442,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
                 drawAsset( "tree", "tree_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuse" );
+								drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "house_d", "diffuse");
@@ -1467,7 +1469,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-
+						m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->use("colour");
@@ -1481,6 +1483,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 			if(baddie.getHealth() > 0.0)
 			{
 				ngl::Vec3 pos = baddie.getPos();
+				m_transform.reset();
 				m_transform.setPosition(pos);
 				m_transform.setRotation(0, baddie.getRot(), 0);
 				m_transform.setScale(2.0f, 2.0f, 2.0f);
@@ -1491,10 +1494,11 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &stone : m_tombstones)
     {
-        //slib->use("diffuse");
-        m_transform.setPosition(stone);
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-        drawAsset( "tombstone", "", "");
+			//slib->use("diffuse");
+			m_transform.reset();
+			m_transform.setPosition(stone);
+			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+			drawAsset( "tombstone", "", "");
     }
 }
 
@@ -1725,6 +1729,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
+						m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
@@ -1740,6 +1745,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 			if(baddie.getHealth() > 0.0)
 			{
 				ngl::Vec3 pos = baddie.getPos();
+				m_transform.reset();
 				m_transform.setPosition(pos);
 				m_transform.setRotation(0, baddie.getRot(), 0);
 				m_transform.setScale(2.0f, 2.0f, 2.0f);
@@ -1753,6 +1759,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     for(auto &stone : m_tombstones)
     {
+				m_transform.reset();
         m_transform.setPosition(stone);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 

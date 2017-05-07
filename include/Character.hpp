@@ -4,7 +4,6 @@
 #include "Grid.hpp"
 #include "Inventory.hpp"
 #include "AI.hpp"
-#include "Baddie.hpp"
 #include "TerrainHeightTracer.hpp"
 #include "ngl/Vec2.h"
 
@@ -49,6 +48,8 @@ enum class CharInventory
 	NONE
 };
 
+class Baddie;
+
 /// \class Character
 /// \brief Information for ingame characters, containing position, states and targets
 class Character : public AI
@@ -81,9 +82,13 @@ public:
 	///
 	void moveState();
 	///
-	/// \brief fightState, character fights enemy
+	/// \brief attackState, character intiates fight with enemy
 	///
-	void fightState();
+	void attackState();
+	///
+	/// \brief invadedState, enemy intiates fight with character
+	///
+	void invadedState( Baddie *_target);
 	///
 	/// \brief chopState, character collects wood from a tree
 	///

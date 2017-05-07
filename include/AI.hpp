@@ -30,10 +30,6 @@ public:
 	///
 	~AI() = default;
 	///
-	/// \brief fightState, sets up AI for combat
-	///
-	virtual void fightState() = 0;
-	///
 	/// \brief idleState, randomly moves AI while not active
 	///
 	virtual void idleState() = 0;

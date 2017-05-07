@@ -14,6 +14,7 @@ AI::AI(TerrainHeightTracer *_height_tracer, Grid *_grid):
 	m_speed(0.0),
 	m_rot(0.0)
 {
+	m_action_timer.start();
 	m_pos = ngl::Vec2(0.0,0.0);
 }
 
