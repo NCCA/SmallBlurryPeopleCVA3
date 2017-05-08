@@ -141,6 +141,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
+		store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
     store->loadTexture("rock", "terrain/rock.png");
@@ -1382,11 +1383,11 @@ void Scene::drawMeshes()
         offset += instances;
     }
 
-    slib->use("colour");
     for(Character &character : m_characters)
     {
         if(character.isSleeping() == false)
         {
+						slib->use("colour");
 						m_transform.reset();
             ngl::Vec3 pos = character.getPos();
             m_transform.setPosition(pos);
@@ -1400,21 +1401,23 @@ void Scene::drawMeshes()
     {
 			if(baddie.getHealth() > 0.0)
 			{
+				//slib->use("diffuse");
 				m_transform.reset();
         ngl::Vec3 pos = baddie.getPos();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, baddie.getRot(), 0);
         m_transform.setScale(2.0f, 2.0f, 2.0f);
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        drawAsset("person", "", "");
+				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+				drawAsset("person", "", "");
+				//drawAsset("person", "baddie_d", "diffuse");
 			}
     }
 
     for(auto &stone : m_tombstones)
     {
+			slib->use("colour");
 			m_transform.reset();
 			m_transform.setPosition(stone);
-			//slib->use("diffuse");
 			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
 			drawAsset("tombstone", "", "");
     }
