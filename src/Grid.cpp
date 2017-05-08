@@ -178,6 +178,10 @@ float Grid::getInterpolatedHeight(float _x, float _y)
   return h0;
 }
 
+TileType Grid::getTileType(ngl::Vec2 _coord)
+{
+	return m_tiles[_coord.m_x + m_w * _coord.m_y].getType();
+}
 
 TileType Grid::getTileType(int _x, int _y)
 {

@@ -35,6 +35,7 @@ public:
   std::vector<ngl::Vec3> getTriangles();
 
   TileType getTileType(int _x, int _y);
+	TileType getTileType(ngl::Vec2 _coord);
   TileType getTileType(int _id);
   int getTileHeight(int _x, int _y);
   int getTileHeight(int _id);

@@ -1,9 +1,10 @@
 #ifndef __CHARACTER_HPP__
 #define __CHARACTER_HPP__
 
+#include "AI.hpp"
+
 #include "Grid.hpp"
 #include "Inventory.hpp"
-#include "AI.hpp"
 #include "TerrainHeightTracer.hpp"
 #include "ngl/Vec2.h"
 
@@ -259,6 +260,10 @@ private:
 	/// \brief m_forage_amount, how many berries they find
 	///
 	int m_forage_amount;
+	///
+	/// \brief m_attack_power, how much the character attacks for
+	///
+	int m_attack_power;
 	///
 	/// \brief allows for checking if this is the first time the character has been set idle between actions
 	///

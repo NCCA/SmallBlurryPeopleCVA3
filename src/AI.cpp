@@ -9,7 +9,6 @@ AI::AI(TerrainHeightTracer *_height_tracer, Grid *_grid):
 	m_grid(_grid),
 	m_height_tracer(_height_tracer),
 	m_idle(true),
-	m_attack_power(0),
 	m_health(1.0),
 	m_speed(0.0),
 	m_rot(0.0)

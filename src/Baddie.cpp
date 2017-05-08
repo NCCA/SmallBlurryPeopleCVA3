@@ -3,7 +3,7 @@
 
 #include "NodeNetwork.hpp"
 #include "Prefs.hpp"
-#include "ngl/NGLStream.h"
+#include "Gui.hpp"
 #include "Utility.hpp"
 
 Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
@@ -12,18 +12,21 @@ Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Cha
 	m_target_character(nullptr),
 	m_combat(false),
 	m_track(false),
-	m_search(true),
-	//** should probably be set in preferences **//
-	m_agro_range(5.0)
+	m_search(true)
 {
-  m_target_id = m_grid->coordToId(m_pos);
   Prefs* prefs = Prefs::instance();
 	m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
 	//** should be in set preferences **//
 	m_attack_power = 0.1;
+	//** should probably be set in preferences **//
+	m_tracking_distance = 5.0;
+	m_agro_distance = 15.0;
 
-	setTarget(ngl::Vec2(10, 10));
+	//starting position, make random?
+	float x,y = 10;
+	m_pos = ngl::Vec2(x, y);
+	m_target_id = m_grid->coordToId(m_pos);
 }
 
 void Baddie::update()
@@ -41,9 +44,9 @@ void Baddie::update()
 		if(m_search)
 			findNearestTarget();
 		if (move())
-		{
-			setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
-		}
+			{
+				setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
+			}
 	}
 }
 
@@ -69,8 +72,14 @@ void Baddie::trackingState()
 	{
 		//if reached enemy character
 		m_target_character->invadedState(this);
+		//reset baddie
 		m_track = false;
 		m_combat = true;
+
+		setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
+
+		Prefs* prefs = Prefs::instance();
+		m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 	}
 	else
 		setTarget(charID);
@@ -79,7 +88,23 @@ void Baddie::trackingState()
 
 void Baddie::fight()
 {
-	if(m_action_timer.elapsed() >= 1000)
+	ngl::Vec2 target_coord = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+	float distance = Utility::sqrDistance(m_pos, target_coord);
+	if(m_grid->coordToId(m_pos) != m_grid->coordToId(target_coord))
+	{
+		if(distance > m_agro_distance)
+		{
+			m_combat = false;
+			m_search = true;
+			Gui::instance()->notify(m_target_character->getName() + " has gotten away", m_pos);
+		}
+		else
+		{
+			setTarget(target_coord);
+			move();
+		}
+	}
+	else if(m_action_timer.elapsed() >= 1000)
 	{
 		m_target_character->takeHealth(m_attack_power);
 
@@ -95,7 +120,7 @@ void Baddie::fight()
 bool Baddie::findNearestTarget()
 {
 	bool found = false;
-	float shortest_dist = m_agro_range;
+	float shortest_dist = m_tracking_distance;
 	for(auto &character : *m_characters)
 	{
 		//find squared distance between baddie and characters

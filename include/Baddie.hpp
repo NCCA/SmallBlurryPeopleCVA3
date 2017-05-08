@@ -4,10 +4,10 @@
 #include "AI.hpp"
 
 #include "ngl/Vec2.h"
-#include "ngl/Vec3.h"
 #include "Grid.hpp"
 #include "TerrainHeightTracer.hpp"
-#include "vector"
+
+#include <vector>
 
 class Character;
 
@@ -73,9 +73,17 @@ private:
 	///
 	Character *m_target_character;
 	///
-	/// \brief m_agro_range, range a character needs to be in to target
+	/// \brief m_attack_power, how much the baddie attacks for
 	///
-	float m_agro_range;
+	float m_attack_power;
+	///
+	/// \brief m_agro_distance, distance a character can move where the baddie will stop pursuing
+	///
+	float m_agro_distance;
+	///
+	/// \brief m_tracking_distance, range a character needs to be in to target
+	///
+	float m_tracking_distance;
 };
 
 #endif//__BADDIE_HPP__

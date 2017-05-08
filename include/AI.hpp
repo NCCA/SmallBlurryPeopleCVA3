@@ -137,10 +137,6 @@ protected:
 	///
 	QTime m_action_timer;
 	///
-	/// \brief m_attack_power, how much the character hits for
-	///
-	int m_attack_power;
-	///
 	/// \brief m_idle, set when character is idle, for checking if idle
 	///
 	bool m_idle;

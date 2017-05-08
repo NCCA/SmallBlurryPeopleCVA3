@@ -1,7 +1,6 @@
 #include "Character.hpp"
 #include "Baddie.hpp"
 
-#include "Node.hpp"
 #include "NodeNetwork.hpp"
 #include "Prefs.hpp"
 #include "Gui.hpp"
@@ -74,7 +73,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
       valid = true;
   }
   m_pos = ngl::Vec2(x, y);
-  m_target_id = m_grid->getTileId(x, y);
+	m_target_id = m_grid->coordToId(m_pos);
 }
 
 void Character::setState(int _target_id)
@@ -206,11 +205,13 @@ void Character::chopState()
   //check if character has enough stamina
   if(m_stamina >= 0.1)
   {
-    m_dest_target_id = m_target_id;
+		m_dest_target_id = m_target_id;
     if(findNearestEmptyTile())
     {
+			std::cout<<"TARGET1 :"<<m_target_id<<std::endl;
       //amount of wood a tree holds
-      int wood_amount = 9;
+			ngl::Vec2 wood_coord = m_grid->idToCoord(m_dest_target_id);
+			int wood_amount = m_grid->getNumTrees(wood_coord[0],wood_coord[1]);
       //create cyle of states: move to tree, chop wood, store wood
       for(int i = 0; i< wood_amount; i++)
       {
@@ -930,22 +931,27 @@ bool Character::findNearestEmptyTile()
   std::vector<ngl::Vec2> neighbours;
   ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
-  if(m_grid->getTileType(target[0]+1, target[1]) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0]+1, target[1]));
+	ngl::Vec2 N1 = ngl::Vec2(target[0]+1, target[1]);
+	ngl::Vec2 N2 = ngl::Vec2(target[0]-1, target[1]);
+	ngl::Vec2 N3 = ngl::Vec2(target[0], target[1]+1);
+	ngl::Vec2 N4 = ngl::Vec2(target[0], target[1]-1);
 
-  if(m_grid->getTileType(target[0]-1, target[1]) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0]-1, target[1]));
+	if(m_grid->getTileType(N1) == TileType::NONE)
+		neighbours.push_back(N1);
 
-  if(m_grid->getTileType(target[0], target[1]+1) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0], target[1]+1));
+	if(m_grid->getTileType(N2) == TileType::NONE)
+		neighbours.push_back(N2);
 
-  if(m_grid->getTileType(target[0], target[1]-1) == TileType::NONE)
-    neighbours.push_back(ngl::Vec2(target[0], target[1]-1));
+	if(m_grid->getTileType(N3) == TileType::NONE)
+		neighbours.push_back(N3);
+
+	if(m_grid->getTileType(N4) == TileType::NONE)
+		neighbours.push_back(N4);
 
   //find tile with the shortest distance to the character's current position
-  if(findNearest(neighbours) == true)
+	if(findNearest(neighbours))
     return true;
-  else
+	else
   {
     generalMessage(" can't get there!", m_target_id);
     m_state_stack.clear();
@@ -971,6 +977,18 @@ bool Character::findNearestFishingTile()
     ngl::Vec2 coord = m_grid->idToCoord(edge);
     edge_vector.push_back(coord);
   }
+
+	//checks if any of the found edge tiles is the tile the character is on
+	//so the character doesn't move
+	for(auto edge: edge_vector)
+	{
+		if (m_grid->coordToId(m_pos) == m_grid->coordToId(edge))
+		{
+			m_target_id = m_grid->coordToId(m_pos);
+			m_path.clear();
+			return true;
+		}
+	}
 
   //sort vector based on squared distance to character
   distanceSort(0, edge_vector.size()-1, edge_vector);
@@ -1132,10 +1150,10 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
       //checks if current target is equal to the any of the coordinates
       if(m_grid->coordToId(m_pos) == m_grid->coordToId(coord))
       {
-				setTarget(m_pos);
-			 // m_target_id = m_grid->coordToId(m_pos);
-				//findPath(m_target_id);
-        return true;
+				m_target_id = m_grid->coordToId(m_pos);
+				//clear path finding as character doesnt need to move
+				m_path.clear();
+				return true;
       }
     }
 
