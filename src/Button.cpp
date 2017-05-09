@@ -100,6 +100,7 @@ bool Button::isPassive(bool character_selected)
   case Action::PASSIVE:
   case Action::PASSIVE_CHARACTER:
   case Action::CHAR_STATE:
+  case Action::POPULATION:
     return true;
     break;
   case Action::BUILDHOUSE:

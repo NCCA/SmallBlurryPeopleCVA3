@@ -166,6 +166,16 @@ public:
     void focusCamToGridPos(ngl::Vec2 _pos);
 
     void initMeshInstances();
+    ///
+    /// \brief getPopulation get the number of characters in the scene
+    /// \return size of the characters vector
+    ///
+    int getPopulation() {return m_characters.size();}
+    ///
+    /// \brief getMaxPopulation get maximum possible population
+    /// \return maximum population
+    ///
+    int getMaxPopulation() {return m_grid.getNumHouses()*5;}
 
 private:
     ///
@@ -350,8 +360,6 @@ private:
     /// \brief m_game_started false if game is in title screen, true otherwise
     ///
     bool m_game_started;
-
-
 
     ///
     /// \brief m_movement_held which movement are currently held

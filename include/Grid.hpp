@@ -170,6 +170,20 @@ public:
   int getNumTrees(int _x, int _y);
 
   ///
+  /// \brief houseAdded increment number of houses in scene
+  ///
+  void houseAdded() {m_num_houses++;}
+  ///
+  /// \brief houseDestroyed decrement number of houses in scene
+  ///
+  void houseDestroyed() {m_num_houses--;}
+
+  ///
+  /// \brief getNumHouses get the number of houses on the grid
+  /// \return m_num_houses, number of houses on grid
+  ///
+  int getNumHouses() {return m_num_houses;}
+
   /// @brief converts a tile id to a coordinate, the tile id is the
   /// one dimensional coordinate of the tile
   /// @param the tile id to convert
@@ -274,6 +288,11 @@ private:
   /// instances need to be rebuilt
   ///
   bool m_has_changes = false;
+
+  ///
+  /// \brief m_num_houses number of houses on the map
+  ///
+  int m_num_houses;
 };
 
 #endif//__GRID_HPP__
