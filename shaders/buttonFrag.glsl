@@ -48,7 +48,7 @@ const int FORAGE         = 3;
 const int CHECK_WOOD     = 4;
 const int CHECK_BERRIES  = 5;
 const int CHECK_FISH     = 6;
-const int REPEAT         = 15;
+const int REPEAT         = 17;
 */
 const int GET_WOOD       = 7;
 const int GET_BERRIES    = 8;
@@ -58,7 +58,9 @@ const int SLEEP          = 11;
 const int EAT_BERRIES    = 12;
 const int EAT_FISH       = 13;
 const int MOVE           = 14;
-const int IDLE           = 16;
+const int TRACK          = 15;
+const int FIGHT          = 16;
+const int IDLE           = 18;
 
 // character exceptions
 const int TEXT_CROSS = 32;
@@ -276,22 +278,21 @@ float charStateText(vec2 tp)
 		tp = translate(tp, vec2(-14.0/4.0, 0.0));
 		_E _a _t _i _n _g __ _f _i _s _h
 	}
-  else if(character_state == MOVE)
+	else if(character_state == MOVE || character_state == TRACK)
   {
     tp = translate(tp, vec2(-10.0/4.0, 0.0));
     _T _r _a _v _e _l _l _i _n _g
   }
+	else if(character_state == FIGHT)
+	{
+		tp = translate(tp, vec2(-8.0/4.0, 0.0));
+		_F _i _g _h _t _i _n _g
+	}
   else if(character_state == IDLE)
   {
     tp = translate(tp, vec2(-4.0/4.0, 0.0));
     _I _d _l _e
   }
-  /*
-	else if(character_state == IDLE)
-	{
-		tp = translate(tp, vec2(1.0/4.0, 0.0));
-		__
-  }*/
   return c;
 }
 

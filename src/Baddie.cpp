@@ -1,124 +1,151 @@
 #include "Baddie.hpp"
+#include "Character.hpp"
+
 #include "NodeNetwork.hpp"
 #include "Prefs.hpp"
-#include "ngl/NGLStream.h"
+#include "Gui.hpp"
 #include "Utility.hpp"
 
-Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid) :
-  m_height_tracer(_height_tracer),
-  m_grid(_grid),
-  m_path()
+Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
+	AI(_height_tracer, _grid),
+	m_characters(_characters),
+	m_target_character(nullptr),
+	m_combat(false),
+	m_track(false),
+	m_search(true)
 {
-  m_pos = ngl::Vec2(0.5,0.5);
-  m_target_id = m_grid->coordToId(m_pos);
-  m_health = 1.0f;
   Prefs* prefs = Prefs::instance();
-  m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.8;
+	m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
-  findPath(ngl::Vec2(m_grid->getW()/2, m_grid->getH()/2));
+	//** should be in set preferences **//
+	m_attack_power = 0.1;
+	//** should probably be set in preferences **//
+	m_tracking_distance = 5.0;
+	m_agro_distance = 15.0;
+
+	//starting position, make random?
+	float x,y = 10;
+	m_pos = ngl::Vec2(x, y);
+	m_target_id = m_grid->coordToId(m_pos);
 }
 
-void Baddie::update(ngl::Vec3 closest_Target)
+void Baddie::update()
 {
-  if(move())
-  {
-    //newRandomTarget();
-  }
+	//following enemy to attack
+	if(m_track)
+		trackingState();
 
-  //setTarget(target);
+	//if enemy and baddie are on same tile, attack
+	else if(m_combat)
+		fight();
 
-  //std::cout << "-Baddie-" << std::endl;
-  //std::cout << "pos:" << m_pos << std::endl;
+	else
+	{
+		if(m_search)
+			findNearestTarget();
+		if (move())
+			{
+				setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
+			}
+	}
 }
 
-bool Baddie::move()
+void Baddie::invadedState(Character *_target)
 {
-  // check whether the next point is necessary or if character has line of sight to the second point in list
-  if(m_path.size() > 1 && NodeNetwork::raytrace(m_grid, m_pos, m_path.end()[-2]))
-  {
-    // if character can see point after next, remove the next point so character heads directly to the furtherst one they can see
-    // done on a one by one basis so it does all happen in the same frame as pathfinding, not super slow that way but marginally better this way
-    m_path.pop_back();
-  }
+	//baddie is being attacked
+	//** to be filled with stuff later **/
+	//** might want a count of how many enemies? **//
+	//** should target be vector? **/
 
-  // move by distance up to speed
-  float dist_moved = 0;
-  while(m_path.size() > 0 && dist_moved < m_speed)
-  {
-    float dist = 1;
-    ngl::Vec2 aim_vec = calcAimVec(&dist);
-    if(dist < m_speed)
-    {
-      aim_vec *= dist;
-      m_path.pop_back();
-    }
-    else
-    {
-      aim_vec *= m_speed;
-    }
-    dist_moved += aim_vec.length();
-    m_pos += aim_vec;
-  }
-  updateRot();
-  if(m_path.size() <= 0)
-  {
-    return true;
-  }
-  else return false;
+	m_target_character = _target;
+	m_combat = true;
+
 }
 
-ngl::Vec2 Baddie::calcAimVec(float *dist)
+void Baddie::trackingState()
 {
-  ngl::Vec2 aim_vec(0,0);
-  if(m_path.size() > 0)
-  {
-   aim_vec = m_path.back() - m_pos;
-  }
-  if(dist)
-  {
-    *dist = aim_vec.length();
-  }
-  if(aim_vec != ngl::Vec2(0,0))
-  {
-    aim_vec.normalize();
-  }
-  return aim_vec;
+	//** Should have check on range so baddie doesn't follow character everywhere **/
+
+	ngl::Vec2 target = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+	int charID = m_grid->coordToId(target);
+	if(m_grid->coordToId(m_pos) == charID)
+	{
+		//if reached enemy character
+		m_target_character->invadedState(this);
+		//reset baddie
+		m_track = false;
+		m_combat = true;
+
+		setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
+
+		Prefs* prefs = Prefs::instance();
+		m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
+	}
+	else
+		setTarget(charID);
+		move();
 }
 
-bool Baddie::setTarget(ngl::Vec2 _target_pos)
+void Baddie::fight()
 {
-  if(m_target_id != m_grid->coordToId(_target_pos))
-  {
-    findPath(_target_pos);
-  }
-  if(m_path.size() <= 0)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+	ngl::Vec2 target_coord = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+	float distance = Utility::sqrDistance(m_pos, target_coord);
+	if(m_grid->coordToId(m_pos) != m_grid->coordToId(target_coord))
+	{
+		if(distance > m_agro_distance)
+		{
+			m_combat = false;
+			m_search = true;
+			Gui::instance()->notify(m_target_character->getName() + " has gotten away", m_pos);
+		}
+		else
+		{
+			setTarget(target_coord);
+			move();
+		}
+	}
+	else if(m_action_timer.elapsed() >= 1000)
+	{
+		m_target_character->takeHealth(m_attack_power);
+
+		if(m_target_character->getHealth() <= 0.0)
+		{
+			m_combat = false;
+			m_search = true;
+		}
+		m_action_timer.restart();
+	}
 }
 
-void Baddie::findPath(ngl::Vec2 _target)
+bool Baddie::findNearestTarget()
 {
-  NodeNetwork network(m_grid, m_pos, _target);
-  m_path = network.findPath();
+	bool found = false;
+	float shortest_dist = m_tracking_distance;
+	for(auto &character : *m_characters)
+	{
+		//find squared distance between baddie and characters
+		ngl::Vec2 char_pos = ngl::Vec2(character.getPos()[0], character.getPos()[2]);
+		float distance = Utility::sqrDistance(m_pos, char_pos);
+		//find closest character within agro range
+		if (distance < shortest_dist)
+		{
+			found = true;
+			shortest_dist = distance;
+			//set found character as target
+			m_target_character = &character;
+		}
+	}
+
+	if (found)
+	{
+		//baddie is set to follow enemy
+		m_track = true;
+		//baddie speeds up to get to enemy
+		m_speed = 0.1;
+		//set baddie's target to character enemy
+		ngl::Vec2 target = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+		setTarget(target);
+	}
+	return found;
 }
 
-ngl::Vec3 Baddie::getPos()
-{
-  //get grid height at baddie's position
-  float height = m_height_tracer->getHeight(m_pos[0], m_pos[1]);
-  return ngl::Vec3(m_pos[0], height, m_pos[1]);
-}
-
-void Baddie::updateRot()
-{
-  if(m_path.size() > 0)
-  {
-    ngl::Vec2 dir = m_path.back() - m_pos;
-    m_rot = Utility::degrees(atan2(dir.m_x, dir.m_y));
-  }
-}

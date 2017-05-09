@@ -24,7 +24,8 @@ public:
 
   /// @brief updateScript loads the specified script and runs it to create a new map
   /// @param _script_path is the file path to the python script
-  void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 4);
+
+	void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 8);
 
   void printTrees();
   void printTypes();
@@ -34,6 +35,7 @@ public:
   std::vector<ngl::Vec3> getTriangles();
 
   TileType getTileType(int _x, int _y);
+	TileType getTileType(ngl::Vec2 _coord);
   TileType getTileType(int _id);
   int getTileHeight(int _x, int _y);
   int getTileHeight(int _id);
