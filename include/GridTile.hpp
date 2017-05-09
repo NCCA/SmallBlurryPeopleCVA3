@@ -10,6 +10,7 @@
 enum class TileType{
   NONE,
   TREES,
+  STUMPS,
   WATER,
   MOUNTAINS,
   HOUSE,
@@ -44,9 +45,6 @@ public:
   /// @brief returns the number of trees
   int getNumTrees();
 
-  /// @brief returns the id of the tile
-  int getID();
-
   /// @brief sets the number of trees, maybe a decrement tree would be useful?
   void setNumTrees(int _num_trees);
 
@@ -56,22 +54,14 @@ public:
 
   float getBuildState() {return m_build_state;}
 
-  void addOccupant();
-
-  void removeOccupant();
-
-  int getOccupants();
-
   std::vector<ngl::Vec2> getTreePositions();
 
 
 private:
-  int m_id;
   TileType m_type = TileType::NONE;
   int m_height;
   int m_trees = 0;
   float m_build_state = 0.0;
-  int m_occupants = 0;
   std::vector<ngl::Vec2> m_tree_positions;
 };
 

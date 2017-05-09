@@ -9,7 +9,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/Scene.cpp \
          $$PWD/src/Camera.cpp \
          $$PWD/src/Grid.cpp \
-				 $$PWD/src/AI.cpp \
+         $$PWD/src/AI.cpp \
          $$PWD/src/Character.cpp \
          $$PWD/src/Inventory.cpp \
          $$PWD/src/Prop.cpp \
@@ -30,11 +30,10 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/ParticleSystem.cpp \
          $$PWD/src/TerrainHeightTracer.cpp
 
-
 HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/Camera.hpp \
          $$PWD/include/Grid.hpp \
-				 $$PWD/include/AI.hpp \
+         $$PWD/include/AI.hpp \
          $$PWD/include/Character.hpp \
          $$PWD/include/Inventory.hpp \
          $$PWD/include/Prop.hpp \
@@ -72,6 +71,7 @@ OTHER_FILES += README.md \
                $$PWD/python/noise/*.py \
                $$PWD/names/*.txt \
                $$PWD/preferences.conf
+
 
 #This means I can build this on windows.
 win32 {

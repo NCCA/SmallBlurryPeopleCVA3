@@ -100,9 +100,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     for (int i = 0; i<m_char_num; i++)
     {
         createCharacter();
-		}
+    }
 
-		m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
+    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
 
     initialiseFramebuffers();
 
@@ -125,6 +125,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     store->loadMesh("tree", "tree/tree.obj");
     store->loadTexture("tree_d", "tree/tree_d.png");
+    store->loadMesh("tree_stump", "tree/tree_stump.obj");
+    store->loadTexture("tree_stump_d", "tree/tree_stump_d.png");
 
     store->loadMesh("house", "house/stilt_house.obj" );
     store->loadTexture("house_d", "house/stilt_house_diff.tif" );
@@ -141,7 +143,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
-		store->loadTexture("baddie_d", "baddie/skelly.tif");
+    store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
     store->loadTexture("rock", "terrain/rock.png");
@@ -264,6 +266,7 @@ void Scene::initMeshInstances()
 {
 
     int meshCount = 0;
+    int max_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
     //m_meshPositions.clear()
     m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getW(); ++i)
@@ -277,15 +280,27 @@ void Scene::initMeshInstances()
               //get position vector
               std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
               //for i in trees:
-                for (int n = 0; n < num_trees; n++)
+                for (int n = 0; n < max_trees; n++)
                 {
-                  //push back tree
-                  ngl::Vec2 p = positions[n];
-                  m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                            i+0.5+p[0],
-                                                            m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                            j+0.5+p[1]
-                                                            ));
+                  if (n < num_trees)
+                  {
+                    //push back tree
+                    ngl::Vec2 p = positions[n];
+                    m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                              i+0.5+p[0],
+                                                              m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                                                              j+0.5+p[1]
+                                                              ));
+                  }
+                  else
+                  {
+                    ngl::Vec2 p = positions[n];
+                    m_meshPositions.at( static_cast<int>(TileType::STUMPS)).push_back(ngl::Vec3(
+                                                              i+0.5+p[0],
+                                                              m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                                                              j+0.5+p[1]
+                                                              ));
+                  }
                   //increment meshCount
                   meshCount++;
                 }
@@ -428,7 +443,7 @@ void Scene::createCharacter()
     std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
     //create character with random name
-		m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
+    m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
 
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
@@ -544,12 +559,12 @@ void Scene::update()
             }
         }
 
-				for(int i=0; i<m_baddies.size(); i++)
+        for(int i=0; i<m_baddies.size(); i++)
         {
-					if(m_baddies[i].getHealth() > 0.0)
-						m_baddies[i].update();
-					else
-						m_baddies.erase(m_baddies.begin() + i);
+          if(m_baddies[i].getHealth() > 0.0)
+            m_baddies[i].update();
+          else
+            m_baddies.erase(m_baddies.begin() + i);
         }
 
 
@@ -1359,8 +1374,11 @@ void Scene::drawMeshes()
         case static_cast<int>(TileType::TREES):
             drawInstances( "tree", "tree_d", "diffuse", instances, offset );
             break;
+        case static_cast<int>(TileType::STUMPS):
+            drawInstances( "tree_stump", "tree_stump_d", "diffuse", instances, offset );
+            break;
         case static_cast<int>(TileType::STOREHOUSE):
-						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
             drawInstances( "house", "house_d", "diffuse", instances, offset);
@@ -1387,8 +1405,8 @@ void Scene::drawMeshes()
     {
         if(character.isSleeping() == false)
         {
-						slib->use("colour");
-						m_transform.reset();
+            slib->use("colour");
+            m_transform.reset();
             ngl::Vec3 pos = character.getPos();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
@@ -1399,27 +1417,27 @@ void Scene::drawMeshes()
 
     for(Baddie &baddie : m_baddies)
     {
-			if(baddie.getHealth() > 0.0)
-			{
-				//slib->use("diffuse");
-				m_transform.reset();
+      if(baddie.getHealth() > 0.0)
+      {
+        //slib->use("diffuse");
+        m_transform.reset();
         ngl::Vec3 pos = baddie.getPos();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, baddie.getRot(), 0);
         m_transform.setScale(2.0f, 2.0f, 2.0f);
-				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				drawAsset("person", "", "");
-				//drawAsset("person", "baddie_d", "diffuse");
-			}
+        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        drawAsset("person", "", "");
+        //drawAsset("person", "baddie_d", "diffuse");
+      }
     }
 
     for(auto &stone : m_tombstones)
     {
-			slib->use("colour");
-			m_transform.reset();
-			m_transform.setPosition(stone);
-			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-			drawAsset("tombstone", "", "");
+      slib->use("colour");
+      m_transform.reset();
+      m_transform.setPosition(stone);
+      slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+      drawAsset("tombstone", "", "");
     }
 }
 
@@ -1444,8 +1462,11 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
             case static_cast<int>(TileType::TREES):
                 drawAsset( "tree", "tree_d", "diffuse" );
                 break;
+            case static_cast<int>(TileType::STUMPS):
+                drawAsset( "tree_stump", "tree_stump_d", "diffuse" );
+                break;
             case static_cast<int>(TileType::STOREHOUSE):
-								drawAsset( "storehouse", "storehouse_d", "diffuse" );
+                drawAsset( "storehouse", "storehouse_d", "diffuse" );
                 break;
             case static_cast<int>(TileType::HOUSE):
                 drawAsset( "house", "house_d", "diffuse");
@@ -1472,7 +1493,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-						m_transform.reset();
+            m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->use("colour");
@@ -1481,27 +1502,27 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         }
     }
 
-		for(Baddie &baddie : m_baddies)
-		{
-			if(baddie.getHealth() > 0.0)
-			{
-				ngl::Vec3 pos = baddie.getPos();
-				m_transform.reset();
-				m_transform.setPosition(pos);
-				m_transform.setRotation(0, baddie.getRot(), 0);
-				m_transform.setScale(2.0f, 2.0f, 2.0f);
-				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				drawAsset("person", "", "");
-			}
-		}
+    for(Baddie &baddie : m_baddies)
+    {
+      if(baddie.getHealth() > 0.0)
+      {
+        ngl::Vec3 pos = baddie.getPos();
+        m_transform.reset();
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(2.0f, 2.0f, 2.0f);
+        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        drawAsset("person", "", "");
+      }
+    }
 
     for(auto &stone : m_tombstones)
     {
-			//slib->use("diffuse");
-			m_transform.reset();
-			m_transform.setPosition(stone);
-			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-			drawAsset( "tombstone", "", "");
+      //slib->use("diffuse");
+      m_transform.reset();
+      m_transform.setPosition(stone);
+      slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+      drawAsset( "tombstone", "", "");
     }
 }
 
@@ -1732,7 +1753,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-						m_transform.reset();
+            m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
@@ -1743,26 +1764,26 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         }
     }
 
-		for(Baddie &baddie : m_baddies)
-		{
-			if(baddie.getHealth() > 0.0)
-			{
-				ngl::Vec3 pos = baddie.getPos();
-				m_transform.reset();
-				m_transform.setPosition(pos);
-				m_transform.setRotation(0, baddie.getRot(), 0);
-				m_transform.setScale(2.0f, 2.0f, 2.0f);
-				ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+    for(Baddie &baddie : m_baddies)
+    {
+      if(baddie.getHealth() > 0.0)
+      {
+        ngl::Vec3 pos = baddie.getPos();
+        m_transform.reset();
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(2.0f, 2.0f, 2.0f);
+        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-				ngl::Obj * k = store->getModel( "person" );
-				loadMatricesToShader( m_transform.getMatrix(), mvp );
-				k->draw();
-			}
-		}
+        ngl::Obj * k = store->getModel( "person" );
+        loadMatricesToShader( m_transform.getMatrix(), mvp );
+        k->draw();
+      }
+    }
 
     for(auto &stone : m_tombstones)
     {
-				m_transform.reset();
+        m_transform.reset();
         m_transform.setPosition(stone);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
