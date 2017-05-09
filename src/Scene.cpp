@@ -30,13 +30,13 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_centre_camera(false),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
+    m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
     m_day(80),
     m_state(GameState::START_MENU),
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
-    m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
     ngl::Random * rnd = ngl::Random::instance();
     rnd->setSeed();
@@ -54,7 +54,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
-    createShader("diffuse", "vertDeferredDataInstanced", "fragDeferredDiffuse");
+    createShader("diffuseInstanced", "vertDeferredDataInstanced", "fragDeferredDiffuse");
+    createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredDataChar", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
@@ -100,9 +101,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     for (int i = 0; i<m_char_num; i++)
     {
         createCharacter();
-		}
+    }
 
-		m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
+    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
 
     initialiseFramebuffers();
 
@@ -141,6 +142,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
+    store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
     store->loadTexture("rock", "terrain/rock.png");
@@ -271,31 +273,31 @@ void Scene::initMeshInstances()
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             if (index == static_cast<int>(TileType::TREES))
             {
-              //get num trees
-              int num_trees = m_grid.getNumTrees(i, j);
-              //get position vector
-              std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
-              //for i in trees:
+                //get num trees
+                int num_trees = m_grid.getNumTrees(i, j);
+                //get position vector
+                std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
+                //for i in trees:
                 for (int n = 0; n < num_trees; n++)
                 {
-                  //push back tree
-                  ngl::Vec2 p = positions[n];
-                  m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                            i+0.5+p[0],
-                                                            m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                            j+0.5+p[1]
-                                                            ));
-                  //increment meshCount
-                  meshCount++;
+                    //push back tree
+                    ngl::Vec2 p = positions[n];
+                    m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                              i+0.5+p[0],
+                                                          m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                            j+0.5+p[1]
+                            ));
+                    //increment meshCount
+                    meshCount++;
                 }
             }
             else{
-              m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                        i+0.5,
-                                                        m_height_tracer.getHeight(i+0.5, j+0.5),
-                                                        j+0.5
-                                                        ));
-              meshCount++;
+                m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                          i+0.5,
+                                                          m_height_tracer.getHeight(i+0.5, j+0.5),
+                                                          j+0.5
+                                                          ));
+                meshCount++;
             }
         }
 
@@ -328,7 +330,7 @@ void Scene::initialiseFramebuffers()
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-    m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_mainBuffer.addTexture( "diffuseInstanced", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
     m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
@@ -427,7 +429,7 @@ void Scene::createCharacter()
     std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
     //create character with random name
-		m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
+    m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
 
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
@@ -543,12 +545,12 @@ void Scene::update()
             }
         }
 
-				for(int i=0; i<m_baddies.size(); i++)
+        for(int i=0; i<m_baddies.size(); i++)
         {
-					if(m_baddies[i].getHealth() > 0.0)
-						m_baddies[i].update();
-					else
-						m_baddies.erase(m_baddies.begin() + i);
+            if(m_baddies[i].getHealth() > 0.0)
+                m_baddies[i].update();
+            else
+                m_baddies.erase(m_baddies.begin() + i);
         }
 
 
@@ -810,6 +812,7 @@ void Scene::draw()
             {
                 ngl::Vec3 pos = ch.getPos();
                 m_transform.setPosition(pos);
+                m_transform.setScale(2.8, 1.4, 2.8);
                 slib->setRegisteredUniform("id", ch.getID());
                 drawAsset( "person", "", "");
             }
@@ -915,7 +918,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
@@ -1038,7 +1041,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
+        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
@@ -1347,7 +1350,7 @@ void Scene::drawMeshes()
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    slib->use("diffuse");
+    slib->use("diffuseInstanced");
 
     int offset = 0;
     for(size_t i = 0; i < m_meshPositions.size(); ++i)
@@ -1356,25 +1359,25 @@ void Scene::drawMeshes()
         switch( i )
         {
         case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuse", instances, offset );
+            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-						drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset );
+            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset );
             break;
         case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuse", instances, offset);
+            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset);
             break;
         case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset);
+            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset);
             break;
         case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset);
+            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset);
             break;
         case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset);
+            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset);
             break;
         case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset);
+            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset);
             break;
         default:
             break;
@@ -1382,12 +1385,12 @@ void Scene::drawMeshes()
         offset += instances;
     }
 
-    slib->use("colour");
     for(Character &character : m_characters)
     {
         if(character.isSleeping() == false)
         {
-						m_transform.reset();
+            slib->use("colour");
+            m_transform.reset();
             ngl::Vec3 pos = character.getPos();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
@@ -1398,25 +1401,27 @@ void Scene::drawMeshes()
 
     for(Baddie &baddie : m_baddies)
     {
-			if(baddie.getHealth() > 0.0)
-			{
-				m_transform.reset();
-        ngl::Vec3 pos = baddie.getPos();
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, baddie.getRot(), 0);
-        m_transform.setScale(2.0f, 2.0f, 2.0f);
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        drawAsset("person", "", "");
-			}
+        if(baddie.getHealth() > 0.0)
+        {
+            //slib->use("diffuseInstanced");
+            m_transform.reset();
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(2.0f, 2.0f, 2.0f);
+            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+            //drawAsset("tree", "tree_d", "diffuseInstanced");
+            drawAsset("person", "baddie_d", "diffuse");
+        }
     }
 
     for(auto &stone : m_tombstones)
     {
-			m_transform.reset();
-			m_transform.setPosition(stone);
-			//slib->use("diffuse");
-			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-			drawAsset("tombstone", "", "");
+        slib->use("colour");
+        m_transform.reset();
+        m_transform.setPosition(stone);
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+        drawAsset("tombstone", "", "");
     }
 }
 
@@ -1424,7 +1429,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
-    slib->use("diffuse");
+    slib->use("diffuseInstanced");
 
     for(size_t i = 0; i < m_meshPositions.size(); ++i)
         for(auto &vec : m_meshPositions[i])
@@ -1439,25 +1444,25 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
             switch( i )
             {
             case static_cast<int>(TileType::TREES):
-                drawAsset( "tree", "tree_d", "diffuse" );
+                drawAsset( "tree", "tree_d", "diffuseInstanced" );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-								drawAsset( "storehouse", "storehouse_d", "diffuse" );
+                drawAsset( "storehouse", "storehouse_d", "diffuseInstanced" );
                 break;
             case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "house_d", "diffuse");
+                drawAsset( "house", "house_d", "diffuseInstanced");
                 break;
             case static_cast<int>(TileType::FOUNDATION_A):
-                drawAsset("foundation_A", "foundation_A_d", "diffuse");
+                drawAsset("foundation_A", "foundation_A_d", "diffuseInstanced");
                 break;
             case static_cast<int>(TileType::FOUNDATION_B):
-                drawAsset("foundation_B", "foundation_B_d", "diffuse");
+                drawAsset("foundation_B", "foundation_B_d", "diffuseInstanced");
                 break;
             case static_cast<int>(TileType::FOUNDATION_C):
-                drawAsset("foundation_C", "foundation_C_d", "diffuse");
+                drawAsset("foundation_C", "foundation_C_d", "diffuseInstanced");
                 break;
             case static_cast<int>(TileType::FOUNDATION_D):
-                drawAsset("foundation_D", "foundation_D_d", "diffuse");
+                drawAsset("foundation_D", "foundation_D_d", "diffuseInstanced");
                 break;
             default:
                 break;
@@ -1469,7 +1474,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-						m_transform.reset();
+            m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             slib->use("colour");
@@ -1478,27 +1483,27 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
         }
     }
 
-		for(Baddie &baddie : m_baddies)
-		{
-			if(baddie.getHealth() > 0.0)
-			{
-				ngl::Vec3 pos = baddie.getPos();
-				m_transform.reset();
-				m_transform.setPosition(pos);
-				m_transform.setRotation(0, baddie.getRot(), 0);
-				m_transform.setScale(2.0f, 2.0f, 2.0f);
-				slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-				drawAsset("person", "", "");
-			}
-		}
+    for(Baddie &baddie : m_baddies)
+    {
+        if(baddie.getHealth() > 0.0)
+        {
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.reset();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(2.0f, 2.0f, 2.0f);
+            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+            drawAsset("person", "", "");
+        }
+    }
 
     for(auto &stone : m_tombstones)
     {
-			//slib->use("diffuse");
-			m_transform.reset();
-			m_transform.setPosition(stone);
-			slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-			drawAsset( "tombstone", "", "");
+        //slib->use("diffuseInstanced");
+        m_transform.reset();
+        m_transform.setPosition(stone);
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+        drawAsset( "tombstone", "", "");
     }
 }
 
@@ -1697,25 +1702,25 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         switch( i )
         {
         case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuse", instances, offset, m_shadowMat[_index]);
+            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
             break;
         case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuse", instances, offset, m_shadowMat[_index] );
+            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
             break;
         case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuse", instances, offset, m_shadowMat[_index]);
+            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
             break;
         default:
             break;
@@ -1729,7 +1734,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         if(character.isSleeping() == false)
         {
             ngl::Vec3 pos = character.getPos();
-						m_transform.reset();
+            m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
             ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
@@ -1740,26 +1745,26 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
         }
     }
 
-		for(Baddie &baddie : m_baddies)
-		{
-			if(baddie.getHealth() > 0.0)
-			{
-				ngl::Vec3 pos = baddie.getPos();
-				m_transform.reset();
-				m_transform.setPosition(pos);
-				m_transform.setRotation(0, baddie.getRot(), 0);
-				m_transform.setScale(2.0f, 2.0f, 2.0f);
-				ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+    for(Baddie &baddie : m_baddies)
+    {
+        if(baddie.getHealth() > 0.0)
+        {
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.reset();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(2.0f, 2.0f, 2.0f);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-				ngl::Obj * k = store->getModel( "person" );
-				loadMatricesToShader( m_transform.getMatrix(), mvp );
-				k->draw();
-			}
-		}
+            ngl::Obj * k = store->getModel( "person" );
+            loadMatricesToShader( m_transform.getMatrix(), mvp );
+            k->draw();
+        }
+    }
 
     for(auto &stone : m_tombstones)
     {
-				m_transform.reset();
+        m_transform.reset();
         m_transform.setPosition(stone);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 

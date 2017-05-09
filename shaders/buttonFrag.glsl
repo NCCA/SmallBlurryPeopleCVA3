@@ -4,16 +4,16 @@
 #define DOUBLE_MAX_NOTES 10
 
 // actions
-const uint PASSIVE           = 0;
-const uint QUIT              = 1;
-const uint BUILDHOUSE        = 2;
-const uint BUILDSTORE        = 3;
-const uint CENTRECAMERA      = 4;
-const uint ESCAPE            = 5;
-const uint ZOOMIN            = 6;
-const uint ZOOMOUT           = 7;
-const uint MOVEFORWARD       = 8;
-const uint MOVEBACKWARD      = 9;
+const uint PASSIVE           =  0;
+const uint QUIT              =  1;
+const uint BUILDHOUSE        =  2;
+const uint BUILDSTORE        =  3;
+const uint CENTRECAMERA      =  4;
+const uint ESCAPE            =  5;
+const uint ZOOMIN            =  6;
+const uint ZOOMOUT           =  7;
+const uint MOVEFORWARD       =  8;
+const uint MOVEBACKWARD      =  9;
 const uint MOVELEFT          = 10;
 const uint MOVERIGHT         = 11;
 const uint STOPFORWARD       = 12;
@@ -32,6 +32,10 @@ const uint SAVE_PREFERENCES  = 24;
 const uint CHAR_STATE        = 25;
 const uint STAMINA_BAR       = 26;
 const uint HEALTH_BAR        = 27;
+const uint HUNGER_BAR        = 28;
+const uint POPULATION        = 29;
+const uint CHAR_EAT_BERRIES  = 30;
+const uint CHAR_EAT_FISH     = 31;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -39,26 +43,28 @@ const uint STATE_PAUSE = 1;
 const uint STATE_PREFS = 2;
 
 // character states
-const int CHOP_WOOD      = 0;
-const int STORE          = 1;
-const int FISH           = 2;
-const int FORAGE         = 3;
+const int CHOP_WOOD      =  0;
+const int STORE          =  1;
+const int FISH           =  2;
+const int FORAGE         =  3;
 //not needed as done too fast to read message
 /*
-const int CHECK_WOOD     = 4;
-const int CHECK_BERRIES  = 5;
-const int CHECK_FISH     = 6;
-const int REPEAT         = 15;
+const int CHECK_WOOD     =  4;
+const int CHECK_BERRIES  =  5;
+const int CHECK_FISH     =  6;
+const int REPEAT         = 17;
 */
-const int GET_WOOD       = 7;
-const int GET_BERRIES    = 8;
-const int GET_FISH       = 9;
+const int GET_WOOD       =  7;
+const int GET_BERRIES    =  8;
+const int GET_FISH       =  9;
 const int BUILD          = 10;
 const int SLEEP          = 11;
 const int EAT_BERRIES    = 12;
 const int EAT_FISH       = 13;
 const int MOVE           = 14;
-const int IDLE           = 16;
+const int TRACK          = 15;
+const int FIGHT          = 16;
+const int IDLE           = 18;
 
 // character exceptions
 const int TEXT_CROSS = 32;
@@ -71,9 +77,11 @@ vec3 text(vec2 pos, int start_index, int end_index);
 vec3 centerText();
 vec3 staminaText();
 vec3 healthText();
+vec3 hungerText();
+vec3 populationText();
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 nglp, vec2 t);
-vec3 getIcon(vec2 pixel_uv);
+vec4 getIcon(vec2 pixel_uv, uint icon_id, vec2 size);
 float loadingBar(float value, float uv_x);
 vec3 shiftRGB(vec3 c, int up_down);
 bool buttonRequiresCharacter();
@@ -95,7 +103,10 @@ uniform bool character_selected;
 uniform int character_state;
 uniform float character_stamina;
 uniform float character_health;
+uniform float character_hunger;
 uniform vec3 character_color;
+uniform int population;
+uniform int max_pop;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -112,7 +123,7 @@ const vec3 button_selected = vec3(0.1, 0.2, 0.2);
 vec3 def_button_color = vec3(0.7, 0.1, 0.0);
 
 //---------------------------------------------------------
-// text functions modified from
+// text functions and format inspired by
 // https://www.shadertoy.com/view/MtySzd
 //---------------------------------------------------------
 
@@ -121,9 +132,6 @@ vec3 def_button_color = vec3(0.7, 0.1, 0.0);
 //--- font data ---
 uniform float FONT_SIZE = 20;
 uniform float FONT_SPACE = 0.5;
-
-//----- access to the image of ascii code characters ------
-//#define S(a) c+=texture(iChannel0,clamp(tp,0.,1.)/16.+fract(floor(vec2(a,15.999-float(a)/16.))/16.)).x; uv.x-=FONT_SPACE;
 
 #define S(a) c+=character(float(a), tp); tp.x-=FONT_SPACE;
 
@@ -137,7 +145,9 @@ uniform float FONT_SPACE = 0.5;
 #define _add S(43);
 #define _comma S(44);
 #define _dot S(46);
+#define _slash S(47);
 #define _cross S(215);
+#define _colon S(58);
 
 #define _0 S(48);
 #define _1 S(49);
@@ -211,10 +221,7 @@ float character(float ch, vec2 tp)
 {
   vec2 tmp = clamp(tp,0.,1.)/16.+fract(floor(vec2(ch,15.999-float(ch)/16.))/16.);
   vec4 f = texture2D(font,vec2(tmp.x, 1-tmp.y));
-  //if (1.0 > 0.0)
-  return f.x;   // 2d
-  //else
-    //return f.x * (f.y+0.3)*(f.z+0.3)*2.0;   // 3d
+  return f.x;
 }
 
 float charStateText(vec2 tp)
@@ -222,7 +229,7 @@ float charStateText(vec2 tp)
   float c = 0.0;
   if(character_state == CHOP_WOOD)
   {
-    tp = translate(tp, vec2(-8.0/4.0, 0.0));//-(fragPixelPos.y + (fragPixelSize.y)/2.0)));
+    tp = translate(tp, vec2(-8.0/4.0, 0.0));
     _C _h _o _p _p _i _n _g
     //_M
   }
@@ -268,30 +275,29 @@ float charStateText(vec2 tp)
   }
 	else if(character_state == EAT_BERRIES)
 	{
-		tp = translate(tp, vec2(-17.0/4.0, 0.0));
+    tp = translate(tp, vec2(-14.0/4.0, 0.0));
 		_E _a _t _i _n _g __ _b _e _r _r _i _e _s
 	}
 	else if(character_state == EAT_FISH)
 	{
-		tp = translate(tp, vec2(-14.0/4.0, 0.0));
+    tp = translate(tp, vec2(-11.0/4.0, 0.0));
 		_E _a _t _i _n _g __ _f _i _s _h
 	}
-  else if(character_state == MOVE)
+	else if(character_state == MOVE || character_state == TRACK)
   {
     tp = translate(tp, vec2(-10.0/4.0, 0.0));
     _T _r _a _v _e _l _l _i _n _g
   }
+	else if(character_state == FIGHT)
+	{
+		tp = translate(tp, vec2(-8.0/4.0, 0.0));
+		_F _i _g _h _t _i _n _g
+	}
   else if(character_state == IDLE)
   {
     tp = translate(tp, vec2(-4.0/4.0, 0.0));
     _I _d _l _e
   }
-  /*
-	else if(character_state == IDLE)
-	{
-		tp = translate(tp, vec2(1.0/4.0, 0.0));
-		__
-  }*/
   return c;
 }
 
@@ -333,7 +339,7 @@ vec3 centerText()
   int max_len = 0;
   int button_id = 0;
   int num_lines = 0;
-  // find string start and end for this button
+
   for(int i=0; i<BUTTON_TEXT_LENGTH; i++)
   {
     if(button_text[i] == TEXT_NEWLINE)
@@ -363,7 +369,7 @@ vec3 centerText()
       }
     }
   }
-  //str_len = end_index - start_index;
+
   if(max_len > 0)
   {
     vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
@@ -379,10 +385,10 @@ vec3 centerText()
 vec3 staminaText()
 {
   float c = 0;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
   vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
   vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
-  //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
+
   _s _t _a _m _i _n _a
   return vec3(max(c, 0.0));
 }
@@ -390,11 +396,65 @@ vec3 staminaText()
 vec3 healthText()
 {
   float c = 0;
-  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);// - FONT_SIZE);
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
   vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
   vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
-  //vec2 tp = translate(pos, vec2(-7.0/4.0, 0.0));
+
   _h _e _a _l _t _h
+  return vec3(max(c, 0.0));
+}
+
+vec3 hungerText()
+{
+  float c = 0;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
+
+  _h _u _n _g _e _r
+  return vec3(max(c, 0.0));
+}
+
+vec3 populationText()
+{
+  float c = 0;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
+
+  __ __ __
+
+  int pop = population;
+  while(pop > 10)
+  {
+    tp.x-=FONT_SPACE;
+    pop/=10;
+  }
+  vec2 tp0 = tp;
+  pop = population;
+  do
+  {
+    S(pop%10 + 48);
+    pop /= 10;
+    tp.x+=FONT_SPACE*2;
+  } while(pop>0);
+  tp = tp0;
+  __ _slash
+
+  pop = max_pop;
+  while(pop > 10)
+  {
+    tp.x-=FONT_SPACE;
+    pop/=10;
+  }
+  pop = max_pop;
+  do
+  {
+    S(pop%10 + 48);
+    pop /= 10;
+    tp.x+=FONT_SPACE*2;
+  } while(pop>0);
+
   return vec3(max(c, 0.0));
 }
 
@@ -412,11 +472,11 @@ vec2 translate(vec2 p, vec2 t)
   return p;
 }
 
-vec3 getIcon(vec2 pixel_uv)
+vec4 getIcon(vec2 fragUV, uint icon_id, vec2 size = vec2(64,64))
 {
-  vec3 s = vec3(0,1,0);
-
-  s = texture2D(icons, pixel_uv/vec2(1024.0)).xyz;
+  vec4 s = vec4(0);
+  vec2 uv = vec2((fragUV.x + icon_id%16) * size.x/1024, (fragUV.y + icon_id/16) * size.y/1024);
+  s = texture2D(icons, uv);
 
   return s;
 }
@@ -447,7 +507,8 @@ bool buttonRequiresCharacter()
 {
   if(buttonUsesCharacterColor()
      || fragAction == STAMINA_BAR
-     || fragAction == HEALTH_BAR)
+     || fragAction == HEALTH_BAR
+     || fragAction == HUNGER_BAR)
   {
     return true;
   }
@@ -461,7 +522,9 @@ bool buttonUsesCharacterColor()
      || fragAction == CHAR_FORAGE
      || fragAction == BUILDHOUSE
      || fragAction == BUILDSTORE
-     || fragAction == CENTRECAMERA)
+     || fragAction == CENTRECAMERA
+     || fragAction == CHAR_EAT_BERRIES
+     || fragAction == CHAR_EAT_FISH)
   {
     return true;
   }
@@ -470,7 +533,6 @@ bool buttonUsesCharacterColor()
 
 void main()
 {
-  //vec2 buttonUV = (gl_FragCoord.xy - posCoord) / sizeCoord;
   vec2 button_pixel_size = fragSize * fResolution;
   vec2 button_pixel_pos = fragPos * fResolution;
   vec2 button_abs_pixel_pos = button_pixel_pos + vec2(fResolution/2);
@@ -486,18 +548,11 @@ void main()
     discard;
   }
 
-  //if(fragMousedOver > 0)
-  //{
-  //  button_color+= button_selected;
-  //  button_highlight += button_selected;
-  //}
-//  vec2 button_inner = 0.5 - (border_size * 2) / (fragSize*fResolution);
-//  float radius = border_size;
-//  if(box(translate(fragUV, vec2(0.5)), button_inner, 0) <= 0)
   float edge = box(translate(pixel_uv, button_pixel_size/2), button_inner, border_size*2);
   if(edge <= 0)
   {
     vec3 button_color = def_button_color;
+    vec4 icon_color = vec4(0);
     if(buttonUsesCharacterColor())
     {
       button_color = character_color - vec3(0.2, 0.2, 0.2);
@@ -514,6 +569,42 @@ void main()
       s *= loadingBar(character_health, fragUV.x);
       //s = shiftRGB(s, 0);
     }
+    else if(fragAction == HUNGER_BAR)
+    {
+      s *= loadingBar(character_hunger, fragUV.x);
+      s = shiftRGB(s, 1);
+      s.g -= 0.1;
+    }
+    else if(fragAction == POPULATION)
+    {
+      s += populationText();
+      icon_color = getIcon(fragUV, 16, vec2(192, 64));
+    }
+    else if(fragAction == CENTRECAMERA)
+    {
+      icon_color = getIcon(fragUV, 0);
+    }
+    else if(fragAction == BUILDHOUSE)
+    {
+      icon_color = getIcon(fragUV, 1);
+    }
+    else if(fragAction == BUILDSTORE)
+    {
+      icon_color = getIcon(fragUV, 2);
+    }
+    else if(fragAction == CHAR_FORAGE)
+    {
+      icon_color = getIcon(fragUV, 3);
+    }
+    else if(fragAction == CHAR_EAT_BERRIES)
+    {
+      icon_color = getIcon(fragUV, 4);
+    }
+    else if(fragAction == CHAR_EAT_FISH)
+    {
+      icon_color = getIcon(fragUV, 5);
+    }
+    s = mix(s, icon_color.xyz, icon_color.a);
 
     if(fragMousedOver > 0)
     {
@@ -524,6 +615,10 @@ void main()
       else if(fragAction == HEALTH_BAR)
       {
         s += healthText();
+      }
+      else if(fragAction == HUNGER_BAR)
+      {
+        s += hungerText();
       }
       else
       {
@@ -542,12 +637,9 @@ void main()
     {
       if(notification_ages[i-1] == fragId)
       {
-        //a = (max_notification_age - notification_ages[i])/float(max_notification_age);
-        //a = float(notification_ages[i])/float(max_notification_age);
         a = smoothstep(1, 0, notification_ages[i] / float(max_notification_age));
       }
     }
-    //a = pow(smoothstep(1, 0, notification_ages[1] / float(max_notification_age)), 0.25);
   }
   outColour = vec4(s, a);
 }
