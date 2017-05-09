@@ -78,7 +78,8 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
 
 void Character::setState(int _target_id)
 {
-  resetCharacter();
+	std::cout<<"FORAGE: "<<m_forage<<std::endl;
+	softResetCharacter();
   //if the target is reachable or a water tile
   if(setTarget(_target_id) || m_grid->getTileType(_target_id)== TileType::WATER)
   {
@@ -86,23 +87,29 @@ void Character::setState(int _target_id)
 
     //create different state stacks depending on grid tile clicked on
     if (m_grid->getTileType(m_target_id) == TileType::TREES)
-      chopState();
-    else if (m_grid->getTileType(m_target_id) == TileType::WATER)
-      fishState();
-    else if (m_grid->getTileType(m_target_id) == TileType::NONE)
-			isBaddie();
-		else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
-						 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
-				buildState(TileType::HOUSE);
-    else if (m_grid->getTileType(m_target_id) == TileType::HOUSE)
-      sleepState();
-		else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_C ||
-						 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_D)
-			buildState(TileType::STOREHOUSE);
-		else if (m_grid->getTileType(m_target_id) == TileType::STOREHOUSE)
-			if(m_inventory != CharInventory::NONE)
-				storeState();
-
+			if(m_forage)
+				forageState();
+			else
+				chopState();
+		else
+		{
+			m_forage = false;
+			if (m_grid->getTileType(m_target_id) == TileType::NONE)
+				isBaddie();
+			else if (m_grid->getTileType(m_target_id) == TileType::WATER)
+				fishState();
+			else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
+							 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
+					buildState(TileType::HOUSE);
+			else if (m_grid->getTileType(m_target_id) == TileType::HOUSE)
+				sleepState();
+			else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_C ||
+							 m_grid->getTileType(m_target_id) == TileType::FOUNDATION_D)
+				buildState(TileType::STOREHOUSE);
+			else if (m_grid->getTileType(m_target_id) == TileType::STOREHOUSE)
+				if(m_inventory != CharInventory::NONE)
+					storeState();
+		}
   }
   else
     //if the tile is unreachable
@@ -144,7 +151,7 @@ void Character::buildState(TileType _building)
   //check if character has enough stamina
   if(m_stamina >= 0.3)
   {
-    resetCharacter();
+		hardResetCharacter();
     m_building_tile = m_target_id;
     //if character is holding something that isnt wood, store it first
     if(m_inventory != CharInventory::NONE && m_inventory != CharInventory::WOOD)
@@ -192,23 +199,23 @@ void Character::attackState()
 }
 void Character::invadedState(Baddie *_target)
 {
+	//idle characters can be attacked, so need to reset
+	hardResetCharacter();
 	//set target baddie to one attacking
 	m_target_baddie = _target;
-	//idle characters can be attacked, so need to reset
-	resetCharacter();
 	m_state_stack.push_back(State::FIGHT);
 	generalMessage(" is being attacked!", m_target_id);
 }
 
 void Character::chopState()
 {
+	m_forage = false;
   //check if character has enough stamina
   if(m_stamina >= 0.1)
   {
 		m_dest_target_id = m_target_id;
     if(findNearestEmptyTile())
     {
-			std::cout<<"TARGET1 :"<<m_target_id<<std::endl;
       //amount of wood a tree holds
 			ngl::Vec2 wood_coord = m_grid->idToCoord(m_dest_target_id);
 			int wood_amount = m_grid->getNumTrees(wood_coord[0],wood_coord[1]);
@@ -254,40 +261,36 @@ void Character::fishState()
     staminaMessage();
 }
 
+
 void Character::forageState()
 {
-  //check if character has enough stamina
-  if(m_stamina >= 0.1)
-  {
-    resetCharacter();
-    //if (m_inventory != CharInventory::NONE)
-    //	storeState();
-
-    //find nearby tree
-    if(findNearestTree())
-    {
-      //m_dest_target_id = m_target_id;
-      //random number of berries collected based on foraging skill
-      int berry_amount = m_forage_amount + Utility::randInt(0, 2);
-      //create cycle of states: move to tree, forage berries, store berries
-      for(int i=0; i<berry_amount; i++)
-      {
-        m_state_stack.push_back(State::MOVE);
-        m_state_stack.push_back(State::FORAGE);
-        m_state_stack.push_back(State::MOVE);
-        m_state_stack.push_back(State::STORE);
-        m_state_stack.push_back(State::MOVE);
-        if (i != (berry_amount -1))
-          m_state_stack.push_back(State::REPEAT);
-      }
-      m_state_stack.push_back(State::IDLE);
-      generalMessage(" has started foraging", m_dest_target_id);
-    }
-    else
-      generalMessage(" can't find a tree", m_pos);
-  }
-  else
-    staminaMessage();
+	//check if character has enough stamina
+	if(m_stamina >= 0.1)
+	{
+		//find tile next to tree
+		m_dest_target_id = m_target_id;
+		if(findNearestEmptyTile())
+		{
+			//m_dest_target_id = m_target_id;
+			//random number of berries collected based on foraging skill
+			int berry_amount = m_forage_amount + Utility::randInt(0, 2);
+			//create cycle of states: move to tree, forage berries, store berries
+			for(int i=0; i<berry_amount; i++)
+			{
+				m_state_stack.push_back(State::MOVE);
+				m_state_stack.push_back(State::FORAGE);
+				m_state_stack.push_back(State::MOVE);
+				m_state_stack.push_back(State::STORE);
+				m_state_stack.push_back(State::MOVE);
+				if (i != (berry_amount -1))
+					m_state_stack.push_back(State::REPEAT);
+			}
+			m_state_stack.push_back(State::IDLE);
+			generalMessage(" has started foraging", m_dest_target_id);
+		}
+	}
+	else
+		staminaMessage();
 }
 
 void Character::storeState()
@@ -313,7 +316,7 @@ void Character::sleepState()
 
 void Character::eatBerriesState()
 {
-  resetCharacter();
+	hardResetCharacter();
   //if the character is holding something other than berries, store it
   if(m_inventory != CharInventory::NONE && m_inventory != CharInventory::BERRIES)
     storeState();
@@ -341,7 +344,7 @@ void Character::eatBerriesState()
 
 void Character::eatFishState()
 {
-  resetCharacter();
+	hardResetCharacter();
   //if the character is holding something other than fish, store it
   if(m_inventory != CharInventory::NONE && m_inventory != CharInventory::FISH)
     storeState();
@@ -369,6 +372,7 @@ void Character::eatFishState()
 
 void Character::idleState()
 {
+	m_forage = false;
   //if this is the first time the idle state has been called in a successive block
   if (m_called == 0)
   {
@@ -464,6 +468,11 @@ void Character::update()
 
 			case(State::TRACK):
 			{
+			//if another character has killed the enemy
+				if(m_target_baddie->getHealth() <= 0.0)
+					m_state_stack.clear();
+
+				//get the baddie's position and move to enemy if not on the same tile
 				ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
 				int baddieID = m_grid->coordToId(baddiePos);
 				if (m_grid->coordToId(m_pos) == baddieID)
@@ -996,24 +1005,6 @@ bool Character::findNearestFishingTile()
   return findFirstPath(edge_vector);
 }
 
-bool Character::findNearestTree()
-{
-  bool found = false;
-  std::vector<ngl::Vec2> tree_coords;
-  treeFloodfill(m_pos, found, tree_coords);
-  if (found == true)
-  {
-    findNearest(tree_coords);
-    m_dest_target_id = m_target_id;
-    if(findNearestEmptyTile())
-      return true;
-    else
-      return false;
-  }
-  else
-    return false;
-}
-
 void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water)
 {
   //algorithm created with help of Quentin
@@ -1063,48 +1054,6 @@ void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set
   {
     _edges.insert(id);
     return;
-  }
-}
-
-void Character::treeFloodfill(ngl::Vec2 _coord, bool &_found, std::vector<ngl::Vec2> &_found_coords)
-{
-  /***** MAYBE ADD VECTOR SO LIST OF TREES CAN BE FOUND, THEN FIND SHORTEST PATH? *****/
-  //if a tree has been found
-  if (_found == true)
-  {
-    _found_coords.push_back(_coord);
-    return;
-  }
-
-  //if the coordinate is outside the grid space
-  if(_coord.m_x >= m_grid->getW() ||
-     _coord.m_x <= 0 ||
-     _coord.m_y >= m_grid->getH() ||
-     _coord.m_y <= 0)
-  {
-    return;
-  }
-
-  int id = m_grid->getTileId(_coord.m_x, _coord.m_y);
-
-  //the tile is a tree type and a path can be found to it, set _found to true
-  if(m_grid->getTileType(id) == TileType::TREES)
-  {
-    if(setTarget(id))
-    {
-      _found = true;
-      //set this tile as the final target
-      m_dest_target_id = id;
-    }
-    return;
-  }
-  else
-  {
-    //recursive search
-    treeFloodfill(ngl::Vec2 (_coord.m_x-1, _coord.m_y), _found, _found_coords);
-    treeFloodfill(ngl::Vec2 (_coord.m_x+1, _coord.m_y), _found, _found_coords);
-    treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y-1), _found, _found_coords);
-    treeFloodfill(ngl::Vec2 (_coord.m_x, _coord.m_y+1), _found, _found_coords);
   }
 }
 
@@ -1209,7 +1158,13 @@ bool Character::findFirstPath(std::vector<ngl::Vec2> _vector)
   return false;
 }
 
-void Character::resetCharacter()
+void Character::hardResetCharacter()
+{
+	m_forage = false;
+	softResetCharacter();
+}
+
+void Character::softResetCharacter()
 {
   //clear states
   m_idle = false;

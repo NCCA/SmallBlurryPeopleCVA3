@@ -9,7 +9,6 @@
 Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
 	AI(_height_tracer, _grid),
 	m_characters(_characters),
-	m_target_character(nullptr),
 	m_combat(false),
 	m_track(false),
 	m_search(true)
@@ -41,10 +40,12 @@ void Baddie::update()
 
 	else
 	{
+		//if not in combat, look for neabry characters
 		if(m_search)
 			findNearestTarget();
 		if (move())
 			{
+				//if no characters found, make baddie move to random position
 				setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
 			}
 	}
@@ -52,26 +53,21 @@ void Baddie::update()
 
 void Baddie::invadedState(Character *_target)
 {
-	//baddie is being attacked
-	//** to be filled with stuff later **/
-	//** might want a count of how many enemies? **//
-	//** should target be vector? **/
-
-	m_target_character = _target;
+	//if a character attacks, add it to the target list
+	m_targets.push_back(_target);
+	//set the character to be ready to fight
 	m_combat = true;
-
 }
 
 void Baddie::trackingState()
 {
-	//** Should have check on range so baddie doesn't follow character everywhere **/
-
-	ngl::Vec2 target = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+	//get the target's position and move the baddie to it if they're not on the same grid tile
+	ngl::Vec2 target = ngl::Vec2(m_targets[0]->getPos()[0], m_targets[0]->getPos()[2]);
 	int charID = m_grid->coordToId(target);
 	if(m_grid->coordToId(m_pos) == charID)
 	{
 		//if reached enemy character
-		m_target_character->invadedState(this);
+		m_targets[0]->invadedState(this);
 		//reset baddie
 		m_track = false;
 		m_combat = true;
@@ -82,39 +78,89 @@ void Baddie::trackingState()
 		m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 	}
 	else
+		//go to character target
 		setTarget(charID);
 		move();
 }
 
 void Baddie::fight()
 {
-	ngl::Vec2 target_coord = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
-	float distance = Utility::sqrDistance(m_pos, target_coord);
-	if(m_grid->coordToId(m_pos) != m_grid->coordToId(target_coord))
-	{
-		if(distance > m_agro_distance)
-		{
-			m_combat = false;
-			m_search = true;
-			Gui::instance()->notify(m_target_character->getName() + " has gotten away", m_pos);
-		}
-		else
-		{
-			setTarget(target_coord);
-			move();
-		}
-	}
-	else if(m_action_timer.elapsed() >= 1000)
-	{
-		m_target_character->takeHealth(m_attack_power);
+	float distance = m_agro_distance;
+	int target;
+	bool chase = false;
 
-		if(m_target_character->getHealth() <= 0.0)
+	//go through every target
+	for(int i=0; i<m_targets.size(); i++)
+	{
+		ngl::Vec2 target_coord = ngl::Vec2(m_targets[i]->getPos()[0], m_targets[i]->getPos()[2]);
+		//if the baddies tile position isnt the same as the targets grid position
+		if(m_grid->coordToId(m_pos) != m_grid->coordToId(target_coord))
 		{
-			m_combat = false;
-			m_search = true;
+			float char_distance = Utility::sqrDistance(m_pos, target_coord);
+			//if character is outside baddie's range
+			if(char_distance > m_agro_distance)
+			{
+				//remove character from vector of targets
+				Gui::instance()->notify(m_targets[i]->getName() + " has gotten away", m_pos);
+				m_targets.erase(m_targets.begin() + i);
+
+			}
+			//finds the closest target to baddie
+			else if (char_distance < distance)
+			{
+				distance = char_distance;
+				target = i;
+				chase = true;
+			}
 		}
-		m_action_timer.restart();
 	}
+
+	//delete all targets that arent the chase target
+	if(m_targets.size() > 1 && chase)
+	{
+		for(int i=0; i<m_targets.size(); i++)
+		{
+			if(i != target)
+			{
+				m_targets.erase(m_targets.begin() + i);
+			}
+		}
+	}
+
+	//follows target
+	if(chase)
+	{
+		ngl::Vec2 target_coord = ngl::Vec2(m_targets[0]->getPos()[0],
+																			 m_targets[0]->getPos()[2]);
+		setTarget(target_coord);
+		move();
+	}
+
+	//if theres no targets left, reset baddie
+	if(m_targets.size() == 0)
+	{
+		m_combat = false;
+		m_search = true;
+	}
+
+	//if not chasing a target, attack targets
+	else if(!chase)
+	{
+		int target_no = (int)m_targets.size();
+		if(m_action_timer.elapsed() >= 1000)
+		{
+			for (int i=0; i<m_targets.size(); i++)
+			{
+				//amount of health taken scales with how many characters are attacking
+				m_targets[i]->takeHealth(m_attack_power/target_no);
+				//if a target dies, remove from vector
+				if(m_targets[i]->getHealth() <= 0.0)
+					m_targets.erase(m_targets.begin() + i);
+			}
+			m_action_timer.restart();
+		}
+	}
+
 }
 
 bool Baddie::findNearestTarget()
@@ -132,7 +178,7 @@ bool Baddie::findNearestTarget()
 			found = true;
 			shortest_dist = distance;
 			//set found character as target
-			m_target_character = &character;
+			m_targets.push_back(&character);
 		}
 	}
 
@@ -143,7 +189,7 @@ bool Baddie::findNearestTarget()
 		//baddie speeds up to get to enemy
 		m_speed = 0.1;
 		//set baddie's target to character enemy
-		ngl::Vec2 target = ngl::Vec2(m_target_character->getPos()[0], m_target_character->getPos()[2]);
+		ngl::Vec2 target = ngl::Vec2(m_targets[0]->getPos()[0], m_targets[0]->getPos()[2]);
 		setTarget(target);
 	}
 	return found;

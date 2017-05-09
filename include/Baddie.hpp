@@ -69,9 +69,9 @@ private:
 	///
 	std::vector<Character> *m_characters;
 	///
-	/// \brief m_target_character, current target character
+	/// \brief m_targets, current character target's
 	///
-	Character *m_target_character;
+	std::vector<Character*> m_targets;
 	///
 	/// \brief m_attack_power, how much the baddie attacks for
 	///

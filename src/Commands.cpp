@@ -125,7 +125,7 @@ ForageCommand::ForageCommand(Character *_character) :
 
 void ForageCommand::execute()
 {
-	m_character->forageState();
+	m_character->setForageState();
 }
 
 //------------------------------------------------------------//
