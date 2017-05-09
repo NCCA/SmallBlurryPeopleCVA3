@@ -766,6 +766,7 @@ void Character::update()
 					if(m_grid->getBuildState(m_building_tile) >= 1.0)
 					{
 						Gui::instance()->notify("Building complete!", m_grid->idToCoord(m_building_tile));
+
 						m_building_type = TileType::NONE;
 					}
 

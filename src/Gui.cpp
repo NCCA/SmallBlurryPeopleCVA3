@@ -260,6 +260,7 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
+  addButton(Action::POPULATION, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(60, 10), ngl::Vec2(120, 40), "");
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "");
@@ -490,6 +491,8 @@ void Gui::drawButtons()
 
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
+  slib->setRegisteredUniform("population", m_scene->getPopulation());
+  slib->setRegisteredUniform("max_population", m_scene->getPopulation());
 
   Character *character = m_scene->getActiveCharacter();
   if(character)

@@ -77,6 +77,8 @@ vec3 text(vec2 pos, int start_index, int end_index);
 vec3 centerText();
 vec3 staminaText();
 vec3 healthText();
+vec3 hungerText();
+vec3 populationText();
 float box(vec2 position, vec2 size, float radius);
 vec2 translate(vec2 nglp, vec2 t);
 vec4 getIcon(vec2 pixel_uv, uint icon_id, vec2 size);
@@ -103,6 +105,8 @@ uniform float character_stamina;
 uniform float character_health;
 uniform float character_hunger;
 uniform vec3 character_color;
+uniform int population;
+uniform int max_pop;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -141,7 +145,9 @@ uniform float FONT_SPACE = 0.5;
 #define _add S(43);
 #define _comma S(44);
 #define _dot S(46);
+#define _slash S(47);
 #define _cross S(215);
+#define _colon S(58);
 
 #define _0 S(48);
 #define _1 S(49);
@@ -409,6 +415,48 @@ vec3 hungerText()
   return vec3(max(c, 0.0));
 }
 
+vec3 populationText()
+{
+  float c = 0;
+  vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
+  vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
+  vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
+
+  __ __ __
+
+  int pop = population;
+  while(pop > 0)
+  {
+    tp.x-=FONT_SPACE;
+    pop/=10;
+  }
+  vec2 tp0 = tp;
+  pop = population;
+  while(pop > 0)
+  {
+    S(pop%10 + 48);
+    pop /= 10;
+    tp.x+=FONT_SPACE*2;
+  }
+  tp = tp0;
+  __ _slash __
+  pop = max_pop;
+  while(pop > 0)
+  {
+    tp.x-=FONT_SPACE;
+    pop/=10;
+  }
+  pop = population;
+  while(pop > 0)
+  {
+    S(pop%10 + 48);
+    pop /= 10;
+    tp.x+=FONT_SPACE*2;
+  }
+
+  return vec3(max(c, 0.0));
+}
+
 float box(vec2 position, vec2 size, float radius)
 {
   //return length(max(abs(position)-size,0.0));
@@ -525,6 +573,10 @@ void main()
       s *= loadingBar(character_hunger, fragUV.x);
       s = shiftRGB(s, 1);
       s.g -= 0.1;
+    }
+    else if(fragAction == POPULATION)
+    {
+      s += populationText();
     }
     else if(fragAction == CENTRECAMERA)
     {

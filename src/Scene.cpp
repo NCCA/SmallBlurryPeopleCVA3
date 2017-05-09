@@ -812,7 +812,7 @@ void Scene::draw()
             {
                 ngl::Vec3 pos = ch.getPos();
                 m_transform.setPosition(pos);
-                m_transform.setScale(5, 5, 5);
+                m_transform.setScale(4, 1.4, 4);
                 slib->setRegisteredUniform("id", ch.getID());
                 drawAsset( "person", "", "");
             }

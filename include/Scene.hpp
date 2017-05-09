@@ -166,6 +166,16 @@ public:
     void focusCamToGridPos(ngl::Vec2 _pos);
 
     void initMeshInstances();
+    ///
+    /// \brief getPopulation get the number of characters in the scene
+    /// \return size of the characters vector
+    ///
+    int getPopulation() {return m_characters.size();}
+    ///
+    /// \brief getMaxPopulation get maximum possible population
+    /// \return maximum population
+    ///
+    int getMaxPopulation() {return m_num_houses*5;}
 
 private:
     ///
@@ -369,6 +379,10 @@ private:
     GLuint m_lightBuffer;
 
     TerrainHeightTracer m_height_tracer;
+    ///
+    /// \brief m_num_houses number of houses on the map
+    ///
+    int m_num_houses;
 };
 
 #endif//__SCENE_HPP__
