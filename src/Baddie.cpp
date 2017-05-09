@@ -31,8 +31,9 @@ Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Cha
 
 void Baddie::update()
 {
-	if(m_health <= 0.01)
+	if(m_health <= 0.0)
 		m_targets.clear();
+
 	//following enemy to attack
 	if(m_track)
 		trackingState();
@@ -88,6 +89,7 @@ void Baddie::trackingState()
 
 void Baddie::fight()
 {
+
 	float distance = m_agro_distance;
 	int target;
 	bool chase = false;

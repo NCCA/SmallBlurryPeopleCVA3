@@ -15,20 +15,20 @@
 int Character::m_id_counter(1);
 
 Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies):
-	AI(_height_tracer, _grid),
-	m_id(m_id_counter++),
+  AI(_height_tracer, _grid),
+  m_id(m_id_counter++),
   m_name(_name),
   m_stamina(1.0),
   m_hunger(1.0),
   m_active(false),
   m_sleeping(false),
   m_world_inventory(_world_inventory),
-	m_baddies(_baddies),
-	m_target_baddie(nullptr),
+  m_baddies(_baddies),
+  m_target_baddie(nullptr),
   m_inventory(CharInventory::NONE),
   m_called(0),
   m_building_amount(0),
-	m_building_type(TileType::NONE)
+  m_building_type(TileType::NONE)
 {
   //get values from preferences
   Prefs* prefs = Prefs::instance();
@@ -49,8 +49,8 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_fishing_catch = Utility::randInt(1,3);
   //amount of berries collected
   m_forage_amount = Utility::randInt(1,5);
-	//amount character hits for
-	m_attack_power = Utility::randInt(5,10);
+  //amount character hits for
+  m_attack_power = Utility::randInt(5,10);
 
   //random colour
   float red = Utility::randFlt(0, 1);
@@ -73,7 +73,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
       valid = true;
   }
   m_pos = ngl::Vec2(x, y);
-	m_target_id = m_grid->coordToId(m_pos);
+  m_target_id = m_grid->coordToId(m_pos);
 }
 
 void Character::setState(int _target_id)
@@ -186,15 +186,15 @@ void Character::buildState(TileType _building)
 void Character::moveState()
 {
    //move character to target and wait
-	m_state_stack.push_back(State::MOVE);
-	m_state_stack.push_back(State::IDLE);
+  m_state_stack.push_back(State::MOVE);
+  m_state_stack.push_back(State::IDLE);
 }
 
 void Character::attackState()
 {
-	m_state_stack.push_back(State::TRACK);
-	m_state_stack.push_back(State::FIGHT);
-	generalMessage(" is going to fight!", m_target_id);
+  m_state_stack.push_back(State::TRACK);
+  m_state_stack.push_back(State::FIGHT);
+  generalMessage(" is going to fight!", m_target_id);
 }
 void Character::invadedState(Baddie *_target)
 {
@@ -212,12 +212,12 @@ void Character::chopState()
   //check if character has enough stamina
   if(m_stamina >= 0.1)
   {
-		m_dest_target_id = m_target_id;
+    m_dest_target_id = m_target_id;
     if(findNearestEmptyTile())
     {
       //amount of wood a tree holds
-			ngl::Vec2 wood_coord = m_grid->idToCoord(m_dest_target_id);
-			int wood_amount = m_grid->getNumTrees(wood_coord[0],wood_coord[1]);
+      ngl::Vec2 wood_coord = m_grid->idToCoord(m_dest_target_id);
+      int wood_amount = m_grid->getNumTrees(wood_coord[0],wood_coord[1]);
       //create cyle of states: move to tree, chop wood, store wood
       for(int i = 0; i< wood_amount; i++)
       {
@@ -408,12 +408,12 @@ void Character::update()
   {
     m_health -= 0.01;
     if(m_health < 0.0)
-			m_health = 0.0;
+      m_health = 0.0;
     m_health_timer.restart();
   }
-	else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 100)
+  else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 100)
   {
-		m_health += 0.001;
+    m_health += 0.001;
     if(m_health > 1.0)
       m_health = 1.0;
     m_health_timer.restart();
@@ -432,8 +432,8 @@ void Character::update()
   if(m_stamina < 1.0 && m_idle == true && m_stamina_timer.elapsed() >= 1000)
   {
     m_stamina += 0.005;
-		if(m_stamina > 1.0)
-			m_stamina = 1.0;
+    if(m_stamina > 1.0)
+      m_stamina = 1.0;
     m_stamina_timer.restart();
   }
 
@@ -799,18 +799,18 @@ void Character::update()
           if (m_hunger >= 1.0)
             m_hunger = 1.0;
 
-					generalMessage(" ate berries", m_pos);
-					completedAction();
-				}
-				break;
-			}
+          generalMessage(" ate berries", m_pos);
+          completedAction();
+        }
+        break;
+      }
 
-			case(State::EAT_FISH):
-			{
-				if(m_action_timer.elapsed() >= 3000)
-				{
-					//take fish from inventory
-					m_inventory = CharInventory::NONE;
+      case(State::EAT_FISH):
+      {
+        if(m_action_timer.elapsed() >= 3000)
+        {
+          //take fish from inventory
+          m_inventory = CharInventory::NONE;
           //add onto hunger
           m_hunger += 0.5;
           //check and clamp to 1.0
@@ -965,27 +965,27 @@ bool Character::findNearestEmptyTile()
   std::vector<ngl::Vec2> neighbours;
   ngl::Vec2 target = m_grid->idToCoord(m_target_id);
 
-	ngl::Vec2 N1 = ngl::Vec2(target[0]+1, target[1]);
-	ngl::Vec2 N2 = ngl::Vec2(target[0]-1, target[1]);
-	ngl::Vec2 N3 = ngl::Vec2(target[0], target[1]+1);
-	ngl::Vec2 N4 = ngl::Vec2(target[0], target[1]-1);
+  ngl::Vec2 N1 = ngl::Vec2(target[0]+1, target[1]);
+  ngl::Vec2 N2 = ngl::Vec2(target[0]-1, target[1]);
+  ngl::Vec2 N3 = ngl::Vec2(target[0], target[1]+1);
+  ngl::Vec2 N4 = ngl::Vec2(target[0], target[1]-1);
 
-	if(m_grid->getTileType(N1) == TileType::NONE)
-		neighbours.push_back(N1);
+  if(m_grid->getTileType(N1) == TileType::NONE)
+    neighbours.push_back(N1);
 
-	if(m_grid->getTileType(N2) == TileType::NONE)
-		neighbours.push_back(N2);
+  if(m_grid->getTileType(N2) == TileType::NONE)
+    neighbours.push_back(N2);
 
-	if(m_grid->getTileType(N3) == TileType::NONE)
-		neighbours.push_back(N3);
+  if(m_grid->getTileType(N3) == TileType::NONE)
+    neighbours.push_back(N3);
 
-	if(m_grid->getTileType(N4) == TileType::NONE)
-		neighbours.push_back(N4);
+  if(m_grid->getTileType(N4) == TileType::NONE)
+    neighbours.push_back(N4);
 
   //find tile with the shortest distance to the character's current position
-	if(findNearest(neighbours))
+  if(findNearest(neighbours))
     return true;
-	else
+  else
   {
     generalMessage(" can't get there!", m_target_id);
     m_state_stack.clear();
@@ -1012,17 +1012,17 @@ bool Character::findNearestFishingTile()
     edge_vector.push_back(coord);
   }
 
-	//checks if any of the found edge tiles is the tile the character is on
-	//so the character doesn't move
-	for(auto edge: edge_vector)
-	{
-		if (m_grid->coordToId(m_pos) == m_grid->coordToId(edge))
-		{
-			m_target_id = m_grid->coordToId(m_pos);
-			m_path.clear();
-			return true;
-		}
-	}
+  //checks if any of the found edge tiles is the tile the character is on
+  //so the character doesn't move
+  for(auto edge: edge_vector)
+  {
+    if (m_grid->coordToId(m_pos) == m_grid->coordToId(edge))
+    {
+      m_target_id = m_grid->coordToId(m_pos);
+      m_path.clear();
+      return true;
+    }
+  }
 
   //sort vector based on squared distance to character
   distanceSort(0, edge_vector.size()-1, edge_vector);
@@ -1042,7 +1042,7 @@ void Character::waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set
     return;
   }
 
-  int id = m_grid->getTileId(_coord.m_x, _coord.m_y);
+  int id = m_grid->coordToId(_coord);
 
   // if tile in edge or water sets exit
   if(_edges.count(id) || _water.count(id))
@@ -1124,16 +1124,16 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
       //checks if current target is equal to the any of the coordinates
       if(m_grid->coordToId(m_pos) == m_grid->coordToId(coord))
       {
-				m_target_id = m_grid->coordToId(m_pos);
-				//clear path finding as character doesnt need to move
-				m_path.clear();
-				return true;
+        m_target_id = m_grid->coordToId(m_pos);
+        //clear path finding as character doesnt need to move
+        m_path.clear();
+        return true;
       }
     }
 
     //set the first element to the target id and shortest path
     m_target_id = m_grid->coordToId(_coord_data[0]);
-		std::vector<ngl::Vec2> shortest_path = getPath(m_target_id);
+    std::vector<ngl::Vec2> shortest_path = getPath(m_target_id);
     //erase the first element in the vector
     _coord_data.erase(_coord_data.begin());
 
@@ -1144,7 +1144,7 @@ bool Character::findNearest(std::vector<ngl::Vec2> _coord_data)
       {
         //compare the current elemets path length to the shortest_path's length
         int id = m_grid->coordToId(coord);
-				std::vector<ngl::Vec2> path = getPath(id);
+        std::vector<ngl::Vec2> path = getPath(id);
         //if shorter path, set as target
         if (shortest_path.size() == 0 && path.size() > shortest_path.size())
         {
@@ -1176,7 +1176,7 @@ bool Character::findFirstPath(std::vector<ngl::Vec2> _vector)
   for(auto element: _vector)
   {
     //if a path is found, return out of the function
-		if(setTarget(element))
+    if(setTarget(element))
       return true;
   }
   //if no path found to any coordinate in the vector
