@@ -2,14 +2,13 @@
 #define __GRID_HPP__
 
 #include <vector>
-#include <iostream>
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
 #include "GridTile.hpp"
 
 ///
 /// @file Grid.hpp
-/// @brief implementation file for the Grid class
+/// @brief header file for the Grid class
 ///
 
 ///
@@ -35,7 +34,7 @@ public:
   /// @param _new_h is the new height of the map
   /// @param _new_seed is the seed value for random number generation in the map script
   ///
-  void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 8);
+  void updateScript(std::string _script_path, int _new_w = 100, int _new_h = 100, int _new_seed = 8);
 
   ///
   /// \brief getTileType gets the tile type at the requested coordinates
