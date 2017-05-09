@@ -15,7 +15,8 @@
 
 Grid::Grid():
   m_w(1),
-  m_h(1)
+  m_h(1),
+  m_num_houses(0)
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
@@ -238,12 +239,20 @@ void Grid::setTileType(int _x, int _y, TileType _type)
 void Grid::setBuildState(int _id, float _value, TileType _type)
 {
   m_tiles[_id].setBuildState(_value, _type);
+  if(_value == 1 && _type == TileType::HOUSE)
+  {
+    houseAdded();
+  }
   m_has_changes = true;
 }
 
 void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
 {
   m_tiles[_x + m_w * _y].setBuildState(_value, _type);
+  if(_value == 1 && _type == TileType::HOUSE)
+  {
+    houseAdded();
+  }
   m_has_changes = true;
 }
 

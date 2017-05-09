@@ -492,7 +492,7 @@ void Gui::drawButtons()
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
   slib->setRegisteredUniform("population", m_scene->getPopulation());
-  slib->setRegisteredUniform("max_population", m_scene->getPopulation());
+  slib->setRegisteredUniform("max_pop", m_scene->getMaxPopulation());
 
   Character *character = m_scene->getActiveCharacter();
   if(character)

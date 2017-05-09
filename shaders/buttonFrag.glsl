@@ -425,34 +425,35 @@ vec3 populationText()
   __ __ __
 
   int pop = population;
-  while(pop > 0)
+  while(pop > 10)
   {
     tp.x-=FONT_SPACE;
     pop/=10;
   }
   vec2 tp0 = tp;
   pop = population;
-  while(pop > 0)
+  do
   {
     S(pop%10 + 48);
     pop /= 10;
     tp.x+=FONT_SPACE*2;
-  }
+  } while(pop>0);
   tp = tp0;
-  __ _slash __
+  __ _slash
+
   pop = max_pop;
-  while(pop > 0)
+  while(pop > 10)
   {
     tp.x-=FONT_SPACE;
     pop/=10;
   }
-  pop = population;
-  while(pop > 0)
+  pop = max_pop;
+  do
   {
     S(pop%10 + 48);
     pop /= 10;
     tp.x+=FONT_SPACE*2;
-  }
+  } while(pop>0);
 
   return vec3(max(c, 0.0));
 }
@@ -577,6 +578,7 @@ void main()
     else if(fragAction == POPULATION)
     {
       s += populationText();
+      icon_color = getIcon(fragUV, 16, vec2(192, 64));
     }
     else if(fragAction == CENTRECAMERA)
     {

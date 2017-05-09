@@ -175,7 +175,7 @@ public:
     /// \brief getMaxPopulation get maximum possible population
     /// \return maximum population
     ///
-    int getMaxPopulation() {return m_num_houses*5;}
+    int getMaxPopulation() {return m_grid.getNumHouses()*5;}
 
 private:
     ///
@@ -361,8 +361,6 @@ private:
     ///
     bool m_game_started;
 
-
-
     ///
     /// \brief m_movement_held which movement are currently held
     ///
@@ -379,10 +377,6 @@ private:
     GLuint m_lightBuffer;
 
     TerrainHeightTracer m_height_tracer;
-    ///
-    /// \brief m_num_houses number of houses on the map
-    ///
-    int m_num_houses;
 };
 
 #endif//__SCENE_HPP__
