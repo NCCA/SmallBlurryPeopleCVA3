@@ -516,7 +516,6 @@ void Character::update()
 					if(m_target_baddie->getHealth() <= 0.0)
 					{
 						//finished action
-						Gui::instance()->notify("Enemy defeated", m_pos);
 						completedAction();
 					}
 					else if(m_health <= 0.0)

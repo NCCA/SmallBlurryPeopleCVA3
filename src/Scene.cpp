@@ -330,7 +330,7 @@ void Scene::initialiseFramebuffers()
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-    m_mainBuffer.addTexture( "diffuseInstanced", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+		m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
     m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
@@ -513,36 +513,39 @@ void Scene::update()
         m_mouseSelectionBoxPosition.update();
         m_mouseSelectionBoxScale.update();
 
-        for(Character &character : m_characters)
+				for(int i=0; i<m_characters.size(); i++)
         {
-            character.update();
-            if (character.isSleeping() && character.getID() == m_active_char_id)
+					if (m_characters[i].getHealth() <= 0.0)
+					{
+							std::string message = m_characters[i].getName() + " has died!";
+							ngl::Vec2 pos = {m_characters[i].getPos()[0], m_characters[i].getPos()[2]};
+							Gui::instance()->notify(message, pos );
+							//check if character has health, if it doesn't remove the character
+							if (m_active_char_id == m_characters[i].getID())
+							{
+									m_active_char_id = -1;
+									Gui::instance()->updateActiveCharacter();
+							}
+							//ID's start from 1 so negate 1 to get index in vector m_characters
+							int index = (m_characters[i].getID() - 1);
+							//add name back to available list
+							m_file_names.push_back(m_characters[i].getName());
+							//add position to tombstone positions
+							ngl::Vec3 stone_pos(m_characters[i].getPos());
+							m_tombstones.push_back(stone_pos);
+							//remove character from vector
+							m_characters.erase(m_characters.begin() + i);
+					}
+					else
+					{
+						m_characters[i].update();
+						if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
             {
                 //check if character is sleeping, if it is, dont make it the active character
                 m_active_char_id = -1;
                 Gui::instance()->updateActiveCharacter();
             }
-            else if (character.getHealth() <= 0.0)
-            {
-                std::string message = character.getName() + " has died!";
-                ngl::Vec2 pos = {character.getPos()[0], character.getPos()[2]};
-                Gui::instance()->notify(message, pos );
-                //check if character has health, if it doesn't remove the character
-                if (m_active_char_id == character.getID())
-                {
-                    m_active_char_id = -1;
-                    Gui::instance()->updateActiveCharacter();
-                }
-                //ID's start from 1 so negate 1 to get index in vector m_characters
-                int index = (character.getID() - 1);
-                //add name back to available list
-                m_file_names.push_back(character.getName());
-                //add position to tombstone positions
-                ngl::Vec3 stone_pos(character.getPos());
-                m_tombstones.push_back(stone_pos);
-                //remove character from vector
-                m_characters.erase(m_characters.begin() + index);
-            }
+					}
         }
 
         for(int i=0; i<m_baddies.size(); i++)
@@ -918,7 +921,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
+				m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
@@ -1041,7 +1044,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
+				m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
@@ -1355,73 +1358,69 @@ void Scene::drawMeshes()
     int offset = 0;
     for(size_t i = 0; i < m_meshPositions.size(); ++i)
     {
-        int instances = m_meshPositions[i].size();
-        switch( i )
-        {
-        case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset);
-            break;
-        default:
-            break;
-        }
-        offset += instances;
+			int instances = m_meshPositions[i].size();
+			switch( i )
+			{
+			case static_cast<int>(TileType::TREES):
+					drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset );
+					break;
+			case static_cast<int>(TileType::STOREHOUSE):
+					drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset );
+					break;
+			case static_cast<int>(TileType::HOUSE):
+					drawInstances( "house", "house_d", "diffuseInstanced", instances, offset);
+					break;
+			case static_cast<int>(TileType::FOUNDATION_A):
+					drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset);
+					break;
+			case static_cast<int>(TileType::FOUNDATION_B):
+					drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset);
+					break;
+			case static_cast<int>(TileType::FOUNDATION_C):
+					drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset);
+					break;
+			case static_cast<int>(TileType::FOUNDATION_D):
+					drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset);
+					break;
+			default:
+					break;
+			}
+			offset += instances;
     }
 
     for(Character &character : m_characters)
     {
-        if(character.isSleeping() == false)
-        {
-            slib->use("colour");
-            m_transform.reset();
-            ngl::Vec3 pos = character.getPos();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, character.getRot(), 0);
-            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-            drawAsset("person", "", "");
-        }
+			if(character.isSleeping() == false)
+			{
+				slib->use("colour");
+				m_transform.reset();
+				ngl::Vec3 pos = character.getPos();
+				m_transform.setPosition(pos);
+				m_transform.setRotation(0, character.getRot(), 0);
+				slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+				drawAsset("person", "", "");
+			}
     }
 
     for(Baddie &baddie : m_baddies)
     {
         if(baddie.getHealth() > 0.0)
         {
-            //slib->use("diffuseInstanced");
-            m_transform.reset();
-            ngl::Vec3 pos = baddie.getPos();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, baddie.getRot(), 0);
-            m_transform.setScale(2.0f, 2.0f, 2.0f);
-            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-            //drawAsset("tree", "tree_d", "diffuseInstanced");
-            drawAsset("person", "baddie_d", "diffuse");
+					slib->use("diffuse");
+					m_transform.reset();
+					ngl::Vec3 pos = baddie.getPos();
+					m_transform.setPosition(pos);
+					m_transform.setRotation(0, baddie.getRot(), 0);
+					m_transform.setScale(2.0f, 2.0f, 2.0f);
+					drawAsset("person", "baddie_d", "diffuse");
         }
     }
 
     for(auto &stone : m_tombstones)
     {
-        slib->use("colour");
-        m_transform.reset();
-        m_transform.setPosition(stone);
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-        drawAsset("tombstone", "", "");
+			m_transform.reset();
+			m_transform.setPosition(stone);
+			drawAsset("tombstone", "tombstone_d", "diffuse");
     }
 }
 
@@ -2076,7 +2075,7 @@ void Scene::bindTextureToShader(const std::string &_shaderID, const GLuint _tex,
     GLint loc = glGetUniformLocation(spid, _uniform);
     if(loc == -1)
     {
-        std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
+				std::cerr << "Uh oh! Invalid uniform location in Scene::bindTextureToShader!! " << _uniform << '\n';
         return;
     }
     glUniform1i(loc, _target);

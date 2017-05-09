@@ -161,6 +161,9 @@ void Baddie::fight()
 		}
 	}
 
+	if(m_health <= 0.0)
+		Gui::instance()->notify("Enemy defeated", m_pos);
+
 }
 
 bool Baddie::findNearestTarget()
