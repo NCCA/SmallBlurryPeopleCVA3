@@ -473,7 +473,9 @@ bool buttonUsesCharacterColor()
      || fragAction == CHAR_FORAGE
      || fragAction == BUILDHOUSE
      || fragAction == BUILDSTORE
-     || fragAction == CENTRECAMERA)
+     || fragAction == CENTRECAMERA
+     || fragAction == CHAR_EAT_BERRIES
+     || fragAction == CHAR_EAT_FISH)
   {
     return true;
   }
@@ -522,6 +524,7 @@ void main()
     {
       s *= loadingBar(character_hunger, fragUV.x);
       s = shiftRGB(s, 1);
+      s.g -= 0.1;
     }
     else if(fragAction == CENTRECAMERA)
     {
@@ -538,6 +541,14 @@ void main()
     else if(fragAction == CHAR_FORAGE)
     {
       icon_color = getIcon(fragUV, 3);
+    }
+    else if(fragAction == CHAR_EAT_BERRIES)
+    {
+      icon_color = getIcon(fragUV, 4);
+    }
+    else if(fragAction == CHAR_EAT_FISH)
+    {
+      icon_color = getIcon(fragUV, 5);
     }
     s = mix(s, icon_color.xyz, icon_color.a);
 

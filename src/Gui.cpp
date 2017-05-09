@@ -263,9 +263,11 @@ void Gui::createSceneButtons()
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "");
+  addButton(Action::CHAR_EAT_BERRIES, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 10), ngl::Vec2(40, 40), "");
+  addButton(Action::CHAR_EAT_FISH, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(210, 10), ngl::Vec2(40, 40), "");
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 110), ngl::Vec2(140, 40), m_scene->getActiveCharacterName());
   addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
-  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), "");
+  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 60), ngl::Vec2(40, 40), "");
 
   addButton(Action::HUNGER_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 220), ngl::Vec2(190, 20), "");
   addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 190), ngl::Vec2(190, 20), "");
