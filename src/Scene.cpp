@@ -330,7 +330,7 @@ void Scene::initialiseFramebuffers()
     //Framebuffers
     std::cout << "Initalising data framebuffer to " << m_viewport.m_x << " by " << m_viewport.m_y << '\n';
     m_mainBuffer.initialise(m_viewport.m_x, m_viewport.m_y);
-    m_mainBuffer.addTexture( "diffuseInstanced", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
+    m_mainBuffer.addTexture( "diffuse", GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT0 );
     m_mainBuffer.addTexture( "normal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
     m_mainBuffer.addTexture( "position", GL_RGBA, GL_RGBA32F, GL_COLOR_ATTACHMENT2 );
     m_mainBuffer.addTexture( "linearDepth", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT3 );
@@ -831,6 +831,7 @@ void Scene::draw()
         m_utilityBuffer.unbind();
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
 
         //---------------------------//
         //  SHADOW PASS  //
@@ -861,7 +862,6 @@ void Scene::draw()
         //---------------------------//
         //         REFLECTIONS       //
         //---------------------------//
-        glCullFace(GL_FRONT);
         m_transform.reset();
 
         m_mainBuffer.bind();
@@ -918,7 +918,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
+        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
@@ -1041,7 +1041,7 @@ void Scene::draw()
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
             slib->setRegisteredUniform( "cascades[" + std::to_string(i) + "]", cascadeDistances[i] );
 
-        m_mainBuffer.bindTexture(id, "diffuseInstanced", "diffuseInstanced", 0);
+        m_mainBuffer.bindTexture(id, "diffuse", "diffuse", 0);
         m_mainBuffer.bindTexture(id, "normal", "normal", 1);
         m_mainBuffer.bindTexture(id, "position", "position", 2);
         m_mainBuffer.bindTexture( id, "linearDepth", "linearDepth", 3 );
