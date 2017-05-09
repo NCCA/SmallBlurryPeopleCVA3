@@ -2389,32 +2389,24 @@ GLuint Scene::constructTerrain()
 
     std::vector<std::vector<ngl::Vec3>> facenorms;
 
-    faces.assign(m_grid.getW() + 2, std::vector<ngl::Vec3>() );
-    for(int j = 0; j < m_grid.getH(); ++j)
-        faces[0].push_back(ngl::Vec3(0, -16.0f, j));
-    for(int j = 0; j < m_grid.getH(); ++j)
-        faces[m_grid.getW() + 1].push_back(ngl::Vec3(m_grid.getW() - 1, -16.0f, j));
-
+    faces.assign(m_grid.getW(), std::vector<ngl::Vec3>() );
 
     //Face centers to start.
     for(int i = 0; i < m_grid.getW(); ++i)
     {
-        int index = i + 1;
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             float height = m_grid.getTileHeight(i, j);
             ngl::Vec3 face (i, height, j);
-            ngl::Vec3 boundary (i, -16.0f, j);
-
-            if(j == 0)
-                faces[index].push_back(boundary);
-
-            faces[index].push_back(face);
-
-            if(j == m_grid.getH() - 1)
-                faces[index].push_back(boundary);
+            faces[i].push_back(face);
         }
     }
+
+    //Create edges.
+    //x < 0
+    /*faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));*/
 
     //Smooth
     /*const int iterations = 128;
@@ -2439,6 +2431,7 @@ GLuint Scene::constructTerrain()
         }
     }*/
 
+    std::cout << "Calculating terrain normals\n";
     //Calculate face normals
     for(size_t i = 0; i < faces.size(); ++i)
     {
@@ -2453,6 +2446,8 @@ GLuint Scene::constructTerrain()
             bool top = j < faces[i].size() - 1;
 
             int count = 0;
+
+            std::cout << "i,j = " << i << "," << j << " / w,h = " << faces.size() << "," << faces[i].size() << '\n';
 
             //->
             if(top and right)
@@ -2576,10 +2571,14 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     terrainFace face;
 
     //Generate xy positions
-    face.m_verts[0].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y - 0.5f, 1.0f);
-    face.m_verts[1].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y - 0.5f, 1.0f);
-    face.m_verts[2].m_pos = ngl::Vec4(_x - 0.5f, 0.0f, _y + 0.5f, 1.0f);
-    face.m_verts[3].m_pos = ngl::Vec4(_x + 0.5f, 0.0f, _y + 0.5f, 1.0f);
+    face.m_verts[0].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y - 1.0f,   1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_x,       0.0f,  _y - 1.0f,   1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y,          1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_x,       0.0f,  _y,          1.0f);
+
+    //Due to the edges of the terrain, this offset must be applied to maintain the mapping from indices -> coordinates.
+    /*for(auto &v : face.m_verts)
+        v.m_pos -= ngl::Vec4(0.5f, 0.0f, 0.5f, 0.0f);*/
 
     std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
     std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
@@ -2612,9 +2611,9 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions[0].size() - 1;
+    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
     //Can we move in the vertical direction?
-    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions.size() - 1;
+    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
 
     if(horizontal)
     {
