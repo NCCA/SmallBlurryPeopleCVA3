@@ -434,7 +434,7 @@ void Character::update()
   //take away hunger over time
   if(m_hunger > 0.0 && m_hunger_timer.elapsed() >= 1000)
   {
-    m_hunger-= 0.01;
+		m_hunger-= 0.005;
     if (m_hunger < 0.0)
       m_hunger = 0;
     m_hunger_timer.restart();
@@ -845,6 +845,8 @@ void Character::update()
 				if(m_action_timer.elapsed() >= 1000)
 				{
 					//remove state from stack
+					if(m_forage)
+						m_forage = false;
 					completedAction();
 				}
 				break;

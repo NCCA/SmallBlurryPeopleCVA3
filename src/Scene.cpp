@@ -834,6 +834,7 @@ void Scene::draw()
         m_utilityBuffer.unbind();
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
 
         //---------------------------//
         //  SHADOW PASS  //
@@ -864,7 +865,6 @@ void Scene::draw()
         //---------------------------//
         //         REFLECTIONS       //
         //---------------------------//
-        glCullFace(GL_FRONT);
         m_transform.reset();
 
         m_mainBuffer.bind();
