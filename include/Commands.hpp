@@ -9,16 +9,16 @@
 ///
 enum class Action
 {
-  PASSIVE,           // 0
-  QUIT,              // 1
-  BUILDHOUSE,        // 2
-  BUILDSTORE,        // 3
-  CENTRECAMERA,      // 4
-  ESCAPE,            // 5
-  ZOOMIN,            // 6
-  ZOOMOUT,           // 7
-  MOVEFORWARD,       // 8
-  MOVEBACKWARD,      // 9
+  PASSIVE,           //  0
+  QUIT,              //  1
+  BUILDHOUSE,        //  2
+  BUILDSTORE,        //  3
+  CENTRECAMERA,      //  4
+  ESCAPE,            //  5
+  ZOOMIN,            //  6
+  ZOOMOUT,           //  7
+  MOVEFORWARD,       //  8
+  MOVEBACKWARD,      //  9
   MOVELEFT,          // 10
   MOVERIGHT,         // 11
   STOPFORWARD,       // 12
@@ -35,9 +35,12 @@ enum class Action
   DECR_PREFS,        // 23
   SAVE_PREFERENCES,  // 24
   CHAR_STATE,        // 25
-  /// NEED TO PUT DIFFERENT BARS IN HERE, HEALTH? FATIGUE? HAPPINESS?
   STAMINA_BAR,       // 26
-  HEALTH_BAR         // 27
+  HEALTH_BAR,        // 27
+  HUNGER_BAR,        // 28
+  POPULATION,        // 29
+  CHAR_EAT_BERRIES,  // 30
+  CHAR_EAT_FISH      // 31
 };
 
 ///
@@ -305,22 +308,94 @@ private:
   Character *m_character;
 };
 
+///
+/// \brief The EatBerriesCommand class used to tell character to find stored berries to eat
+///
+class EatBerriesCommand : public Command
+{
+public:
+  ///
+  /// \brief EatBerriesCommand constructor for eat berries command
+  /// \param _character character to instruct
+  ///
+  EatBerriesCommand(Character *_character);
+  ~EatBerriesCommand() = default;
+  ///
+  /// \brief execute tells character to find berries to eat
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_character character to instruct
+  ///
+  Character *m_character;
+};
+
+///
+/// \brief The EatFishCommand class used to tell character to find stored fish to eat
+///
+class EatFishCommand : public Command
+{
+public:
+  ///
+  /// \brief EatFishCommand constructor for eat fish command
+  /// \param _character character to instruct
+  ///
+  EatFishCommand(Character *_character);
+  ~EatFishCommand() = default;
+  ///
+  /// \brief execute tells character to find stored fish to eat
+  ///
+  virtual void execute();
+private:
+  ///
+  /// \brief m_character character to instruct
+  ///
+  Character *m_character;
+};
+
+///
+/// \brief The CentreNotificationCommand class to focus camera on a notification's position
+///
 class CentreNotificationCommand : public Command
 {
 public:
+  ///
+  /// \brief CentreNotificationCommand constructor for center notification command
+  /// \param _scene current scene being used
+  /// \param _map_pos position to move camera to
+  ///
   CentreNotificationCommand(Scene *_scene, ngl::Vec2 _map_pos);
   ~CentreNotificationCommand() = default;
+  ///
+  /// \brief execute send instruction to move camera
+  ///
   virtual void execute();
 private:
+  ///
+  /// \brief m_scene scene to send instruction to
+  ///
   Scene *m_scene;
+  ///
+  /// \brief m_map_pos map position to move camera to
+  ///
   ngl::Vec2 m_map_pos;
 };
 
+///
+/// \brief The SavePreferencesCommand class to write preferences out to config file
+///
 class SavePreferencesCommand : public Command
 {
 public:
+  ///
+  /// \brief SavePreferencesCommand constructor for save preferences command
+  ///
   SavePreferencesCommand();
   ~SavePreferencesCommand() = default;
+  ///
+  /// \brief execute writes out preferences to file
+  ///
   virtual void execute();
 };
 

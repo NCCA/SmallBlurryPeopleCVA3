@@ -78,6 +78,8 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::CHAR_STATE:
   case Action::STAMINA_BAR:
   case Action::HEALTH_BAR:
+  case Action::HUNGER_BAR:
+  case Action::POPULATION:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -182,6 +184,12 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::SAVE_PREFERENCES:
     command.reset(new SavePreferencesCommand);
     break;
+  case Action::CHAR_EAT_BERRIES:
+    command.reset(new EatBerriesCommand(m_scene->getActiveCharacter()));
+    break;
+  case Action::CHAR_EAT_FISH:
+    command.reset(new EatFishCommand(m_scene->getActiveCharacter()));
+    break;
   }
   return command;
 }
@@ -252,13 +260,14 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
-  addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "BH");
-  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "BS");
-  addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "F");
+  addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "");
+  addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "");
+  addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "");
   addButton(Action::PASSIVE_CHARACTER, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 110), ngl::Vec2(140, 40), m_scene->getActiveCharacterName());
   addButton(Action::CHAR_STATE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 60), ngl::Vec2(140, 40), "");
-  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), TEXT_SMILEY);
+  addButton(Action::CENTRECAMERA, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(160, 110), ngl::Vec2(40, 40), "");
 
+  addButton(Action::HUNGER_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 220), ngl::Vec2(190, 20), "");
   addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 190), ngl::Vec2(190, 20), "");
   addButton(Action::HEALTH_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 160), ngl::Vec2(190, 20), "");
   updateButtonArrays();
@@ -487,6 +496,7 @@ void Gui::drawButtons()
     slib->setRegisteredUniform("character_state", (int)character->getState());
     slib->setRegisteredUniform("character_stamina", character->getStamina());
     slib->setRegisteredUniform("character_health", character->getHealth());
+    slib->setRegisteredUniform("character_hunger", character->getHunger());
     slib->setRegisteredUniform("character_color", character->getColour());
   }
   else

@@ -120,12 +120,38 @@ void MoveCamCommand::execute()
 //------------------------------------------------------------//
 
 ForageCommand::ForageCommand(Character *_character) :
-  m_character(_character)
+	m_character(_character)
 {}
 
 void ForageCommand::execute()
 {
 	m_character->forageState();
+}
+
+//------------------------------------------------------------//
+// Eat Berries Command
+//------------------------------------------------------------//
+
+EatBerriesCommand::EatBerriesCommand(Character *_character) :
+	m_character(_character)
+{}
+
+void EatBerriesCommand::execute()
+{
+	m_character->eatBerriesState();
+}
+
+//------------------------------------------------------------//
+// Eat Fish Command
+//------------------------------------------------------------//
+
+EatFishCommand::EatFishCommand(Character *_character) :
+	m_character(_character)
+{}
+
+void EatFishCommand::execute()
+{
+	m_character->eatFishState();
 }
 
 //------------------------------------------------------------//

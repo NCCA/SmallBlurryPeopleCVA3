@@ -152,9 +152,14 @@ public:
 	State getState();
 	///
 	/// \brief getStamina get character's stamina
-	/// \return character's stamina value
+	/// \return character's stamina value 0-1
 	///
 	float getStamina() {return m_stamina;}
+	///
+	/// \brief getHunger get character's hunger
+	/// \return character's hunger value 0-1
+	///
+	float getHunger() {return m_hunger;}
 	///
 	/// \brief setActive, set's whether the character is active
 	/// \param _selection, a boolean determing whether the character is active or not
