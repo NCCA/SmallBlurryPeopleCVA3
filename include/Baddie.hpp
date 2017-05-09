@@ -9,8 +9,16 @@
 
 #include <vector>
 
+/// \file Baddie.hpp
+/// \brief The enemy class that wanders around searching for characters, when one comes into range
+///  it follows and attacks the character
+
+
 class Character;
 
+/// \class Baddie
+/// \brief The Baddie class is the ingame enemy, with attacking and tracking states
+///
 class Baddie : public AI
 {
 public:
@@ -51,6 +59,16 @@ public:
 	/// \brief findNearestTarget, finds character nearest to baddie
 	///
 	bool findNearestTarget();
+	///
+	/// \brief getScale, returns baddie's scale for drawing
+	/// \return m_scale, scale of baddie
+	///
+	float getScale() {return m_scale;}
+	///
+	/// \brief addScale, adds onto scale of baddie
+	/// \param _scale, amount to add onto scale
+	///
+	void addScale(float _scale) {m_scale += _scale;}
 private:
 	///
 	/// \brief m_combat, if the character is in combat
@@ -84,6 +102,10 @@ private:
 	/// \brief m_tracking_distance, range a character needs to be in to target
 	///
 	float m_tracking_distance;
+	///
+	/// \brief m_scale, baddie grows in size when it kills enemies
+	///
+	float m_scale;
 };
 
 #endif//__BADDIE_HPP__

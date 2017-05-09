@@ -78,7 +78,6 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
 
 void Character::setState(int _target_id)
 {
-	std::cout<<"FORAGE: "<<m_forage<<std::endl;
 	softResetCharacter();
   //if the target is reachable or a water tile
   if(setTarget(_target_id) || m_grid->getTileType(_target_id)== TileType::WATER)
@@ -134,7 +133,7 @@ void Character::isBaddie()
 		}
 	}
 
-	if (found == true)
+	if (found)
 		attackState();
 	else
 		moveState();
@@ -378,35 +377,24 @@ void Character::idleState()
   {
     //set the idle target to the character's current target
     m_idle_target_id = m_grid->coordToId(m_pos);
-    m_speed /= 10;
+
+		//slow down speed of characters
+		Prefs* prefs = Prefs::instance();
+		m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
   }
 
+	//set random position for character
   ngl::Vec2 idle_pos = m_grid->idToCoord(m_idle_target_id);
   int dist = 5;
-  int max_attempts = 10;
-  bool valid = false;
-  int attempt_number = 0;
+	bool valid = false;
 
-  while(!valid && attempt_number<max_attempts)
-  {
-    attempt_number++;
+	valid = randomIdlePos(idle_pos, dist);
 
-    //find the maximum range the character can move in the x and y direction
-    int x_min_range = Utility::clamp((idle_pos.m_x - dist), 0, m_grid->getW());
-    int x_max_range = Utility::clamp((idle_pos.m_x + dist), 0, m_grid->getW());
-    int y_min_range = Utility::clamp((idle_pos.m_y - dist), 0, m_grid->getH());
-    int y_max_range = Utility::clamp((idle_pos.m_y + dist), 0, m_grid->getH());
-
-    //find a random coordinate from these ranges
-    int x = Utility::randInt(x_min_range, x_max_range);
-    int y = Utility::randInt(y_min_range, y_max_range);
-		valid = setTarget(ngl::Vec2(x,y));
-  }
   //create stack if path found
   if(valid)
   {
-    m_state_stack.push_back(State::MOVE);
-    m_state_stack.push_back(State::IDLE);
+		m_state_stack.push_back(State::MOVE);
+		m_state_stack.push_back(State::IDLE);
   }
 
   m_called++;
@@ -458,6 +446,20 @@ void Character::update()
     {
       case(State::MOVE):
       {
+				//for avoiding baddie, makes them spaz out though
+				/*if(m_idle)
+				{
+					for(auto &baddie : *m_baddies)
+					{
+						ngl::Vec2 baddie_pos = ngl::Vec2(baddie.getPos()[0], baddie.getPos()[2]);
+						float dist = Utility::sqrDistance(m_pos, baddie_pos);
+						if (dist < 10)
+						{
+							randomIdlePos(m_pos, 10);
+						}
+					}
+				}*/
+
 				if (move())
         {
           //when the target has been reached, remove the state from the stack
@@ -468,60 +470,59 @@ void Character::update()
 
 			case(State::TRACK):
 			{
-			//if another character has killed the enemy
+				//if another character has killed the enemy
 				if(m_target_baddie->getHealth() <= 0.0)
+				{
 					m_state_stack.clear();
-
-				//get the baddie's position and move to enemy if not on the same tile
-				ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
-				int baddieID = m_grid->coordToId(baddiePos);
-				if (m_grid->coordToId(m_pos) == baddieID)
-					{
-					//if reached enemy, initiate fighting
-						m_target_baddie->invadedState(this);
-						completedAction();
-					}
+				}
 				else
 				{
-					//set target to enemy's new position
-					setTarget(baddieID);
-					move();
+					//get the baddie's position and move to enemy if not on the same tile
+					ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
+					int baddieID = m_grid->coordToId(baddiePos);
+					if (m_grid->coordToId(m_pos) == baddieID)
+						{
+						//if reached enemy, initiate fighting
+							m_target_baddie->invadedState(this);
+							completedAction();
+						}
+					else
+					{
+						//set target to enemy's new position
+						setTarget(baddieID);
+						move();
+					}
 				}
-					break;
+				break;
 			}
 
 			case(State::FIGHT):
 			{
-				if(m_action_timer.elapsed() >= 1000)
+				if(m_target_baddie->getHealth() <= 0.0)
 				{
-
-					if(m_stamina > 0.0)
+					//finished action
+					completedAction();
+				}
+				else
+				{
+					if(m_action_timer.elapsed() >= 1000)
 					{
-						//take health from target enemy according to characters power
-						m_target_baddie->takeHealth(0.01 * m_attack_power);
-						//take away stamina
-						m_stamina -= 0.1;
-						//if stamina below 0, make equal to 0
-						if(m_stamina < 0.0)
-							m_stamina = 0.0;
-					}
-					else
-					{
-						//if no stamina, attacks capped to 0.02
-						m_target_baddie->takeHealth(0.02);
-					}
-
-					m_action_timer.restart();
-					//if the enemy has no health left
-					if(m_target_baddie->getHealth() <= 0.0)
-					{
-						//finished action
-						completedAction();
-					}
-					else if(m_health <= 0.0)
-					{
-						//if character dies
-						m_state_stack.clear();
+						if(m_stamina > 0.0)
+						{
+							//take health from target enemy according to characters power
+							m_target_baddie->takeHealth(0.01 * m_attack_power);
+							//take away stamina
+							m_stamina -= 0.1;
+							//if stamina below 0, make equal to 0
+							if(m_stamina < 0.0)
+								m_stamina = 0.0;
+						}
+						else
+						{
+							//if no stamina, attacks capped to 0.02
+							m_target_baddie->takeHealth(0.02);
+						}
+						m_action_timer.restart();
 					}
 				}
 				break;
@@ -886,7 +887,7 @@ void Character::update()
 			}
     }
   }
-  else if (m_active == false)
+	else if (!m_active)
   {
     //if a character isn't active they are idle
     if(!m_idle)
@@ -899,6 +900,28 @@ void Character::update()
     if(!m_idle)
         m_idle = true;
   }
+}
+
+bool Character::randomIdlePos(ngl::Vec2 _idle_pos, int _radius)
+{
+	int attempt_number = 0;
+	int max_attempts = 10;
+	bool valid = false;
+
+	while(!valid && attempt_number<max_attempts)
+	{
+		attempt_number++;
+		int x_min_range = Utility::clamp((_idle_pos.m_x - _radius), 0, m_grid->getW());
+		int x_max_range = Utility::clamp((_idle_pos.m_x + _radius), 0, m_grid->getW());
+		int y_min_range = Utility::clamp((_idle_pos.m_y - _radius), 0, m_grid->getH());
+		int y_max_range = Utility::clamp((_idle_pos.m_y + _radius), 0, m_grid->getH());
+
+		//find a random coordinate from these ranges
+		int x = Utility::randInt(x_min_range, x_max_range);
+		int y = Utility::randInt(y_min_range, y_max_range);
+		valid = setTarget(ngl::Vec2(x,y));
+	}
+	return valid;
 }
 
 bool Character::findNearestStorage()
@@ -925,7 +948,7 @@ bool Character::findNearestStorage()
   distanceSort(0, storage_houses.size()-1, storage_houses);
 
   //set the storehouse with the shortest path as the target
-  if(	findNearest(storage_houses) == true)
+	if(findNearest(storage_houses))
     return true;
   else
   {

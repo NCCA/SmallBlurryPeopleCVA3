@@ -15,8 +15,10 @@
 #include <SDL.h>
 
 /// \file Character.hpp
-/// \brief The character refers to the grid for pathfinding and keeps track of a target
-/// for pathfinding. It is responsible for updating itself.
+/// \brief Has multiple states for actions, responsible for updating itself
+
+/// \enum State
+/// \brief The State enum, used for stack of states that are handled internally in a switch statment
 
 enum State
 {
@@ -41,6 +43,9 @@ enum State
 	IDLE
 };
 
+/// \enum CharInventory
+/// \brief The CharInventory enum, used to define what the character is holding
+///
 enum class CharInventory
 {
 	WOOD,
@@ -294,6 +299,13 @@ private:
 	///
 	TileType m_building_type;
 	///
+	/// \brief randomIdlePos, find random position within a radius
+	/// \param _idle_pos, central position for idle walking
+	/// \param _radius, radius to find position in
+	/// \return whether position was found
+	///
+	bool randomIdlePos(ngl::Vec2 _idle_pos, int _radius);
+	///
 	/// \brief findNearestStorage, finds a storage house close to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found
 	///
@@ -335,10 +347,13 @@ private:
 	///
 	bool findFirstPath(std::vector<ngl::Vec2> _vector);
 	///
-	/// \brief resetCharacter, clears a characters stack and resets their speed, used when changing from
+	/// \brief softResetCharacter, clears a characters stack and resets their speed, used when changing from
 	/// a character's idle state where the character's speed is reduced
 	///
 	void softResetCharacter();
+	///
+	/// \brief hardResetCharacter, does the same as the softResetCharacter except it also turns off the foraging flag
+	///
 	void hardResetCharacter();
 	///
 	/// \brief completedAction, when a state has been completed it is removed from the stack and the

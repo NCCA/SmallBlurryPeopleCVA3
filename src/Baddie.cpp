@@ -11,7 +11,8 @@ Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Cha
 	m_characters(_characters),
 	m_combat(false),
 	m_track(false),
-	m_search(true)
+	m_search(true),
+	m_scale(2.0)
 {
   Prefs* prefs = Prefs::instance();
 	m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
@@ -30,6 +31,8 @@ Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Cha
 
 void Baddie::update()
 {
+	if(m_health <= 0.01)
+		m_targets.clear();
 	//following enemy to attack
 	if(m_track)
 		trackingState();
@@ -160,9 +163,6 @@ void Baddie::fight()
 			m_action_timer.restart();
 		}
 	}
-
-	if(m_health <= 0.0)
-		Gui::instance()->notify("Enemy defeated", m_pos);
 
 }
 

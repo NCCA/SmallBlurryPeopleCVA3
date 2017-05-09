@@ -535,6 +535,8 @@ void Scene::update()
 							m_tombstones.push_back(stone_pos);
 							//remove character from vector
 							m_characters.erase(m_characters.begin() + i);
+							for(auto &baddie: m_baddies)
+								baddie.addScale(0.5f);
 					}
 					else
 					{
@@ -552,8 +554,13 @@ void Scene::update()
         {
             if(m_baddies[i].getHealth() > 0.0)
                 m_baddies[i].update();
+
             else
-                m_baddies.erase(m_baddies.begin() + i);
+						{
+							ngl::Vec2 pos = ngl::Vec2(m_baddies[i].getPos()[0], m_baddies[i].getPos()[2]);
+							Gui::instance()->notify("Enemy defeated", pos);
+							m_baddies.erase(m_baddies.begin() + i);
+						}
         }
 
 
@@ -1411,7 +1418,7 @@ void Scene::drawMeshes()
 					ngl::Vec3 pos = baddie.getPos();
 					m_transform.setPosition(pos);
 					m_transform.setRotation(0, baddie.getRot(), 0);
-					m_transform.setScale(2.0f, 2.0f, 2.0f);
+					m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
 					drawAsset("person", "baddie_d", "diffuse");
         }
     }
