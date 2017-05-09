@@ -16,6 +16,9 @@
 
 #include <ngl/AABB.h>
 
+//If you see this delete it and talk to Ben.
+std::vector<std::vector<ngl::Vec3>> faces;
+
 //This should be the same as the size of the map, for now.
 const ngl::Vec2 waterDimensions (20.0f, 20.0f);
 
@@ -1266,6 +1269,17 @@ void Scene::draw()
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
     }*/
 
+    m_transform.reset();
+    m_transform.setScale(0.1,0.1,0.1);
+    slib->use("colour");
+    slib->setRegisteredUniform("colour", ngl::Vec4(1.0,0.0,0.0,1.0));
+    for(auto &row : faces)
+        for(auto &vec : row)
+        {
+            m_transform.setPosition(vec);
+            drawAsset("debugSphere", "", "");
+        }
+
     /*slib->use("colour");
     for(auto &p : m_debugPoints)
         p.m_w = 1.0;
@@ -2373,18 +2387,32 @@ GLuint Scene::constructTerrain()
 {
     std::cout << "constructTerrain start\n";
 
-    std::vector<std::vector<ngl::Vec3>> faces;
     std::vector<std::vector<ngl::Vec3>> facenorms;
+
+    faces.assign(m_grid.getW() + 2, std::vector<ngl::Vec3>() );
+    for(int j = 0; j < m_grid.getH(); ++j)
+        faces[0].push_back(ngl::Vec3(0, -16.0f, j));
+    for(int j = 0; j < m_grid.getH(); ++j)
+        faces[m_grid.getW() + 1].push_back(ngl::Vec3(m_grid.getW() - 1, -16.0f, j));
+
 
     //Face centers to start.
     for(int i = 0; i < m_grid.getW(); ++i)
     {
-        faces.push_back( std::vector<ngl::Vec3>() );
+        int index = i + 1;
         for(int j = 0; j < m_grid.getH(); ++j)
         {
             float height = m_grid.getTileHeight(i, j);
             ngl::Vec3 face (i, height, j);
-            faces[i].push_back(face);
+            ngl::Vec3 boundary (i, -16.0f, j);
+
+            if(j == 0)
+                faces[index].push_back(boundary);
+
+            faces[index].push_back(face);
+
+            if(j == m_grid.getH() - 1)
+                faces[index].push_back(boundary);
         }
     }
 
