@@ -15,8 +15,10 @@
 #include <SDL.h>
 
 /// \file Character.hpp
-/// \brief The character refers to the grid for pathfinding and keeps track of a target
-/// for pathfinding. It is responsible for updating itself.
+/// \brief Has multiple states for actions, responsible for updating itself
+
+/// \enum State
+/// \brief The State enum, used for stack of states that are handled internally in a switch statment
 
 enum State
 {
@@ -41,6 +43,9 @@ enum State
 	IDLE
 };
 
+/// \enum CharInventory
+/// \brief The CharInventory enum, used to define what the character is holding
+///
 enum class CharInventory
 {
 	WOOD,
@@ -69,6 +74,10 @@ public:
 	/// \brief setState, creates state stack for the character to execute
 	///
 	void setState(int _target_id);
+	///
+	/// \brief setForageState, sets character for foraging instead of chopping
+	///
+	void setForageState() {m_forage = true; softResetCharacter();}
 	///
 	/// \brief isBaddie, checks if an empty square has been selected or a enemy
 	///
@@ -210,6 +219,10 @@ private:
 	///
 	bool m_sleeping;
 	///
+	/// \brief m_forage, checks if character is wanting to forage
+	///
+	bool m_forage;
+	///
 	/// \brief m_world_inventory, inventory in store houses around the map
 	///
 	Inventory *m_world_inventory;
@@ -286,6 +299,13 @@ private:
 	///
 	TileType m_building_type;
 	///
+	/// \brief randomIdlePos, find random position within a radius
+	/// \param _idle_pos, central position for idle walking
+	/// \param _radius, radius to find position in
+	/// \return whether position was found
+	///
+	bool randomIdlePos(ngl::Vec2 _idle_pos, int _radius);
+	///
 	/// \brief findNearestStorage, finds a storage house close to the character and sets it as the target
 	/// \return a boolean determining whether a storage house was found
 	///
@@ -301,23 +321,12 @@ private:
 	///
 	bool findNearestFishingTile();
 	///
-	/// \brief findNearestTree, find a tree close to the character for foraging
-	/// \return a boolean determining whether a tree tile was found
-	///
-	bool findNearestTree();
-	///
 	/// \brief waterFloodfill, uses a flood fill algorithm to find the edges of a body of water
 	/// \param _coord, the current tile's coordinate
 	/// \param _edges, a vector of tile id's that are the edge of the water
 	/// \param _water, a vector of tile id's that are water tiles
 	///
 	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
-	///
-	/// \brief treeFloodfill, finds a nearby tree using a flood fill algorithm
-	/// \param _coord, the current tile's coordinate
-	/// \param _found, when a tree is found then the flood fill is exited
-	///
-	void treeFloodfill(ngl::Vec2 _coord, bool &_found, std::vector<ngl::Vec2> &_found_coords);
 	///
 	/// \brief distanceSort, sorts a vector based on the squared distance from a character
 	/// \param io_left, the index of the first element in the sub-section of the vector
@@ -338,10 +347,14 @@ private:
 	///
 	bool findFirstPath(std::vector<ngl::Vec2> _vector);
 	///
-	/// \brief resetCharacter, clears a characters stack and resets their speed, used when changing from
+	/// \brief softResetCharacter, clears a characters stack and resets their speed, used when changing from
 	/// a character's idle state where the character's speed is reduced
 	///
-	void resetCharacter();
+	void softResetCharacter();
+	///
+	/// \brief hardResetCharacter, does the same as the softResetCharacter except it also turns off the foraging flag
+	///
+	void hardResetCharacter();
 	///
 	/// \brief completedAction, when a state has been completed it is removed from the stack and the
 	/// internal timer is reset

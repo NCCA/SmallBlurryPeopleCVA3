@@ -1,25 +1,17 @@
 #include "GridTile.hpp"
 #include "Prefs.hpp"
-#include <iostream>
+#include "ngl/Random.h"
 
-const float perm[] = {-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4};
-
-GridTile::GridTile(int _id):
-  m_id(_id)
+GridTile::GridTile(int _id)
 {
-  //generate random tree positions for the tile
+  auto rand = ngl::Random::instance();
   int num_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
+  rand->setSeed(_id);
   for (int i = 0; i < num_trees; i++)
   {
-    _id *= _id;
-    _id += i * 5;
-
-    int x = (_id + i * 5)%9;
-    int y = (_id + i * 13)%9;
-
-    ngl::Vec2 pos(perm[x], perm[y]);
-
-    m_tree_positions.push_back(pos);
+    ngl::Vec2 rand_pos = rand->getRandomVec2();
+    rand_pos *= 0.4;
+    m_tree_positions.push_back(rand_pos);
   }
 }
 
@@ -57,11 +49,6 @@ int GridTile::getNumTrees()
   return m_trees;
 }
 
-int GridTile::getID()
-{
-  return m_id;
-}
-
 void GridTile::setNumTrees(int _num_trees)
 {
   m_trees = _num_trees;
@@ -87,7 +74,6 @@ int GridTile::cutTrees(int _goal_amount)
 void GridTile::setBuildState(float _value, TileType _type)
 {
   m_build_state += _value;
-  std::cout<<"Building Done: "<<(m_build_state * 100)<<"%"<<std::endl;
 
   if (_type == TileType::HOUSE)
   {
@@ -107,23 +93,6 @@ void GridTile::setBuildState(float _value, TileType _type)
     else if(m_build_state >= 1.0)
       m_type = TileType::STOREHOUSE;
   }
-}
-
-
-
-void GridTile::addOccupant()
-{
-  m_occupants += 1;
-}
-
-void GridTile::removeOccupant()
-{
-  m_occupants -= 1;
-}
-
-int GridTile::getOccupants()
-{
-  return m_occupants;
 }
 
 std::vector<ngl::Vec2> GridTile::getTreePositions()

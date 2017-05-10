@@ -58,14 +58,12 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   PyRun_SimpleString(m_script.c_str());
 
   //extract width and height and map data
-  m_w = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_width"));
-  m_h = PyInt_AsLong(PyDict_GetItemString(py_dict, "map_height"));
+  m_w = _w;
+  m_h = _h;
   m_mountain_height = PyInt_AsLong(PyDict_GetItemString(py_dict, "mountain_height"));
   m_water_level = PyInt_AsLong(PyDict_GetItemString(py_dict, "water_height"));
   py_map = PyDict_GetItemString(py_dict, "map_data");
-  //std::cout << "mountain, water: " << m_mountain_height << ", " << m_water_level << std::endl;
-  //create an empty grid with each tile's id set
-
+ //create an empty grid with each tile's id set
 
   for (int i = 0; i < m_w * m_h; i++)
   {
@@ -90,29 +88,6 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   Py_Finalize();
 }
 
-std::vector<ngl::Vec3> Grid::getTriangles()
-{
-  //initialize vector of points for triangles
-  std::vector<ngl::Vec3> tris;
-  for (int y = 0; y < m_h; y++)
-  {
-    for (int x = 0; x < m_w; x++)
-    {
-      ngl::Vec3 v1(x, 0, y);
-      ngl::Vec3 v2(x+1, 0, y);
-      ngl::Vec3 v3(x, 0, y+1);
-      ngl::Vec3 v4(x+1, 0, y+1);
-      tris.push_back(v3);
-      tris.push_back(v2);
-      tris.push_back(v1);
-      tris.push_back(v3);
-      tris.push_back(v4);
-      tris.push_back(v2);
-    }
-  }
-  return tris;
-}
-
 ngl::Vec2 Grid::idToCoord(int _tileId)
 {
   int x = _tileId % m_w;
@@ -132,7 +107,7 @@ void Grid::loadScript(std::string _script_path)
   if (!script_file.is_open())
   {
     //if the file is not found, an empty string is returned
-    std::cerr << "file not found " << _script_path << std::endl;
+    std::cerr << "error opening script: " << _script_path << std::endl;
     m_script =  std::string();
   }
   m_script = std::string((std::istreambuf_iterator<char>(script_file)),
@@ -161,27 +136,32 @@ int Grid::getGlobalWaterLevel()
 
 float Grid::getInterpolatedHeight(float _x, float _y)
 {
+  //clamping the input values to 0 and their respective limits
+  //handles edge cases for the map
   float x0 = Utility::clamp(std::round(_x), 0, m_w-1);
   float x1 = Utility::clamp(x0 + 1, 0, m_w);
   float y0 = Utility::clamp(std::round(_y), 0, m_h-1);
   float y1 = Utility::clamp(y0 + 1, 0, m_h);
 
-
+  //retrieving the 4 height values to interpolate between
   float h0 = m_tiles[x0 + m_w * y0].getHeight();
   float h1 = m_tiles[x1 + m_w * y0].getHeight();
   float h2 = m_tiles[x0 + m_w * y1].getHeight();
   float h3 = m_tiles[x1 + m_w * y1].getHeight();
 
+  //interpolate in the x direction
   float h4 = h0 * (x1 - _x) + h1 * (_x - x0);
   float h5 = h2 * (x1 - _x) + h3 * (_x - x0);
+
+  //interpolate in the y direction
   float h6 = h4 * (y1 - _y) + h5 * (_y - y0);
 
-  return h0;
+  return h6;
 }
 
 TileType Grid::getTileType(ngl::Vec2 _coord)
 {
-	return m_tiles[_coord.m_x + m_w * _coord.m_y].getType();
+  return m_tiles[_coord.m_x + m_w * _coord.m_y].getType();
 }
 
 TileType Grid::getTileType(int _x, int _y)
@@ -202,11 +182,6 @@ int Grid::getTileHeight(int _x, int _y)
 int Grid::getTileHeight(int _id)
 {
   return m_tiles[_id].getHeight();
-}
-
-int Grid::getTileId(int _x, int _y)
-{
-  return _x + m_w * _y;
 }
 
 bool Grid::isTileTraversable(int _x, int _y)
@@ -276,35 +251,6 @@ void Grid::resetHasChanges()
   m_has_changes = false;
 }
 
-void Grid::addOccupant(int _id)
-{
-  m_tiles[_id].addOccupant();
-}
-
-void Grid::addOccupant(int _x, int _y)
-{
-  m_tiles[_x + m_w * _y].addOccupant();
-}
-
-void Grid::removeOccupant(int _id)
-{
-  m_tiles[_id].removeOccupant();
-}
-
-void Grid::removeOccupant(int _x, int _y)
-{
-  m_tiles[_x + m_w * _y].removeOccupant();
-}
-
-int Grid::getOccupants(int _id)
-{
-  return m_tiles[_id].getOccupants();
-}
-
-int Grid::getOccupants(int _x, int _y)
-{
-  return m_tiles[_x + m_w * _y].getOccupants();
-}
 
 std::vector<ngl::Vec2> Grid::getTreePositions(int _x, int _y)
 {
