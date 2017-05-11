@@ -226,7 +226,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     //Number of clouds.
-    int num_clouds = 1;//m_grid.getW() * m_grid.getH() / 200;
+    int num_clouds = m_grid.getW() * m_grid.getH() / 400;
     //Number of particles per cloud.
     int num_cloud_particles = 32;
 
@@ -279,34 +279,34 @@ void Scene::initMeshInstances()
             int index = static_cast<int>( m_grid.getTileType(i, j) );
             if (index == static_cast<int>(TileType::TREES))
             {
-              //get num trees
-              int num_trees = m_grid.getNumTrees(i, j);
-              //get position vector
-              std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
-              //for i in trees:
+                //get num trees
+                int num_trees = m_grid.getNumTrees(i, j);
+                //get position vector
+                std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
+                //for i in trees:
                 for (int n = 0; n < max_trees; n++)
                 {
-                  if (n < num_trees)
-                  {
-                    //push back tree
-                    ngl::Vec2 p = positions[n];
-                    m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                          i+0.5+p[0],
-                                                          m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                          j+0.5+p[1]
-                                                          ));
-                  }
-                  else
-                  {
-                    ngl::Vec2 p = positions[n];
-                    m_meshPositions.at( static_cast<int>(TileType::STUMPS)).push_back(ngl::Vec3(
-                                                        i+0.5+p[0],
-                                                        m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                        j+0.5+p[1]
-                                                        ));
-                  }
-                  //increment meshCount
-                  meshCount++;
+                    if (n < num_trees)
+                    {
+                        //push back tree
+                        ngl::Vec2 p = positions[n];
+                        m_meshPositions.at( index ).push_back(ngl::Vec3(
+                                                                  i+0.5+p[0],
+                                                              m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                                j+0.5+p[1]
+                                ));
+                    }
+                    else
+                    {
+                        ngl::Vec2 p = positions[n];
+                        m_meshPositions.at( static_cast<int>(TileType::STUMPS)).push_back(ngl::Vec3(
+                                                                                              i+0.5+p[0],
+                                                                                          m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
+                                j+0.5+p[1]
+                                ));
+                    }
+                    //increment meshCount
+                    meshCount++;
                 }
             }
             else{
@@ -533,39 +533,39 @@ void Scene::update()
 
         for(int i=0; i<m_characters.size(); i++)
         {
-          if (m_characters[i].getHealth() <= 0.0)
-          {
-              std::string message = m_characters[i].getName() + " has died!";
-              ngl::Vec2 pos = {m_characters[i].getPos()[0], m_characters[i].getPos()[2]};
-              Gui::instance()->notify(message, pos );
-              //check if character has health, if it doesn't remove the character
-              if (m_active_char_id == m_characters[i].getID())
-              {
-                  m_active_char_id = -1;
-                  Gui::instance()->updateActiveCharacter();
-              }
-              //ID's start from 1 so negate 1 to get index in vector m_characters
-              int index = (m_characters[i].getID() - 1);
-              //add name back to available list
-              m_file_names.push_back(m_characters[i].getName());
-              //add position to tombstone positions
-              ngl::Vec3 stone_pos(m_characters[i].getPos());
-              m_tombstones.push_back(stone_pos);
-              //remove character from vector
-              m_characters.erase(m_characters.begin() + i);
-              for(auto &baddie: m_baddies)
-                baddie.addScale(0.5f);
-          }
-          else
-          {
-            m_characters[i].update();
-            if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+            if (m_characters[i].getHealth() <= 0.0)
             {
-                //check if character is sleeping, if it is, dont make it the active character
-                m_active_char_id = -1;
-                Gui::instance()->updateActiveCharacter();
+                std::string message = m_characters[i].getName() + " has died!";
+                ngl::Vec2 pos = {m_characters[i].getPos()[0], m_characters[i].getPos()[2]};
+                Gui::instance()->notify(message, pos );
+                //check if character has health, if it doesn't remove the character
+                if (m_active_char_id == m_characters[i].getID())
+                {
+                    m_active_char_id = -1;
+                    Gui::instance()->updateActiveCharacter();
+                }
+                //ID's start from 1 so negate 1 to get index in vector m_characters
+                int index = (m_characters[i].getID() - 1);
+                //add name back to available list
+                m_file_names.push_back(m_characters[i].getName());
+                //add position to tombstone positions
+                ngl::Vec3 stone_pos(m_characters[i].getPos());
+                m_tombstones.push_back(stone_pos);
+                //remove character from vector
+                m_characters.erase(m_characters.begin() + i);
+                for(auto &baddie: m_baddies)
+                    baddie.addScale(0.5f);
             }
-          }
+            else
+            {
+                m_characters[i].update();
+                if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+                {
+                    //check if character is sleeping, if it is, dont make it the active character
+                    m_active_char_id = -1;
+                    Gui::instance()->updateActiveCharacter();
+                }
+            }
         }
 
         for(int i=0; i<m_baddies.size(); i++)
@@ -574,9 +574,9 @@ void Scene::update()
                 m_baddies[i].update();
             else
             {
-              ngl::Vec2 pos = ngl::Vec2(m_baddies[i].getPos()[0], m_baddies[i].getPos()[2]);
-              Gui::instance()->notify("Enemy defeated", pos);
-              m_baddies.erase(m_baddies.begin() + i);
+                ngl::Vec2 pos = ngl::Vec2(m_baddies[i].getPos()[0], m_baddies[i].getPos()[2]);
+                Gui::instance()->notify("Enemy defeated", pos);
+                m_baddies.erase(m_baddies.begin() + i);
             }
         }
 
@@ -1028,9 +1028,11 @@ void Scene::draw()
                                    !m_mouse_trans_active and
                                    !m_mouse_rot_active and
                                    !g->mousePos( Utility::getMousePos() ) and
-                                   mouseTerrainPos.m_x != 0.0f and
-                mouseTerrainPos.m_z != 0.0f
-                );
+                                   mouseTerrainPos.m_x > 0.0f and
+                                   mouseTerrainPos.m_x < m_grid.getW() and
+                                   mouseTerrainPos.m_z > 0.0f and
+                                   mouseTerrainPos.m_z < m_grid.getH()
+                                   );
 
         if(shouldDrawMouseBox)
         {
@@ -1300,7 +1302,7 @@ void Scene::draw()
     for(auto &row : faces)
         for(auto &vec : row)
         {
-            m_transform.setPosition(vec);
+            m_transform.setPosition(vec + ngl::Vec3(0.5f, 0.0f, 0.5f));
             drawAsset("debugSphere", "", "");
         }
 
@@ -1428,37 +1430,37 @@ void Scene::drawMeshes()
 
     for(Character &character : m_characters)
     {
-      if(character.isSleeping() == false)
-      {
-        slib->use("colour");
-        m_transform.reset();
-        ngl::Vec3 pos = character.getPos();
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, character.getRot(), 0);
-        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset("person", "", "");
-      }
+        if(character.isSleeping() == false)
+        {
+            slib->use("colour");
+            m_transform.reset();
+            ngl::Vec3 pos = character.getPos();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, character.getRot(), 0);
+            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+            drawAsset("person", "", "");
+        }
     }
 
     for(Baddie &baddie : m_baddies)
     {
         if(baddie.getHealth() > 0.0)
         {
-          slib->use("diffuse");
-          m_transform.reset();
-          ngl::Vec3 pos = baddie.getPos();
-          m_transform.setPosition(pos);
-          m_transform.setRotation(0, baddie.getRot(), 0);
-          m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
-          drawAsset("person", "baddie_d", "diffuse");
+            slib->use("diffuse");
+            m_transform.reset();
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
+            drawAsset("person", "baddie_d", "diffuse");
         }
     }
 
     for(auto &stone : m_tombstones)
     {
-      m_transform.reset();
-      m_transform.setPosition(stone);
-      drawAsset("tombstone", "tombstone_d", "diffuse");
+        m_transform.reset();
+        m_transform.setPosition(stone);
+        drawAsset("tombstone", "tombstone_d", "diffuse");
     }
 }
 
@@ -1525,25 +1527,25 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(Baddie &baddie : m_baddies)
     {
-      if(baddie.getHealth() > 0.0)
-      {
-        ngl::Vec3 pos = baddie.getPos();
-        m_transform.reset();
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, baddie.getRot(), 0);
-        m_transform.setScale(2.0f, 2.0f, 2.0f);
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        drawAsset("person", "", "");
-      }
+        if(baddie.getHealth() > 0.0)
+        {
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.reset();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(2.0f, 2.0f, 2.0f);
+            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+            drawAsset("person", "", "");
+        }
     }
 
     for(auto &stone : m_tombstones)
     {
-      //slib->use("diffuse");
-      m_transform.reset();
-      m_transform.setPosition(stone);
-      slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-      drawAsset( "tombstone", "", "");
+        //slib->use("diffuse");
+        m_transform.reset();
+        m_transform.setPosition(stone);
+        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
+        drawAsset( "tombstone", "", "");
     }
 }
 
@@ -1787,19 +1789,19 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     for(Baddie &baddie : m_baddies)
     {
-      if(baddie.getHealth() > 0.0)
-      {
-        ngl::Vec3 pos = baddie.getPos();
-        m_transform.reset();
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, baddie.getRot(), 0);
-        m_transform.setScale(2.0f, 2.0f, 2.0f);
-        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+        if(baddie.getHealth() > 0.0)
+        {
+            ngl::Vec3 pos = baddie.getPos();
+            m_transform.reset();
+            m_transform.setPosition(pos);
+            m_transform.setRotation(0, baddie.getRot(), 0);
+            m_transform.setScale(2.0f, 2.0f, 2.0f);
+            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-        ngl::Obj * k = store->getModel( "person" );
-        loadMatricesToShader( m_transform.getMatrix(), mvp );
-        k->draw();
-      }
+            ngl::Obj * k = store->getModel( "person" );
+            loadMatricesToShader( m_transform.getMatrix(), mvp );
+            k->draw();
+        }
     }
 
     for(auto &stone : m_tombstones)
@@ -2430,32 +2432,32 @@ GLuint Scene::constructTerrain()
 
     //Create edges.
     //x < 0
-    /*faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getH(); ++i)
-        faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));*/
+        faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));
+    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[0].push_back(ngl::Vec3(-1,-4.0f,i));
+    //x > end
+    faces.insert(faces.end(), std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),m_grid.getTileHeight(m_grid.getW() - 1,i),i));
+    faces.insert(faces.end(), std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),-4.0f,i));
+    //y < 0
+    for(int i = 0; i < m_grid.getW(); ++i)
+        faces[i].insert(faces[i].begin(), ngl::Vec3(i, m_grid.getTileHeight(i,0), -1.0f));
+    for(int i = 0; i < m_grid.getW(); ++i)
+        faces[i].insert(faces[i].begin(), ngl::Vec3(i, -4.0f, -1.0f));
+    //y > end
+    for(int i = 0; i < m_grid.getW(); ++i)
+        faces[i].push_back(ngl::Vec3(i, m_grid.getTileHeight(i,m_grid.getH() - 1), m_grid.getH()));
+    for(int i = 0; i < m_grid.getW(); ++i)
+        faces[i].push_back(ngl::Vec3(i, -4.0f, m_grid.getH()));
 
-    //Smooth
-    /*const int iterations = 128;
-    const float hardness = 0.02f;
-    for(int it = 0; it < iterations; ++it)
-    {
-        for(int i = 1; i < m_grid.getW() - 1; ++i)
-        {
-            for(int j = 1; j < m_grid.getH() - 1; ++j)
-            {
-                float ay = 0.0f;
-                for(int y = -1; y <= 1; ++y)
-                    for(int x = -1; x <= 1; ++x)
-                        ay += faces[i + x][j + y].m_y;
-
-                ay /= 9.0f;
-
-                float dy = faces[i][j].m_y - ay;
-
-                faces[i][j].m_y -= hardness * dy;
-            }
-        }
-    }*/
+    //Do corners
+    //faces[0].insert(faces[0].begin)
 
     std::cout << "Calculating terrain normals\n";
     //Calculate face normals
@@ -2533,6 +2535,8 @@ GLuint Scene::constructTerrain()
             terrainFace f = terrainVerticesToFace(
                         i,
                         j,
+                        faces[i][j].m_x,
+                        faces[i][j].m_z,
                         faces,
                         facenorms
                         );
@@ -2587,6 +2591,8 @@ GLuint Scene::constructTerrain()
 
 Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
                                                  const int _y,
+                                                 const float _worldX,
+                                                 const float _worldY,
                                                  const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                                  const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                                  )
@@ -2596,15 +2602,11 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     //  0---1
     terrainFace face;
 
-    //Generate xy positions
-    face.m_verts[0].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y - 1.0f,   1.0f);
-    face.m_verts[1].m_pos = ngl::Vec4(_x,       0.0f,  _y - 1.0f,   1.0f);
-    face.m_verts[2].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y,          1.0f);
-    face.m_verts[3].m_pos = ngl::Vec4(_x,       0.0f,  _y,          1.0f);
-
-    //Due to the edges of the terrain, this offset must be applied to maintain the mapping from indices -> coordinates.
-    /*for(auto &v : face.m_verts)
-        v.m_pos -= ngl::Vec4(0.5f, 0.0f, 0.5f, 0.0f);*/
+    //Generate xz positions
+    face.m_verts[0].m_pos = ngl::Vec4(_worldX - 0.5f,0.0f,  _worldY - 0.5f,   1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_worldX + 0.5f,0.0f,  _worldY - 0.5f,   1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_worldX - 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_worldX + 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
 
     std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
     std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
@@ -2624,6 +2626,9 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     return face;
 }
 
+// We give this function an x and y coordinate to start from, and a desired direction.
+// The function averages attributes from neighbouring faces in the desired directions, if it is able.
+// For example, starting at 0,0 (bottom left) with desired direction 1,-1 would explore only 1,0, since 0,-1 and 1,-1 do not exist.
 std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
                                                            const int _y,
                                                            const int _dirX,
@@ -2637,9 +2642,9 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
+    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) < _facePositions.size();
     //Can we move in the vertical direction?
-    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
+    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) < _facePositions[_y].size();
 
     if(horizontal)
     {
@@ -2664,8 +2669,13 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     normal /= static_cast<float>(count);
     normal.normalize();
 
+    yCoord /= static_cast<float>(count);
+
+    if(yCoord > 5)
+        std::cout << "over " << _x << ", " << _y << " : " << yCoord << '\n';
+
     return std::make_pair(
-                yCoord / static_cast<float>(count),
+                yCoord,
                 normal
                 );
 }

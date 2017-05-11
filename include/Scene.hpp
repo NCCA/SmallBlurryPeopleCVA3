@@ -323,7 +323,7 @@ private:
     };
 
     terrainFace terrainVerticesToFace(const int _x,
-                                      const int _y,
+                                      const int _y, const float _worldX, const float _worldY,
                                       const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
 
