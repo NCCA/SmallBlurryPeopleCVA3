@@ -18,6 +18,8 @@ uniform sampler2D shadowDepths[NUM_CASCADES];
 uniform sampler2D linearDepth;
 uniform sampler2D rayDir;
 
+uniform vec2 gridDimensions;
+
 layout (location = 0) out vec4 fragColour;
 
 struct light
@@ -254,7 +256,7 @@ void main()
 
   mul = max(mul, 0.35 / (sunmul + moonmul + 1.0));
   fragColour.xyz *= mul;
-  fragColour.xyz *= directionalLightCol; 
+  fragColour.xyz *= directionalLightCol;
 
   for(int i = 0; i < lbufLen; ++i)
   {
@@ -267,23 +269,28 @@ void main()
   fragColour.xyz = mix(fragColour.xyz, 0.8 * directionalLightCol * (clamp(sunInts, 0.0, 1.0) + clamp(moonInts, 0.0, 1.0)), a);
   //fragColour.xyz = vec3(texture(linearDepth, UV).r);
 
-  if(camPos.y < waterLevel)
-    fragColour.xyz *= vec3(0.1, 0.2, 0.35) * directionalLightCol;
+  if(fragPos.x > 0.0 && fragPos.x < gridDimensions.x &&
+     fragPos.z > 0.0 && fragPos.z < gridDimensions.y
+     )
+  {
+    if(camPos.y < waterLevel)
+      fragColour.xyz *= vec3(0.1, 0.2, 0.35) * directionalLightCol;
 
-  float d = clamp(waterLevel - fragPos.y, 0.0, 1.0);
-  fragColour.xyz = mix(fragColour.xyz, fragColour.xyz * directionalLightCol * vec3(0.1, 0.2, 0.35), d);
+    float d = clamp(waterLevel - fragPos.y, 0.0, 1.0);
+    fragColour.xyz = mix(fragColour.xyz, fragColour.xyz * directionalLightCol * vec3(0.1, 0.2, 0.35), d);
 
-  float wigglyLightMul = (1.1 - d) * (d * d);
-  vec3 wiggles = vec3(1.0) - abs(cnoise(fragPos.xyz * 8.0 + vec3(0.0, iGlobalTime * 0.25, 0.0)));
-  wiggles = pow(wiggles, vec3(4.0));
-  wiggles = clamp(wiggles, 0.0, 1.0);
-  fragColour.xyz += wigglyLightMul * wiggles * directionalLightCol;
+    float wigglyLightMul = (1.1 - d) * (d * d);
+    vec3 wiggles = vec3(1.0) - abs(cnoise(fragPos.xyz * 8.0 + vec3(0.0, iGlobalTime * 0.25, 0.0)));
+    wiggles = pow(wiggles, vec3(4.0));
+    wiggles = max(wiggles, 0.0);
+    fragColour.xyz += wigglyLightMul * wiggles * directionalLightCol;
+  }
 
 #if shadowbuffer == 1
   fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
 
-  //fragColour.xyz = vec3(fragDepth / 16.0);
+  fragColour.xyz = vec3(fragPos.xyz) / 16.0;
 
   fragColour.a = 1.0;
 }

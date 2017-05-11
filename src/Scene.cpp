@@ -940,6 +940,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+        slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
 
         slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
@@ -1061,6 +1062,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+        slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
 
         //Draw god rays here.
         //To-do: Add preference bool to control drawing of god rays.
@@ -2430,34 +2432,64 @@ GLuint Scene::constructTerrain()
         }
     }
 
+    std::cout << "Doing edges...\n";
     //Create edges.
     //x < 0
-    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    /*faces.insert(faces.begin(), std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getH(); ++i)
         faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));
-    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
-    for(int i = 0; i < m_grid.getH(); ++i)
-        faces[0].push_back(ngl::Vec3(-1,-4.0f,i));
     //x > end
-    faces.insert(faces.end(), std::vector<ngl::Vec3>());
+    faces.push_back(std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getH(); ++i)
-        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),m_grid.getTileHeight(m_grid.getW() - 1,i),i));
-    faces.insert(faces.end(), std::vector<ngl::Vec3>());
-    for(int i = 0; i < m_grid.getH(); ++i)
-        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),-4.0f,i));
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),m_grid.getTileHeight(m_grid.getW() - 1,i),i));*/
     //y < 0
     for(int i = 0; i < m_grid.getW(); ++i)
         faces[i].insert(faces[i].begin(), ngl::Vec3(i, m_grid.getTileHeight(i,0), -1.0f));
+    //y > end
+    for(int i = 0; i < m_grid.getW(); ++i)
+        faces[i].push_back(ngl::Vec3(i, m_grid.getTileHeight(i,m_grid.getH() - 1), m_grid.getH()));
+
+    //x < 0
+    /*faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[0].push_back(ngl::Vec3(-1,-4.0f,i));
+    //x > end
+    faces.push_back(std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),-4.0f,i));*/
+    //y < 0
     for(int i = 0; i < m_grid.getW(); ++i)
         faces[i].insert(faces[i].begin(), ngl::Vec3(i, -4.0f, -1.0f));
     //y > end
     for(int i = 0; i < m_grid.getW(); ++i)
-        faces[i].push_back(ngl::Vec3(i, m_grid.getTileHeight(i,m_grid.getH() - 1), m_grid.getH()));
-    for(int i = 0; i < m_grid.getW(); ++i)
         faces[i].push_back(ngl::Vec3(i, -4.0f, m_grid.getH()));
 
-    //Do corners
-    //faces[0].insert(faces[0].begin)
+    std::cout << "Filling corners...\n";
+    //Fill corners
+    //Get max vector length.
+    int max = 0;
+    for(auto &vec : faces)
+        if(vec.size() > max)
+            max = vec.size();
+    std::cout << "max is " << max << '\n';
+    //Run horizontally and duplicate entries.
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        std::cout << "size " << faces[i].size() << '\n';
+        int diff = max - faces[i].size();
+        int half = diff / 2;
+        for(int j = 0; j < half; ++j)
+            faces[i].insert(
+                        faces[i].begin(),
+                        faces[i][0]/* + ngl::Vec3(0.0f, 0.0f, -1.0f)*/
+                        );
+        for(int j = 0; j < diff - half; ++j)
+        {
+            faces[i].push_back(
+                        faces[i].back()/* + ngl::Vec3(0.0f, 0.0f, 1.0f)*/
+                        );
+        }
+    }
 
     std::cout << "Calculating terrain normals\n";
     //Calculate face normals
@@ -2474,9 +2506,6 @@ GLuint Scene::constructTerrain()
             bool top = j < faces[i].size() - 1;
 
             int count = 0;
-
-            std::cout << "i,j = " << i << "," << j << " / w,h = " << faces.size() << "," << faces[i].size() << '\n';
-
             //->
             if(top and right)
             {
@@ -2582,6 +2611,11 @@ GLuint Scene::constructTerrain()
     m_terrainVAOSize = trimesh.size();
 
     m_height_tracer = TerrainHeightTracer(trimesh);
+
+    std::cout << "Size :\n";
+    for(auto &f : faces)
+        std::cout << f.size() << '\n';
+
     return createVAO(
                 trimesh,
                 normesh,
@@ -2608,15 +2642,15 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     face.m_verts[2].m_pos = ngl::Vec4(_worldX - 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
     face.m_verts[3].m_pos = ngl::Vec4(_worldX + 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
 
-    std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
 
-    face.m_verts[0].m_pos.m_y = v0.first;
-    face.m_verts[1].m_pos.m_y = v1.first;
-    face.m_verts[2].m_pos.m_y = v2.first;
-    face.m_verts[3].m_pos.m_y = v3.first;
+    face.m_verts[0].m_pos = v0.first;
+    face.m_verts[1].m_pos = v1.first;
+    face.m_verts[2].m_pos = v2.first;
+    face.m_verts[3].m_pos = v3.first;
 
     face.m_verts[0].m_norm = v0.second;
     face.m_verts[1].m_norm = v1.second;
@@ -2629,15 +2663,15 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
 // We give this function an x and y coordinate to start from, and a desired direction.
 // The function averages attributes from neighbouring faces in the desired directions, if it is able.
 // For example, starting at 0,0 (bottom left) with desired direction 1,-1 would explore only 1,0, since 0,-1 and 1,-1 do not exist.
-std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
-                                                           const int _y,
-                                                           const int _dirX,
-                                                           const int _dirY,
-                                                           const std::vector<std::vector<ngl::Vec3>> &_facePositions,
-                                                           const std::vector<std::vector<ngl::Vec3>> &_faceNormals
-                                                           )
+std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
+                                                               const int _y,
+                                                               const int _dirX,
+                                                               const int _dirY,
+                                                               const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                               const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                               )
 {
-    float yCoord = _facePositions[_x][_y].m_y;
+    ngl::Vec4 position = _facePositions[_x][_y];
     ngl::Vec3 normal = _faceNormals[_x][_y];
     size_t count = 1;
 
@@ -2648,19 +2682,19 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
 
     if(horizontal)
     {
-        yCoord += _facePositions[_x + _dirX][_y].m_y;
+        position += _facePositions[_x + _dirX][_y];
         normal += _faceNormals[_x + _dirX][_y];
         count++;
     }
     if(vertical)
     {
-        yCoord += _facePositions[_x][_y + _dirY].m_y;
+        position += _facePositions[_x][_y + _dirY];
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
     if(vertical and horizontal)
     {
-        yCoord += _facePositions[_x + _dirX][_y + _dirY].m_y;
+        position += _facePositions[_x + _dirX][_y + _dirY];
         normal += _faceNormals[_x + _dirX][_y + _dirY];
         count++;
     }
@@ -2669,13 +2703,12 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     normal /= static_cast<float>(count);
     normal.normalize();
 
-    yCoord /= static_cast<float>(count);
-
-    if(yCoord > 5)
-        std::cout << "over " << _x << ", " << _y << " : " << yCoord << '\n';
+    position /= static_cast<float>(count);
+    position.m_w = 1.0f;
+    //position.m_y = _facePositions[_x][_y].m_y;
 
     return std::make_pair(
-                yCoord,
+                position,
                 normal
                 );
 }

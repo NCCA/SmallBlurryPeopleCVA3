@@ -34,7 +34,7 @@ public:
   /// @param _new_h is the new height of the map
   /// @param _new_seed is the seed value for random number generation in the map script
   ///
-  void updateScript(std::string _script_path, int _new_w = 64, int _new_h = 64, int _new_seed = 8);
+  void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 8);
 
 
   void printTrees();

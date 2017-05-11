@@ -327,7 +327,7 @@ private:
                                       const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
 
-    std::pair<float, ngl::Vec3> generateTerrainFaceData(const int _x,
+    std::pair<ngl::Vec4, ngl::Vec3> generateTerrainFaceData(const int _x,
                                                         const int _y,
                                                         const int _dirX,
                                                         const int _dirY,
