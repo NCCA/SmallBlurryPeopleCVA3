@@ -6,8 +6,8 @@ import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import gameUtils.noise.noise as n
-import gameUtils.helperFunctions.helperFunctions as hf
+import gameUtils.noise as n
+import gameUtils.helperFunctions as hf
 
 #parameters from game
 map_width = width_in

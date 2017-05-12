@@ -1,46 +1,10 @@
-"""
-A user can write custom scripts for the game to use to generate maps. To do this they
-must define the 3 following variables:
-
-  map_data:       An array of integers that set the types of the map tiles in game.
-                  To allow the setting of specific types, a dictionary is passed from
-                  the c++ program that links strings with the tile type integers. The
-                  dictionary is called tileTypes and stoes the following strings:
-                    NONE
-                    TREES
-                    WATER
-                    MOUNTAINS
-                    HOUSE
-                    STOREHOUSE
-                  To set one of these values the following syntax is used:
-                    $map_data[x + map_width * y] = tileTypes["TREES"]
-
-  map_width:      The width of the map, set in the main program.
-                  This is set from the values in the main program and not passed back
-
-  map_height:     The height of the map, set in the main program.
-                  This is set from the values in the main program and not passed back
-
-
-A python module for producing fractal simple noise is also provided and can be imported
-using the following lines:
-  $import os
-  $cwd = os.getcwd()+ "/python/"
-  $import sys
-  $sys.path.append(cwd)
-  $import noise.noise as n
-The preamble is required because the module is stoeed as part of the game, which is not
-on the PYTHONPATH variable
-"""
-
 import random as rand
 import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import gameUtils.noise.noise as n
-import gameUtils.mapViewer.mapViewer as mv
-import gameUtils.helperFunctions.helperFunctions as hf
+import gameUtils.noise as n
+import gameUtils.helperFunctions as hf
 
 #parameters from game
 map_width = 100
@@ -118,7 +82,3 @@ spawn_point = (px, py+2)
 water_height = 90/20
 mountain_height = 170/20
 
-if "from_game" not in globals():
-  print "not from game"
-  viewer = mv.mapViewer(map_data, tileTypes, map_width, map_height)
-  viewer.display(displayType = "types")

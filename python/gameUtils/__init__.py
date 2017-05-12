@@ -1,1 +1,1 @@
-__all__ = ["noise", "mapViewer", "defaults"]
+__all__ = ["noise", "mapViewer", "helperFunctions"]
