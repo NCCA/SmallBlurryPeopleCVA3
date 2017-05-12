@@ -14,15 +14,15 @@ int main()
 {
   Prefs* prefs = Prefs::instance();
   prefs->init("preferences.conf");
-  prefs->printPrefs();
 
 
 
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
-
-    SDL_Rect rect = {100, 100, 1280, 720};
+    float w = prefs->getIntPref("X_RES");
+    float h = prefs->getIntPref("Y_RES");
+    SDL_Rect rect = {100, 100, w, h};
     //SDL_GetDisplayBounds(0, &rect);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

@@ -19,7 +19,6 @@ gen = n.fractalNoise(map_seed)
 #setting up variables that will be passed to the game
 
 map_data = [[tileTypes["NONE"], 0] for i in range(map_width * map_height)]
-print map_data[0]
 #setting up noise function values
 octaves = 8
 persistence = 0.4

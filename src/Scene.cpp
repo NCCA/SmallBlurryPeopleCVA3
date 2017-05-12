@@ -101,7 +101,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-    int m_char_num = m_prefs->getIntPref("NUMBER_OF_CHARACTERS");
 
     createCharacter();
     m_active_char_id = m_characters[0].getID();
@@ -228,7 +227,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     //Number of clouds.
-    int num_clouds = 1;//m_grid.getW() * m_grid.getH() / 200;
+    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
     //Number of particles per cloud.
     int num_cloud_particles = 32;
 
@@ -585,7 +584,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x += 0.01f;
+        m_sunAngle.m_x += m_prefs->getFloatPref("TIME_SCALE");
         if(m_sunAngle.m_x > 360.0f)
         {
             m_day++;

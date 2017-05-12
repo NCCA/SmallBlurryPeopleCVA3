@@ -244,7 +244,27 @@ public:
   ///
   ngl::Vec2 getSpawnPoint();
 
+  ///
+  /// \brief checkID checks that the id asked for is valid
+  /// \param _id the id to check
+  /// \return true if the id is valid
+  ///
+  bool checkID(int _id);
 
+  ///
+  /// \brief checkCoord checks that the coordinate asked for is valid
+  /// \param _x is the x coordinate
+  /// \param _y is the y coordinate
+  /// \return true if the coordinate is valid
+  ///
+  bool checkCoord(double _x, double _y);
+
+  ///
+  /// \brief checkCoord checks that the coordinate asked for is valid
+  /// \param _p the coordinate as an ngl vec2
+  /// \return true if the coordinate is valid
+  ///
+  bool checkCoord(ngl::Vec2 _p);
 
 private:
   ///
