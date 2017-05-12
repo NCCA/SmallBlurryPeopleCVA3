@@ -41,6 +41,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
     m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
+  Gui *gui = Gui::instance();
+  gui->init(this, _viewport, "button");
+
     ngl::Random * rnd = ngl::Random::instance();
     rnd->setSeed();
 
@@ -60,7 +63,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuseInstanced", "vertDeferredDataInstanced", "fragDeferredDiffuse");
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
-		createShader("diffuseCharacter", "vertDeferredData", "fragCharDiffuse");
+    createShader("diffuseCharacter", "vertDeferredData", "fragCharDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredDataChar", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
@@ -105,7 +108,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     createCharacter();
     m_active_char_id = m_characters[0].getID();
-    Gui::instance()->updateActiveCharacter();
+    gui->updateActiveCharacter();
     m_characters[0].setActive(true);
 
     initialiseFramebuffers();
@@ -147,7 +150,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
-		store->loadTexture("person_d", "person/person.tif");
+    store->loadTexture("person_d", "person/person.tif");
     store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
@@ -209,8 +212,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Gui *gui = Gui::instance();
-    gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
 
     initMeshInstances();
@@ -532,7 +533,7 @@ void Scene::update()
         m_mouseSelectionBoxPosition.update();
         m_mouseSelectionBoxScale.update();
 
-        for(int i=0; i<m_characters.size(); i++)
+        for(size_t i=0; i<m_characters.size(); i++)
         {
           if (m_characters[i].getHealth() <= 0.0)
           {
@@ -546,7 +547,7 @@ void Scene::update()
                   Gui::instance()->updateActiveCharacter();
               }
               //ID's start from 1 so negate 1 to get index in vector m_characters
-              int index = (m_characters[i].getID() - 1);
+              //int index = (m_characters[i].getID() - 1);
               //add name back to available list
               m_file_names.push_back(m_characters[i].getName());
               //add position to tombstone positions
@@ -819,7 +820,7 @@ void Scene::draw()
         m_transform.reset();
         glEnable(GL_DEPTH_TEST);
 
-        ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
+        //ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
 
         //---------------------------//
         // UTILITY ID DRAW //
@@ -1441,9 +1442,9 @@ void Scene::drawMeshes()
         m_transform.setPosition(pos);
         m_transform.setRotation(0, character.getRot(), 0);
 
-				slib->use("diffuseCharacter");
-				slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-				drawAsset("person", "person_d", "diffuseCharacter");
+        slib->use("diffuseCharacter");
+        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+        drawAsset("person", "person_d", "diffuseCharacter");
       }
     }
 
@@ -1457,8 +1458,8 @@ void Scene::drawMeshes()
           m_transform.setRotation(0, baddie.getRot(), 0);
           m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
 
-					slib->use("diffuse");
-					drawAsset("person", "baddie_d", "diffuse");
+          slib->use("diffuse");
+          drawAsset("person", "baddie_d", "diffuse");
         }
     }
 

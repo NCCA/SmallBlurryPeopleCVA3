@@ -20,8 +20,8 @@ int main()
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event event;
-    float w = prefs->getIntPref("X_RES");
-    float h = prefs->getIntPref("Y_RES");
+    int w = prefs->getIntPref("X_RES");
+    int h = prefs->getIntPref("Y_RES");
     SDL_Rect rect = {100, 100, w, h};
     //SDL_GetDisplayBounds(0, &rect);
 

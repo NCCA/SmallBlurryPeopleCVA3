@@ -8,6 +8,7 @@
 #include <QTime>
 #include <vector>
 #include <SDL.h>
+#include<iostream>
 
 /// @file AI.hpp
 /// @brief The AI refers to the grid for pathfinding and keeps track of a target
@@ -111,46 +112,46 @@ public:
 	bool isIdle() {return m_idle;}
 
 protected:
-	///
-	/// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
-	///
-	float m_health;
-	///
-	/// @brief m_grid, grid pointer to reference for pathfinding
-	///
-	Grid *m_grid;
-	///
-	/// @brief m_pos, character position
-	/// ///
-	ngl::Vec2 m_pos;
-	///
-	/// @brief m_target_id, id of target tile on grid
-	///
-	int m_target_id;
-	///
-	/// @brief m_rot character's rotation to face current direction (degrees)
-	///
-	float m_rot;
-	///
-	/// @brief m_speed, max speed of character
-	///
-	float m_speed;
-	///
-	/// @brief m_path, vector of target positions for movement
-	///
-	std::vector<ngl::Vec2> m_path;
-	///
-	/// @brief m_action_timer, timer for characters actions such as chopping wood and building
-	///
-	QTime m_action_timer;
-	///
-	/// @brief m_idle, set when character is idle, for checking if idle
-	///
-	bool m_idle;
-	///
-	/// @brief m_height_tracer, for grid height
-	///
-	TerrainHeightTracer *m_height_tracer;
+  ///
+  /// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
+  ///
+  float m_health;
+  ///
+  /// @brief m_grid, grid pointer to reference for pathfinding
+  ///
+  Grid *m_grid;
+  ///
+  /// @brief m_pos, character position
+  /// ///
+  ngl::Vec2 m_pos;
+  ///
+  /// @brief m_target_id, id of target tile on grid
+  ///
+  int m_target_id;
+  ///
+  /// @brief m_rot character's rotation to face current direction (degrees)
+  ///
+  float m_rot;
+  ///
+  /// @brief m_speed, max speed of character
+  ///
+  float m_speed;
+  ///
+  /// @brief m_path, vector of target positions for movement
+  ///
+  std::vector<ngl::Vec2> m_path;
+  ///
+  /// @brief m_action_timer, timer for characters actions such as chopping wood and building
+  ///
+  QTime m_action_timer;
+  ///
+  /// @brief m_idle, set when character is idle, for checking if idle
+  ///
+  bool m_idle;
+  ///
+  /// @brief m_height_tracer, for grid height
+  ///
+  TerrainHeightTracer *m_height_tracer;
 };
 
 #endif//__CHARACTER_HPP__

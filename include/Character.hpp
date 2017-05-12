@@ -22,25 +22,25 @@
 
 enum State
 {
-	CHOP_WOOD,
-	STORE,
-	FISH,
-	FORAGE,
-	CHECK_WOOD,
-	CHECK_BERRIES,
-	CHECK_FISH,
-	GET_WOOD,
-	GET_BERRIES,
-	GET_FISH,
-	BUILD,
-	SLEEP,
-	EAT_BERRIES,
-	EAT_FISH,
-	MOVE,
-	TRACK,
-	FIGHT,
-	REPEAT,
-	IDLE
+  CHOP_WOOD,
+  STORE,
+  FISH,
+  FORAGE,
+  CHECK_WOOD,
+  CHECK_BERRIES,
+  CHECK_FISH,
+  GET_WOOD,
+  GET_BERRIES,
+  GET_FISH,
+  BUILD,
+  SLEEP,
+  EAT_BERRIES,
+  EAT_FISH,
+  MOVE,
+  TRACK,
+  FIGHT,
+  REPEAT,
+  IDLE
 };
 
 /// @enum CharInventory
@@ -48,10 +48,10 @@ enum State
 ///
 enum class CharInventory
 {
-	WOOD,
-	FISH,
-	BERRIES,
-	NONE
+  WOOD,
+  FISH,
+  BERRIES,
+  NONE
 };
 
 class Baddie;
@@ -195,201 +195,201 @@ public:
 	bool isSleeping() {return m_sleeping;}
 
 private:
-	///
-	/// @brief m_id_counter, counts how many characters have been created
-	///
-	static int m_id_counter;
-	///
-	/// @brief m_id, current character's id
-	///
-	int m_id;
-	///
-	/// @brief m_name, current character's name
-	///
-	std::string m_name;
-	///
-	/// @brief m_colour, current character's shading colour
-	///
-	ngl::Vec3 m_colour;
-	///
-	/// @brief m_action_speed, speed of actions; scaled by character speed
-	///
-	float m_action_speed;
-	///
-	/// @brief m_stamina, how much stamina the character has
-	///
-	float m_stamina;
-	///
-	/// @brief m_hunger, how hungry the character is, 1 = full, 0 = hungry
-	///
-	float m_hunger;
-	///
-	/// @brief m_active, sets if the current character is selected
-	///
-	bool m_active;
-	///
-	/// @brief m_sleeping, checks if the character is sleeping and hence shouldn't be drawn
-	///
-	bool m_sleeping;
-	///
-	/// @brief m_forage, checks if character is wanting to forage
-	///
-	bool m_forage;
-	///
-	/// @brief m_world_inventory, inventory in store houses around the map
-	///
-	Inventory *m_world_inventory;
-	///
-	/// @brief m_baddies, vector of baddies in world
-	///
-	std::vector<Baddie> *m_baddies;
-	///
-	/// @brief m_target_baddie, current enemy
-	///
-	Baddie *m_target_baddie;
-	///
-	/// @brief m_dest_target_id, id of character's final destination or reoccuring destination
-	///
-	int m_dest_target_id;
-	///
-	/// @brief m_building_tile, tile to build on
-	///
-	int m_building_tile;
-	///
-	/// @brief m_hunger_timer, timer for how fast hunger depletes and regenerates
-	///
-	QTime m_hunger_timer;
-	///
-	/// @brief m_health_timer, timer for how fast health depletes and regenerates
-	///
-	QTime m_health_timer;
-	///
-	/// @brief m_stamina_timer, timer for how fast stamina depletes and regenerates
-	///
-	QTime m_stamina_timer;
-	///
-	/// @brief m_state_stack, stack containing sequence of states to reach an end goal, such as chopping wood
-	///
-	std::deque <State> m_state_stack;
-	///
-	/// @brief m_inventory, character's current inventory
-	///
-	CharInventory m_inventory;
-	///
-	/// @brief m_chopping_speed, how long it takes the character to chop wood
-	///
-	int m_chopping_speed;
-	///
-	/// @brief m_building_speed, how long it takes the character to build a house
-	///
-	int m_building_speed;
-	///
-	/// @brief m_fishing_catch, likeyhood of catching a fish
-	///
-	int m_fishing_catch;
-	///
-	/// @brief m_forage_amount, how many berries they find
-	///
-	int m_forage_amount;
-	///
-	/// @brief m_attack_power, how much the character attacks for
-	///
-	int m_attack_power;
-	///
-	/// @brief allows for checking if this is the first time the character has been set idle between actions
-	///
-	int m_called;
-	///
-	/// @brief m_idle_target_id, grid id that the character moves around while idle
-	///
-	int m_idle_target_id;
-	///
-	/// @brief m_building_amount, how many times it takes to build a house or storage house
-	///
-	int m_building_amount;
-	///
-	/// @brief m_building_type, the type of building the character is building
-	///
-	TileType m_building_type;
-	///
-	/// @brief randomIdlePos, find random position within a radius
-	/// @param [in] _idle_pos, central position for idle walking
-	/// @param [in] _radius, radius to find position in
-	/// @return whether position was found
-	///
-	bool randomIdlePos(ngl::Vec2 _idle_pos, int _radius);
-	///
-	/// @brief findNearestStorage, finds a storage house close to the character and sets it as the target
-	/// @return a boolean determining whether a storage house was found
-	///
-	bool findNearestStorage();
-	///
-	/// @brief findNearestEmptyTile, finds nearest neighbouring empty grid tile
-	/// @return a boolean determing whether a neighbouring empty tile was found
-	///
-	bool findNearestEmptyTile();
-	///
-	/// @brief findNearestFishingTile, finds a tile on the edge of water for the character to fish from
-	/// @return a boolean determining if a tile to fish from was found
-	///
-	bool findNearestFishingTile();
-	///
-	/// @brief waterFloodfill, uses a flood fill algorithm to find the edges of a body of water
-	/// @param [in] _coord, the current tile's coordinate
-	/// @param [in,out] _edges, a vector of tile id's that are the edge of the water
-	/// @param [in,out] _water, a vector of tile id's that are water tiles
-	///
-	void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
-	///
-	/// @brief distanceSort, sorts a vector based on the squared distance from a character
-	/// @param [in] io_left, the index of the first element in the sub-section of the vector
-	/// @param [in] io_right, the index of the last element in the sub-section of the vector
-	/// @param [in,out] _vector, vector of tile positions
-	///
-	void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_vector);
-	///
-	/// @brief findNearest, finds the shortest distance for a character in a vector of given coordinates
-	/// @param _coord_data, vector containing vec2's of coordinates to sort through
-	/// @return a boolean determining if the shortest distance has been found
-	///
-	bool findNearest(std::vector<ngl::Vec2> _coord_data);
-	///
-	/// @brief findFirstPath, finds path to tiles, if a path is find then the function is exited
-	/// @param [in] _vector, vector of tile coordinates
-	/// @return a boolean determining if a path was found to a coordinate in the vector
-	///
-	bool findFirstPath(std::vector<ngl::Vec2> _vector);
-	///
-	/// @brief softResetCharacter, clears a characters stack and resets their speed, used when changing from
-	/// a character's idle state where the character's speed is reduced
-	///
-	void softResetCharacter();
-	///
-	/// @brief hardResetCharacter, does the same as the softResetCharacter except it also turns off the foraging flag
-	///
-	void hardResetCharacter();
-	///
-	/// @brief completedAction, when a state has been completed it is removed from the stack and the
-	/// internal timer is reset
-	///
-	void completedAction() {m_state_stack.pop_front(); m_action_timer.restart();}
-	///
-	/// @brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
-	/// complete a task
-	///
-	void staminaMessage();
-	///
-	/// @brief generalMessage, for sending a message to the UI
-	/// @param [in] _print, message being printed by the UI
-	/// @param [in] _id, tile id of where the camera will move to
-	///
-	void generalMessage(std::string _print, int _id);
-	///
-	/// @brief generalMessage, for sending a message to the UI
-	/// @param [in] _print, message being printed by the UI
-	/// @param [in] _coord, coordinate of where the camera will move to
-	///
-	void generalMessage(std::string _print, ngl::Vec2 _coord);
+  ///
+  /// @brief m_id_counter, counts how many characters have been created
+  ///
+  static int m_id_counter;
+  ///
+  /// @brief m_id, current character's id
+  ///
+  int m_id;
+  ///
+  /// @brief m_name, current character's name
+  ///
+  std::string m_name;
+  ///
+  /// @brief m_colour, current character's shading colour
+  ///
+  ngl::Vec3 m_colour;
+  ///
+  /// @brief m_action_speed, speed of actions; scaled by character speed
+  ///
+  float m_action_speed;
+  ///
+  /// @brief m_stamina, how much stamina the character has
+  ///
+  float m_stamina;
+  ///
+  /// @brief m_hunger, how hungry the character is, 1 = full, 0 = hungry
+  ///
+  float m_hunger;
+  ///
+  /// @brief m_active, sets if the current character is selected
+  ///
+  bool m_active;
+  ///
+  /// @brief m_sleeping, checks if the character is sleeping and hence shouldn't be drawn
+  ///
+  bool m_sleeping;
+  ///
+  /// @brief m_forage, checks if character is wanting to forage
+  ///
+  bool m_forage;
+  ///
+  /// @brief m_world_inventory, inventory in store houses around the map
+  ///
+  Inventory *m_world_inventory;
+  ///
+  /// @brief m_baddies, vector of baddies in world
+  ///
+  std::vector<Baddie> *m_baddies;
+  ///
+  /// @brief m_target_baddie, current enemy
+  ///
+  Baddie *m_target_baddie;
+  ///
+  /// @brief m_dest_target_id, id of character's final destination or reoccuring destination
+  ///
+  int m_dest_target_id;
+  ///
+  /// @brief m_building_tile, tile to build on
+  ///
+  int m_building_tile;
+  ///
+  /// @brief m_hunger_timer, timer for how fast hunger depletes and regenerates
+  ///
+  QTime m_hunger_timer;
+  ///
+  /// @brief m_health_timer, timer for how fast health depletes and regenerates
+  ///
+  QTime m_health_timer;
+  ///
+  /// @brief m_stamina_timer, timer for how fast stamina depletes and regenerates
+  ///
+  QTime m_stamina_timer;
+  ///
+  /// @brief m_state_stack, stack containing sequence of states to reach an end goal, such as chopping wood
+  ///
+  std::deque <State> m_state_stack;
+  ///
+  /// @brief m_inventory, character's current inventory
+  ///
+  CharInventory m_inventory;
+  ///
+  /// @brief m_chopping_speed, how long it takes the character to chop wood
+  ///
+  int m_chopping_speed;
+  ///
+  /// @brief m_building_speed, how long it takes the character to build a house
+  ///
+  int m_building_speed;
+  ///
+  /// @brief m_fishing_catch, likeyhood of catching a fish
+  ///
+  int m_fishing_catch;
+  ///
+  /// @brief m_forage_amount, how many berries they find
+  ///
+  int m_forage_amount;
+  ///
+  /// @brief m_attack_power, how much the character attacks for
+  ///
+  int m_attack_power;
+  ///
+  /// @brief allows for checking if this is the first time the character has been set idle between actions
+  ///
+  int m_called;
+  ///
+  /// @brief m_idle_target_id, grid id that the character moves around while idle
+  ///
+  int m_idle_target_id;
+  ///
+  /// @brief m_building_amount, how many times it takes to build a house or storage house
+  ///
+  int m_building_amount;
+  ///
+  /// @brief m_building_type, the type of building the character is building
+  ///
+  TileType m_building_type;
+  ///
+  /// @brief randomIdlePos, find random position within a radius
+  /// @param [in] _idle_pos, central position for idle walking
+  /// @param [in] _radius, radius to find position in
+  /// @return whether position was found
+  ///
+  bool randomIdlePos(ngl::Vec2 _idle_pos, int _radius);
+  ///
+  /// @brief findNearestStorage, finds a storage house close to the character and sets it as the target
+  /// @return a boolean determining whether a storage house was found
+  ///
+  bool findNearestStorage();
+  ///
+  /// @brief findNearestEmptyTile, finds nearest neighbouring empty grid tile
+  /// @return a boolean determing whether a neighbouring empty tile was found
+  ///
+  bool findNearestEmptyTile();
+  ///
+  /// @brief findNearestFishingTile, finds a tile on the edge of water for the character to fish from
+  /// @return a boolean determining if a tile to fish from was found
+  ///
+  bool findNearestFishingTile();
+  ///
+  /// @brief waterFloodfill, uses a flood fill algorithm to find the edges of a body of water
+  /// @param [in] _coord, the current tile's coordinate
+  /// @param [in,out] _edges, a vector of tile id's that are the edge of the water
+  /// @param [in,out] _water, a vector of tile id's that are water tiles
+  ///
+  void waterFloodfill(ngl::Vec2 _coord, std::set<int> &_edges, std::set<int> &_water);
+  ///
+  /// @brief distanceSort, sorts a vector based on the squared distance from a character
+  /// @param [in] io_left, the index of the first element in the sub-section of the vector
+  /// @param [in] io_right, the index of the last element in the sub-section of the vector
+  /// @param [in,out] _vector, vector of tile positions
+  ///
+  void distanceSort(int io_left, int io_right, std::vector<ngl::Vec2> &_vector);
+  ///
+  /// @brief findNearest, finds the shortest distance for a character in a vector of given coordinates
+  /// @param _coord_data, vector containing vec2's of coordinates to sort through
+  /// @return a boolean determining if the shortest distance has been found
+  ///
+  bool findNearest(std::vector<ngl::Vec2> _coord_data);
+  ///
+  /// @brief findFirstPath, finds path to tiles, if a path is find then the function is exited
+  /// @param [in] _vector, vector of tile coordinates
+  /// @return a boolean determining if a path was found to a coordinate in the vector
+  ///
+  bool findFirstPath(std::vector<ngl::Vec2> _vector);
+  ///
+  /// @brief softResetCharacter, clears a characters stack and resets their speed, used when changing from
+  /// a character's idle state where the character's speed is reduced
+  ///
+  void softResetCharacter();
+  ///
+  /// @brief hardResetCharacter, does the same as the softResetCharacter except it also turns off the foraging flag
+  ///
+  void hardResetCharacter();
+  ///
+  /// @brief completedAction, when a state has been completed it is removed from the stack and the
+  /// internal timer is reset
+  ///
+  void completedAction() {m_state_stack.pop_front(); m_action_timer.restart();}
+  ///
+  /// @brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
+  /// complete a task
+  ///
+  void staminaMessage();
+  ///
+  /// @brief generalMessage, for sending a message to the UI
+  /// @param [in] _print, message being printed by the UI
+  /// @param [in] _id, tile id of where the camera will move to
+  ///
+  void generalMessage(std::string _print, int _id);
+  ///
+  /// @brief generalMessage, for sending a message to the UI
+  /// @param [in] _print, message being printed by the UI
+  /// @param [in] _coord, coordinate of where the camera will move to
+  ///
+  void generalMessage(std::string _print, ngl::Vec2 _coord);
 };
 
 #endif//__CHARACTER_HPP__

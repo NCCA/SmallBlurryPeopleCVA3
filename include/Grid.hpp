@@ -281,6 +281,8 @@ private:
   ///
   void loadScript(std::string _script_path);
 
+  void addTileToVectors(int _id, TileType _type);
+
   ///
   /// @brief width of the grid
   ///
@@ -295,6 +297,8 @@ private:
   /// @brief container for map information
   ///
   std::vector<GridTile> m_tiles;
+
+  std::vector<int> m_store_houses;
 
   ///
   /// \brief m_script holds the python script as a single string
@@ -326,6 +330,8 @@ private:
   /// \brief m_spawn_ponit is the spawn point set in the python script
   ///
   ngl::Vec2 m_spawn_ponit;
+
+
 };
 
 #endif//__GRID_HPP__
