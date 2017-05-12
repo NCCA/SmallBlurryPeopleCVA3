@@ -266,7 +266,11 @@ public:
   ///
   bool checkCoord(ngl::Vec2 _p);
 
-  std::vector<int> getStoreHouseIds();
+  ///
+  /// \brief getStoreHouseIds returns the vector of storehouse positions
+  /// \return m_store_houses
+  ///
+  std::vector<ngl::Vec2> getStoreHouseIds();
 
 private:
   ///
@@ -290,7 +294,7 @@ private:
   /// \param _id is the id of the tile being set
   /// \param _type type is the TileType the tile is being set to
   ///
-  void addTileToVectors(int _id, TileType _type);
+  void addTileToVectors(ngl::Vec2 _pos, TileType _type);
 
   ///
   /// @brief width of the grid
@@ -310,7 +314,7 @@ private:
   ///
   /// \brief m_store_houses is a vector of all the storehouse ids
   ///
-  std::vector<int> m_store_houses;
+  std::vector<ngl::Vec2> m_store_houses;
 
   ///
   /// \brief m_script holds the python script as a single string
