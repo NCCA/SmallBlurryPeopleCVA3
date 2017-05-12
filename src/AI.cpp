@@ -122,6 +122,11 @@ ngl::Vec3 AI::getPos()
 	return ngl::Vec3(m_pos[0], height, m_pos[1]);
 }
 
+ngl::Vec2 AI::getPos2d()
+{
+	return m_pos;
+}
+
 void AI::updateRot()
 {
 	if(m_path.size() > 0)

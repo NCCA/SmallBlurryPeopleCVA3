@@ -67,8 +67,21 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   bool valid = false;
   float x,y = 0;
 
+  //find random starting position
+  /*
+  while(!valid)
+  {
+    x = Utility::randInt(0, m_grid->getW());
+    y = Utility::randInt(0, m_grid->getH());
+
+    if (m_grid->getTileType(x, y) == TileType::NONE)
+      valid = true;
+  }
+  */
+  m_forage = false;
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
+  Gui::instance()->notify(m_name+" was born!", getPos2d());
 }
 
 void Character::setState(int _target_id)
@@ -110,6 +123,21 @@ void Character::setState(int _target_id)
   else
     //if the tile is unreachable
     generalMessage(" can't get there!", _target_id);
+}
+
+void Character::setForageState()
+{
+  if(m_forage == false)
+  {
+    m_forage = true;
+    Gui::instance()->notify("Click on a tree to forage!", m_pos);
+  }
+  else
+  {
+    m_forage = false;
+    Gui::instance()->notify("Click on a tree to chop!", m_pos);
+  }
+  softResetCharacter();
 }
 
 void Character::isBaddie()
@@ -766,7 +794,7 @@ void Character::update()
 
           //amount of building complete
           float percentage = 1.0/m_building_amount;
-          m_grid->setBuildState(m_building_tile, percentage, m_building_type);
+          m_grid->addBuildState(m_building_tile, percentage, m_building_type);
 
           //if charaters has finished building
           if(m_grid->getBuildState(m_building_tile) >= 1.0)

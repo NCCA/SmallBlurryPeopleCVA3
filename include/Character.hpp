@@ -61,138 +61,138 @@ class Baddie;
 class Character : public AI
 {
 public:
-  ///
-  /// @brief ctor, sets reference to grid and initialised values
-  /// @param [in] _height_tracer, pointer to height tracer, used for getting height at positions
-  /// @param [in] _grid, pointer to the grid to reference for pathfinding
-  /// @param [in] _world_inventory, pointer to global inventory
-  /// @param [in] _name, name for character
-  /// @param [in] _baddies, pointer to vector of baddies in the game
-  ///
-  Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
-  ///
-  /// @brief destructor
-  ///
-  ~Character() = default;
-  ///
-  /// @brief setState, creates state stack for the character to execute
-  ///
-  void setState(int _target_id);
-  ///
-  /// @brief setForageState, sets character for foraging instead of chopping
-  ///
-  void setForageState() {m_forage = true; softResetCharacter();}
-  ///
-  /// @brief isBaddie, checks if an empty square has been selected or a enemy
-  ///
-  void isBaddie();
-  ///
-  /// @brief buildState, tell character to start building on current square
-  /// @param [in] _building type of building to build
-  ///
-  void buildState(TileType _building);
-  ///
-  /// @brief moveState, character moves to its target
-  ///
-  void moveState();
-  ///
-  /// @brief attackState, character intiates fight with enemy
-  ///
-  void attackState();
-  ///
-  /// @brief invadedState, enemy intiates fight with character
-  ///
-  void invadedState( Baddie *_target);
-  ///
-  /// @brief chopState, character collects wood from a tree
-  ///
-  void chopState();
-  ///
-  /// @brief fishState, character tries to catch a fish
-  ///
-  void fishState();
-  ///
-  /// @brief forageState, character finds tree to get berries
-  ///
-  void forageState();
-  ///
-  /// @brief storeState, character stores whatever is in its inventory
-  ///
-  void storeState();
-  ///
-  /// @brief sleepState, recovers character stamina and makes them inactive
-  ///
-  void sleepState();
-  ///
-  /// @brief eatBerries, character eats berries and restores stamina
-  ///
-  void eatBerriesState();
-  ///
-  /// @brief eatFish, character eats fish and restores stamina
-  ///
-  void eatFishState();
-  ///
-  /// @brief idleState, randomly moves character while not active
-  ///
-  void idleState();
-  ///
-  /// @brief clearState, removes any actions in the state stack
-  ///
-  void clearState() {m_state_stack.clear();}
-  ///
-  /// @brief update, updates character based on its current state
-  ///
-  void update();
-  ///
-  /// @brief getID, get the unique character id
-  /// @return m_id, character's id
-  ///
-  int getID() {return m_id;}
-  ///
-  /// @brief getName, get character's name
-  /// @return m_name, character's name
-  ///
-  std::string getName() {return m_name;}
-  ///
-  /// @brief getColour, get character's colour
-  /// @return m_colour, character's colour
-  ///
-  ngl::Vec3 getColour() {return m_colour;}
-  ///
-  /// @brief getState get character's current state
-  /// @return character's current state
-  ///
-  State getState();
-  ///
-  /// @brief getStamina get character's stamina
-  /// @return character's stamina value 0-1
-  ///
-  float getStamina() {return m_stamina;}
-  ///
-  /// @brief getHunger get character's hunger
-  /// @return character's hunger value 0-1
-  ///
-  float getHunger() {return m_hunger;}
-  ///
-  /// @brief getAttributes, gets character attributes such as chopping speed
-  /// @return a vector of m_chopping_speed, m_building_speed, m_fishing_catch, m_forage_amount, m_attack_power
-  ///
-  std::vector<float> getAttributes();
-  ///
-  /// @brief setActive, set's whether the character is active
-  /// @param [in] _selection, a boolean determing whether the character is active or not
-  ///
-  void setActive(bool _selection) {m_active = _selection;}
-  ///
-  /// @brief isActive, returns whether the  character is active
-  /// @return m_active, the boolean stored in the character determining if it is active or not
-  ///
-  bool isActive() {return m_active;}
-  ///
-  /// @brief isSleeping, returns whether the character is sleeping
-  /// @return m_sleeping, the boolean stored in the character determining if it is sleeping or not
-  ///
-  bool isSleeping() {return m_sleeping;}
+	///
+	/// @brief ctor, sets reference to grid and initialised values
+	/// @param [in] _height_tracer, pointer to height tracer, used for getting height at positions
+	/// @param [in] _grid, pointer to the grid to reference for pathfinding
+	/// @param [in] _world_inventory, pointer to global inventory
+	/// @param [in] _name, name for character
+	/// @param [in] _baddies, pointer to vector of baddies in the game
+	///
+	Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
+	///
+	/// @brief destructor
+	///
+	~Character() = default;
+	///
+	/// @brief setState, creates state stack for the character to execute
+	///
+	void setState(int _target_id);
+	///
+	/// @brief setForageState, sets character for foraging instead of chopping
+	///
+	void setForageState();
+	///
+	/// @brief isBaddie, checks if an empty square has been selected or a enemy
+	///
+	void isBaddie();
+	///
+	/// @brief buildState, tell character to start building on current square
+	/// @param [in] _building type of building to build
+	///
+	void buildState(TileType _building);
+	///
+	/// @brief moveState, character moves to its target
+	///
+	void moveState();
+	///
+	/// @brief attackState, character intiates fight with enemy
+	///
+	void attackState();
+	///
+	/// @brief invadedState, enemy intiates fight with character
+	///
+	void invadedState( Baddie *_target);
+	///
+	/// @brief chopState, character collects wood from a tree
+	///
+	void chopState();
+	///
+	/// @brief fishState, character tries to catch a fish
+	///
+	void fishState();
+	///
+	/// @brief forageState, character finds tree to get berries
+	///
+	void forageState();
+	///
+	/// @brief storeState, character stores whatever is in its inventory
+	///
+	void storeState();
+	///
+	/// @brief sleepState, recovers character stamina and makes them inactive
+	///
+	void sleepState();
+	///
+	/// @brief eatBerries, character eats berries and restores stamina
+	///
+	void eatBerriesState();
+	///
+	/// @brief eatFish, character eats fish and restores stamina
+	///
+	void eatFishState();
+	///
+	/// @brief idleState, randomly moves character while not active
+	///
+	void idleState();
+	///
+	/// @brief clearState, removes any actions in the state stack
+	///
+	void clearState() {m_state_stack.clear();}
+	///
+	/// @brief update, updates character based on its current state
+	///
+	void update();
+	///
+	/// @brief getID, get the unique character id
+	/// @return m_id, character's id
+	///
+	int getID() {return m_id;}
+	///
+	/// @brief getName, get character's name
+	/// @return m_name, character's name
+	///
+	std::string getName() {return m_name;}
+	///
+	/// @brief getColour, get character's colour
+	/// @return m_colour, character's colour
+	///
+	ngl::Vec3 getColour() {return m_colour;}
+	///
+	/// @brief getState get character's current state
+	/// @return character's current state
+	///
+	State getState();
+	///
+	/// @brief getStamina get character's stamina
+	/// @return character's stamina value 0-1
+	///
+	float getStamina() {return m_stamina;}
+	///
+	/// @brief getHunger get character's hunger
+	/// @return character's hunger value 0-1
+	///
+	float getHunger() {return m_hunger;}
+	///
+	/// @brief getAttributes, gets character attributes such as chopping speed
+	/// @return a vector of m_chopping_speed, m_building_speed, m_fishing_catch, m_forage_amount, m_attack_power
+	///
+	std::vector<float> getAttributes();
+	///
+	/// @brief setActive, set's whether the character is active
+	/// @param [in] _selection, a boolean determing whether the character is active or not
+	///
+	void setActive(bool _selection) {m_active = _selection;}
+	///
+	/// @brief isActive, returns whether the  character is active
+	/// @return m_active, the boolean stored in the character determining if it is active or not
+	///
+	bool isActive() {return m_active;}
+	///
+	/// @brief isSleeping, returns whether the character is sleeping
+	/// @return m_sleeping, the boolean stored in the character determining if it is sleeping or not
+	///
+	bool isSleeping() {return m_sleeping;}
 
 private:
   ///

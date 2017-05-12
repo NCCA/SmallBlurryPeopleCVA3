@@ -111,8 +111,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     gui->updateActiveCharacter();
     m_characters[0].setActive(true);
 
-    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
-
     initialiseFramebuffers();
 
     m_shadowMat.assign(3, ngl::Mat4());
@@ -452,7 +450,6 @@ void Scene::createCharacter()
     int name_chosen = nameNo(mt_rand);
     //create character with random name
     m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
-
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
@@ -535,12 +532,14 @@ void Scene::update()
         m_mouseSelectionBoxPosition.update();
         m_mouseSelectionBoxScale.update();
 
-        for(int i=0; i<m_characters.size(); i++)
+        charactersSpawn();
+
+        for(size_t i=0; i<m_characters.size(); i++)
         {
           if (m_characters[i].getHealth() <= 0.0)
           {
               std::string message = m_characters[i].getName() + " has died!";
-              ngl::Vec2 pos = {m_characters[i].getPos()[0], m_characters[i].getPos()[2]};
+              ngl::Vec2 pos = m_characters[i].getPos2d();
               Gui::instance()->notify(message, pos );
               //check if character has health, if it doesn't remove the character
               if (m_active_char_id == m_characters[i].getID())
@@ -549,7 +548,7 @@ void Scene::update()
                   Gui::instance()->updateActiveCharacter();
               }
               //ID's start from 1 so negate 1 to get index in vector m_characters
-              int index = (m_characters[i].getID() - 1);
+              //int index = (m_characters[i].getID() - 1);
               //add name back to available list
               m_file_names.push_back(m_characters[i].getName());
               //add position to tombstone positions
@@ -570,6 +569,11 @@ void Scene::update()
                 Gui::instance()->updateActiveCharacter();
             }
           }
+        }
+        // preference for this?
+        if(true)
+        {
+          baddiesSpawn();
         }
 
         for(size_t i=0; i<m_baddies.size(); i++)
@@ -818,7 +822,7 @@ void Scene::draw()
         m_transform.reset();
         glEnable(GL_DEPTH_TEST);
 
-        ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
+        //ngl::Vec4 mouseWorldPos = getTerrainPosAtMouse();
 
         //---------------------------//
         // UTILITY ID DRAW //
@@ -2809,6 +2813,42 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
     std::cout << "moved camera" << std::endl;
     // negative values needed?
     m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
+}
+
+void Scene::baddiesSpawn()
+{
+  m_baddie_timer++;
+  if(m_baddie_timer > 10*m_baddies.size())
+  {
+    m_baddie_timer = 0;
+    ngl::Random *rnd = ngl::Random::instance();
+    if(rnd->randomPositiveNumber(100) < 1)
+    {
+      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+      direction *= 20.0f;
+      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
+      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+      {
+        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+      }
+    }
+  }
+}
+
+void Scene::charactersSpawn()
+{
+  ngl::Random *rnd = ngl::Random::instance();
+  m_character_timer++;
+  if(m_character_timer > 10)
+  {
+    m_character_timer = 0;
+    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
+    if(rnd->randomPositiveNumber(50) < spawn_chance)
+    {
+      createCharacter();
+    }
+  }
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()

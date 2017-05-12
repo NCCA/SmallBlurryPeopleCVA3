@@ -83,11 +83,11 @@ public:
   int cutTrees(int _goal_amount);
 
   ///
-  /// \brief setBuildState sets the build state for a building tile
+  /// \brief setBuildState adds to the build state for a building tile
   /// \param _value is the amount to increment the build state variable by
   /// \param _type is the type of building being built
   ///
-  void setBuildState(float _value, TileType _type);
+  void addBuildState(float _value, TileType _type);
 
   ///
   /// \brief getBuildState gets the completion of a building in the range [0 ... 1]

@@ -23,14 +23,13 @@ class Baddie : public AI
 {
 public:
   ///
-  /// @brief ctr, create baddie with a position on the grid and a references to the characters
-  /// @param [in]_grid, pointer to grid for pathfinding and positions
+  /// \brief Baddie create baddie with a position on the grid and a references to the characters
+  /// \param _pos spawn position
+  /// \param _height_tracer height tracer to use
+  /// \param _grid pointer to grid for pathfinding and positions
+  /// \param _characters reference to character vector in scene
   ///
-  Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters);
-  ///
-  /// @brief default destructor
-  ///
-  ~Baddie() = default;
+  Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters);
   ///
   /// @brief update calculate behaviours for baddie
   ///
