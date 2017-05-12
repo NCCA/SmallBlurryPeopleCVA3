@@ -66,6 +66,7 @@ include($(HOME)/NGL/UseNGL.pri)
 OTHER_FILES += README.md \
                $$PWD/shaders/*.glsl \
                $$PWD/python/*.py \
+               $$PWD/python/gameUtils/*.py \
                $$PWD/python/noise/*.py \
                $$PWD/names/*.txt \
                $$PWD/preferences.conf
