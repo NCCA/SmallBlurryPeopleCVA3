@@ -1,9 +1,10 @@
 import random as rand
 import math
 
+
 class fractalNoise:
   """
-  A class foir generating fractal noise patterns in 2d using simplex noise.
+  A class for generating fractal noise patterns in 2d using simplex noise.
   The user can make calls to both fractal and simplex fiunctions, incase they
   only want a single leyer of noise
 
