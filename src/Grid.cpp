@@ -18,7 +18,7 @@ Grid::Grid():
   m_w(1),
   m_h(1),
   m_store_houses(0),
-  m_num_houses(1)
+  m_num_houses(1) // begin with one house to start
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
@@ -232,20 +232,20 @@ void Grid::setTileType(int _x, int _y, TileType _type)
   m_tiles[_x + m_w * _y].setType(_type);
 }
 
-void Grid::setBuildState(int _id, float _value, TileType _type)
+void Grid::addBuildState(int _id, float _value, TileType _type)
 {
-  m_tiles[_id].setBuildState(_value, _type);
-  if(_value >= 1.0 && _type == TileType::HOUSE)
+  m_tiles[_id].addBuildState(_value, _type);
+  if(getBuildState(_id) >= 1.0 && _type == TileType::HOUSE)
   {
     houseAdded();
   }
   m_has_changes = true;
 }
 
-void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
+void Grid::addBuildState(int _x, int _y, float _value, TileType _type)
 {
-  m_tiles[_x + m_w * _y].setBuildState(_value, _type);
-  if(_value >= 1.0 && _type == TileType::HOUSE)
+  m_tiles[_x + m_w * _y].addBuildState(_value, _type);
+  if(getBuildState(_x, _y) >= 1.0 && _type == TileType::HOUSE)
   {
     houseAdded();
   }

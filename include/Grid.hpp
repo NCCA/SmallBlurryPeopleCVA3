@@ -132,21 +132,21 @@ public:
   void setTileType(int _x, int _y, TileType _type);
 
   ///
-  /// \brief setBuildState sets the build state of the tile, which represents the stage of completion of the building
+  /// \brief addBuildState adds to the build state of the tile, which represents the stage of completion of the building
   /// \param _id is id of the tile of interest
   /// \param _value the increment value of the build state
   /// \param _type the type of building being built
   ///
-  void setBuildState(int _id, float _value, TileType _type);
+  void addBuildState(int _id, float _value, TileType _type);
 
   ///
-  /// \brief setBuildState sets the build state of the tile, which represents the stage of completion of the building
+  /// \brief addBuildState adds to the build state of the tile, which represents the stage of completion of the building
   /// \param _x is the x component of the tile of interest
   /// \param _y is the y component of the tile of interest
   /// \param _value is the value to increase the tiles build state by
   /// \param _type is the type of building being built
   ///
-  void setBuildState(int _x, int _y, float _value, TileType _type);
+  void addBuildState(int _x, int _y, float _value, TileType _type);
 
   ///
   /// \brief getBuildState gets the build state of the tile with the given id
@@ -325,6 +325,21 @@ private:
   /// \brief m_num_houses number of houses on the map
   ///
   int m_num_houses;
+
+  ///
+  /// \brief m_num_wood amount of wood stored
+  ///
+  int m_num_wood;
+
+  ///
+  /// \brief m_num_berries amount of berries stored
+  ///
+  int m_num_berries;
+
+  ///
+  /// \brief m_num_fish amount of fish stored
+  ///
+  int m_num_fish;
 
   ///
   /// \brief m_spawn_ponit is the spawn point set in the python script
