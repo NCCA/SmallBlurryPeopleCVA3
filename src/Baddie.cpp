@@ -97,8 +97,9 @@ void Baddie::fight()
 	//go through every target
 	for(int i=0; i<m_targets.size(); i++)
 	{
-		if(m_targets[i]->isSleeping())
+    if(m_targets[i]->isSleeping())
 			m_targets.erase(m_targets.begin() + i);
+
 		ngl::Vec2 target_coord = ngl::Vec2(m_targets[i]->getPos()[0], m_targets[i]->getPos()[2]);
 		//if the baddies tile position isnt the same as the targets grid position
 		if(m_grid->coordToId(m_pos) != m_grid->coordToId(target_coord))
@@ -180,7 +181,7 @@ bool Baddie::findNearestTarget()
 		ngl::Vec2 char_pos = ngl::Vec2(character.getPos()[0], character.getPos()[2]);
 		float distance = Utility::sqrDistance(m_pos, char_pos);
 		//find closest character within agro range
-		if (distance < shortest_dist && !character.isSleeping())
+    if (distance < shortest_dist && !character.isInside())
 		{
 			found = true;
 			shortest_dist = distance;

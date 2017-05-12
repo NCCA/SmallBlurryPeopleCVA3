@@ -839,7 +839,7 @@ void Scene::draw()
         //Draw characters...
         for(auto &ch : m_characters)
         {
-            if(ch.isSleeping() == false)
+            if(ch.isInside() == false)
             {
                 ngl::Vec3 pos = ch.getPos();
                 m_transform.setPosition(pos);
@@ -1432,7 +1432,7 @@ void Scene::drawMeshes()
 
     for(Character &character : m_characters)
     {
-      if(character.isSleeping() == false)
+      if(character.isInside() == false)
       {
         m_transform.reset();
         ngl::Vec3 pos = character.getPos();
@@ -1517,7 +1517,7 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &character : m_characters)
     {
-        if(character.isSleeping() == false)
+        if(character.isInside() == false)
         {
             ngl::Vec3 pos = character.getPos();
             m_transform.reset();
@@ -1777,7 +1777,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
-        if(character.isSleeping() == false)
+        if(character.isInside() == false)
         {
             ngl::Vec3 pos = character.getPos();
             m_transform.reset();
@@ -2071,11 +2071,6 @@ void Scene::mouseSelection()
                         character.setState(target_id);
                     }
                 }
-            }
-            else
-            {
-                //if grid_coord == {0,0,0}
-                std::cout<<"NO GRID CLICK D:"<<std::endl;
             }
         }
         glReadBuffer(GL_NONE);
@@ -2479,7 +2474,7 @@ GLuint Scene::constructTerrain()
 
             int count = 0;
 
-            std::cout << "i,j = " << i << "," << j << " / w,h = " << faces.size() << "," << faces[i].size() << '\n';
+            //std::cout << "i,j = " << i << "," << j << " / w,h = " << faces.size() << "," << faces[i].size() << '\n';
 
             //->
             if(top and right)

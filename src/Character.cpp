@@ -22,6 +22,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_hunger(1.0),
   m_active(false),
   m_sleeping(false),
+  m_storing(false),
 	m_forage(false),
   m_world_inventory(_world_inventory),
   m_baddies(_baddies),
@@ -35,9 +36,6 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
   m_building_amount = prefs->getIntPref("CHARACTER_BUILDING");
-
-	//scale time it takes to do actions by the character's speed
-	m_action_speed = (m_speed );
 
   //timer for actions
   m_hunger_timer.start();
@@ -557,8 +555,10 @@ void Character::update()
 
       case(State::STORE):
       {
+        m_storing = true;
 				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
+          m_storing = false;
           //if the character is holding wood, add to inventory
           if (m_inventory == CharInventory::WOOD)
           {
@@ -616,7 +616,7 @@ void Character::update()
 
       case(State::FORAGE):
       {
-				if(m_action_timer.elapsed() >= (100 / m_action_speed))
+        if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //take away stamina
           m_stamina -= 0.1;
@@ -1220,11 +1220,11 @@ std::vector<float> Character::getAttributes()
 {
 	std::vector<float> attributes;
 
-	float chopping = Utility::remap01(m_chopping_speed, 5, 10);
-	float building = Utility::remap01(m_building_speed, 5, 10);
-	float fishing = Utility::remap01(m_fishing_catch, 1, 3);
-	float foraging = Utility::remap01(m_forage_amount, 1, 5);
-	float attacking = Utility::remap01(m_attack_power, 5, 10);
+  float chopping = Utility::remap01(m_chopping_speed, 10, 5);
+  float building = Utility::remap01(m_building_speed, 10, 5);
+  float fishing = Utility::remap01(m_fishing_catch, 3, 1);
+  float foraging = Utility::remap01(m_forage_amount, 5, 1);
+  float attacking = Utility::remap01(m_attack_power, 10, 5);
 
 	attributes.push_back(chopping);
 	attributes.push_back(building);

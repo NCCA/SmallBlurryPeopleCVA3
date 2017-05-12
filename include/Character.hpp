@@ -189,10 +189,15 @@ public:
 	///
 	bool isActive() {return m_active;}
 	///
-	/// @brief isSleeping, returns whether the character is sleeping
-	/// @return m_sleeping, the boolean stored in the character determining if it is sleeping or not
-	///
-	bool isSleeping() {return m_sleeping;}
+  /// @brief isInside, returns whether the character is inside a house or storehouse
+  /// @return boolean OR operation between storing and sleeping so that if it is in a house or storehouse it returns true
+  ///
+  bool isInside() {return (m_sleeping || m_storing);}
+  ///
+  /// @brief isSleeping, returns whether the character is sleeping
+  /// @return m_sleeping, the boolean stored in the character determining if it is sleeping in a house
+  ///
+  bool isSleeping() {return m_sleeping;}
 
 private:
 	///
@@ -212,10 +217,6 @@ private:
 	///
 	ngl::Vec3 m_colour;
 	///
-	/// @brief m_action_speed, speed of actions; scaled by character speed
-	///
-	float m_action_speed;
-	///
 	/// @brief m_stamina, how much stamina the character has
 	///
 	float m_stamina;
@@ -227,10 +228,14 @@ private:
 	/// @brief m_active, sets if the current character is selected
 	///
 	bool m_active;
+  ///
+  /// @brief m_sleeping, checks if the character is inside a house
+  ///
+  bool m_sleeping;
 	///
-	/// @brief m_sleeping, checks if the character is sleeping and hence shouldn't be drawn
+  /// @brief m_storing, checks if the character is inside a storehouse
 	///
-	bool m_sleeping;
+  bool m_storing;
 	///
 	/// @brief m_forage, checks if character is wanting to forage
 	///
