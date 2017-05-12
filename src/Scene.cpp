@@ -449,7 +449,6 @@ void Scene::createCharacter()
     int name_chosen = nameNo(mt_rand);
     //create character with random name
     m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
-
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
@@ -532,12 +531,14 @@ void Scene::update()
         m_mouseSelectionBoxPosition.update();
         m_mouseSelectionBoxScale.update();
 
+        charactersSpawn();
+
         for(int i=0; i<m_characters.size(); i++)
         {
           if (m_characters[i].getHealth() <= 0.0)
           {
               std::string message = m_characters[i].getName() + " has died!";
-              ngl::Vec2 pos = {m_characters[i].getPos()[0], m_characters[i].getPos()[2]};
+              ngl::Vec2 pos = m_characters[i].getPos2d();
               Gui::instance()->notify(message, pos );
               //check if character has health, if it doesn't remove the character
               if (m_active_char_id == m_characters[i].getID())
@@ -568,6 +569,7 @@ void Scene::update()
             }
           }
         }
+        // preference for this?
         if(true)
         {
           baddiesSpawn();
@@ -2829,6 +2831,21 @@ void Scene::baddiesSpawn()
       {
         m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
       }
+    }
+  }
+}
+
+void Scene::charactersSpawn()
+{
+  ngl::Random *rnd = ngl::Random::instance();
+  m_character_timer++;
+  if(m_character_timer > 10)
+  {
+    m_character_timer = 0;
+    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
+    if(rnd->randomPositiveNumber(50) < spawn_chance)
+    {
+      createCharacter();
     }
   }
 }

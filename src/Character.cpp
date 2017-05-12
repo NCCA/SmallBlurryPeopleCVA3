@@ -81,6 +81,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_forage = false;
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
+  Gui::instance()->notify(m_name+" was born!", getPos2d());
 }
 
 void Character::setState(int _target_id)
@@ -793,7 +794,7 @@ void Character::update()
 
           //amount of building complete
           float percentage = 1.0/m_building_amount;
-          m_grid->setBuildState(m_building_tile, percentage, m_building_type);
+          m_grid->addBuildState(m_building_tile, percentage, m_building_type);
 
           //if charaters has finished building
           if(m_grid->getBuildState(m_building_tile) >= 1.0)

@@ -168,6 +168,10 @@ public:
     /// \brief baddiesSpawn manage baddie spawning
     ///
     void baddiesSpawn();
+    ///
+    /// \brief charactersSpawn spawn characters at houses if there's space
+    ///
+    void charactersSpawn();
 
     void initMeshInstances();
     ///
@@ -369,8 +373,14 @@ private:
     /// \brief m_movement_held which movement are currently held
     ///
     bool m_movement_held[4];
-
+    ///
+    /// \brief m_baddie_timer timer to spawn baddies
+    ///
     size_t m_baddie_timer = 0;
+    ///
+    /// \brief m_character_timer timer to spawn characters
+    ///
+    size_t m_character_timer = 0;
     /// @brief Where the mouse selection box is.
     IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
     /// @brief How the mouse selection box is scaled. For example, when hovering over a character it gets taller and thinner.
