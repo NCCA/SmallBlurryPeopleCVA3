@@ -61,6 +61,8 @@ float clamp(float _in, float _lo, float _hi);
 
 float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b);
 
+float remap01(float _in_value, float _max_in_range, float _min_in_range);
+
 int findSetElement(std::set<int> _set, int index);
 
 template<typename T>

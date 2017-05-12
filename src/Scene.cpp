@@ -39,8 +39,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
-    m_characters(0)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
   Gui *gui = Gui::instance();
   gui->init(this, _viewport, "button");
@@ -64,6 +63,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuseInstanced", "vertDeferredDataInstanced", "fragDeferredDiffuse");
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
+    createShader("diffuseCharacter", "vertDeferredData", "fragCharDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredDataChar", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
@@ -152,6 +152,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
+    store->loadTexture("person_d", "person/person.tif");
     store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
@@ -1434,13 +1435,14 @@ void Scene::drawMeshes()
     {
       if(character.isSleeping() == false)
       {
-        slib->use("colour");
         m_transform.reset();
         ngl::Vec3 pos = character.getPos();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, character.getRot(), 0);
+
+        slib->use("diffuseCharacter");
         slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset("person", "", "");
+        drawAsset("person", "person_d", "diffuseCharacter");
       }
     }
 
@@ -1448,12 +1450,13 @@ void Scene::drawMeshes()
     {
         if(baddie.getHealth() > 0.0)
         {
-          slib->use("diffuse");
           m_transform.reset();
           ngl::Vec3 pos = baddie.getPos();
           m_transform.setPosition(pos);
           m_transform.setRotation(0, baddie.getRot(), 0);
           m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
+
+          slib->use("diffuse");
           drawAsset("person", "baddie_d", "diffuse");
         }
     }

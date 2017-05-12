@@ -9,34 +9,30 @@
 
 #include <vector>
 
-/// \file Baddie.hpp
-/// \brief The enemy class that wanders around searching for characters, when one comes into range
+/// @file Baddie.hpp
+/// @brief The enemy class that wanders around searching for characters, when one comes into range
 ///  it follows and attacks the character
 
 
 class Character;
 
-/// \class Baddie
-/// \brief The Baddie class is the ingame enemy, with attacking and tracking states
+/// @class Baddie
+/// @brief The Baddie class is the ingame enemy, with attacking and tracking states
 ///
 class Baddie : public AI
 {
 public:
-  Baddie():AI(){
-    std::cout << "fuck you baddie" << std::endl;
-  }
-
   ///
-  /// \brief Baddie constructor to create baddie at edge of map
-  /// \param _grid grid to use
+  /// @brief ctr, create baddie with a position on the grid and a references to the characters
+  /// @param [in]_grid, pointer to grid for pathfinding and positions
   ///
   Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters);
   ///
-  /// \brief default destructor
+  /// @brief default destructor
   ///
   ~Baddie() = default;
   ///
-  /// \brief update calculate behaviours for baddie
+  /// @brief update calculate behaviours for baddie
   ///
   void update();
   ///
