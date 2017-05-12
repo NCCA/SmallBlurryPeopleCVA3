@@ -283,6 +283,13 @@ private:
   ///
   void loadScript(std::string _script_path);
 
+  ///
+  /// \brief addTileToVectors adds a new tile to its corresponding vector.
+  /// This is used when a character needs to find the nearest tile of a certain
+  /// type, currently only used for storehouses
+  /// \param _id is the id of the tile being set
+  /// \param _type type is the TileType the tile is being set to
+  ///
   void addTileToVectors(int _id, TileType _type);
 
   ///

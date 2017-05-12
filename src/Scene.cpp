@@ -539,6 +539,11 @@ void Scene::update()
           if (m_characters[i].getHealth() <= 0.0)
           {
               std::string message = m_characters[i].getName() + " has died!";
+              if (m_characters.size() == 0)
+              {
+                m_state = GameState::ENDGAME;
+                return;
+              }
               ngl::Vec2 pos = m_characters[i].getPos2d();
               Gui::instance()->notify(message, pos );
               //check if character has health, if it doesn't remove the character
@@ -2648,9 +2653,9 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
+    bool horizontal = (unsigned int)(_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
     //Can we move in the vertical direction?
-    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
+    bool vertical = (unsigned int)(_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
 
     if(horizontal)
     {
