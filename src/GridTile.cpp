@@ -1,24 +1,17 @@
 #include "GridTile.hpp"
 #include "Prefs.hpp"
-#include <iostream>
-
-const float perm[] = {-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4};
+#include "ngl/Random.h"
 
 GridTile::GridTile(int _id)
 {
-  //generate random tree positions for the tile
+  auto rand = ngl::Random::instance();
   int num_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
+  rand->setSeed(_id);
   for (int i = 0; i < num_trees; i++)
   {
-    _id *= _id;
-    _id += i * 5;
-
-    int x = (_id + i * 5)%9;
-    int y = (_id + i * 13)%9;
-
-    ngl::Vec2 pos(perm[x], perm[y]);
-
-    m_tree_positions.push_back(pos);
+    ngl::Vec2 rand_pos = rand->getRandomVec2();
+    rand_pos *= 0.4;
+    m_tree_positions.push_back(rand_pos);
   }
 }
 

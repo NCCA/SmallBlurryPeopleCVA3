@@ -56,7 +56,7 @@ void Camera::calculateViewMat()
 }
 
 void Camera::updateSmoothCamera()
-{    
+{
     m_ipos.update();
     m_irot.update();
     m_iFocalDepth.update();

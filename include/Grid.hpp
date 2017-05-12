@@ -2,14 +2,13 @@
 #define __GRID_HPP__
 
 #include <vector>
-#include <iostream>
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
 #include "GridTile.hpp"
 
 ///
 /// @file Grid.hpp
-/// @brief implementation file for the Grid class
+/// @brief header file for the Grid class
 ///
 
 ///
@@ -35,8 +34,11 @@ public:
   /// @param _new_h is the new height of the map
   /// @param _new_seed is the seed value for random number generation in the map script
   ///
-  void updateScript(std::string _script_path, int _new_w = 30, int _new_h = 30, int _new_seed = 8);
+  void updateScript(std::string _script_path, int _new_w = 100, int _new_h = 100, int _new_seed = 8);
 
+
+  void printTrees();
+  void printTypes();
   ///
   /// \brief getTileType gets the tile type at the requested coordinates
   /// \param _x is the x component of the coordinate
@@ -236,6 +238,12 @@ public:
   ///
   void resetHasChanges();
 
+  ///
+  /// \brief getSpawnPoint retrieves the spawn point set by the python script
+  /// \return the spwan point as an ngl::Vec2
+  ///
+  ngl::Vec2 getSpawnPoint();
+
 
 
 private:
@@ -293,6 +301,11 @@ private:
   /// \brief m_num_houses number of houses on the map
   ///
   int m_num_houses;
+
+  ///
+  /// \brief m_spawn_ponit is the spawn point set in the python script
+  ///
+  ngl::Vec2 m_spawn_ponit;
 };
 
 #endif//__GRID_HPP__

@@ -6,8 +6,8 @@ import os
 cwd = os.getcwd()+ "/python/"
 import sys
 sys.path.append(cwd)
-import gameUtils.noise.noise as n
-import gameUtils.helperFunctions.helperFunctions as hf
+import gameUtils.noise as n
+import gameUtils.helperFunctions as hf
 
 #parameters from game
 map_width = width_in
@@ -72,6 +72,10 @@ for x in range(map_width):
         map_data[x + map_width * y][0] = tileTypes["TREES"]
 
 #dividing heights to be passes to game
+px, py = hf.getRandomSpawn(map_data, map_width, map_height, tileTypes["NONE"])
+map_data[px + map_width * py][0] = tileTypes["STOREHOUSE"]
+map_data[px+1 + map_width * py][0] = tileTypes["HOUSE"]
+spawn_point = (px, py+2)
 water_height /= height_divider
 mountain_height /= height_divider
 
