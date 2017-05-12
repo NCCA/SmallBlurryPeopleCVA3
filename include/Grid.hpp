@@ -266,6 +266,8 @@ public:
   ///
   bool checkCoord(ngl::Vec2 _p);
 
+  std::vector<int> getStoreHouseIds();
+
 private:
   ///
   /// \brief runCurrentScript runs the currently sotred python script to generate a map
@@ -298,6 +300,9 @@ private:
   ///
   std::vector<GridTile> m_tiles;
 
+  ///
+  /// \brief m_store_houses is a vector of all the storehouse ids
+  ///
   std::vector<int> m_store_houses;
 
   ///
@@ -330,8 +335,6 @@ private:
   /// \brief m_spawn_ponit is the spawn point set in the python script
   ///
   ngl::Vec2 m_spawn_ponit;
-
-
 };
 
 #endif//__GRID_HPP__

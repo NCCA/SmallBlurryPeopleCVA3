@@ -80,6 +80,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   {
     TileType t = (TileType)PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
     int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    addTileToVectors(i, t);
     m_tiles[i].setType(t);
     m_tiles[i].setHeight(height);
     std::cout << height << std::endl;
@@ -222,13 +223,13 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
 
 void Grid::setTileType(int _id, TileType _type)
 {
-  //addTileToVectors(_id, _type);
+  addTileToVectors(_id, _type);
   m_tiles[_id].setType(_type);
 }
 
 void Grid::setTileType(int _x, int _y, TileType _type)
 {
-  //addTileToVectors(_x + m_w * _y, _type);
+  addTileToVectors(_x + m_w * _y, _type);
   m_tiles[_x + m_w * _y].setType(_type);
 }
 
@@ -323,7 +324,8 @@ bool Grid::checkCoord(ngl::Vec2 _p)
     return false;
   }
 }
-/*
+
+
 void Grid::addTileToVectors(int _id, TileType _type)
 {
   switch(_type)
@@ -336,7 +338,11 @@ void Grid::addTileToVectors(int _id, TileType _type)
   }
 }
 
-*/
+std::vector<int> Grid::getStoreHouseIds()
+{
+  return m_store_houses;
+}
+
 
 
 
