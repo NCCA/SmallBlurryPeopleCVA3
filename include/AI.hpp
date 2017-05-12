@@ -89,6 +89,11 @@ public:
 	///
 	ngl::Vec3 getPos();
 	///
+	/// \brief getPos2d get 2d position
+	/// \return m_pos
+	///
+	ngl::Vec2 getPos2d();
+	///
 	/// \brief updateRot update m_rot, eg if direction has changed
 	///
 	void updateRot();

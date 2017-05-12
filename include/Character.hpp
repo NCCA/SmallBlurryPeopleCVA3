@@ -77,7 +77,7 @@ public:
 	///
 	/// \brief setForageState, sets character for foraging instead of chopping
 	///
-	void setForageState() {m_forage = true; softResetCharacter();}
+	void setForageState();
 	///
 	/// \brief isBaddie, checks if an empty square has been selected or a enemy
 	///

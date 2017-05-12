@@ -108,8 +108,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     Gui::instance()->updateActiveCharacter();
     m_characters[0].setActive(true);
 
-    m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
-
     initialiseFramebuffers();
 
     m_shadowMat.assign(3, ngl::Mat4());
@@ -568,6 +566,10 @@ void Scene::update()
                 Gui::instance()->updateActiveCharacter();
             }
           }
+        }
+        if(true)
+        {
+          baddiesSpawn();
         }
 
         for(size_t i=0; i<m_baddies.size(); i++)
@@ -2805,6 +2807,27 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
     std::cout << "moved camera" << std::endl;
     // negative values needed?
     m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
+}
+
+void Scene::baddiesSpawn()
+{
+  m_baddie_timer++;
+  if(m_baddie_timer > 10*m_baddies.size())
+  {
+    m_baddie_timer = 0;
+    ngl::Random *rnd = ngl::Random::instance();
+    if(rnd->randomPositiveNumber(100) < 1)
+    {
+      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+      direction *= 20.0f;
+      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
+      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+      {
+        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+      }
+    }
+  }
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()

@@ -74,7 +74,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
       valid = true;
   }
   */
-
+  m_forage = false;
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
 }
@@ -116,6 +116,21 @@ void Character::setState(int _target_id)
   else
     //if the tile is unreachable
     generalMessage(" can't get there!", _target_id);
+}
+
+void Character::setForageState()
+{
+  if(m_forage == false)
+  {
+    m_forage = true;
+    Gui::instance()->notify("Click on a tree to forage!", m_pos);
+  }
+  else
+  {
+    m_forage = false;
+    Gui::instance()->notify("Click on a tree to chop!", m_pos);
+  }
+  softResetCharacter();
 }
 
 void Character::isBaddie()

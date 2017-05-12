@@ -164,6 +164,10 @@ public:
     /// \param _pos position for the camera to focus in on
     ///
     void focusCamToGridPos(ngl::Vec2 _pos);
+    ///
+    /// \brief baddiesSpawn manage baddie spawning
+    ///
+    void baddiesSpawn();
 
     void initMeshInstances();
     ///
@@ -366,6 +370,7 @@ private:
     ///
     bool m_movement_held[4];
 
+    size_t m_baddie_timer = 0;
     /// @brief Where the mouse selection box is.
     IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
     /// @brief How the mouse selection box is scaled. For example, when hovering over a character it gets taller and thinner.

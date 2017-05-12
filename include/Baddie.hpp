@@ -24,9 +24,12 @@ class Baddie : public AI
 public:
   ///
   /// \brief Baddie constructor to create baddie at edge of map
+  /// \param _pos spawn position
+  /// \param _height_tracer height tracer to use
   /// \param _grid grid to use
+  /// \param _characters reference to character vector in scene
   ///
-	Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters);
+  Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters);
   ///
   /// \brief default destructor
   ///

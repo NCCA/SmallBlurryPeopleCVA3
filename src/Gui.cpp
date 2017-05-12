@@ -12,7 +12,7 @@ constexpr char TEXT_SMILEY[2] = {29,0};
 constexpr float FONT_SIZE = 20;
 constexpr float FONT_SPACE = 0.5;
 
-constexpr int MAX_AGE = 300;
+constexpr int MAX_AGE = 500;
 constexpr int DOUBLE_MAX_NOTES = 10;
 
 Gui::Gui()
