@@ -22,6 +22,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_hunger(1.0),
   m_active(false),
   m_sleeping(false),
+	m_forage(false),
   m_world_inventory(_world_inventory),
   m_baddies(_baddies),
   m_target_baddie(nullptr),
@@ -34,6 +35,9 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
   m_building_amount = prefs->getIntPref("CHARACTER_BUILDING");
+
+	//scale time it takes to do actions by the character's speed
+	m_action_speed = (m_speed );
 
   //timer for actions
   m_hunger_timer.start();
@@ -89,16 +93,18 @@ void Character::setState(int _target_id)
 
     //create different state stacks depending on grid tile clicked on
     if (m_grid->getTileType(m_target_id) == TileType::TREES)
+		{
       if(m_forage)
         forageState();
       else
         chopState();
+		}
+		else if (m_grid->getTileType(m_target_id) == TileType::NONE)
+			isBaddie();
     else
     {
       m_forage = false;
-      if (m_grid->getTileType(m_target_id) == TileType::NONE)
-        isBaddie();
-      else if (m_grid->getTileType(m_target_id) == TileType::WATER)
+			if (m_grid->getTileType(m_target_id) == TileType::WATER)
         fishState();
       else if (m_grid->getTileType(m_target_id) == TileType::FOUNDATION_A ||
                m_grid->getTileType(m_target_id) == TileType::FOUNDATION_B)
@@ -422,14 +428,14 @@ void Character::update()
 {
   std::string message;
   //take away health if hunger is too low
-  if(m_hunger == 0.0 && m_health_timer.elapsed() >= 1000)
+	if(m_hunger == 0.0 && m_health_timer.elapsed() >= (100 / m_speed))
   {
     m_health -= 0.01;
     if(m_health < 0.0)
       m_health = 0.0;
     m_health_timer.restart();
   }
-  else if (m_hunger > 0.75 && m_health_timer.elapsed() >= 100)
+	else if (m_hunger > 0.75 && m_health_timer.elapsed() >= (10 / m_speed))
   {
     m_health += 0.001;
     if(m_health > 1.0)
@@ -438,7 +444,7 @@ void Character::update()
   }
 
   //take away hunger over time
-  if(m_hunger > 0.0 && m_hunger_timer.elapsed() >= 1000)
+	if(m_hunger > 0.0 && m_hunger_timer.elapsed() >= (100 / m_speed))
   {
     m_hunger-= 0.001;
     if (m_hunger < 0.0)
@@ -447,7 +453,7 @@ void Character::update()
   }
 
   //recover stamina when idle
-  if(m_stamina < 1.0 && m_idle == true && m_stamina_timer.elapsed() >= 1000)
+	if(m_stamina < 1.0 && m_idle == true && m_stamina_timer.elapsed() >= (100 / m_speed))
   {
     m_stamina += 0.005;
     if(m_stamina > 1.0)
@@ -523,7 +529,7 @@ void Character::update()
         }
         else
         {
-          if(m_action_timer.elapsed() >= 1000)
+					if(m_action_timer.elapsed() >= (100 / m_speed))
           {
             if(m_stamina > 0.0)
             {
@@ -553,7 +559,7 @@ void Character::update()
         if(wood_left > 0)
         {
           //when chopping speed has been reached, gain a piece of wood
-          if(m_action_timer.elapsed() >= 1000 * m_chopping_speed)
+					if(m_action_timer.elapsed() >= ((100 / m_speed) * m_chopping_speed))
           {
             m_grid->cutTileTrees(m_dest_target_id, 1);
             //take stamina away according to chopping speed
@@ -578,7 +584,7 @@ void Character::update()
 
       case(State::STORE):
       {
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //if the character is holding wood, add to inventory
           if (m_inventory == CharInventory::WOOD)
@@ -608,7 +614,7 @@ void Character::update()
       case(State::FISH):
       {
         //when fishing speed reached, gain piece of fish
-        if(m_action_timer.elapsed() >= 3000)
+				if(m_action_timer.elapsed() >= (300 / m_speed))
         {
           //take away stamina
           m_stamina -= 0.3;
@@ -637,7 +643,7 @@ void Character::update()
 
       case(State::FORAGE):
       {
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_action_speed))
         {
           //take away stamina
           m_stamina -= 0.1;
@@ -721,7 +727,7 @@ void Character::update()
 
       case(State::GET_WOOD):
       {
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //character has wood in inventory
           m_inventory = CharInventory::WOOD;
@@ -738,7 +744,7 @@ void Character::update()
 
       case(State::GET_BERRIES):
       {
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //character has berries in inventory
           m_inventory = CharInventory::BERRIES;
@@ -754,7 +760,7 @@ void Character::update()
 
       case(State::GET_FISH):
       {
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //character has fish in inventory
           m_inventory = CharInventory::FISH;
@@ -779,7 +785,7 @@ void Character::update()
           storeState();
         }
 
-        if(m_action_timer.elapsed() >= 1000 * m_building_speed)
+				if(m_action_timer.elapsed() >= ((100 / m_speed) * m_building_speed))
         {
           //take away stamina
           m_stamina -= 0.03 * m_building_speed;
@@ -807,7 +813,7 @@ void Character::update()
 
       case(State::EAT_BERRIES):
       {
-        if(m_action_timer.elapsed() >= 3000)
+				if(m_action_timer.elapsed() >= (300 / m_speed))
         {
           //take berries away from inventory
           m_inventory = CharInventory::NONE;
@@ -825,7 +831,7 @@ void Character::update()
 
       case(State::EAT_FISH):
       {
-        if(m_action_timer.elapsed() >= 3000)
+				if(m_action_timer.elapsed() >= (300 / m_speed))
         {
           //take fish from inventory
           m_inventory = CharInventory::NONE;
@@ -861,7 +867,7 @@ void Character::update()
       case(State::IDLE):
       {
         //character doesnt move after an action for a second
-        if(m_action_timer.elapsed() >= 1000)
+				if(m_action_timer.elapsed() >= (100 / m_speed))
         {
           //remove state from stack
           if(m_forage)
@@ -881,7 +887,7 @@ void Character::update()
           m_sleeping = true;
           //character is no longer the active character
           m_active = false;
-          if(m_action_timer.elapsed() >= 1000 * (recover*10))
+					if(m_action_timer.elapsed() >= ((100 / m_speed) * (recover*10)))
           {
             m_sleeping = false;
             m_stamina = 1.0;
@@ -894,7 +900,7 @@ void Character::update()
         else
         {
           //if stamina is full
-          if(m_action_timer.elapsed() >= 1000)
+					if(m_action_timer.elapsed() >= (100 / m_speed))
           {
             generalMessage(" doesn't need to sleep", m_pos);
             findNearestEmptyTile();
@@ -1235,6 +1241,25 @@ void Character::generalMessage(std::string _print, ngl::Vec2 _coord)
   //general message using the character's name
   std::string message = m_name + _print;
   Gui::instance()->notify(message, _coord);
+}
+
+std::vector<float> Character::getAttributes()
+{
+	std::vector<float> attributes;
+
+	float chopping = Utility::remap01(m_chopping_speed, 5, 10);
+	float building = Utility::remap01(m_building_speed, 5, 10);
+	float fishing = Utility::remap01(m_fishing_catch, 1, 3);
+	float foraging = Utility::remap01(m_forage_amount, 1, 5);
+	float attacking = Utility::remap01(m_attack_power, 5, 10);
+
+	attributes.push_back(chopping);
+	attributes.push_back(building);
+	attributes.push_back(fishing);
+	attributes.push_back(foraging);
+	attributes.push_back(attacking);
+
+	return attributes;
 }
 
 State Character::getState()

@@ -94,7 +94,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
 
 ngl::Vec2 Grid::idToCoord(int _tileId)
 {
-  int x = _tileId % m_w;
+    int x = _tileId % m_w;
   int y = _tileId / m_w;
   return ngl::Vec2(x, y);
 }
@@ -190,12 +190,26 @@ int Grid::getTileHeight(int _id)
 
 bool Grid::isTileTraversable(int _x, int _y)
 {
+  if (_x > 0 && _y > 0 && _x < m_w && _y < m_h)
+  {
   return m_tiles[_x + m_w * _y].isTraversable();
+  }
+  else
+  {
+    return false;
+  }
 }
 
 bool Grid::isTileTraversable(int _id)
 {
-  return m_tiles[_id].isTraversable();
+  if (_id >= 0 && _id < m_w * m_h)
+  {
+    return m_tiles[_id].isTraversable();
+  }
+  else
+  {
+    return false;
+  }
 }
 
 int Grid::cutTileTrees(int _id, int _goal_amount)
@@ -270,3 +284,44 @@ ngl::Vec2 Grid::getSpawnPoint()
 {
   return m_spawn_ponit;
 }
+
+bool Grid::checkID(int _id)
+{
+  if (_id > 0 && _id > m_tiles.size())
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool Grid::checkCoord(double _x, double _y)
+{
+  if (_x > 0 && _y > 0 && _x < m_w && _y < m_h)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool Grid::checkCoord(ngl::Vec2 _p)
+{
+  if (_p[0] > 0 && _p[1] > 0 && _p[0] < m_w && _p[1] < m_h)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+
+
+

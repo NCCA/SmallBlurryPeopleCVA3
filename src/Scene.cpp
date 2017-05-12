@@ -60,6 +60,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("deferredLight", "vertScreenQuad", "fragBasicLight");
     createShader("diffuseInstanced", "vertDeferredDataInstanced", "fragDeferredDiffuse");
     createShader("diffuse", "vertDeferredData", "fragDeferredDiffuse");
+		createShader("diffuseCharacter", "vertDeferredData", "fragCharDiffuse");
     createShader("colour", "vertDeferredData", "fragBasicColour");
     createShader("charPick", "vertDeferredDataChar", "fragPickChar");
     createShader("terrain", "vertDeferredData", "fragTerrain");
@@ -101,7 +102,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-    int m_char_num = m_prefs->getIntPref("NUMBER_OF_CHARACTERS");
 
     createCharacter();
     m_active_char_id = m_characters[0].getID();
@@ -147,6 +147,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("foundation_D_d", "house/mid_way_building_diff.tif");
 
     store->loadMesh("person", "person/person.obj");
+		store->loadTexture("person_d", "person/person.tif");
     store->loadTexture("baddie_d", "baddie/skelly.tif");
 
     store->loadTexture("grass", "terrain/grass.png");
@@ -226,7 +227,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     //Number of clouds.
-    int num_clouds = 1;//m_grid.getW() * m_grid.getH() / 200;
+    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
     //Number of particles per cloud.
     int num_cloud_particles = 32;
 
@@ -587,7 +588,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x += 0.01f;
+        m_sunAngle.m_x += m_prefs->getFloatPref("TIME_SCALE");
         if(m_sunAngle.m_x > 360.0f)
         {
             m_day++;
@@ -1435,13 +1436,14 @@ void Scene::drawMeshes()
     {
       if(character.isSleeping() == false)
       {
-        slib->use("colour");
         m_transform.reset();
         ngl::Vec3 pos = character.getPos();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, character.getRot(), 0);
-        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset("person", "", "");
+
+				slib->use("diffuseCharacter");
+				slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+				drawAsset("person", "person_d", "diffuseCharacter");
       }
     }
 
@@ -1449,13 +1451,14 @@ void Scene::drawMeshes()
     {
         if(baddie.getHealth() > 0.0)
         {
-          slib->use("diffuse");
           m_transform.reset();
           ngl::Vec3 pos = baddie.getPos();
           m_transform.setPosition(pos);
           m_transform.setRotation(0, baddie.getRot(), 0);
           m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
-          drawAsset("person", "baddie_d", "diffuse");
+
+					slib->use("diffuse");
+					drawAsset("person", "baddie_d", "diffuse");
         }
     }
 

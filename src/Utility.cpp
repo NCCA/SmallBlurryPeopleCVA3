@@ -56,6 +56,13 @@ float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b)
 	return ((_a.m_x -_b.m_x) * (_a.m_x -_b.m_x)) + ((_a.m_y - _b.m_y) * (_a.m_y - _b.m_y));
 }
 
+//remaps a number to be between 0 and 1
+float remap01(float _in_value, float _max_in_range, float _min_in_range)
+{
+	float num = _in_value / (_max_in_range - _min_in_range);
+	return num;
+}
+
 int findSetElement(std::set<int> _set, int index)
 {
 	auto iter = _set.begin();
