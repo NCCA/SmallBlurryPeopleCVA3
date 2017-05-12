@@ -6,7 +6,7 @@
 #include "Gui.hpp"
 #include "Utility.hpp"
 
-Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
+Baddie::Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
 	AI(_height_tracer, _grid),
 	m_characters(_characters),
 	m_combat(false),
@@ -23,9 +23,7 @@ Baddie::Baddie(TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Cha
 	m_tracking_distance = 5.0;
 	m_agro_distance = 15.0;
 
-	//starting position, make random?
-	float x,y = 10;
-	m_pos = ngl::Vec2(x, y);
+	m_pos = _pos;
 	m_target_id = m_grid->coordToId(m_pos);
 }
 

@@ -22,25 +22,25 @@
 
 enum State
 {
-	CHOP_WOOD,
-	STORE,
-	FISH,
-	FORAGE,
-	CHECK_WOOD,
-	CHECK_BERRIES,
-	CHECK_FISH,
-	GET_WOOD,
-	GET_BERRIES,
-	GET_FISH,
-	BUILD,
-	SLEEP,
-	EAT_BERRIES,
-	EAT_FISH,
-	MOVE,
-	TRACK,
-	FIGHT,
-	REPEAT,
-	IDLE
+  CHOP_WOOD,
+  STORE,
+  FISH,
+  FORAGE,
+  CHECK_WOOD,
+  CHECK_BERRIES,
+  CHECK_FISH,
+  GET_WOOD,
+  GET_BERRIES,
+  GET_FISH,
+  BUILD,
+  SLEEP,
+  EAT_BERRIES,
+  EAT_FISH,
+  MOVE,
+  TRACK,
+  FIGHT,
+  REPEAT,
+  IDLE
 };
 
 /// @enum CharInventory
@@ -48,10 +48,10 @@ enum State
 ///
 enum class CharInventory
 {
-	WOOD,
-	FISH,
-	BERRIES,
-	NONE
+  WOOD,
+  FISH,
+  BERRIES,
+  NONE
 };
 
 class Baddie;
@@ -81,7 +81,7 @@ public:
 	///
 	/// @brief setForageState, sets character for foraging instead of chopping
 	///
-	void setForageState() {m_forage = true; softResetCharacter();}
+	void setForageState();
 	///
 	/// @brief isBaddie, checks if an empty square has been selected or a enemy
 	///

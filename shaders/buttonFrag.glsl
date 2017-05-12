@@ -529,7 +529,7 @@ vec3 populationText()
     tp.x+=FONT_SPACE*2;
   } while(pop>0);
   tp = tp0;
-  __ _slash
+  __ _slash __
 
   pop = max_pop;
   while(pop > 10)
@@ -674,11 +674,11 @@ void main()
     {
       icon_color = getIcon(fragUV, 0);
     }
-    else if(fragAction == BUILDHOUSE)
+    else if(fragAction == BUILDSTORE)
     {
       icon_color = getIcon(fragUV, 1);
     }
-    else if(fragAction == BUILDSTORE)
+    else if(fragAction == BUILDHOUSE)
     {
       icon_color = getIcon(fragUV, 2);
     }

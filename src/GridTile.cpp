@@ -71,7 +71,7 @@ int GridTile::cutTrees(int _goal_amount)
   return output;
 }
 
-void GridTile::setBuildState(float _value, TileType _type)
+void GridTile::addBuildState(float _value, TileType _type)
 {
   m_build_state += _value;
 

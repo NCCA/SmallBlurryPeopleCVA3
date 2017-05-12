@@ -40,7 +40,8 @@ enum GameState
   START_MENU,
   MAIN,
   PAUSE,
-  PREFERENCES
+  PREFERENCES,
+  ENDGAME
 };
 
 typedef std::pair<ngl::Vec3, ngl::Vec3> bounds;
@@ -164,6 +165,14 @@ public:
     /// \param _pos position for the camera to focus in on
     ///
     void focusCamToGridPos(ngl::Vec2 _pos);
+    ///
+    /// \brief baddiesSpawn manage baddie spawning
+    ///
+    void baddiesSpawn();
+    ///
+    /// \brief charactersSpawn spawn characters at houses if there's space
+    ///
+    void charactersSpawn();
 
     void initMeshInstances();
     ///
@@ -195,15 +204,15 @@ private:
     ///
     /// @brief m_character, vector of characters that have been created
     ///
-		std::vector<Character> m_characters;
+    std::vector<Character> m_characters;
     ///
-		/// \brief m_tombstones, vector of positions for tombstones
+    /// \brief m_tombstones, vector of positions for tombstones
     ///
     std::vector<ngl::Vec3> m_tombstones;
     ///
     /// \brief m_baddies vector of baddie objects
     ///
-		std::vector<Baddie> m_baddies;
+    std::vector<Baddie> m_baddies;
     ///
     /// \brief m_active_char_id id used to keep track of active character, more stable than using addresses
     ///
@@ -365,7 +374,14 @@ private:
     /// \brief m_movement_held which movement are currently held
     ///
     bool m_movement_held[4];
-
+    ///
+    /// \brief m_baddie_timer timer to spawn baddies
+    ///
+    size_t m_baddie_timer = 0;
+    ///
+    /// \brief m_character_timer timer to spawn characters
+    ///
+    size_t m_character_timer = 0;
     /// @brief Where the mouse selection box is.
     IVal<ngl::Vec3> m_mouseSelectionBoxPosition;
     /// @brief How the mouse selection box is scaled. For example, when hovering over a character it gets taller and thinner.

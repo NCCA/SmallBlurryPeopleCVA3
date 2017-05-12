@@ -17,7 +17,8 @@
 Grid::Grid():
   m_w(1),
   m_h(1),
-  m_num_houses(0)
+  m_store_houses(0),
+  m_num_houses(1) // begin with one house to start
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
@@ -79,6 +80,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   {
     TileType t = (TileType)PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 0));
     int height =  PyInt_AsLong(PyList_GetItem(PyList_GetItem(py_map, i), 1));
+    addTileToVectors(i, t);
     m_tiles[i].setType(t);
     m_tiles[i].setHeight(height);
     std::cout << height << std::endl;
@@ -221,28 +223,30 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
 
 void Grid::setTileType(int _id, TileType _type)
 {
+  addTileToVectors(_id, _type);
   m_tiles[_id].setType(_type);
 }
 
 void Grid::setTileType(int _x, int _y, TileType _type)
 {
+  addTileToVectors(_x + m_w * _y, _type);
   m_tiles[_x + m_w * _y].setType(_type);
 }
 
-void Grid::setBuildState(int _id, float _value, TileType _type)
+void Grid::addBuildState(int _id, float _value, TileType _type)
 {
-  m_tiles[_id].setBuildState(_value, _type);
-  if(_value == 1 && _type == TileType::HOUSE)
+  m_tiles[_id].addBuildState(_value, _type);
+  if(getBuildState(_id) >= 1.0 && _type == TileType::HOUSE)
   {
     houseAdded();
   }
   m_has_changes = true;
 }
 
-void Grid::setBuildState(int _x, int _y, float _value, TileType _type)
+void Grid::addBuildState(int _x, int _y, float _value, TileType _type)
 {
-  m_tiles[_x + m_w * _y].setBuildState(_value, _type);
-  if(_value == 1 && _type == TileType::HOUSE)
+  m_tiles[_x + m_w * _y].addBuildState(_value, _type);
+  if(getBuildState(_x, _y) >= 1.0 && _type == TileType::HOUSE)
   {
     houseAdded();
   }
@@ -321,6 +325,23 @@ bool Grid::checkCoord(ngl::Vec2 _p)
   }
 }
 
+
+void Grid::addTileToVectors(int _id, TileType _type)
+{
+  switch(_type)
+  {
+    case TileType::STOREHOUSE:
+      m_store_houses.push_back(_id);
+      break;
+    default:
+      break;
+  }
+}
+
+std::vector<int> Grid::getStoreHouseIds()
+{
+  return m_store_houses;
+}
 
 
 
