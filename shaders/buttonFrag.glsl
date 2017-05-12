@@ -70,21 +70,110 @@ const int IDLE           = 18;
 const int TEXT_CROSS = 32;
 const int TEXT_NEWLINE = 10;
 
-// return character intensity of ch at position tp
+///
+/// \brief character draw character at the given position
+/// \param ch character index
+/// \param tp current text position
+/// \return greyscale text
+///
 float character(float ch, vec2 tp);
-vec3 charStateText(vec3);
+
+///
+/// \brief charStateText draw character at the given position, checks the current character's state and then writes the corresponding text to the button
+/// \param tp position for text
+/// \return greyscale text
+///
+float charStateText(vec2 tp);
+
+///
+/// \brief text draws text from the button_text uniform, between given indices
+/// \param pos position to draw text
+/// \param start_index index of button_text to begin text
+/// \param end_index index of button_text to end text
+/// \return greyscale text
+///
 vec3 text(vec2 pos, int start_index, int end_index);
+
+///
+/// \brief centerText writes text in center of button, using button_text and fragId
+/// \return greyscale text
+///
 vec3 centerText();
+
+///
+/// \brief staminaText write text on top of stamina meter
+/// \return greyscale text
+///
 vec3 staminaText();
+
+///
+/// \brief healthText write text on top of health meter
+/// \return greyscale text
+///
 vec3 healthText();
+
+///
+/// \brief hungerText write text on top of hunger meter
+/// \return greyscale text
+///
 vec3 hungerText();
+
+///
+/// \brief populationText write population text to the population button
+/// \return greyscale text
+///
 vec3 populationText();
+
+///
+/// \brief box draw an SDF represented box, with curved corners
+/// \param position position of the box
+/// \param size size of box
+/// \param radius radius of the corner curves
+/// \return + for inside the box, - for outside the box, 0 for on the edge
+///
 float box(vec2 position, vec2 size, float radius);
-vec2 translate(vec2 nglp, vec2 t);
+///
+/// \brief translate position for looking up textures, text etc
+/// \param p original position
+/// \param t amount to translate
+/// \return new position
+///
+vec2 translate(vec2 p, vec2 t);
+
+///
+/// \brief getIcon
+/// \param pixel_uv uv position of button
+/// \param icon_id index of icon needed
+/// \param size size of icon in pixels, defaults to 64x64
+/// \return colour of texture
+///
 vec4 getIcon(vec2 pixel_uv, uint icon_id, vec2 size);
+
+///
+/// \brief loadingBar draw loading bar
+/// \param value value of bar
+/// \param uv_x current uv x position
+/// return float 1-0 for whether bar at position is full
+///
 float loadingBar(float value, float uv_x);
+
+///
+/// \brief shiftRGB rotates R, G, B values
+/// \param c initial colour
+/// \param up_down direction to shift colour in
+///
 vec3 shiftRGB(vec3 c, int up_down);
+
+///
+/// \brief buttonRequiresCharacter check whether button requires character to be drawn
+/// \return true if button requires character, false otherwise
+///
 bool buttonRequiresCharacter();
+
+///
+/// \brief buttonRequiresCharacter check whether button uses character colour
+/// \return true if button is drawn with character colour, false otherwise
+///
 bool buttonUsesCharacterColor();
 
 layout(location = 0) out vec4 outColour;
@@ -132,6 +221,8 @@ vec3 def_button_color = vec3(0.7, 0.1, 0.0);
 //--- font data ---
 uniform float FONT_SIZE = 20;
 uniform float FONT_SPACE = 0.5;
+
+// define function for different character indices
 
 #define S(a) c+=character(float(a), tp); tp.x-=FONT_SPACE;
 
@@ -215,7 +306,6 @@ uniform float FONT_SPACE = 0.5;
 #define _z S(122);
 
 #define _newline tp.y += 1.0; tp.x = tp0.x;
-
 // return character intensity of ch at position tp
 float character(float ch, vec2 tp)
 {

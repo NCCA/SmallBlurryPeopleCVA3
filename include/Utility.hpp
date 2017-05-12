@@ -84,6 +84,10 @@ bool pointInBox(std::pair<ngl::Vec3, ngl::Vec3> _box, ngl::Vec3 _pt);
 
 bool boxIntersectBox(std::pair<ngl::Vec3, ngl::Vec3> _a, std::pair<ngl::Vec3, ngl::Vec3> _b);
 
+///
+/// \brief getMousePos get the mouse position
+/// \return vec2 with x,y position of mouse
+///
 ngl::Vec2 getMousePos();
 
 template<typename T>
