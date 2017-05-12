@@ -39,8 +39,12 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
+    m_characters(0)
 {
+  Gui *gui = Gui::instance();
+  gui->init(this, _viewport, "button");
+
     ngl::Random * rnd = ngl::Random::instance();
     rnd->setSeed();
 
@@ -104,7 +108,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
     createCharacter();
     m_active_char_id = m_characters[0].getID();
-    Gui::instance()->updateActiveCharacter();
+    gui->updateActiveCharacter();
     m_characters[0].setActive(true);
 
     m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
@@ -209,8 +213,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Gui *gui = Gui::instance();
-    gui->init(this, _viewport, "button");
     std::cout << "Scene constructor complete.\n";
 
     initMeshInstances();
