@@ -33,8 +33,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_centre_camera(false),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
-    m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
     m_day(80),
+    m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
     m_state(GameState::START_MENU),
     m_game_started(false),
     m_movement_held{false},
@@ -568,7 +568,7 @@ void Scene::update()
           }
         }
 
-        for(int i=0; i<m_baddies.size(); i++)
+        for(size_t i=0; i<m_baddies.size(); i++)
         {
             if(m_baddies[i].getHealth() > 0.0)
                 m_baddies[i].update();
@@ -1291,7 +1291,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }*/
+    }
 
     m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);
@@ -1304,7 +1304,7 @@ void Scene::draw()
             drawAsset("debugSphere", "", "");
         }
 
-    /*slib->use("colour");
+    slib->use("colour");
     for(auto &p : m_debugPoints)
         p.m_w = 1.0;
 
