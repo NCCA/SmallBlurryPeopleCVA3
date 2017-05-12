@@ -2823,15 +2823,18 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 void Scene::baddiesSpawn()
 {
   m_baddie_timer++;
-  if(m_baddie_timer > 10*m_baddies.size())
+  int timer_scale = 10;
+  timer_scale/=getPopulation();
+  timer_scale += 2;
+  if(m_baddie_timer > timer_scale*m_baddies.size())
   {
     m_baddie_timer = 0;
     ngl::Random *rnd = ngl::Random::instance();
-    if(rnd->randomPositiveNumber(100) < 1)
+    if(rnd->randomPositiveNumber(20+100/getPopulation()) < 1)
     {
       size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
       ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-      direction *= 20.0f;
+      direction *= 12.0f;
       ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
       if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
       {
@@ -2849,7 +2852,7 @@ void Scene::charactersSpawn()
   {
     m_character_timer = 0;
     float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(50) < spawn_chance)
+    if(rnd->randomPositiveNumber(30) < spawn_chance)
     {
       createCharacter();
     }
