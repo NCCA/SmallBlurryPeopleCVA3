@@ -7,8 +7,7 @@
 #include "ngl/Vec2.h"
 ///
 /// \file NodeNetwork.hpp
-/// \brief The NodeNetwork can be created as a temporary helper object for finding a path.
-/// all pathfinding logic is contained within it
+/// \brief The NodeNetwork can be created as a temporary helper object for finding a path. All pathfinding logic is contained within it
 ///
 ///
 /// \class NodeNetwork
@@ -45,7 +44,7 @@ public:
   ///
   void printPath(std::vector<ngl::Vec2> &_path);
   ///
-  /// \brief raytrace check whether straight path is possible between given points. Does not require instance of class
+  /// \brief raytrace check whether straight path is possible between given points. Does not require instance of class. Algorithm from http://playtechs.blogspot.co.uk/2007/03/raytracing-on-grid.html
   /// \param _grid grid to check
   /// \param _start_pos start of line
   /// \param _end_pos end of line

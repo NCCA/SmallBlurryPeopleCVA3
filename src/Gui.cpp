@@ -55,7 +55,6 @@ void Gui::click()
 {
   if(m_selected_button)
   {
-    std::cout << "clicked button " << m_selected_button->getID() << std::endl;
     executeAction(m_selected_button->getAction());
   }
 }
@@ -596,7 +595,6 @@ void Gui::updateText()
     // add a 0 value for break
     button_text.push_back(0);
   }
-  std::cout << "button text size: " << button_text.size() << std::endl;
   if(button_text.size() > BUTTON_TEXT_LENGTH)
   {
     std::cerr << "button text of size " << button_text.size() << " too long for current limit of " << BUTTON_TEXT_LENGTH << ", recommended to increase limit" << std::endl;

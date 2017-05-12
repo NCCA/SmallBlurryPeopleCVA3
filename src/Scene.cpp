@@ -617,153 +617,154 @@ void Scene::update()
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
     }
 
-    m_pointLights.clear();
+      m_pointLights.clear();
 
-    ngl::Vec3 off (0.0f, 0.5f, 0.0f);
-    for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-    for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-    for(auto &c : m_characters)
-    {
-        //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
-        if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
-        {
-            ngl::Vec3 vec = c.getPos() + off;
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-        }
-    }
+      ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+      for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
+          m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+      for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+          m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+      for(auto &c : m_characters)
+      {
+          //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+          if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
+          {
+              ngl::Vec3 vec = c.getPos() + off;
+              m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+          }
+      }
 
-    glBindVertexArray(m_cloudParticlesVAO);
+      glBindVertexArray(m_cloudParticlesVAO);
 
-    //Create a VAO for the clouds.
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
-                 &m_cloudParticles.m_pos[0].m_x,
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
+      //Create a VAO for the clouds.
+      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
+      glBufferData(GL_ARRAY_BUFFER,
+                   sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
+                   &m_cloudParticles.m_pos[0].m_x,
+              GL_STATIC_DRAW
+              );
+      setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_scale.size(),
-                 &m_cloudParticles.m_scale[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
+      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
+      glBufferData(GL_ARRAY_BUFFER,
+                   sizeof(float) * m_cloudParticles.m_scale.size(),
+                   &m_cloudParticles.m_scale[0],
+              GL_STATIC_DRAW
+              );
+      setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_time.size(),
-                 &m_cloudParticles.m_time[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
+      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
+      glBufferData(GL_ARRAY_BUFFER,
+                   sizeof(float) * m_cloudParticles.m_time.size(),
+                   &m_cloudParticles.m_time[0],
+              GL_STATIC_DRAW
+              );
+      setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_alpha.size(),
-                 &m_cloudParticles.m_alpha[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
+      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
+      glBufferData(GL_ARRAY_BUFFER,
+                   sizeof(float) * m_cloudParticles.m_alpha.size(),
+                   &m_cloudParticles.m_alpha[0],
+              GL_STATIC_DRAW
+              );
+      setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
 
-    glBindVertexArray(0);
+      glBindVertexArray(0);
 
-    //Update velocity
-    for(auto &vec : m_cloudParticles.m_vel)
-    {
-        vec += m_windDirection.get() * 0.001f;
-        vec -= vec * 0.01f;
-    }
-    //Update position
-    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-        m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
+      //Update velocity
+      for(auto &vec : m_cloudParticles.m_vel)
+      {
+          vec += m_windDirection.get() * 0.001f;
+          vec -= vec * 0.01f;
+      }
+      //Update position
+      for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+          m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
 
-    for(auto &t : m_cloudParticles.m_time)
-    {
-        t += 0.01f;
-        if(t > 3.0f)
-            t -= 3.0f;
-    }
+      for(auto &t : m_cloudParticles.m_time)
+      {
+          t += 0.01f;
+          if(t > 3.0f)
+              t -= 3.0f;
+      }
 
-    //Simple wrapping, now with alpha fading when out of bounds.
-    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-    {
-        auto vec = m_cloudParticles.m_pos[i];
-        auto vel = m_cloudParticles.m_vel[i];
-        auto alpha = m_cloudParticles.m_alpha[i];
+      //Simple wrapping, now with alpha fading when out of bounds.
+      for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+      {
+          auto vec = m_cloudParticles.m_pos[i];
+          auto vel = m_cloudParticles.m_vel[i];
+          auto alpha = m_cloudParticles.m_alpha[i];
 
-        bool fading = false;
+          bool fading = false;
 
-        if(vec.m_x < 0.0f and vel.m_x < 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_x += m_grid.getW();
-        }
-        else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
-        }
+          if(vec.m_x < 0.0f and vel.m_x < 0.0f)
+          {
+              fading = true;
+              m_cloudParticles.m_alpha[i] -= 0.005f;
+              if(alpha <= 0.0f)
+                  m_cloudParticles.m_pos[i].m_x += m_grid.getW();
+          }
+          else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
+          {
+              fading = true;
+              m_cloudParticles.m_alpha[i] -= 0.005f;
+              if(alpha <= 0.0f)
+                  m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
+          }
 
-        if(vec.m_z < 0.0f and vel.m_z < 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_z += m_grid.getH();
-        }
-        else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
-        }
+          if(vec.m_z < 0.0f and vel.m_z < 0.0f)
+          {
+              fading = true;
+              m_cloudParticles.m_alpha[i] -= 0.005f;
+              if(alpha <= 0.0f)
+                  m_cloudParticles.m_pos[i].m_z += m_grid.getH();
+          }
+          else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
+          {
+              fading = true;
+              m_cloudParticles.m_alpha[i] -= 0.005f;
+              if(alpha <= 0.0f)
+                  m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
+          }
 
-        if(!fading)
-            m_cloudParticles.m_alpha[i] += 0.005f;
+          if(!fading)
+              m_cloudParticles.m_alpha[i] += 0.005f;
 
-        m_cloudParticles.m_alpha[i] = Utility::clamp(
-                    m_cloudParticles.m_alpha[i], 0.0f, 1.0f
-                    );
-    }
+          m_cloudParticles.m_alpha[i] = Utility::clamp(
+                      m_cloudParticles.m_alpha[i], 0.0f, 1.0f
+                      );
+      }
 
-    ngl::Random * rnd = ngl::Random::instance();
+      ngl::Random * rnd = ngl::Random::instance();
 
-    if(rnd->randomPositiveNumber() > 0.99f)
-    {
-        ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
-        v.m_y /= 6.0f;
+      if(rnd->randomPositiveNumber() > 0.99f)
+      {
+          ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
+          v.m_y /= 6.0f;
 
-        m_windDirection.setEnd( v );
-    }
+          m_windDirection.setEnd( v );
+      }
 
-    m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
+      m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
 
-    //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
-    for(int i = 0; i < 32; ++i)
-    {
-        for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
-        {
-            ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
-            ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
-            if(diffc.lengthSquared() < diffn.lengthSquared())
-            {
-                std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
-                std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
-                std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
-                std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
-                std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
-            }
-        }
-    }
+      //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+      for(int i = 0; i < 32; ++i)
+      {
+          for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
+          {
+              ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+              ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+              if(diffc.lengthSquared() < diffn.lengthSquared())
+              {
+                  std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
+                  std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
+                  std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
+                  std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                  std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+              }
+          }
+      }
+
 }
 
 //I'm sorry this function is so long :(
