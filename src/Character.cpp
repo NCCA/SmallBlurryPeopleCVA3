@@ -22,6 +22,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_hunger(1.0),
   m_active(false),
   m_sleeping(false),
+	m_forage(false),
   m_world_inventory(_world_inventory),
   m_baddies(_baddies),
   m_target_baddie(nullptr),

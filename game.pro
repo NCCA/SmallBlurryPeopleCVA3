@@ -90,3 +90,6 @@ win32 {
     LIBS += -LC:/NGL/lib/ -lNGL
     DEFINES += NO_DLL
 }
+
+DISTFILES += \
+    shaders/fragCharDiffuse.glsl
