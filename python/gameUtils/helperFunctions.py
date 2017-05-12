@@ -2,8 +2,8 @@ import math
 import random as rand
 
 ## @package helperFunctions
-#  This module contains functions that I found useful when writing 
-#  the maps that ship with the game and I thought would be useful 
+#  This module contains functions that I found useful when writing
+#  the maps that ship with the game and I thought would be useful
 #  to other people writing their own custom maps
 
 ## roundToNearest rounds the value x to the nearest multiple of base
@@ -18,10 +18,11 @@ def roundToNearest(x, base):
 ## len returns the length of a 2d vector
 #  @param x is the x component of the vector
 #  @param y is the y component of the vector
+#  @return is the length sqrt(x^2 + y^2)
 def len(x, y):
   return math.sqrt(x * x + y * y)
 
-## isClearArea indicates if the tiles within a give radius of a 
+## isClearArea indicates if the tiles within a give radius of a
 #  tile are all empty. This is used to find an empty area on a map
 #  to designate as the starting area
 #
@@ -30,7 +31,7 @@ def len(x, y):
 #  @param x is the x coordinate of the center tile
 #  @param y is the y coordinate of the center tile
 #  @param radius is the search radius for the desured clear area
-#  @param empty_type is a value that indicated if a tile is empty
+#  @param empty_type is a value that indicates if a tile is empty
 #  @return is true if the area around x, y is clear, fals otherwise
 def isClearArea(map_data, map_width, x, y, radius, empty_type):
   for i in range(x - radius, x + radius + 1):
@@ -42,7 +43,12 @@ def isClearArea(map_data, map_width, x, y, radius, empty_type):
 
 ## getRandomSpawn produces a random spawn point to be passed to the
 #  c++ program. The spawn point is checked to ensure it is clear in
-#  a 
+#  a 3 by 3 square around the centre
+#  @param map data is the list of tiles that have been set by the script
+#  @param width is the width of the grid
+#  @param height is the height of the grid
+#  @param empty type is the value that indicated an empty tile
+#  @return is a tuple of the coordinates of the random spawn point
 def getRandomSpawn(map_data, width, height, empty_type):
   found = False
   x = 0

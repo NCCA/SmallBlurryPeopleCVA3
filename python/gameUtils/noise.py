@@ -1,23 +1,23 @@
 import random as rand
 import math
 
+## @package The Noise module has classes that implement simplex noise and
+#  fractal noise functions
 
+
+## A class for generating fractal noise patterns in 2d using simplex noise.
+# The user can make calls to both fractal and simplex fiunctions, incase they
+# only want a single leyer of noise. The simplex noise function was implemented
+# from explanations and examples found at
+# http://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
 class fractalNoise:
-  """
-  A class for generating fractal noise patterns in 2d using simplex noise.
-  The user can make calls to both fractal and simplex fiunctions, incase they
-  only want a single leyer of noise
 
-  The simplex noise function was implemented from explanations and examples
-  found at http://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
-  """
+  ## __init__ is the ctor that sets the seed, and shuffles the permutation table
+  #
+  #  @param self is the class instance
+  #  @param the seed value used top generate the permutation table which
+  #  controlls the gradient vector direction for each vertex in the grid
   def __init__(self, _seed):
-    """
-    initializer for the noise generator
-    _seed       the seed value used top generate the permutation table which
-                controlls the gradient vector direction for each vertex in the
-                grid
-    """
     #set random engine seed
     rand.seed(_seed)
 
@@ -30,23 +30,21 @@ class fractalNoise:
                  [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
                  [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]]
 
+  ## dot is a custom dot product function used by the simplexNoise function
+  #
+  #  @param a is a gradient vector
+  #  @param x is the x component of second vector
+  #  @param y is tge y component of second vector
+  #  @return the dot product of a and (x, y)
   def dot(self, a, x, y):
-    """
-    custom dot product function used by the simplexNoise function
-    a:        a gradient vector
-    x:        x component of second vector
-    y:        y component of second vector
-    return:   the dot product of a and (x, y)
-    """
     return a[0] * x + a[1] * y
 
+  ## simplex computes values of 2d simplex noise for given positions
+  #
+  #  @param x_in is the x component of the position
+  #  @param y_in is the y component of the position
+  #  @return the value of the simplex noise at (x_in, y_in)
   def simplex(self, x_in, y_in):
-    """
-    computes values of 2d simplex noise for given positions
-    x_in:     the x component of the position
-    y_in:     the y component of the position
-    return:   the value of the simplex noise at (x_in, y_in)
-    """
     #vairables to store noise contributions from the three corners
     n0 = .0;
     n1 = .0;
@@ -107,18 +105,17 @@ class fractalNoise:
 
     return 70.0 * (n0 + n1 + n2)
 
+  ## fractal computes 2d fractal noise values using layered simplex noise
+  #
+  #  @param x is the x component of position
+  #  @param y is the y component of position
+  #  @param octaves is the number of layers of noise
+  #  @param persistence is how much the weight of each layer is reduced by
+  #  @param scale is the initial frequency
+  #  @param low is the minimum value of output
+  #  @param high is the maximum value of output
+  #  @return fractal noise value for the position (x, y) scaled to the range low-high
   def fractal(self, x, y, octaves, persistence, scale, low, high):
-    """
-    computes 2d fractal noise values using layered simplex noise
-    x:          x component of position
-    y:          y component of position
-    octaves:    number of layers of noise
-    persistence:how much the weight of each layer is reduced by
-    scale:      initial frequency
-    low:        minimum value of output
-    high:       maximum value of output
-    return:     fractal noise value for the position (x, y) scaled to the range low-high
-    """
     #initializing values
     max_amp = 0
     amp = 1

@@ -6,27 +6,11 @@ sys.path.append(cwd)
 import gameUtils.noise as n
 import gameUtils.helperFunctions as hf
 
-#parameters from game
-map_width = 100
-map_height = 100
-map_seed = 4
-tileTypes = {"NONE": 0,
-             "TREES": 1,
-             "WATER": 2,
-             "MOUNTAINS": 3,
-             "STOREHOUSE": 4}
 
-if "width_in" in globals():
-  map_width = width_in
-
-if "height_in" in globals():
-  map_height = height_in
-
-if "seed_in" in globals():
-  map_seed = seed_in
-
-if "tileTypes_in" in globals():
-  tileTypes = tileTypes_in
+map_width = width_in
+map_height = height_in
+map_seed = seed_in
+tileTypes = tileTypes_in
 
 
 
@@ -50,15 +34,17 @@ tree_band = (90, 150)
 tree_density_scale = 0.5
 water_height = 90
 
+height_divider = 20
+
 #setting terrain types
 for x in range(map_width):
   for y in range(map_height):
     noise = int(gen.fractal(x, y, octaves, persistence, freq, min, max))
-    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)/20.0
+    map_data[x + map_width * y][1] = hf.roundToNearest(noise, 25)/height_divider
     #setting terrain types
     if noise > peak_height:
       map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
-      map_data[x + map_width * y][1] = int(gen.fractal(x, y, octaves, persistence, freq/2, min, max))/10
+      map_data[x + map_width * y][1] = int(gen.fractal(x, y, octaves, persistence, freq/2, min, max))/(height_divider/2)
     elif noise > mountain_height:
       map_data[x + map_width * y][0] = tileTypes["MOUNTAINS"]
       map_data[x + map_width * y][1] = int(gen.fractal(x, y, octaves, persistence, freq/2, min, max))/12
@@ -79,6 +65,6 @@ px, py = hf.getRandomSpawn(map_data, map_width, map_height, tileTypes["NONE"])
 map_data[px + map_width * py][0] = tileTypes["STOREHOUSE"]
 map_data[px+1 + map_width * py][0] = tileTypes["HOUSE"]
 spawn_point = (px, py+2)
-water_height = 90/20
-mountain_height = 170/20
+water_height = 90/height_divider
+mountain_height = 170/height_divider
 
