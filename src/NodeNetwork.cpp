@@ -15,7 +15,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
   while(!path_found)
   {
 
-    /// FUNCTION: GET LOWEST COST
+    // GET LOWEST COST
     // used as pointer to lowest f cost node, but since vector might be reallocated and addresses will change, id is used
     int lowest_f_node_id = -1;
 
@@ -46,10 +46,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
     {
       break;
     }
-
-    ///FUNCTION END
-
-    ///FUNCTION GET NEIGHBOURS AND UPDATE COSTS
+    // GET NEIGHBOURS AND UPDATE COSTS
 
     // create neighbour list, (4)
     std::array<int, 4> neighbour_ids = m_nodes[lowest_f_node_id].getNeighbours();
@@ -120,7 +117,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
       }
     }
 
-    /// CLOSE NODE
+    // CLOSE NODE
     // close current node
     m_nodes[lowest_f_node_id].close();
 
@@ -138,6 +135,7 @@ std::vector<ngl::Vec2> NodeNetwork::findPath()
 
 void NodeNetwork::printNetwork()
 {
+  // march through positions and if a valid node exists, print x or o, if closed or open
   for(int y=0; y<m_grid->getH(); y++)
   {
     for(int x=0; x<m_grid->getW(); x++)
@@ -178,10 +176,12 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
   Node *current_node = &_end_node;
   while(true)
   {
+    // stop when parent is reached
     if(current_node->getParentID() == -1)
     {
       break;
     }
+    // add current position to vector and then get parent
     path.push_back(current_node->getPos() + ngl::Vec2(0.5, 0.5));
     current_node = &(m_nodes[current_node->getParentID()]);
   }
@@ -191,6 +191,7 @@ std::vector<ngl::Vec2> NodeNetwork::createFoundPath(Node _end_node)
 
 void NodeNetwork::printPath(std::vector<ngl::Vec2> &_path)
 {
+  // similar to print Network, go through positions and print valid path positions
   for(int y=0; y<m_grid->getH(); y++)
   {
     for(int x=0; x<m_grid->getW(); x++)

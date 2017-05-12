@@ -32,9 +32,6 @@ public:
   /// \param _parent_id the position of the parent node in the vector
   ///
   Node(Grid *_grid, std::vector<Node> *nodes, ngl::Vec2 _pos, ngl::Vec2 _target_pos, int _parent_id);
-  ///
-  /// \brief default destructor
-  ///
   ~Node() = default;
 
   ///

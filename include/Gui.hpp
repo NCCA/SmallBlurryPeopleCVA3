@@ -9,7 +9,15 @@
 #include "Commands.hpp"
 #include "Scene.hpp"
 
-constexpr unsigned int BUTTON_TEXT_LENGTH = 2048;
+///
+/// \file Gui.hpp
+/// \brief The Gui is used for user interaction, and managing and drawing the buttons
+///
+
+///
+/// \brief BUTTON_TEXT_LENGTH
+///
+constexpr unsigned int BUTTON_TEXT_LENGTH = 1024;
 
 ///
 /// \brief The Gui class contains button positions and managing their use
@@ -81,23 +89,35 @@ public :
   /// \brief createPrefsButtons create the set of buttons for the preferences menu
   ///
   void createPrefsButtons();
-
-
-
-
-
+  ///
+  /// \brief addButton add a button to the button vector
+  /// \param _action button's action when clicked
+  /// \param _x_align horizonal alignment (to left/right/center of screen)
+  /// \param _y_align vertical alignment (to top/bottom/center of screen)
+  /// \param _offset offset from edge/center
+  /// \param _size size of button
+  /// \param _text button's text
+  ///
   void addButton(Action _action, XAlignment _x_align, YAlignment _y_align, ngl::Vec2 _offset, ngl::Vec2 _size, const std::string &_text);
-
+  ///
+  /// \brief addNotification add a notificaion to the button vector
+  /// \param _text text of notification
+  /// \param _map_pos position notification comes from
+  ///
   void addNotification(const std::string &_text, ngl::Vec2 _map_pos);
-
+  ///
+  /// \brief removeButton delete a button from the vector
+  /// \param button button to remove
+  ///
   void removeButton(std::shared_ptr<Button> button);
   ///
   /// \brief updateButtonArrays updates positions and passes them to openGL, useful for changing buttons or resizing screen
   ///
   void updateButtonArrays();
-
+  ///
+  /// \brief updateNotifications update age of notifications and delete any if necessary
+  ///
   void updateNotifications();
-
   ///
   /// \brief drawButtons draw buttons to screen
   ///
