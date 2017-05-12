@@ -938,21 +938,7 @@ bool Character::findNearestStorage()
 {
   //empty vector to hold positions of storage house
   std::vector<ngl::Vec2> storage_houses;
-  int height = m_grid->getH();
-  int width = m_grid->getW();
-
-  //go thorugh grid
-  for (int i=0; i< height; i++)
-  {
-    for (int j=0; j<width; j++)
-    {
-      //if the current grid tile is a storehouse, add to vector
-      if (m_grid->getTileType(i, j) == TileType::STOREHOUSE)
-      {
-        storage_houses.push_back(ngl::Vec2(i, j));
-      }
-    }
-  }
+  storage_houses = m_grid->getStoreHouses();
 
   //sort vector based on distance from character's position
   distanceSort(0, storage_houses.size()-1, storage_houses);

@@ -338,7 +338,7 @@ void Grid::addTileToVectors(ngl::Vec2 _pos, TileType _type)
   }
 }
 
-std::vector<ngl::Vec2> Grid::getStoreHouseIds()
+std::vector<ngl::Vec2> Grid::getStoreHouses()
 {
   return m_store_houses;
 }

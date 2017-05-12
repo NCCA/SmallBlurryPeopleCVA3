@@ -270,7 +270,7 @@ public:
   /// \brief getStoreHouseIds returns the vector of storehouse positions
   /// \return m_store_houses
   ///
-  std::vector<ngl::Vec2> getStoreHouseIds();
+  std::vector<ngl::Vec2> getStoreHouses();
 
 private:
   ///
