@@ -174,6 +174,11 @@ public:
 	///
 	float getHunger() {return m_hunger;}
 	///
+	/// @brief getAttributes, gets character attributes such as chopping speed
+	/// @return a vector of m_chopping_speed, m_building_speed, m_fishing_catch, m_forage_amount, m_attack_power
+	///
+	std::vector<float> getAttributes();
+	///
 	/// @brief setActive, set's whether the character is active
 	/// @param [in] _selection, a boolean determing whether the character is active or not
 	///
@@ -206,6 +211,10 @@ private:
 	/// @brief m_colour, current character's shading colour
 	///
 	ngl::Vec3 m_colour;
+	///
+	/// @brief m_action_speed, speed of actions; scaled by character speed
+	///
+	float m_action_speed;
 	///
 	/// @brief m_stamina, how much stamina the character has
 	///
