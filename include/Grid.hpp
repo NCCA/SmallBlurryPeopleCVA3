@@ -238,6 +238,12 @@ public:
   ///
   void resetHasChanges();
 
+  ///
+  /// \brief getSpawnPoint retrieves the spawn point set by the python script
+  /// \return the spwan point as an ngl::Vec2
+  ///
+  ngl::Vec2 getSpawnPoint();
+
 
 
 private:
@@ -295,6 +301,11 @@ private:
   /// \brief m_num_houses number of houses on the map
   ///
   int m_num_houses;
+
+  ///
+  /// \brief m_spawn_ponit is the spawn point set in the python script
+  ///
+  ngl::Vec2 m_spawn_ponit;
 };
 
 #endif//__GRID_HPP__

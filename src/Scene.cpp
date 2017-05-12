@@ -30,7 +30,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_active_char_id(-1),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
-    m_centre_camera(false),
+    m_centre_camera(true),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
     m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
@@ -53,6 +53,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_cam.calculateProjectionMat();
     m_cam.clearTransforms();
     m_cam.calculateViewMat();
+    zoom(-30);
 
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
@@ -101,10 +102,11 @@ Scene::Scene(ngl::Vec2 _viewport) :
     readNameFile();
     //creates characters with random names
     int m_char_num = m_prefs->getIntPref("NUMBER_OF_CHARACTERS");
-    for (int i = 0; i<m_char_num; i++)
-    {
-        createCharacter();
-    }
+
+    createCharacter();
+    m_active_char_id = m_characters[0].getID();
+    Gui::instance()->updateActiveCharacter();
+    m_characters[0].setActive(true);
 
     m_baddies.push_back(Baddie(&m_height_tracer, &m_grid, &m_characters));
 

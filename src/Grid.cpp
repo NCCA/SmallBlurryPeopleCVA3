@@ -5,6 +5,7 @@
 #include <streambuf>
 #include <Python.h>
 #include "ngl/Random.h"
+#include "ngl/NGLStream.h"
 #include "Grid.hpp"
 #include "Prefs.hpp"
 #include "Utility.hpp"
@@ -63,6 +64,9 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   m_mountain_height = PyInt_AsLong(PyDict_GetItemString(py_dict, "mountain_height"));
   m_water_level = PyInt_AsLong(PyDict_GetItemString(py_dict, "water_height"));
   py_map = PyDict_GetItemString(py_dict, "map_data");
+  m_spawn_ponit[0] = PyInt_AsLong(PyTuple_GetItem(PyDict_GetItemString(py_dict, "spawn_point"), 0));
+  m_spawn_ponit[1] = PyInt_AsLong(PyTuple_GetItem(PyDict_GetItemString(py_dict, "spawn_point"), 1));
+  std::cout << "spawn point is set to: " << m_spawn_ponit << std::endl;
  //create an empty grid with each tile's id set
 
   for (int i = 0; i < m_w * m_h; i++)
@@ -260,4 +264,9 @@ std::vector<ngl::Vec2> Grid::getTreePositions(int _x, int _y)
 int Grid::getNumTrees(int _x, int _y)
 {
   return m_tiles[_x + m_w * _y].getNumTrees();
+}
+
+ngl::Vec2 Grid::getSpawnPoint()
+{
+  return m_spawn_ponit;
 }

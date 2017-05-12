@@ -11,7 +11,7 @@ must define the 3 following variables:
                     WATER
                     MOUNTAINS
                     HOUSE
-                    STOEREHOUSE
+                    STOREHOUSE
                   To set one of these values the following syntax is used:
                     $map_data[x + map_width * y] = tileTypes["TREES"]
 
@@ -111,14 +111,10 @@ for x in range(map_width):
         map_data[x + map_width * y][0] = tileTypes["TREES"]
 
 #scattering some random stoerehouses
-for i in range(10):
-  #wtf is going on here
-  rand.seed(i)
-  x_rand = rand.randint(0, map_width)
-  y_rand = rand.randint(0, map_height)
-  if (map_data[x_rand + map_width * y_rand][0] != tileTypes["WATER"]) and (map_data[x_rand + map_width * y_rand][0] != tileTypes["MOUNTAINS"]):
-    map_data[x_rand + map_width * y_rand][0] = tileTypes["STOREHOUSE"]
-
+px, py = hf.getRandomSpawn(map_data, map_width, map_height, tileTypes["NONE"])
+map_data[px + map_width * py][0] = tileTypes["STOREHOUSE"]
+map_data[px+1 + map_width * py][0] = tileTypes["HOUSE"]
+spawn_point = (px, py+2)
 water_height = 90/20
 mountain_height = 170/20
 
