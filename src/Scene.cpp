@@ -2843,7 +2843,7 @@ void Scene::charactersSpawn()
 {
   ngl::Random *rnd = ngl::Random::instance();
   m_character_timer++;
-  if(m_character_timer > 10)
+  if(m_character_timer > 50)
   {
     m_character_timer = 0;
     float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
