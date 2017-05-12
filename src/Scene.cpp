@@ -278,8 +278,8 @@ void Scene::initMeshInstances()
     for(int i = 0; i < m_grid.getW(); ++i)
         for(int j = 0; j < m_grid.getH(); ++j)
         {
-            int index = static_cast<int>( m_grid.getTileType(i, j) );
-            if (index == static_cast<int>(TileType::TREES))
+            TileType index = m_grid.getTileType(i, j);
+            if (index == TileType::TREES)
             {
               //get num trees
               int num_trees = m_grid.getNumTrees(i, j);
@@ -292,19 +292,19 @@ void Scene::initMeshInstances()
                   {
                     //push back tree
                     ngl::Vec2 p = positions[n];
-                    m_meshPositions.at( index ).push_back(ngl::Vec3(
-                                                          i+0.5+p[0],
-                                                          m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                          j+0.5+p[1]
+                    m_meshPositions.at((int)index).push_back(ngl::Vec3(
+                                                          i+p[0],
+                                                          m_height_tracer.getHeight(i+p[0], j+p[1]),
+                                                          j+p[1]
                                                           ));
                   }
                   else
                   {
                     ngl::Vec2 p = positions[n];
-                    m_meshPositions.at( static_cast<int>(TileType::STUMPS)).push_back(ngl::Vec3(
-                                                        i+0.5+p[0],
-                                                        m_height_tracer.getHeight(i+0.5+p[0], j+0.5+p[1]),
-                                                        j+0.5+p[1]
+                    m_meshPositions.at((int)TileType::STUMPS).push_back(ngl::Vec3(
+                                                        i+p[0],
+                                                        m_height_tracer.getHeight(i+p[0], j+p[1]),
+                                                        j+p[1]
                                                         ));
                   }
                   //increment meshCount
@@ -312,7 +312,7 @@ void Scene::initMeshInstances()
                 }
             }
             else{
-                m_meshPositions.at( index ).push_back(ngl::Vec3(
+                m_meshPositions.at( (int)index ).push_back(ngl::Vec3(
                                                           i+0.5,
                                                           m_height_tracer.getHeight(i+0.5, j+0.5),
                                                           j+0.5
@@ -2648,9 +2648,9 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (unsigned int)(_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
+    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
     //Can we move in the vertical direction?
-    bool vertical = (unsigned int)(_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
+    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
 
     if(horizontal)
     {

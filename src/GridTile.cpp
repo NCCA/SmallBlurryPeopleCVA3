@@ -11,6 +11,7 @@ GridTile::GridTile(int _id)
   {
     ngl::Vec2 rand_pos = rand->getRandomVec2();
     rand_pos *= 0.4;
+    rand_pos += ngl::Vec2(0.5, 0.5);
     m_tree_positions.push_back(rand_pos);
   }
 }
