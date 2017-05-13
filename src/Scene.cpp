@@ -575,8 +575,7 @@ void Scene::update()
             }
           }
         }
-        // preference for this?
-        if(true)
+        if(m_prefs->getBoolPref("ENEMIES"))
         {
           baddiesSpawn();
         }
@@ -2818,22 +2817,27 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 void Scene::baddiesSpawn()
 {
   m_baddie_timer++;
-  int timer_scale = 10;
-  timer_scale/=getPopulation();
-  timer_scale += 2;
-  if(m_baddie_timer > timer_scale*m_baddies.size())
+
+  if(m_baddie_timer > (100 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
   {
     m_baddie_timer = 0;
     ngl::Random *rnd = ngl::Random::instance();
-    if(rnd->randomPositiveNumber(20+100/getPopulation()) < 1)
+    double rand = rnd->randomNumber();
+    if (rand < (0.001))
     {
       size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-      direction *= 12.0f;
-      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
-      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+      bool found = false;
+      while(!found)
       {
-        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+        ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+        float dist = 10 + rnd->randomPositiveNumber(10);
+        direction *= dist;
+        ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
+        if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+        {
+          m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+          found = true;
+        }
       }
     }
   }
@@ -2843,11 +2847,11 @@ void Scene::charactersSpawn()
 {
   ngl::Random *rnd = ngl::Random::instance();
   m_character_timer++;
-  if(m_character_timer > 50)
+  if(m_character_timer > (100 / m_prefs->getFloatPref("CHARACERT_SPAWN_RATE")))
   {
     m_character_timer = 0;
     float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(30) < spawn_chance)
+    if(rnd->randomPositiveNumber(10) < spawn_chance)
     {
       createCharacter();
     }
