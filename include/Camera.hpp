@@ -99,6 +99,7 @@ public:
 
     float getTargetDolly() const {return m_iDolly.getEnd();}
 
+    void setFocalDepth(const float _d) {m_iFocalDepth.setEnd(_d);}
     float getFocalDepth() const {return m_iFocalDepth.get();}
 
     void immediateTransform(const ngl::Mat4 &_mat) {m_V *= _mat; m_VP = m_V * m_P;}

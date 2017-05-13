@@ -92,7 +92,7 @@ public :
   ///
   /// \brief createEndGameButtons create set of buttons for the game over screen
   ///
-  void createEndGameButtons();
+  void createEndGameButtons(const std::string &_message);
   ///
   /// \brief addButton add a button to the button vector
   /// \param _action button's action when clicked

@@ -94,7 +94,8 @@ enum class Action
   SUB_SEED,          // 43
   MAP_WIDTH,         // 44
   MAP_HEIGHT,        // 45
-  MAP_SEED           // 46
+  MAP_SEED,          // 46
+  END_GAME           // 47
 };
 
 ///
@@ -495,6 +496,17 @@ public:
   virtual void execute();
 private:
   int m_dir;
+};
+
+class EndGameCommand :public Command
+{
+public:
+  EndGameCommand(Scene *_scene);
+  ~EndGameCommand() = default;
+
+  virtual void execute();
+private:
+  Scene *m_scene;
 };
 
 #endif//__COMMANDS_HPP__

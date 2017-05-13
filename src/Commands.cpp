@@ -244,3 +244,16 @@ void ChangeSeedCommand::execute()
   MapList::instance()->addSeed(m_dir);
   Gui::instance()->mapChanged();
 }
+
+//------------------------------------------------------------//
+// End Game Command
+//------------------------------------------------------------//
+
+EndGameCommand::EndGameCommand(Scene *_scene) :
+  m_scene(_scene)
+{}
+
+void EndGameCommand::execute()
+{
+  m_scene->endGame("MAIN MENU");
+}

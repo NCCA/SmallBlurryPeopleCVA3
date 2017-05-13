@@ -48,6 +48,10 @@ const uint PLUS_HEIGHT       = 40;
 const uint SUB_HEIGHT        = 41;
 const uint PLUS_SEED         = 42;
 const uint SUB_SEED          = 43;
+const uint MAP_WIDTH         = 44;
+const uint MAP_HEIGHT        = 45;
+const uint MAP_SEED          = 46;
+const uint END_GAME          = 47;
 
 //game states
 const uint STATE_MAIN  = 0;

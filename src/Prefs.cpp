@@ -42,15 +42,18 @@ void Prefs::restoreDefaultPrefs()
   //setting float values
   m_float_prefs["CHARACTER_SPEED"] = float_pref_t(0.1, IncType::X0_1);
   m_float_prefs["TIME_SCALE"] = float_pref_t(0.01, IncType::X0_01);
+  m_float_prefs["ENEMIE_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
+  m_float_prefs["CHARACTER_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
 
   //setting string values
   m_str_prefs["MAP_SCRIPT"] = str_pref_t("python/simplexMap.py", IncType::NONE);
 
   //setting bool values
   m_bool_prefs["AA"] = bool_pref_t(true, IncType::NONE);
-  m_bool_prefs["DOP"] = bool_pref_t(true, IncType::NONE);
+  m_bool_prefs["DOF"] = bool_pref_t(true, IncType::NONE);
   m_bool_prefs["REFLECTIONS"] = bool_pref_t(true, IncType::NONE);
   m_bool_prefs["SHADOWS"] = bool_pref_t(true, IncType::NONE);
+  m_bool_prefs["ENEMIES"] = bool_pref_t(true, IncType::NONE);
 }
 
 IncType Prefs::getIncType(std::string _key)

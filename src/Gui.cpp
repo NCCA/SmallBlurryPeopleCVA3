@@ -222,6 +222,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::SUB_SEED:
     command.reset(new ChangeSeedCommand(-1));
     break;
+  case Action::END_GAME:
+    command.reset(new EndGameCommand(m_scene));
+    break;
   }
   return command;
 }
@@ -319,7 +322,7 @@ void Gui::createPauseButtons()
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40), TEXT_PLAY);
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
+  addButton(Action::END_GAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "MAIN MENU");
   updateButtonArrays();
 }
 
@@ -365,11 +368,10 @@ void Gui::createPrefsButtons()
   updateButtonArrays();
 }
 
-void Gui::createEndGameButtons()
+void Gui::createEndGameButtons(const std::string &_message)
 {
   wipeButtons();
-  std::string end_message = "GAME OVER: everyone died :(";
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(getButtonLength(end_message), 40), end_message);
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(getButtonLength(_message), 40), _message);
 
   addMapButtons();
   addMenuButtons();

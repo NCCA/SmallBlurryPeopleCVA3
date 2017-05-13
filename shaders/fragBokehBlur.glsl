@@ -1,7 +1,9 @@
 #version 410 core
 
-//Stolen from
-//http://devlog-martinsh.blogspot.co.uk/2011/11/glsl-depth-of-field-with-bokeh-v21.html
+//This shader was adapted from the source code available here:
+//  http://devlog-martinsh.blogspot.co.uk/2011/11/glsl-depth-of-field-with-bokeh-v21.html
+//This shader is not developed wholly by me, and should not be marked as such.
+//Ben Hawkyard
 
 uniform sampler2D bgl_RenderedTexture;
 uniform sampler2D bgl_DepthTexture;
@@ -26,11 +28,11 @@ int rings = 3; //ring count
 
 bool autofocus = false; //use autofocus in shader? disable if you use external focalDepth value
 vec2 focus = vec2(0.5,0.5); // autofocus point on screen (0.0,0.0 - left lower corner, 1.0,1.0 - upper right)
-float range = 4.0; //focal range
-float maxblur = 0.2; //clamp value of max blur
+float range = 16.0; //focal range
+float maxblur = 4.0; //clamp value of max blur
 
 float threshold = 0.4; //highlight threshold;
-float gain = 2.0; //highlight gain;
+float gain = 1.0; //highlight gain;
 
 float bias = 0.4; //bokeh edge bias
 float fringe = 0.25; //bokeh chromatic aberration/fringing
