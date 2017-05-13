@@ -1,7 +1,6 @@
 #include "MapList.hpp"
 #include "Prefs.hpp"
 #include "Utility.hpp"
-#include <iostream>
 
 MapList::MapList() :
   m_current_map(0),
@@ -36,7 +35,6 @@ void MapList::nextMap()
 {
   m_current_map++;
   m_current_map %= m_map_names.size()+1;
-  std::cout << "next, now:" << m_current_map << std::endl;
 }
 
 void MapList::prevMap()
@@ -46,19 +44,18 @@ void MapList::prevMap()
   {
     m_current_map += m_map_names.size()+1;
   }
-  std::cout << "prev, now:" << m_current_map << std::endl;
 }
 
 void MapList::addWidth(int x)
 {
   m_w+=x;
-  m_w = Utility::clamp(m_w, 30, 500);
+  m_w = Utility::clamp(m_w, 30, 200);
 }
 
 void MapList::addHeight(int x)
 {
   m_h+=x;
-  m_h = Utility::clamp(m_h, 30, 500);
+  m_h = Utility::clamp(m_h, 30, 200);
 }
 
 void MapList::addSeed(int x)

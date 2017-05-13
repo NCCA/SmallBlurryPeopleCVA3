@@ -789,7 +789,6 @@ void Gui::scrollButton(int _dir)
 void Gui::mapChanged()
 {
   MapList *maplist = MapList::instance();
-  std::cout << "seed: " << maplist->getSeed() << std::endl;
   for(std::shared_ptr<Button> &button : m_buttons)
   {
     switch(button->getAction())
