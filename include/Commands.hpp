@@ -45,6 +45,16 @@
 /// NEXT_MAP go to the next map
 /// PREV_MAP go to the previous map
 /// MAP_NAME display name of current map
+/// PLUS_WIDTH add to the map width
+/// SUB_WIDTH subtract from the map width
+/// PLUS_HEIGHT add to the map height
+/// SUB_HEIGHT subtract from the map height
+/// PLUS_SEED add to the map seed
+/// SUB_SEED subtract from the map seed
+/// MAP_WIDTH display map width
+/// MAP_HEIGHT display map height
+/// MAP_SEED display map seed
+/// END_GAME go to the main menu
 ///
 enum class Action
 {
