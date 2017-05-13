@@ -283,12 +283,12 @@ void Gui::unpause()
 void Gui::createStartMenuButtons()
 {
   wipeButtons();
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "TINY PEOPLE");
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 225), ngl::Vec2(130,40), TEXT_PLAY);
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-250), ngl::Vec2(130,40), "TINY PEOPLE");
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -150), ngl::Vec2(130,40), TEXT_PLAY);
 
   addMapButtons();
-
   addMenuButtons();
+
   updateButtonArrays();
 }
 
@@ -371,11 +371,11 @@ void Gui::createPrefsButtons()
 void Gui::createEndGameButtons(const std::string &_message)
 {
   wipeButtons();
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(getButtonLength(_message), 40), _message);
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-250), ngl::Vec2(getButtonLength(_message), 40), _message);
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-150), ngl::Vec2(130,40), "PLAY AGAIN");
 
   addMapButtons();
   addMenuButtons();
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,225), ngl::Vec2(130,40), "PLAY AGAIN");
 
   updateButtonArrays();
 }
@@ -613,22 +613,22 @@ void Gui::mouseUp()
 
 void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _target)
 {
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-    GLint id = slib->getProgramID("button");
-    GLint loc = glGetUniformLocation(id, _uniform);
+  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+  GLint id = slib->getProgramID("button");
+  GLint loc = glGetUniformLocation(id, _uniform);
 
-    if(loc == -1)
-    {
-        //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
-        //std::cerr << "shader name: " << m_shader_name << std::endl;
-        //std::cerr << "program id" << id << std::endl;
-        // don't exit, because texture is optimised out when shader is compiled
-        //exit(EXIT_FAILURE);
-    }
-    glUniform1i(loc, _target);
+  if(loc == -1)
+  {
+    //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
+    //std::cerr << "shader name: " << m_shader_name << std::endl;
+    //std::cerr << "program id" << id << std::endl;
+    // don't exit, because texture is optimised out when shader is compiled
+    //exit(EXIT_FAILURE);
+  }
+  glUniform1i(loc, _target);
 
-    glActiveTexture(GL_TEXTURE0 + _target);
-    glBindTexture(GL_TEXTURE_2D, _tex);
+  glActiveTexture(GL_TEXTURE0 + _target);
+  glBindTexture(GL_TEXTURE_2D, _tex);
 }
 
 void Gui::updateText()
@@ -794,7 +794,7 @@ void Gui::mapChanged()
     switch(button->getAction())
     {
     case Action::MAP_NAME:
-      button->setText(maplist->getCurrentMapPath());
+      button->setText(maplist->getCurrentMapName());
       break;
     case Action::MAP_WIDTH:
       button->setText(maplist->getWString());
@@ -815,25 +815,27 @@ void Gui::mapChanged()
 void Gui::addMapButtons()
 {
   MapList *maplist = MapList::instance();
-  addButton(Action::MAP_NAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,25), ngl::Vec2(250,40), maplist->getCurrentMapPath());
-  addButton(Action::PREV_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,25), ngl::Vec2(40,40), TEXT_PLAYBACK);
-  addButton(Action::NEXT_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,25), ngl::Vec2(40,40), TEXT_PLAY);
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-100), ngl::Vec2(350, 40), "CHOOSE MAP:");
 
-  addButton(Action::MAP_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,75), ngl::Vec2(250,40), maplist->getWString());
-  addButton(Action::SUB_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,75), ngl::Vec2(40,40), TEXT_PLAYBACK);
-  addButton(Action::PLUS_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,75), ngl::Vec2(40,40), TEXT_PLAY);
+  addButton(Action::MAP_NAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-50), ngl::Vec2(250,40), maplist->getCurrentMapName());
+  addButton(Action::PREV_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,-50), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::NEXT_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,-50), ngl::Vec2(40,40), TEXT_PLAY);
 
-  addButton(Action::MAP_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,125), ngl::Vec2(250,40), maplist->getHString());
-  addButton(Action::SUB_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,125), ngl::Vec2(40,40), TEXT_PLAYBACK);
-  addButton(Action::PLUS_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,125), ngl::Vec2(40,40), TEXT_PLAY);
+  addButton(Action::MAP_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,0), ngl::Vec2(250,40), maplist->getWString());
+  addButton(Action::SUB_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,0), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,0), ngl::Vec2(40,40), TEXT_PLAY);
 
-  addButton(Action::MAP_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,175), ngl::Vec2(250,40), maplist->getSeedString());
-  addButton(Action::SUB_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,175), ngl::Vec2(40,40), TEXT_PLAYBACK);
-  addButton(Action::PLUS_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,175), ngl::Vec2(40,40), TEXT_PLAY);
+  addButton(Action::MAP_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,50), ngl::Vec2(250,40), maplist->getHString());
+  addButton(Action::SUB_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,50), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,50), ngl::Vec2(40,40), TEXT_PLAY);
+
+  addButton(Action::MAP_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,100), ngl::Vec2(250,40), maplist->getSeedString());
+  addButton(Action::SUB_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,100), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,100), ngl::Vec2(40,40), TEXT_PLAY);
 }
 
 void Gui::addMenuButtons()
 {
-  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 275), ngl::Vec2(130,40), "PREFERENCES");
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 325), ngl::Vec2(130, 40), "QUIT");
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 150), ngl::Vec2(130,40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 200), ngl::Vec2(130, 40), "QUIT");
 }

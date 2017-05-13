@@ -196,8 +196,8 @@ public:
     ///
     void charactersSpawn();
     ///
-    /// @brief endGame
-    /// @param _message
+    /// \brief endGame return to main menu
+    /// \param _message text for first button in main menu
     ///
     void endGame(const std::string &_message);
     ///
@@ -217,20 +217,19 @@ private:
     ///
     bool m_active;
     ///
-    /// @brief m_prefs
+    /// \brief m_prefs pointer to preferences
     ///
     Prefs* m_prefs;
     ///
-    /// @brief m_cam
+    /// \brief m_cam camera that user sees through
     ///
     Camera m_cam;
     ///
-    /// @brief m_grid
+    /// \brief m_grid grid to use for map traversal and terrain generation etc
     ///
     Grid m_grid;
     ///
-    /// @brief m_world_inventory, global inventory of store houses, controls how much can be stored 
-    /// and keeps track of what has been stored
+    /// \brief m_world_inventory user's total inventory
     ///
     Inventory m_world_inventory;
     ///

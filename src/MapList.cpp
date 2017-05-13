@@ -15,7 +15,7 @@ MapList::MapList() :
   m_map_names.push_back("uk");
 }
 
-std::string MapList::getCurrentMapPath()
+std::string MapList::getCurrentMapName()
 {
   if((size_t)m_current_map<m_map_names.size())
   {
@@ -27,7 +27,23 @@ std::string MapList::getCurrentMapPath()
   }
   else
   {
-    return "";
+    return "MAP_NAME_ERROR";
+  }
+}
+
+std::string MapList::getCurrentMapPath()
+{
+  if((size_t)m_current_map<m_map_names.size())
+  {
+    return "python/" + m_map_names[m_current_map] + ".py";
+  }
+  else if((size_t)m_current_map == m_map_names.size())
+  {
+    return "python/" + Prefs::instance()->getStrPref("MAP_SCRIPT") + ".py";
+  }
+  else
+  {
+    return "MAP_PATH_ERROR";
   }
 }
 
