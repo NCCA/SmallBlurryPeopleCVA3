@@ -1359,10 +1359,6 @@ void Scene::draw()
 
       glBindVertexArray(0);
 
-      glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
-
-      Gui::instance()->drawButtons();
-
     }
 
     //---------------------------//
@@ -1370,7 +1366,7 @@ void Scene::draw()
     //---------------------------//
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
-    //Gui::instance()->drawButtons();
+    Gui::instance()->drawButtons();
 
     //---------------------------//
     //         DEBUG DRAW        //
@@ -2792,7 +2788,6 @@ void Scene::startGame()
 
   //Number of clouds.
   int num_clouds = m_grid.getW() * m_grid.getH() / 200;
-  num_clouds = 1;
   //Number of particles per cloud.
   int num_cloud_particles = 32;
 
