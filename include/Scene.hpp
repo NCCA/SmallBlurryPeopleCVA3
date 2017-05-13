@@ -20,7 +20,6 @@
 
 #include "Framebuffer.hpp"
 
-
 ///
 /// \brief The Direction enum clarification for which direction is being used
 ///
@@ -171,6 +170,8 @@ public:
     /// \brief charactersSpawn spawn characters at houses if there's space
     ///
     void charactersSpawn();
+
+    void endGame(const std::string &_message);
 
     ///
     /// \brief getPopulation get the number of characters in the scene

@@ -11,6 +11,7 @@
 #include "Gui.hpp"
 #include "Utility.hpp"
 #include "Commands.hpp"
+#include "MapList.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -163,9 +164,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("cloud2", "cloud/cloud2.png");
     store->loadTexture("sphericalNormal", "cloud/sphericalNormal.png");
 
-    std::cout << "Constructing terrain...\n";
-    m_terrainVAO = constructTerrain();
-
     std::vector<ngl::Vec4> verts = {
         ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
         ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
@@ -210,11 +208,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::cout << "Scene constructor complete.\n";
-
-    initMeshInstances();
-
-
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
 
@@ -225,45 +218,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    //Number of clouds.
-    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
-    //Number of particles per cloud.
-    int num_cloud_particles = 32;
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
-                + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
-        m_cloudParticles.m_pos.push_back( p );
-        m_cloudParticles.m_vel.push_back(ngl::Vec3());
-        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-        m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-    }
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        for(int j = 0; j < num_cloud_particles; ++j)
-        {
-            ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
-            m_cloudParticles.m_pos.push_back(p);
-            m_cloudParticles.m_vel.push_back(ngl::Vec3());
-            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-            m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-        }
-    }
-    m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
-
-    glGenVertexArrays(1, &m_cloudParticlesVAO);
-    glBindVertexArray(m_cloudParticlesVAO);
-    m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
-    setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
-    m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
-    setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
-    m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
-    setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
-    m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
-    setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
-    glBindVertexArray(0);
 }
 
 void Scene::initMeshInstances()
@@ -598,29 +552,30 @@ void Scene::update()
 
         for(size_t i=0; i<m_characters.size(); i++)
         {
-            if (m_characters[i].getHealth() <= 0.0)
-            {
-                std::string message = m_characters[i].getName() + " has died!";
-                ngl::Vec2 pos = m_characters[i].getPos2d();
-                Gui::instance()->notify(message, pos );
-                //check if character has health, if it doesn't remove the character
-                if (m_active_char_id == m_characters[i].getID())
-                {
-                    m_active_char_id = -1;
-                    Gui::instance()->updateActiveCharacter();
-                }
-                //ID's start from 1 so negate 1 to get index in vector m_characters
-                //int index = (m_characters[i].getID() - 1);
-                //add name back to available list
-                m_file_names.push_back(m_characters[i].getName());
-                //add position to tombstone positions
-                ngl::Vec3 stone_pos(m_characters[i].getPos());
-                m_tombstones.push_back(stone_pos);
-                //remove character from vector
-                m_characters.erase(m_characters.begin() + i);
-                for(auto &baddie: m_baddies)
-                    baddie.addScale(0.5f);
-                break;
+          //check if character has health, if it doesn't remove the character
+          if (m_characters[i].getHealth() <= 0.0)
+          {
+              std::string message = m_characters[i].getName() + " has died!";
+              ngl::Vec2 pos = m_characters[i].getPos2d();
+              Gui::instance()->notify(message, pos );
+              //check if character has health, if it doesn't remove the character
+              if (m_active_char_id == m_characters[i].getID())
+              {
+                  m_active_char_id = -1;
+                  Gui::instance()->updateActiveCharacter();
+              }
+              //ID's start from 1 so negate 1 to get index in vector m_characters
+              //int index = (m_characters[i].getID() - 1);
+              //add name back to available list
+              m_file_names.push_back(m_characters[i].getName());
+              //add position to tombstone positions
+              ngl::Vec3 stone_pos(m_characters[i].getPos());
+              m_tombstones.push_back(stone_pos);
+              //remove character from vector
+              m_characters.erase(m_characters.begin() + i);
+              for(auto &baddie: m_baddies)
+                  baddie.addScale(0.5f);
+              break;
             }
             else
             {
@@ -635,9 +590,7 @@ void Scene::update()
         }
         if (m_characters.size() == 0)
         {
-            m_state = GameState::ENDGAME;
-            Gui::instance()->createEndGameButtons();
-            m_game_started = false;
+            endGame("GAME OVER: everybody died :(");
             return;
         }
 
@@ -687,7 +640,6 @@ void Scene::update()
                 t_sundown * ngl::Vec3(1.0f, 0.6f, 0.1f);
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
-    }
 
     m_pointLights.clear();
 
@@ -698,14 +650,16 @@ void Scene::update()
             m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
         for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
             m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-        for(auto &c : m_characters)
+    }
+
+    for(auto &c : m_characters)
+    {
+        ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+        //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+        if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
         {
-            //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
-            if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
-            {
-                ngl::Vec3 vec = c.getPos() + off;
-                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
-            }
+            ngl::Vec3 vec = c.getPos() + off;
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
         }
     }
 
@@ -756,6 +710,23 @@ void Scene::update()
     for(size_t i = 0; i < m_cloudParticles.size(); ++i)
         m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
 
+      //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+      for(int i = 0; i < 32; ++i)
+      {
+          for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
+          {
+              ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+              ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+              if(diffc.lengthSquared() < diffn.lengthSquared())
+              {
+                  std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
+                  std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
+                  std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
+                  std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                  std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+              }
+          }
+      }
     for(auto &t : m_cloudParticles.m_time)
     {
         t += 0.01f;
@@ -839,10 +810,10 @@ void Scene::update()
             }
         }
     }
+  }
 
 }
 
-//I'm sorry this function is so long :(
 //Order of operations:
 //  --
 //  SETUP                   : Sets up the scene ready for drawing.
@@ -1401,8 +1372,8 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
-        //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
+        //m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
+        m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
@@ -1781,9 +1752,9 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     glBindVertexArray(0);
 
     slib->use("shadowDepthInstanced");
-    int offset = 0;
     for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
+        int offset = 0;
         const auto &block = m_meshInstances[b];
         for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
@@ -2066,7 +2037,7 @@ void Scene::mouseSelection()
     Gui *gui = Gui::instance();
     ngl::Vec2 mouse_coords = Utility::getMousePos();
 
-    if(gui->mousePos( mouse_coords ) )
+    if( gui->mousePos( mouse_coords ) )
     {
         gui->click();
     }
@@ -2074,7 +2045,7 @@ void Scene::mouseSelection()
     {
         int red = getCharIDAtMouse();
 
-        if(red < (m_characters.size() + 1) && red > 0)
+        if(red > 0)
         {
             for (Character &character : m_characters)
             {
@@ -2085,7 +2056,7 @@ void Scene::mouseSelection()
                     {
                         m_active_char_id = character.getID();
                         character.setActive(true);
-                        //character.clearState();
+                        // character.clearState();
                         gui->updateActiveCharacter();
                     }
                 }
@@ -2785,17 +2756,63 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
-    Gui *gui = Gui::instance();
-    m_state = GameState::MAIN;
-    m_game_started = true;
-    gui->unpause();
-    // add first character
-    createCharacter();
-    m_active_char_id = m_characters[0].getID();
-    gui->updateActiveCharacter();
-    m_characters[0].setActive(true);
-    // clear baddie vector
-    m_baddies.clear();
+  ngl::Random *rnd = ngl::Random::instance();
+  Gui *gui = Gui::instance();
+  MapList *maplist = MapList::instance();
+  m_state = GameState::MAIN;
+  m_game_started = true;
+  gui->unpause();
+  m_grid.updateScript("python/"+maplist->getCurrentMapPath()+".py", maplist->getW(), maplist->getH(), maplist->getSeed());
+  std::cout << "Constructing terrain...\n";
+  m_terrainVAO = constructTerrain();
+
+  initMeshInstances();
+
+  // add first character
+  createCharacter();
+  m_active_char_id = m_characters[0].getID();
+  gui->updateActiveCharacter();
+  m_characters[0].setActive(true);
+
+  //Number of clouds.
+  int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+  //Number of particles per cloud.
+  int num_cloud_particles = 32;
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
+              + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
+      m_cloudParticles.m_pos.push_back( p );
+      m_cloudParticles.m_vel.push_back(ngl::Vec3());
+      m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+      m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+  }
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      for(int j = 0; j < num_cloud_particles; ++j)
+      {
+          ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
+          m_cloudParticles.m_pos.push_back(p);
+          m_cloudParticles.m_vel.push_back(ngl::Vec3());
+          m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+          m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+      }
+  }
+  m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
+
+  glGenVertexArrays(1, &m_cloudParticlesVAO);
+  glBindVertexArray(m_cloudParticlesVAO);
+  m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
+  setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
+  m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
+  setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
+  m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
+  setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+  m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
+  setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
+  glBindVertexArray(0);
 }
 
 void Scene::startMove(Direction _d)
@@ -2915,6 +2932,19 @@ void Scene::charactersSpawn()
             createCharacter();
         }
     }
+}
+
+void Scene::endGame(const std::string &_message)
+{
+  m_state = GameState::ENDGAME;
+  Gui::instance()->createEndGameButtons(_message);
+  m_game_started = false;
+  m_grid.hasChanges();
+  m_meshInstances.clear();
+  // clear baddie vector
+  m_baddies.clear();
+  m_characters.clear();
+  m_active_char_id = -1;
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()

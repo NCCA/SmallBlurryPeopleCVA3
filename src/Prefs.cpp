@@ -43,10 +43,10 @@ void Prefs::restoreDefaultPrefs()
   m_float_prefs["CHARACTER_SPEED"] = float_pref_t(0.1, IncType::X0_1);
   m_float_prefs["TIME_SCALE"] = float_pref_t(0.01, IncType::X0_01);
   m_float_prefs["ENEMIE_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
-  m_float_prefs["CHARACERT_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
+  m_float_prefs["CHARACTER_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
 
   //setting string values
-  m_str_prefs["MAP_SCRIPT_PATH"] = str_pref_t("python/simplexMap.py", IncType::NONE);
+  m_str_prefs["MAP_SCRIPT"] = str_pref_t("python/simplexMap.py", IncType::NONE);
 
   //setting bool values
   m_bool_prefs["AA"] = bool_pref_t(true, IncType::NONE);
