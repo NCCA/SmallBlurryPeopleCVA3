@@ -45,6 +45,9 @@ Scene::Scene(ngl::Vec2 _viewport) :
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
 
+    //reads file with list of names
+    readNameFile();
+    //pass reference of world inventory to character class
     Character::setWorldInventory(&m_world_inventory);
 
     ngl::Random * rnd = ngl::Random::instance();
@@ -105,10 +108,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->use("bokeh");
     slib->setRegisteredUniform("bgl_dim", m_viewport);
 
-    //reads file with list of names
-    readNameFile();
-    //creates characters with random names
-
     initialiseFramebuffers();
 
     m_shadowMat.assign(3, ngl::Mat4());
@@ -119,9 +118,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     prim->createSphere( "sphere", 0.1, 12 );
 
     std::cout << "Loading assets...\n";
-
-    //store->loadMesh("mountain", "mountain/mountain.obj");
-    //store->loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
@@ -415,27 +411,30 @@ void Scene::initialiseFramebuffers()
 
 void Scene::readNameFile()
 {
-    std::ifstream namesFile;
-    namesFile.open("names/game_names.txt");
+  //open file of names
+  std::ifstream namesFile;
+  namesFile.open("names/game_names.txt");
 
-    if(!namesFile.is_open())
-    {
-        std::cerr<<"Couldnt open file\n";
-        exit(EXIT_FAILURE);
-    }
+  //if can't open file
+  if(!namesFile.is_open())
+  {
+      std::cerr<<"Couldnt open file\n";
+      exit(EXIT_FAILURE);
+  }
 
-    int lineNo = 0;
-    std::string lineBuffer;
-    while (!namesFile.eof())
-    {
-        std::getline(namesFile, lineBuffer, '\n');
-        if(lineBuffer.size() != 0)
-        {
-            m_file_names.push_back(lineBuffer);
-            lineNo++;
-        }
-    }
-    namesFile.close();
+  //go through file line by line and add to vector of names, m_file_names
+  int lineNo = 0;
+  std::string lineBuffer;
+  while (!namesFile.eof())
+  {
+      std::getline(namesFile, lineBuffer, '\n');
+      if(lineBuffer.size() != 0)
+      {
+          m_file_names.push_back(lineBuffer);
+          lineNo++;
+      }
+  }
+  namesFile.close();
 }
 
 void Scene::createCharacter()
@@ -450,6 +449,45 @@ void Scene::createCharacter()
     m_characters.push_back(Character(&m_height_tracer, &m_grid, m_file_names[name_chosen], &m_baddies));
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
+}
+
+void Scene::charactersSpawn()
+{
+  ngl::Random *rnd = ngl::Random::instance();
+  m_character_timer++;
+  if(m_character_timer > 50)
+  {
+    m_character_timer = 0;
+    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
+    if(rnd->randomPositiveNumber(30) < spawn_chance)
+    {
+      createCharacter();
+    }
+  }
+}
+
+void Scene::baddiesSpawn()
+{
+  m_baddie_timer++;
+  int timer_scale = 10;
+  timer_scale/=getPopulation();
+  timer_scale += 2;
+  if(m_baddie_timer > timer_scale*m_baddies.size())
+  {
+    m_baddie_timer = 0;
+    ngl::Random *rnd = ngl::Random::instance();
+    if(rnd->randomPositiveNumber(20+100/getPopulation()) < 1)
+    {
+      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+      direction *= 12.0f;
+      ngl::Vec2 rand_pos = m_characters[character_index].getPos2D() + direction;
+      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+      {
+        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+      }
+    }
+  }
 }
 
 void Scene::update()
@@ -500,7 +538,9 @@ void Scene::update()
 
         if(m_centre_camera == true)
         {
+          //centre camera onto character
             for (Character &character : m_characters)
+              //if the character has been selected/ the one being controlled by the user
                 if (character.isActive())
                     m_cam.setPos(-character.getPos());
         }
@@ -534,32 +574,31 @@ void Scene::update()
 
         for(size_t i=0; i<m_characters.size(); i++)
         {
+          //if a character has died
           if (m_characters[i].getHealth() <= 0.0)
           {
-              std::string message = m_characters[i].getName() + " has died!";
-              ngl::Vec2 pos = m_characters[i].getPos2d();
-              Gui::instance()->notify(message, pos );
-              //check if character has health, if it doesn't remove the character
-              if (m_active_char_id == m_characters[i].getID())
-              {
-                  m_active_char_id = -1;
-                  Gui::instance()->updateActiveCharacter();
-              }
-              //ID's start from 1 so negate 1 to get index in vector m_characters
-              //int index = (m_characters[i].getID() - 1);
-              //add name back to available list
-              m_file_names.push_back(m_characters[i].getName());
-              //add position to tombstone positions
-              ngl::Vec3 stone_pos(m_characters[i].getPos());
-              m_tombstones.push_back(stone_pos);
-              //remove character from vector
-              m_characters.erase(m_characters.begin() + i);
-              for(auto &baddie: m_baddies)
-                baddie.addScale(0.5f);
-              break;
+            //print a message in the UI
+            ngl::Vec2 pos = m_characters[i].getPos2D();
+            std::string message = m_characters[i].getName() + " has died!";
+            Gui::instance()->notify(message, pos );
+            //if its the active character, update the selected character to none
+            if (m_active_char_id == m_characters[i].getID())
+            {
+                m_active_char_id = -1;
+                Gui::instance()->updateActiveCharacter();
+            }
+            //add name back to available list
+            m_file_names.push_back(m_characters[i].getName());
+            //add position to tombstone positions
+            ngl::Vec3 stone_pos(m_characters[i].getPos());
+            m_tombstones.push_back(stone_pos);
+            //remove character from vector
+            m_characters.erase(m_characters.begin() + i);
+            break;
           }
           else
           {
+            //update characters
             m_characters[i].update();
             if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
             {
@@ -569,6 +608,7 @@ void Scene::update()
             }
           }
         }
+        //if all characters have died
         if (m_characters.size() == 0)
         {
           m_state = GameState::ENDGAME;
@@ -585,14 +625,15 @@ void Scene::update()
 
         for(size_t i=0; i<m_baddies.size(); i++)
         {
-            if(m_baddies[i].getHealth() > 0.0)
-                m_baddies[i].update();
-            else
-            {
-              ngl::Vec2 pos = ngl::Vec2(m_baddies[i].getPos()[0], m_baddies[i].getPos()[2]);
-              Gui::instance()->notify("Enemy defeated", pos);
-              m_baddies.erase(m_baddies.begin() + i);
-            }
+          //if have health, update
+          if(m_baddies[i].getHealth() > 0.0)
+              m_baddies[i].update();
+          else
+          {
+            //if the baddies has died, message and erase from vector
+            Gui::instance()->notify("Enemy defeated", m_baddies[i].getPos2D());
+            m_baddies.erase(m_baddies.begin() + i);
+          }
         }
 
 
@@ -1444,7 +1485,8 @@ void Scene::drawMeshes()
 
     for(Character &character : m_characters)
     {
-      if(character.isInside() == false)
+      //if the character is not in a store house or house, draw
+      if(!character.isInside())
       {
         m_transform.reset();
         ngl::Vec3 pos = character.getPos();
@@ -1459,20 +1501,17 @@ void Scene::drawMeshes()
 
     for(Baddie &baddie : m_baddies)
     {
-        if(baddie.getHealth() > 0.0)
-        {
-          m_transform.reset();
-          ngl::Vec3 pos = baddie.getPos();
-          m_transform.setPosition(pos);
-          m_transform.setRotation(0, baddie.getRot(), 0);
-          m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
+      m_transform.reset();
+      ngl::Vec3 pos = baddie.getPos();
+      m_transform.setPosition(pos);
+      m_transform.setRotation(0, baddie.getRot(), 0);
+      m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
 
-          slib->use("diffuse");
-          drawAsset("person", "baddie_d", "diffuse");
-        }
+      slib->use("diffuse");
+      drawAsset("person", "baddie_d", "diffuse");
     }
 
-    for(auto &stone : m_tombstones)
+    for(ngl::Vec3 &stone : m_tombstones)
     {
       m_transform.reset();
       m_transform.setPosition(stone);
@@ -1529,50 +1568,39 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
 
     for(auto &character : m_characters)
     {
-        if(character.isInside() == false)
-        {
-            ngl::Vec3 pos = character.getPos();
-            m_transform.reset();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, character.getRot(), 0);
-            slib->use("colour");
-            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-            drawAsset( "person", "", "");
-        }
+      //if not inside house or store house, draw
+      if(!character.isInside())
+      {
+        ngl::Vec3 pos = character.getPos();
+        m_transform.reset();
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, character.getRot(), 0);
+
+        slib->use("diffuseCharacter");
+        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
+        drawAsset("person", "person_d", "diffuseCharacter");
+      }
     }
 
     for(Baddie &baddie : m_baddies)
     {
-      if(baddie.getHealth() > 0.0)
-      {
         ngl::Vec3 pos = baddie.getPos();
         m_transform.reset();
         m_transform.setPosition(pos);
         m_transform.setRotation(0, baddie.getRot(), 0);
         m_transform.setScale(2.0f, 2.0f, 2.0f);
-        slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-        drawAsset("person", "", "");
-      }
+
+        slib->use("diffuse");
+        drawAsset("person", "baddie_d", "diffuse");
     }
 
-    for(auto &stone : m_tombstones)
+    for(ngl::Vec3 &stone : m_tombstones)
     {
-      //slib->use("diffuse");
       m_transform.reset();
       m_transform.setPosition(stone);
-      slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-      drawAsset( "tombstone", "", "");
+
+      drawAsset("tombstone", "tombstone_d", "diffuse");
     }
-}
-
-void Scene::quit()
-{
-    m_active = false;
-}
-
-bool Scene::isActive()
-{
-    return m_active;
 }
 
 //First = world space aabbs
@@ -1789,29 +1817,13 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
-        if(character.isInside() == false)
-        {
-            ngl::Vec3 pos = character.getPos();
-            m_transform.reset();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, character.getRot(), 0);
-            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
-
-            ngl::Obj * k = store->getModel( "person" );
-            loadMatricesToShader( m_transform.getMatrix(), mvp );
-            k->draw();
-        }
-    }
-
-    for(Baddie &baddie : m_baddies)
-    {
-      if(baddie.getHealth() > 0.0)
+      //if character is not in house or store house, draw
+      if(character.isInside() == false)
       {
-        ngl::Vec3 pos = baddie.getPos();
+        ngl::Vec3 pos = character.getPos();
         m_transform.reset();
         m_transform.setPosition(pos);
-        m_transform.setRotation(0, baddie.getRot(), 0);
-        m_transform.setScale(2.0f, 2.0f, 2.0f);
+        m_transform.setRotation(0, character.getRot(), 0);
         ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
         ngl::Obj * k = store->getModel( "person" );
@@ -1820,15 +1832,29 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
       }
     }
 
-    for(auto &stone : m_tombstones)
+    for(Baddie &baddie : m_baddies)
     {
-        m_transform.reset();
-        m_transform.setPosition(stone);
-        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+      ngl::Vec3 pos = baddie.getPos();
+      m_transform.reset();
+      m_transform.setPosition(pos);
+      m_transform.setRotation(0, baddie.getRot(), 0);
+      m_transform.setScale(2.0f, 2.0f, 2.0f);
+      ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-        ngl::Obj * k = store->getModel( "tombstone" );
-        loadMatricesToShader( m_transform.getMatrix(), mvp );
-        k->draw();
+      ngl::Obj * k = store->getModel( "person" );
+      loadMatricesToShader( m_transform.getMatrix(), mvp );
+      k->draw();
+    }
+
+    for(ngl::Vec3 &stone : m_tombstones)
+    {
+      m_transform.reset();
+      m_transform.setPosition(stone);
+      ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+
+      ngl::Obj * k = store->getModel( "tombstone" );
+      loadMatricesToShader( m_transform.getMatrix(), mvp );
+      k->draw();
     }
 
 
@@ -2036,57 +2062,63 @@ void Scene::mouseSelection()
 
     if(gui->mousePos( mouse_coords ) )
     {
-        gui->click();
+      gui->click();
     }
     else if(m_state == GameState::MAIN)
     {
-        int red = getCharIDAtMouse();
-
-        if(red < (m_characters.size() + 1) && red > 0)
+      //read from charPick texture
+      int red = getCharIDAtMouse();
+      //if the value is not -1 (the default), then a character has been clicked
+      if(red < (m_characters.size() + 1) && red > 0)
+      {
+        for (Character &character : m_characters)
         {
-            for (Character &character : m_characters)
+          //if the value of the pixel matches a character's ID
+          if (character.getID() == red)
+          {
+            //if the character is not already the active character
+            if(!character.isActive())
             {
-                if (character.getID() == red)
-                {
-                    // probably needs changing because vector address is not guaranteed
-                    if(character.isActive() == false)
-                    {
-                        m_active_char_id = character.getID();
-                        character.setActive(true);
-                        gui->updateActiveCharacter();
-                    }
-                }
-                else
-                    if (character.isActive() == true)
-                        character.setActive(false);
+              //make the active character
+               m_active_char_id = character.getID();
+                character.setActive(true);
+                gui->updateActiveCharacter();
             }
+          }
+          else
+          //make any other active character unactive
+          if (character.isActive())
+            character.setActive(false);
         }
-        //check grid_id texture
-        else
+      }
+      //check grid_id texture
+      else
+      {
+        //get the pixel value from the terrainPick texture
+        ngl::Vec4 grid_coord = getTerrainPosAtMouse();
+        //if the coordinate doesn't equal the default (0,0), then the grid has been clicked
+        if(grid_coord[0] != 0 && grid_coord[2] != 0)
         {
-            ngl::Vec4 grid_coord = getTerrainPosAtMouse();
+          //floor to get integer value (to find tile)
+          int grid_coord_x = floor(grid_coord[0]);
+          grid_coord_x = Utility::clamp(grid_coord_x, 0, m_grid.getW());
 
-            if(grid_coord[0] != 0 && grid_coord[2] != 0)
+          int grid_coord_y = floor(grid_coord[2]);
+          grid_coord_y = Utility::clamp(grid_coord_y, 0, m_grid.getH());
+          //set as target for active character
+          int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
+          for (Character &character : m_characters)
+          {
+            if(character.isActive())
             {
-                int grid_coord_x = floor(grid_coord[0]);
-                grid_coord_x = Utility::clamp(grid_coord_x, 0, m_grid.getW());
-
-                int grid_coord_y = floor(grid_coord[2]);
-                grid_coord_y = Utility::clamp(grid_coord_y, 0, m_grid.getH());
-
-                int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
-                for (Character &character : m_characters)
-                {
-                    if(character.isActive() == true)
-                    {
-                        character.setState(target_id);
-                    }
-                }
+              character.setState(target_id);
             }
+          }
         }
-        glReadBuffer(GL_NONE);
-        m_utilityBuffer.unbind();
-    }
+      }
+    glReadBuffer(GL_NONE);
+    m_utilityBuffer.unbind();
+  }
 }
 
 void Scene::loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP)
@@ -2825,45 +2857,6 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
     m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
 }
 
-void Scene::baddiesSpawn()
-{
-  m_baddie_timer++;
-  int timer_scale = 10;
-  timer_scale/=getPopulation();
-  timer_scale += 2;
-  if(m_baddie_timer > timer_scale*m_baddies.size())
-  {
-    m_baddie_timer = 0;
-    ngl::Random *rnd = ngl::Random::instance();
-    if(rnd->randomPositiveNumber(20+100/getPopulation()) < 1)
-    {
-      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-      direction *= 12.0f;
-      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
-      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
-      {
-        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
-      }
-    }
-  }
-}
-
-void Scene::charactersSpawn()
-{
-  ngl::Random *rnd = ngl::Random::instance();
-  m_character_timer++;
-  if(m_character_timer > 50)
-  {
-    m_character_timer = 0;
-    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(30) < spawn_chance)
-    {
-      createCharacter();
-    }
-  }
-}
-
 ngl::Vec4 Scene::getTerrainPosAtMouse()
 {
     m_utilityBuffer.bind();
@@ -2884,20 +2877,33 @@ ngl::Vec4 Scene::getTerrainPosAtMouse()
 
 int Scene::getCharIDAtMouse()
 {
-    m_utilityBuffer.bind();
+  //bind fbo
+  m_utilityBuffer.bind();
 
-    ngl::Vec2 mousePos = Utility::getMousePos();
+  ngl::Vec2 mousePos = Utility::getMousePos();
 
-    //check character_id texture
-    GLuint char_texID = getCharPickTexture();
-    glBindTexture(GL_TEXTURE_2D, char_texID);
-    glReadBuffer(GL_COLOR_ATTACHMENT1);
+  //bind charPick texture
+  GLuint char_texID = getCharPickTexture();
+  glBindTexture(GL_TEXTURE_2D, char_texID);
+  glReadBuffer(GL_COLOR_ATTACHMENT1);
 
-    int red = 0;
+  int red = 0;
+  //read the pixel in the texture
+  glReadPixels(mousePos.m_x, (m_viewport.m_y - mousePos.m_y), 1, 1, GL_RED_INTEGER, GL_INT, &red);
 
-    glReadPixels(mousePos.m_x, (m_viewport.m_y - mousePos.m_y), 1, 1, GL_RED_INTEGER, GL_INT, &red);
+  //unbind fbo
+  m_utilityBuffer.unbind();
 
-    m_utilityBuffer.unbind();
+  //red defaults to 0, so use -1 for checking
+  return red - 1;
+}
 
-    return red - 1;
+void Scene::quit()
+{
+    m_active = false;
+}
+
+bool Scene::isActive()
+{
+    return m_active;
 }

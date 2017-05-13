@@ -64,7 +64,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::stri
   m_forage = false;
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
-  Gui::instance()->notify(m_name+" was born!", getPos2d());
+  generalMessage(" was born!", m_pos);
 }
 
 void Character::setWorldInventory(Inventory *_world_inventory)
