@@ -112,7 +112,7 @@ public:
 	///
 	/// @brief invadedState, enemy intiates fight with character
 	///
-	void invadedState( Baddie *_target);
+  void invadedState( int _target);
 	///
 	/// @brief chopState, character collects wood from a tree
 	///
@@ -259,9 +259,9 @@ private:
 	///
 	std::vector<Baddie> *m_baddies;
 	///
-	/// @brief m_target_baddie, current enemy
+  /// @brief m_target_baddie, current enemy's ID
 	///
-	Baddie *m_target_baddie;
+  int m_target_baddie;
 	///
 	/// @brief m_dest_target_id, id of character's final destination or reoccuring destination
 	///

@@ -26,7 +26,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::stri
   m_storing(false),
   m_forage(false),
   m_baddies(_baddies),
-  m_target_baddie(nullptr),
+  m_target_baddie(-1),
   m_inventory(CharInventory::NONE),
   m_called(0),
   m_building_amount(0),
@@ -146,8 +146,8 @@ void Character::isBaddie()
        baddiePos.m_y <= (selection.m_y + 0.5))
     {
       found = true;
-      m_target_baddie = &baddie;
-      m_target_baddie->stopSearching();
+      m_target_baddie = baddie.getID();
+      baddie.stopSearching();
     }
   }
 
@@ -214,7 +214,7 @@ void Character::attackState()
   m_state_stack.push_back(State::FIGHT);
   generalMessage(" is going to fight!", m_target_id);
 }
-void Character::invadedState(Baddie *_target)
+void Character::invadedState(int _target)
 {
   //idle characters can be attacked, so need to reset
   hardResetCharacter();
@@ -395,11 +395,11 @@ void Character::idleState()
   {
     //set the idle target to the character's current target
     m_idle_target_id = m_grid->coordToId(m_pos);
-
-    //slow down speed of characters
-    Prefs* prefs = Prefs::instance();
-    m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
   }
+
+  //slow down speed of characters
+  Prefs* prefs = Prefs::instance();
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
   //set random position for character
   ngl::Vec2 idle_pos = m_grid->idToCoord(m_idle_target_id);
@@ -474,60 +474,89 @@ void Character::update()
 
       case(State::TRACK):
       {
-        //if another character has killed the enemy
-        if(m_target_baddie->getHealth() <= 0.0)
+        bool enemy = false;
+        //go through vector of baddies to find one with same id
+        for(auto &baddie : *m_baddies)
+        {
+          if(baddie.getID() == m_target_baddie)
+          {
+            enemy = true;
+            //if another character has killed the enemy
+            if(baddie.getHealth() <= 0.0)
+            {
+              m_state_stack.clear();
+            }
+            else
+            {
+              //get the baddie's position and move to enemy if not on the same tile
+              ngl::Vec2 baddiePos = ngl::Vec2(baddie.getPos()[0] - 0.5, baddie.getPos()[2] - 0.5);
+              int baddieID = m_grid->coordToId(baddiePos);
+              if (m_grid->coordToId(m_pos) == baddieID)
+              {
+              //if reached enemy, initiate fighting
+                baddie.invadedState(this);
+                completedAction();
+              }
+              else
+              {
+                //set target to enemy's new position
+                setTarget(baddieID);
+                move();
+              }
+            }
+          }
+        }
+        if(!enemy)
         {
           m_state_stack.clear();
-        }
-        else
-        {
-          //get the baddie's position and move to enemy if not on the same tile
-          ngl::Vec2 baddiePos = ngl::Vec2(m_target_baddie->getPos()[0] - 0.5, m_target_baddie->getPos()[2] - 0.5);
-          int baddieID = m_grid->coordToId(baddiePos);
-          if (m_grid->coordToId(m_pos) == baddieID)
-            {
-            //if reached enemy, initiate fighting
-              m_target_baddie->invadedState(this);
-              completedAction();
-            }
-          else
-          {
-            //set target to enemy's new position
-            setTarget(baddieID);
-            move();
-          }
+          m_target_baddie = -1;
         }
         break;
       }
 
       case(State::FIGHT):
       {
-        if(m_target_baddie->getHealth() <= 0.0)
+        bool enemy = false;
+        //go through vector of baddies to find one with same id
+        for(auto &baddie : *m_baddies)
         {
-          //finished action
-          completedAction();
-        }
-        else
-        {
-          if(m_action_timer.elapsed() >= (100 / m_speed))
+          if(baddie.getID() == m_target_baddie)
           {
-            if(m_stamina > 0.0)
+            enemy = true;
+            if(baddie.getHealth() <= 0.0)
             {
-              //take health from target enemy according to characters power
-              m_target_baddie->takeHealth(0.01 * m_attack_power);
-              //take away stamina
-              m_stamina -= 0.1;
-              //if stamina below 0, make equal to 0
-              if(m_stamina < 0.0)
-                m_stamina = 0.0;
+              //finished action
+              completedAction();
             }
             else
             {
-              //if no stamina, attacks capped to 0.02
-              m_target_baddie->takeHealth(0.02);
+              if(m_action_timer.elapsed() >= (100 / m_speed))
+              {
+                if(m_stamina > 0.0)
+                {
+                  //take health from target enemy according to characters power
+                  baddie.takeHealth(0.01 * m_attack_power);
+                  //take away stamina
+                  m_stamina -= 0.1;
+                  //if stamina below 0, make equal to 0
+                  if(m_stamina < 0.0)
+                    m_stamina = 0.0;
+                }
+                else
+                {
+                  //if no stamina, attacks capped to 0.02
+                  baddie.takeHealth(0.02);
+                }
+                m_action_timer.restart();
+              }
             }
-            m_action_timer.restart();
           }
+        }
+        //if the target is no longer in the vector
+        if (!enemy)
+        {
+          m_state_stack.clear();
+          m_target_baddie = -1;
         }
         break;
       }
@@ -573,8 +602,13 @@ void Character::update()
             if(!m_world_inventory->addWood(1))
             {
               Gui::instance()->notify("The store houses have run out of space for wood",m_grid->idToCoord(m_target_id));
+              //so not repeated
               m_state_stack.clear();
+              //so character moves out of storehouse
+              m_state_stack.push_back(MOVE);
             }
+            else
+              completedAction();
           }
           //if the character is holding fish, add to inventory
           else if (m_inventory == CharInventory::FISH)
@@ -582,8 +616,13 @@ void Character::update()
             if(!m_world_inventory->addFish(1))
             {
               Gui::instance()->notify("The store houses have run out of space for fish",m_grid->idToCoord(m_target_id));
+              //so not repeated
               m_state_stack.clear();
+              //so character moves out of storehouse
+              m_state_stack.push_back(MOVE);
             }
+            else
+              completedAction();
           }
           //if the character is holding berries, add to inventory
           else if (m_inventory == CharInventory::BERRIES)
@@ -591,15 +630,18 @@ void Character::update()
             if(!m_world_inventory->addBerries(5))
             {
               Gui::instance()->notify("The store houses have run out of space for berries",m_grid->idToCoord(m_target_id));
+              //so not repeated
               m_state_stack.clear();
+              //so character moves out of storehouse
+              m_state_stack.push_back(MOVE);
             }
+            else
+              completedAction();
           }
-
           //reset character inventory
           m_inventory = CharInventory::NONE;
           //find nearest empty tile to the storage house
           findNearestEmptyTile();
-          completedAction();
         }
         break;
       }
@@ -720,8 +762,10 @@ void Character::update()
 
       case(State::GET_WOOD):
       {
+        m_storing = true;
         if(m_action_timer.elapsed() >= (100 / m_speed))
         {
+          m_storing = false;
           //character has wood in inventory
           m_inventory = CharInventory::WOOD;
 
@@ -737,8 +781,10 @@ void Character::update()
 
       case(State::GET_BERRIES):
       {
+        m_storing = true;
         if(m_action_timer.elapsed() >= (100 / m_speed))
         {
+          m_storing = false;
           //character has berries in inventory
           m_inventory = CharInventory::BERRIES;
 
@@ -753,8 +799,10 @@ void Character::update()
 
       case(State::GET_FISH):
       {
+        m_storing = true;
         if(m_action_timer.elapsed() >= (100 / m_speed))
         {
+          m_storing = false;
           //character has fish in inventory
           m_inventory = CharInventory::FISH;
 
@@ -1196,6 +1244,9 @@ void Character::softResetCharacter()
 {
   //clear states
   m_idle = false;
+  m_storing = false;
+  m_sleeping = false;
+  m_target_baddie = -1;
   m_state_stack.clear();
   //reset speed
   Prefs* prefs = Prefs::instance();

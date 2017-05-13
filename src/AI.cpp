@@ -8,10 +8,10 @@
 AI::AI(TerrainHeightTracer *_height_tracer, Grid *_grid):
 	m_grid(_grid),
 	m_height_tracer(_height_tracer),
-	m_idle(true),
-	m_health(1.0),
-	m_speed(0.0),
-	m_rot(0.0)
+  m_health(1.0),
+  m_rot(0.0),
+  m_speed(0.0),
+  m_idle(true)
 {
 	m_action_timer.start();
 	m_pos = ngl::Vec2(0.0,0.0);
@@ -91,7 +91,7 @@ ngl::Vec2 AI::calcAimVec(float *dist)
 
 bool AI::setTarget(ngl::Vec2 _target_pos)
 {
-	setTarget(m_grid->coordToId(_target_pos));
+  return (setTarget(m_grid->coordToId(_target_pos)));
 }
 
 bool AI::setTarget(int _tile_id)

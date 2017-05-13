@@ -113,13 +113,13 @@ public:
 
 protected:
   ///
-  /// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
-  ///
-  float m_health;
-  ///
   /// @brief m_grid, grid pointer to reference for pathfinding
   ///
   Grid *m_grid;
+  ///
+  /// @brief m_height_tracer, for grid height
+  ///
+  TerrainHeightTracer *m_height_tracer;
   ///
   /// @brief m_pos, character position
   /// ///
@@ -128,6 +128,10 @@ protected:
   /// @brief m_target_id, id of target tile on grid
   ///
   int m_target_id;
+  ///
+  /// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
+  ///
+  float m_health;
   ///
   /// @brief m_rot character's rotation to face current direction (degrees)
   ///
@@ -148,10 +152,6 @@ protected:
   /// @brief m_idle, set when character is idle, for checking if idle
   ///
   bool m_idle;
-  ///
-  /// @brief m_height_tracer, for grid height
-  ///
-  TerrainHeightTracer *m_height_tracer;
 };
 
 #endif//__CHARACTER_HPP__

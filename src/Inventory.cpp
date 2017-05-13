@@ -5,8 +5,8 @@ Inventory::Inventory():
 	m_berry_inventory(0),
   m_fish_inventory(0),
   m_max_wood(10),
-  m_max_fish(5),
-  m_max_berries(15)
+  m_max_berries(15),
+    m_max_fish(3)
 {
 }
 
@@ -121,6 +121,6 @@ int Inventory::takeFish(int _amount)
 void Inventory::addStoreSpace()
 {
   m_max_wood += 10;
-  m_max_fish += 5;
+  m_max_fish += 3;
   m_max_berries += 15;
 }

@@ -6,12 +6,15 @@
 #include "Gui.hpp"
 #include "Utility.hpp"
 
+int Baddie::m_id_counter(1);
+
 Baddie::Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid, std::vector<Character> *_characters) :
 	AI(_height_tracer, _grid),
+  m_id(m_id_counter++),
 	m_characters(_characters),
 	m_combat(false),
-	m_track(false),
 	m_search(true),
+  m_track(false),
 	m_scale(2.0)
 {
   Prefs* prefs = Prefs::instance();
@@ -69,7 +72,7 @@ void Baddie::trackingState()
 	if(m_grid->coordToId(m_pos) == charID)
 	{
 		//if reached enemy character
-		m_targets[0]->invadedState(this);
+    m_targets[0]->invadedState(m_id);
 		//reset baddie
 		m_track = false;
 		m_combat = true;
@@ -89,11 +92,11 @@ void Baddie::fight()
 {
 
 	float distance = m_agro_distance;
-	int target;
+  size_t target = -1;
 	bool chase = false;
 
 	//go through every target
-	for(int i=0; i<m_targets.size(); i++)
+  for(size_t i=0; i<m_targets.size(); i++)
 	{
     if(m_targets[i]->isSleeping())
 			m_targets.erase(m_targets.begin() + i);
@@ -124,9 +127,9 @@ void Baddie::fight()
 	//delete all targets that arent the chase target
 	if(m_targets.size() > 1 && chase)
 	{
-		for(int i=0; i<m_targets.size(); i++)
+    for(size_t i=0; i<m_targets.size(); i++)
 		{
-			if(i != target)
+      if(i != target)
 			{
 				m_targets.erase(m_targets.begin() + i);
 			}
@@ -155,7 +158,7 @@ void Baddie::fight()
 		int target_no = (int)m_targets.size();
 		if(m_action_timer.elapsed() >= 1000)
 		{
-			for (int i=0; i<m_targets.size(); i++)
+      for (size_t i=0; i<m_targets.size(); i++)
 			{
 				//amount of health taken scales with how many characters are attacking
 				m_targets[i]->takeHealth(m_attack_power/target_no);

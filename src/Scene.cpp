@@ -27,6 +27,7 @@ const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
     m_active(true),
+    m_grid(&m_world_inventory),
     m_active_char_id(-1),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
@@ -39,8 +40,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
-    m_grid(&m_world_inventory)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
@@ -2041,6 +2041,7 @@ void Scene::mouseSelection()
     else if(m_state == GameState::MAIN)
     {
         int red = getCharIDAtMouse();
+        std::cout<<"RED:"<<red<<std::endl;
 
         if(red < (m_characters.size() + 1) && red > 0)
         {
@@ -2048,12 +2049,12 @@ void Scene::mouseSelection()
             {
                 if (character.getID() == red)
                 {
+                    std::cout<<"CHAR ID:" <<red<<std::endl;
                     // probably needs changing because vector address is not guaranteed
                     if(character.isActive() == false)
                     {
                         m_active_char_id = character.getID();
                         character.setActive(true);
-                        //character.clearState();
                         gui->updateActiveCharacter();
                     }
                 }
