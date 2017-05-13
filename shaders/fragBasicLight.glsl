@@ -290,7 +290,7 @@ void main()
   fragColour.xyz = vec3(texture(shadowDepths[0], UV).r);
 #endif
 
-  fragColour.xyz = vec3(fragPos.xyz) / 16.0;
+  //fragColour.xyz = vec3(fragPos.xyz) / 16.0;
 
   fragColour.a = 1.0;
 }

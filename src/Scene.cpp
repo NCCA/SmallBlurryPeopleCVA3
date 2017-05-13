@@ -520,6 +520,12 @@ void Scene::update()
         m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
         //---
 
+        //Update camera focal depth
+        ngl::Vec4 tpm = getTerrainPosAtMouse();
+        m_cam.setFocalDepth(
+                    ngl::Vec3(m_cam.getPos() - ngl::Vec3(tpm.m_x, tpm.m_y, tpm.m_z)).length()
+                    );
+        //std::cout << m_cam.getFocalDepth() << '\n';
 
         //Recalculate view matrix.
         m_cam.updateSmoothCamera();
@@ -588,9 +594,7 @@ void Scene::update()
         {
             m_day++;
             m_sunAngle.m_x = 0.0f;
-            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
         }
-        //std::cout << m_sunAngle.m_x << '\n';
 
         m_season = (m_day % 365) / 365.0f;
 
@@ -1048,9 +1052,16 @@ void Scene::draw()
         glUnmapBuffer(GL_UNIFORM_BUFFER);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_postEffectsBuffer.bind();
-        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-        glClear(GL_COLOR_BUFFER_BIT);
+        //If blur is enabled draw to blur buffer. Else draw to back buffer.
+        Prefs * pref = Prefs::instance();
+        bool blur = pref->getBoolPref("DOP");
+
+        if(blur)
+        {
+            m_postEffectsBuffer.bind();
+            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
 
         slib->use("deferredLight");
         id = slib->getProgramID("deferredLight");
@@ -1094,29 +1105,47 @@ void Scene::draw()
         //---------------------------//
         //    DEFERRED BLUR PASS     //
         //---------------------------//
-        slib->use("bokeh");
+        if(blur)
+        {
+            slib->use("bokeh");
 
-        id = slib->getProgramID("bokeh");
-        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-        m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
-        slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
+            id = slib->getProgramID("bokeh");
+            m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+            m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+            slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
 
-        glBindVertexArray(m_screenQuad);
-        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+            glBindVertexArray(m_screenQuad);
+            glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+        }
 
         //---------------------------//
         //      FORWARD SHADING      //
         //---------------------------//
-        m_postEffectsBuffer.bind();
-        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        //If using DOF copy depth data to the post effects buffer. If not copy it straight to the back buffer.
+        if(blur)
+        {
+            m_postEffectsBuffer.bind();
+            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //Copy depth buffer from main buffer to back buffer.
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
-        glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
-                          GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            //Copy depth buffer from main buffer to back buffer.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
+            glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        }
+        else
+        {
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            //Copy depth buffer from main buffer to back buffer.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        }
+
+        glEnable(GL_DEPTH_TEST);
 
         slib->use("water");
         slib->setRegisteredUniform("mouseWorldPos", mlpos);
@@ -1253,14 +1282,17 @@ void Scene::draw()
         //---------------------------//
         //     FORWARD BLUR PASS     //
         //---------------------------//
-        slib->use("bokeh");
+        if(blur)
+        {
+            slib->use("bokeh");
 
-        id = slib->getProgramID("bokeh");
-        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-        m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+            id = slib->getProgramID("bokeh");
+            m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+            m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
 
-        glBindVertexArray(m_screenQuad);
-        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+            glBindVertexArray(m_screenQuad);
+            glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+        }
     }
     else
     {
@@ -1290,14 +1322,14 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        m_utilityBuffer.bindTexture( id, "charid", "tex", 0);
+        m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
         //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
     }*/
 
-    m_transform.reset();
+    /*m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);
     slib->use("colour");
     slib->setRegisteredUniform("colour", ngl::Vec4(1.0,0.0,0.0,1.0));
@@ -1306,7 +1338,7 @@ void Scene::draw()
         {
             m_transform.setPosition(vec + ngl::Vec3(0.5f, 0.0f, 0.5f));
             drawAsset("debugSphere", "", "");
-        }
+        }*/
 
     /*slib->use("colour");
     for(auto &p : m_debugPoints)
@@ -2650,6 +2682,8 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) < _facePositions.size();
     //Can we move in the vertical direction?
     bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) < _facePositions[_x].size();
+    //Can we move in the diagonal direction?
+    bool diagonal = horizontal and (_y + _dirY) < _facePositions[_x + _dirX].size();
 
     if(horizontal)
     {
@@ -2665,7 +2699,7 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
-    if(vertical and horizontal)
+    if(diagonal)
     {
         std::cout << "      diagonal accessing " << (_x + _dirX) << ", " << (_y + _dirY) << " : " << _facePositions[_x + _dirX][_y + _dirY] << '\n';
         position += _facePositions[_x + _dirX][_y + _dirY];
@@ -2680,12 +2714,6 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     position /= static_cast<float>(count);
     position.m_w = 1.0f;
     //position.m_y = _facePositions[_x][_y].m_y;
-
-    if(!(position.m_x > 0.0f and position.m_x < m_grid.getW() and position.m_z > 0.0f and position.m_z < m_grid.getH()))
-    {
-        std::cout << "h,v " << horizontal << ", " << vertical << '\n';
-        std::cout << "  index : " << _x << ", " << _y << " position : " << position << '\n';
-    }
 
     return std::make_pair(
                 position,
