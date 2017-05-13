@@ -58,10 +58,9 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::stri
   float red = Utility::randFlt(0, 1);
   float blue = Utility::randFlt(0,1);
   float green = Utility::randFlt(0,1);
-
   m_colour = ngl::Vec3(red, blue, green);
 
-  m_forage = false;
+  //set spawn location
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
   generalMessage(" was born!", m_pos);
@@ -69,6 +68,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::stri
 
 void Character::setWorldInventory(Inventory *_world_inventory)
 {
+  //set character's pointer refernce for the world's inventory
   m_world_inventory = _world_inventory;
 }
 
@@ -575,7 +575,6 @@ void Character::update()
             //take stamina away according to chopping speed
             m_stamina -= 0.1;
             m_inventory = CharInventory::WOOD;
-            generalMessage(" got a piece of wood", m_pos);
 
             //remove the state from the stack
             completedAction();
@@ -685,7 +684,6 @@ void Character::update()
           m_stamina -= 0.1;
           //character has berries in inventory
           m_inventory = CharInventory::BERRIES;
-          generalMessage(" got berries", m_pos);
           //remove state from stack
           completedAction();
           //find nearest storage house and sets as target
@@ -997,6 +995,7 @@ bool Character::findNearestStorage()
   storage_houses = m_grid->getStoreHouses();
 
   //sort vector based on distance from character's position
+  //hopefully make less resetting of attributes in findNearest function
   distanceSort(0, storage_houses.size()-1, storage_houses);
 
   //set the storehouse with the shortest path as the target
@@ -1237,6 +1236,7 @@ bool Character::findFirstPath(std::vector<ngl::Vec2> _vector)
 
 void Character::hardResetCharacter()
 {
+  //foraging turned off
   m_forage = false;
   softResetCharacter();
 }
@@ -1256,6 +1256,7 @@ void Character::softResetCharacter()
 
 void Character::completedAction()
 {
+  //remove state from stack, restart timer and reset speed
   m_state_stack.pop_front();
   m_action_timer.restart();
   m_speed = Prefs::instance()->getFloatPref("CHARACTER_SPEED");
@@ -1283,26 +1284,32 @@ void Character::generalMessage(std::string _print, ngl::Vec2 _coord)
 
 std::vector<float> Character::getAttributes()
 {
+  //create vector of attributes
   std::vector<float> attributes;
 
+  //remap to value between 0 and 1
   float chopping = Utility::remap01(m_chopping_speed, 10, 5);
   float building = Utility::remap01(m_building_speed, 10, 5);
   float fishing = Utility::remap01(m_fishing_catch, 3, 1);
   float foraging = Utility::remap01(m_forage_amount, 5, 1);
   float attacking = Utility::remap01(m_attack_power, 10, 5);
 
+  //push new values onto vector
   attributes.push_back(chopping);
   attributes.push_back(building);
   attributes.push_back(fishing);
   attributes.push_back(foraging);
   attributes.push_back(attacking);
 
+  //return vector
   return attributes;
 }
 
 void Character::setActive(bool _selection)
 {
+  //set the characters active state
   m_active = _selection;
+  //if the character is idle, clear its state
   if(m_active && m_idle)
     clearState();
 }
