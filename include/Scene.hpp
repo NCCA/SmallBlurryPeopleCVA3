@@ -53,7 +53,7 @@ public:
     ~Scene() = default;
     void draw();
     /// \brief draws the sky
-    void drawSky();
+    void drawSky(bool _flipped = false);
     /// \brief draws the terrain
     void drawTerrain();
     /// \brief draws the meshes
@@ -291,6 +291,7 @@ private:
     std::pair<std::vector<bounds>, std::vector<bounds> > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
     void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
 
+    float m_globalTime;
     ngl::Vec3 m_sunAngle;
     //The direction the sun is pointing (not unit vector TO the light).
     ngl::Vec3 m_sunDir;
@@ -332,11 +333,11 @@ private:
     };
 
     terrainFace terrainVerticesToFace(const int _x,
-                                      const int _y,
+                                      const int _y, const float _worldX, const float _worldY,
                                       const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
 
-    std::pair<float, ngl::Vec3> generateTerrainFaceData(const int _x,
+    std::pair<ngl::Vec4, ngl::Vec3> generateTerrainFaceData(const int _x,
                                                         const int _y,
                                                         const int _dirX,
                                                         const int _dirY,

@@ -38,7 +38,6 @@ public:
   ///
   void updateScript(std::string _script_path, int _new_w = 50, int _new_h = 50, int _new_seed = 8);
 
-
   void printTrees();
   void printTypes();
   ///
