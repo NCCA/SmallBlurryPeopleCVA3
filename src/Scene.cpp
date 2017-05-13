@@ -269,13 +269,33 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
 void Scene::initMeshInstances()
 {
+    int iiterations = m_grid.getW() / m_meshInstanceBlockTileSize;
+    int jiterations = m_grid.getH() / m_meshInstanceBlockTileSize;
+
+    for(int x = 0; x < iiterations; ++x)
+    {
+        for(int y = 0; y < jiterations; ++y)
+        {
+            meshInstanceBlock b = generateInstanceMeshTile(x,y);
+            m_meshInstances.push_back(b);
+        }
+    }
+}
+
+Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
+{
+    meshInstanceBlock b;
 
     int meshCount = 0;
     int max_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
     //m_meshPositions.clear()
-    m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    b.m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
+    int minx = _x * m_meshInstanceBlockTileSize;
+    int maxx = _x * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
+    int miny = _y * m_meshInstanceBlockTileSize;
+    int maxy = _y * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
+    for(int i = minx; i < maxx and i < m_grid.getW(); ++i)
+        for(int j = miny; j < maxy and j < m_grid.getH(); ++j)
         {
             TileType index = m_grid.getTileType(i, j);
             if (index == TileType::TREES)
@@ -291,18 +311,18 @@ void Scene::initMeshInstances()
                     {
                         //push back tree
                         ngl::Vec2 p = positions[n];
-                        m_meshPositions.at((int)index).push_back(ngl::Vec3(
-                                                                     i+p[0],
-                                                                 m_height_tracer.getHeight(i+p[0], j+p[1]),
+                        b.m_meshPositions.at((int)index).push_back(ngl::Vec3(
+                                                                       i+p[0],
+                                                                   m_height_tracer.getHeight(i+p[0], j+p[1]),
                                 j+p[1]
                                 ));
                     }
                     else
                     {
                         ngl::Vec2 p = positions[n];
-                        m_meshPositions.at((int)TileType::STUMPS).push_back(ngl::Vec3(
-                                                                                i+p[0],
-                                                                            m_height_tracer.getHeight(i+p[0], j+p[1]),
+                        b.m_meshPositions.at((int)TileType::STUMPS).push_back(ngl::Vec3(
+                                                                                  i+p[0],
+                                                                              m_height_tracer.getHeight(i+p[0], j+p[1]),
                                 j+p[1]
                                 ));
                     }
@@ -311,11 +331,11 @@ void Scene::initMeshInstances()
                 }
             }
             else{
-                m_meshPositions.at( (int)index ).push_back(ngl::Vec3(
-                                                               i+0.5,
-                                                               m_height_tracer.getHeight(i+0.5, j+0.5),
-                                                               j+0.5
-                                                               ));
+                b.m_meshPositions.at( (int)index ).push_back(ngl::Vec3(
+                                                                 i+0.5,
+                                                                 m_height_tracer.getHeight(i+0.5, j+0.5),
+                                                                 j+0.5
+                                                                 ));
                 meshCount++;
             }
         }
@@ -324,7 +344,7 @@ void Scene::initMeshInstances()
     //ngl::Random * rng = ngl::Random::instance();
     std::vector<ngl::Mat4> transforms;
     transforms.reserve( meshCount );
-    for(auto &slot : m_meshPositions)
+    for(auto &slot : b.m_meshPositions)
         for(auto &vec : slot)
         {
             ngl::Mat4 m;
@@ -337,10 +357,22 @@ void Scene::initMeshInstances()
     glBindBuffer(GL_TEXTURE_BUFFER, buf);
     glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
 
-    glGenTextures(1, &m_instanceTBO);
+    glGenTextures(1, &b.m_instanceTBO);
     glActiveTexture( GL_TEXTURE0 );
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
+
+    return b;
+}
+
+void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
+{
+  int x = _tilex / m_meshInstanceBlockTileSize;
+  int y = _tiley / m_meshInstanceBlockTileSize;
+  int index = x * std::ceil(m_grid.getH() / (float)m_meshInstanceBlockTileSize) + y;
+
+  meshInstanceBlock b = generateInstanceMeshTile(x, y);
+  m_meshInstances[index] = b;
 }
 
 void Scene::initialiseFramebuffers()
@@ -635,18 +667,21 @@ void Scene::update()
 
     m_pointLights.clear();
 
-    ngl::Vec3 off (0.0f, 0.5f, 0.0f);
-    for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-    for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-        m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-    for(auto &c : m_characters)
+    for(auto &b : m_meshInstances)
     {
-        //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
-        if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
+        ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::HOUSE)])
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+        for(auto &c : m_characters)
         {
-            ngl::Vec3 vec = c.getPos() + off;
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+            //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+            if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
+            {
+                ngl::Vec3 vec = c.getPos() + off;
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+            }
         }
     }
 
@@ -1304,6 +1339,7 @@ void Scene::draw()
         if(blur)
         {
             slib->use("bokeh");
+            slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
 
             id = slib->getProgramID("bokeh");
             m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
@@ -1447,40 +1483,44 @@ void Scene::drawMeshes()
 
     slib->use("diffuseInstanced");
 
-    int offset = 0;
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+    for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
-        int instances = m_meshPositions[i].size();
-        switch( i )
+        const auto &block = m_meshInstances[b];
+        int offset = 0;
+        for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
-        case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::STUMPS):
-            drawInstances( "tree_stump", "tree_stump_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset);
-            break;
-        default:
-            break;
+            int instances = block.m_meshPositions[i].size();
+            switch( i )
+            {
+            case static_cast<int>(TileType::TREES):
+                drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::STUMPS):
+                drawInstances( "tree_stump", "tree_stump_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_A):
+                drawInstances( "foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_B):
+                drawInstances( "foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_C):
+                drawInstances( "foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, b );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_D):
+                drawInstances( "foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, b );
+                break;
+            default:
+                break;
+            }
+            offset += instances;
         }
-        offset += instances;
     }
 
     for(Character &character : m_characters)
@@ -1518,91 +1558,6 @@ void Scene::drawMeshes()
         m_transform.reset();
         m_transform.setPosition(stone);
         drawAsset("tombstone", "tombstone_d", "diffuse");
-    }
-}
-
-void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
-{
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-
-    slib->use("diffuseInstanced");
-
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
-        for(auto &vec : m_meshPositions[i])
-        {
-            bool br = false;
-            for(auto &fb : _frustumBoxes)
-                br = (br or Utility::pointInBox(fb, vec));
-            if(!br)
-                continue;
-
-            m_transform.setPosition(vec);
-            switch( i )
-            {
-            case static_cast<int>(TileType::TREES):
-                drawAsset( "tree", "tree_d", "diffuseInstanced" );
-                break;
-            case static_cast<int>(TileType::STUMPS):
-                drawAsset( "tree_stump", "tree_stump_d", "diffuseInstanced" );
-                break;
-            case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuseInstanced" );
-                break;
-            case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "house_d", "diffuseInstanced");
-                break;
-            case static_cast<int>(TileType::FOUNDATION_A):
-                drawAsset("foundation_A", "foundation_A_d", "diffuseInstanced");
-                break;
-            case static_cast<int>(TileType::FOUNDATION_B):
-                drawAsset("foundation_B", "foundation_B_d", "diffuseInstanced");
-                break;
-            case static_cast<int>(TileType::FOUNDATION_C):
-                drawAsset("foundation_C", "foundation_C_d", "diffuseInstanced");
-                break;
-            case static_cast<int>(TileType::FOUNDATION_D):
-                drawAsset("foundation_D", "foundation_D_d", "diffuseInstanced");
-                break;
-            default:
-                break;
-            }
-        }
-
-    for(auto &character : m_characters)
-    {
-        if(character.isInside() == false)
-        {
-            ngl::Vec3 pos = character.getPos();
-            m_transform.reset();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, character.getRot(), 0);
-            slib->use("colour");
-            slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-            drawAsset( "person", "", "");
-        }
-    }
-
-    for(Baddie &baddie : m_baddies)
-    {
-        if(baddie.getHealth() > 0.0)
-        {
-            ngl::Vec3 pos = baddie.getPos();
-            m_transform.reset();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, baddie.getRot(), 0);
-            m_transform.setScale(2.0f, 2.0f, 2.0f);
-            slib->setRegisteredUniform("colour", ngl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-            drawAsset("person", "", "");
-        }
-    }
-
-    for(auto &stone : m_tombstones)
-    {
-        //slib->use("diffuse");
-        m_transform.reset();
-        m_transform.setPosition(stone);
-        slib->setRegisteredUniform("colour", ngl::Vec4(1.0f,1.0f,1.0f));
-        drawAsset( "tombstone", "", "");
     }
 }
 
@@ -1795,36 +1750,40 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     slib->use("shadowDepthInstanced");
     int offset = 0;
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+    for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
-        int instances = m_meshPositions[i].size();
-        switch( i )
+        const auto &block = m_meshInstances[b];
+        for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
-        case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
-            break;
-        default:
-            break;
+            int instances = block.m_meshPositions[i].size();
+            switch( i )
+            {
+            case static_cast<int>(TileType::TREES):
+                drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_A):
+                drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_B):
+                drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_C):
+                drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_D):
+                drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            default:
+                break;
+            }
+            offset += instances;
         }
-        offset += instances;
     }
 
     slib->use("shadowDepth");
@@ -2210,7 +2169,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
     m->draw();
 }
 
-void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset)
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -2239,7 +2198,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
 
     slib->setRegisteredUniform("VP", m_cam.getVP());
     slib->setRegisteredUniform("offset", _offset);
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, m_meshInstances[_index].m_instanceTBO);
     //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
 
     m->bindVAO();
@@ -2247,7 +2206,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
     m->unbindVAO();
 }
 
-void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const ngl::Mat4 &_VP)
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index, const ngl::Mat4 &_VP)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -2276,7 +2235,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
 
     slib->setRegisteredUniform("VP", _VP);
     slib->setRegisteredUniform("offset", _offset);
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, m_meshInstances[_index].m_instanceTBO);
     //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
 
     m->bindVAO();
