@@ -14,11 +14,12 @@
 /// @file Grid.cpp
 /// @brief source code for the Grid class
 
-Grid::Grid():
+Grid::Grid(Inventory *_world_inventory):
   m_w(1),
   m_h(1),
   m_store_houses(0),
-  m_num_houses(1) // begin with one house to start
+  m_num_houses(1), // begin with one house to start
+  m_world_inventory(_world_inventory)
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
@@ -331,8 +332,12 @@ void Grid::addTileToVectors(ngl::Vec2 _pos, TileType _type)
   switch(_type)
   {
     case TileType::STOREHOUSE:
+    {
       m_store_houses.push_back(_pos);
+      //add extra storage space
+      m_world_inventory->addStoreSpace();
       break;
+    }
     default:
       break;
   }

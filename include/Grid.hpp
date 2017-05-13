@@ -4,7 +4,9 @@
 #include <vector>
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
+
 #include "GridTile.hpp"
+#include "Inventory.hpp"
 
 ///
 /// @file Grid.hpp
@@ -25,7 +27,7 @@ public:
   ///
   /// @brief default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser
   ///
-  Grid();
+  Grid(Inventory *_world_inventory);
 
   ///
   /// @brief updateScript loads the specified script and runs it to create a new map
@@ -342,6 +344,7 @@ private:
   ///
   int m_num_houses;
 
+  /*
   ///
   /// \brief m_num_wood amount of wood stored
   ///
@@ -356,6 +359,9 @@ private:
   /// \brief m_num_fish amount of fish stored
   ///
   int m_num_fish;
+  */
+
+  Inventory *m_world_inventory;
 
   ///
   /// \brief m_spawn_ponit is the spawn point set in the python script

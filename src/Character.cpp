@@ -454,20 +454,6 @@ void Character::update()
     {
       case(State::MOVE):
       {
-        //for avoiding baddie, makes them spaz out though
-        /*if(m_idle)
-        {
-          for(auto &baddie : *m_baddies)
-          {
-            ngl::Vec2 baddie_pos = ngl::Vec2(baddie.getPos()[0], baddie.getPos()[2]);
-            float dist = Utility::sqrDistance(m_pos, baddie_pos);
-            if (dist < 10)
-            {
-              randomIdlePos(m_pos, 10);
-            }
-          }
-        }*/
-
         if (move())
         {
           //when the target has been reached, remove the state from the stack
@@ -560,7 +546,6 @@ void Character::update()
         else
         {
           //no wood left to chop
-          generalMessage(" finished chopping wood", m_dest_target_id);
           m_state_stack.clear();
         }
         break;
@@ -575,17 +560,29 @@ void Character::update()
           //if the character is holding wood, add to inventory
           if (m_inventory == CharInventory::WOOD)
           {
-            m_world_inventory->addWood(1);
+            if(!m_world_inventory->addWood(1))
+            {
+              Gui::instance()->notify("The store houses have run out of space for wood",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
           //if the character is holding fish, add to inventory
           else if (m_inventory == CharInventory::FISH)
           {
-            m_world_inventory->addFish(1);
+            if(!m_world_inventory->addFish(1))
+            {
+              Gui::instance()->notify("The store houses have run out of space for fish",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
           //if the character is holding berries, add to inventory
           else if (m_inventory == CharInventory::BERRIES)
           {
-            m_world_inventory->addBerries(5);
+            if(!m_world_inventory->addBerries(5))
+            {
+              Gui::instance()->notify("The store houses have run out of space for berries",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
 
           //reset character inventory
