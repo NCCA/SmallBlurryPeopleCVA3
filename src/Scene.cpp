@@ -2884,26 +2884,22 @@ void Scene::baddiesSpawn()
 {
   m_baddie_timer++;
 
-  if(m_baddie_timer > (100 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
+  if(m_baddie_timer > (1000 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
   {
     m_baddie_timer = 0;
     ngl::Random *rnd = ngl::Random::instance();
-    double rand = rnd->randomNumber();
-    if (rand < (0.001))
+
+    size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+    for (size_t i = 0; i < 1000; i++)
     {
-      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-      bool found = false;
-      while(!found)
+      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+      float dist = 10 + rnd->randomPositiveNumber(10);
+      direction *= dist;
+      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
+      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
       {
-        ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-        float dist = 10 + rnd->randomPositiveNumber(10);
-        direction *= dist;
-        ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
-        if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
-        {
-          m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
-          found = true;
-        }
+        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+        break;
       }
     }
   }
@@ -2912,14 +2908,14 @@ void Scene::baddiesSpawn()
 void Scene::charactersSpawn()
 {
   m_character_timer++;
-  if(m_character_timer > (100 / m_prefs->getFloatPref("CHARACTER_SPAWN_RATE")))
+  if(m_character_timer > (1000 / m_prefs->getFloatPref("CHARACTER_SPAWN_RATE")))
   {
-    ngl::Random* rnd = ngl::Random::instance();
     m_character_timer = 0;
-    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(30) < spawn_chance)
+    int population = getPopulation();
+    int max_population = getMaxPopulation();
+    if (population < max_population)
     {
-        createCharacter();
+      createCharacter();
     }
   }
 }

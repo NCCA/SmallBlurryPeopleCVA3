@@ -19,7 +19,6 @@ tileTypes = tileTypes_in
 img_filename = "resources/textures/maps/uk_heightmap.png"
 im = Image.open(img_filename)
 im = im.resize((map_width, map_height), Image.ANTIALIAS)
-im.show()
 bright = ImageEnhance.Brightness(im)
 im = bright.enhance(1.1)
 im = im.filter(ImageFilter.GaussianBlur(radius = 1))
