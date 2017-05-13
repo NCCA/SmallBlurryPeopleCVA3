@@ -13,8 +13,9 @@
 #include <memory>
 
 int Character::m_id_counter(1);
+Inventory *Character::m_world_inventory(nullptr);
 
-Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies):
+Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::string _name, std::vector<Baddie> *_baddies):
   AI(_height_tracer, _grid),
   m_id(m_id_counter++),
   m_name(_name),
@@ -23,8 +24,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_active(false),
   m_sleeping(false),
   m_storing(false),
-	m_forage(false),
-  m_world_inventory(_world_inventory),
+  m_forage(false),
   m_baddies(_baddies),
   m_target_baddie(nullptr),
   m_inventory(CharInventory::NONE),
@@ -65,6 +65,16 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
   Gui::instance()->notify(m_name+" was born!", getPos2d());
+}
+
+void Character::setWorldInventory(Inventory *_world_inventory)
+{
+  m_world_inventory = _world_inventory;
+}
+
+Inventory *Character::getWorldInventory()
+{
+  return m_world_inventory;
 }
 
 void Character::setState(int _target_id)
@@ -1193,6 +1203,13 @@ void Character::softResetCharacter()
   //reset speed
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
+}
+
+void Character::completedAction()
+{
+  m_state_stack.pop_front();
+  m_action_timer.restart();
+  m_speed = Prefs::instance()->getFloatPref("CHARACTER_SPEED");
 }
 
 void Character::staminaMessage()

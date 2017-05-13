@@ -5,7 +5,43 @@
 #include "Scene.hpp"
 
 ///
-/// \brief The Action enum for what the buttons does, ints are commented in to match shader consts
+/// \brief The Action enum for what the buttons does, ints are commented in to match shader consts.
+/// Includes:
+/// PASSIVE - text button with no action
+/// QUIT - button quits the game
+/// BUILDHOUSE - tell character to build a house
+/// BUILDSTORE - tell character to build a storehouse
+/// CENTRECAMERA - center the camera on the current character
+/// ESCAPE escape the current menu
+/// ZOOMIN zoom camera in
+/// ZOOMOUT zoom camera out
+/// MOVEFORWARD move camera forward
+/// MOVEBACKWARD move camera backward
+/// MOVELEFT move camera left
+/// MOVERIGHT move camera right
+/// STOPFORWARD stop camera move forward
+/// STOPBACKWARD stop camera move backward
+/// STOPLEFT stop camera move left
+/// STOPRIGHT stop camera move right
+/// PREFERENCES open preferences menu
+/// PASSIVE_CHARACTER display character name
+/// TOGGLEBOOLPREF toggle a boolean preference
+/// FORAGE tell character to forage for berries
+/// NOTIFY display a notification
+/// PREFS_VALUE display a preferences value
+/// INCR_PREFS increase a preferences value
+/// DECR_PREFS decrease a preferences value
+/// SAVE_PREFERENCES save preferences to preferences.conf
+/// CHAR_STATE display characters's state
+/// STAMINA_BAR disaplay stamina of character
+/// HEALTH_BAR display health of character
+/// HUNGER_BAR display hunger of character
+/// POPULATION display population
+/// CHAR_EAT_BERRIES tell character to eat berries
+/// CHAR_EAT_FISH tell character to eat fish
+/// INV_WOOD display amount of wood in inventory
+/// INV_BERRIES display amount of berries in inventory
+/// INV_FISH display amount of fish in inventory
 ///
 enum class Action
 {
@@ -40,7 +76,10 @@ enum class Action
   HUNGER_BAR,        // 28
   POPULATION,        // 29
   CHAR_EAT_BERRIES,  // 30
-  CHAR_EAT_FISH      // 31
+  CHAR_EAT_FISH,     // 31
+  INV_WOOD,          // 32
+  INV_BERRIES,       // 33
+  INV_FISH           // 34
 };
 
 ///
