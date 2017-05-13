@@ -35,7 +35,7 @@ void Prefs::restoreDefaultPrefs()
   m_int_prefs["X_RES"] = int_pref_t(1920, IncType::X10);
   m_int_prefs["Y_RES"] = int_pref_t(1080, IncType::X10);
   m_int_prefs["CHARACTER_BUILDING"] = int_pref_t(6, IncType::X1);
-  m_int_prefs["NUMBER_OF_CHARACTERS"] = int_pref_t(5, IncType::X1);
+  m_int_prefs["CHARACTERS_PER_HOUSE"] = int_pref_t(5, IncType::X1);
   m_int_prefs["MAX_TILE_OCCUPANTS"] = int_pref_t(4, IncType::X1);
   m_int_prefs["TREES_PER_TILE"] = int_pref_t(4, IncType::X1);
 

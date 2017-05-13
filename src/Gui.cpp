@@ -79,6 +79,9 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::HEALTH_BAR:
   case Action::HUNGER_BAR:
   case Action::POPULATION:
+  case Action::INV_WOOD:
+  case Action::INV_BERRIES:
+  case Action::INV_FISH:
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -247,7 +250,7 @@ void Gui::unpause()
 void Gui::createStartMenuButtons()
 {
   wipeButtons();
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "GAME TITLE");
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "TINY PEOPLE");
   addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), TEXT_PLAY);
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
   addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
@@ -259,7 +262,12 @@ void Gui::createSceneButtons()
 {
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), TEXT_PAUSE);
+
   addButton(Action::POPULATION, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(60, 10), ngl::Vec2(120, 40), "");
+  addButton(Action::INV_WOOD, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(190, 10), ngl::Vec2(120, 40), "");
+  addButton(Action::INV_BERRIES, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(320, 10), ngl::Vec2(120, 40), "");
+  addButton(Action::INV_FISH, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(450, 10), ngl::Vec2(120, 40), "");
+
   addButton(Action::BUILDHOUSE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "");
   addButton(Action::BUILDSTORE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(60, 10), ngl::Vec2(40, 40), "");
   addButton(Action::FORAGE, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(110, 10), ngl::Vec2(40, 40), "");
@@ -290,7 +298,6 @@ void Gui::createPrefsButtons()
   float y0 = 10;
   float y_pos = 10;
   float x_pos = 10;
-  int num_prefs = prefs->getNumChangeablePrefs();
   std::string name = "";
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::RIGHT, YAlignment::TOP, ngl::Vec2(10, 10), ngl::Vec2(40, 40), "X");
@@ -323,6 +330,18 @@ void Gui::createPrefsButtons()
   addButton(Action::SAVE_PREFERENCES, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0, 60), ngl::Vec2(getButtonLength(save_prefs), 40), save_prefs);
   std::string prefs_warning("You will need to SAVE PREFERENCES and restart the game for most settings to take effect");
   addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::BOTTOM, ngl::Vec2(0,10), ngl::Vec2(getButtonLength(prefs_warning), 40), prefs_warning);
+
+  updateButtonArrays();
+}
+
+void Gui::createEndGameButtons()
+{
+  wipeButtons();
+  std::string end_message = "GAME OVER: everyone died :(";
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(getButtonLength(end_message), 40), end_message);
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), "PLAY AGAIN");
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
 
   updateButtonArrays();
 }
@@ -487,12 +506,21 @@ void Gui::drawButtons()
   slib->setRegisteredUniform("game_state", m_scene->getState());
   slib->setRegisteredUniform("FONT_SIZE", FONT_SIZE);
   slib->setRegisteredUniform("FONT_SPACE", FONT_SPACE);
-
+  // bind textures
   bindTextureToShader(store->getTexture("icons"), "icons", 0);
   bindTextureToShader(store->getTexture("font"), "font", 1);
+
+  // send population data
   slib->setRegisteredUniform("population", m_scene->getPopulation());
   slib->setRegisteredUniform("max_pop", m_scene->getMaxPopulation());
 
+  // send inventory data
+  slib->setRegisteredUniform("wood", Character::getWorldInventory()->getWoodInventory());
+  slib->setRegisteredUniform("berries", Character::getWorldInventory()->getBerryInventory());
+  slib->setRegisteredUniform("fish", Character::getWorldInventory()->getFishInventory());
+  slib->setRegisteredUniform("max_inv", 0);
+
+  // if there's an active character, send character data
   Character *character = m_scene->getActiveCharacter();
   if(character)
   {

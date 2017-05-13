@@ -69,11 +69,21 @@ public:
 	/// @param [in] _name, name for character
 	/// @param [in] _baddies, pointer to vector of baddies in the game
 	///
-	Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies);
+	Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::string _name, std::vector<Baddie> *_baddies);
 	///
 	/// @brief destructor
 	///
 	~Character() = default;
+	///
+	/// \brief setWorldInventory initialize world inventory for character class
+	/// \param _world_inventory pointer to world inventory
+	///
+	static void setWorldInventory(Inventory *_world_inventory);
+	///
+	/// \brief getWorldInventory access the world inventory
+	/// \return pointer to world inventory
+	///
+	static Inventory *getWorldInventory();
 	///
 	/// @brief setState, creates state stack for the character to execute
 	///
@@ -243,7 +253,7 @@ private:
 	///
 	/// @brief m_world_inventory, inventory in store houses around the map
 	///
-	Inventory *m_world_inventory;
+	static Inventory *m_world_inventory;
 	///
 	/// @brief m_baddies, vector of baddies in world
 	///
@@ -377,7 +387,7 @@ private:
 	/// @brief completedAction, when a state has been completed it is removed from the stack and the
 	/// internal timer is reset
 	///
-	void completedAction() {m_state_stack.pop_front(); m_action_timer.restart();}
+	void completedAction();
 	///
 	/// @brief staminaMessage, generic message that is used when a character doesnt have enough stamina to
 	/// complete a task

@@ -344,26 +344,8 @@ private:
   ///
   int m_num_houses;
 
-  /*
-  ///
-  /// \brief m_num_wood amount of wood stored
-  ///
-  int m_num_wood;
-
-  ///
-  /// \brief m_num_berries amount of berries stored
-  ///
-  int m_num_berries;
-
-  ///
-  /// \brief m_num_fish amount of fish stored
-  ///
-  int m_num_fish;
-  */
-
   Inventory *m_world_inventory;
 
-  ///
   /// \brief m_spawn_ponit is the spawn point set in the python script
   ///
   ngl::Vec2 m_spawn_ponit;

@@ -90,6 +90,10 @@ public :
   ///
   void createPrefsButtons();
   ///
+  /// \brief createEndGameButtons create set of buttons for the game over screen
+  ///
+  void createEndGameButtons();
+  ///
   /// \brief addButton add a button to the button vector
   /// \param _action button's action when clicked
   /// \param _x_align horizonal alignment (to left/right/center of screen)

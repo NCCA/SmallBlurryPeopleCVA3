@@ -42,10 +42,10 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
     m_grid(&m_world_inventory)
 {
-
-   // m_grid = Grid(&m_world_inventory);
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
+
+    Character::setWorldInventory(&m_world_inventory);
 
     ngl::Random * rnd = ngl::Random::instance();
     rnd->setSeed();
@@ -108,11 +108,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //reads file with list of names
     readNameFile();
     //creates characters with random names
-
-    createCharacter();
-    m_active_char_id = m_characters[0].getID();
-    gui->updateActiveCharacter();
-    m_characters[0].setActive(true);
 
     initialiseFramebuffers();
 
@@ -452,7 +447,7 @@ void Scene::createCharacter()
     std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
     int name_chosen = nameNo(mt_rand);
     //create character with random name
-    m_characters.push_back(Character(&m_height_tracer, &m_grid, &m_world_inventory, m_file_names[name_chosen], &m_baddies));
+    m_characters.push_back(Character(&m_height_tracer, &m_grid, m_file_names[name_chosen], &m_baddies));
     //remove name from list so no multiples
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
@@ -542,11 +537,6 @@ void Scene::update()
           if (m_characters[i].getHealth() <= 0.0)
           {
               std::string message = m_characters[i].getName() + " has died!";
-              if (m_characters.size() == 0)
-              {
-                m_state = GameState::ENDGAME;
-                return;
-              }
               ngl::Vec2 pos = m_characters[i].getPos2d();
               Gui::instance()->notify(message, pos );
               //check if character has health, if it doesn't remove the character
@@ -566,6 +556,7 @@ void Scene::update()
               m_characters.erase(m_characters.begin() + i);
               for(auto &baddie: m_baddies)
                 baddie.addScale(0.5f);
+              break;
           }
           else
           {
@@ -578,6 +569,14 @@ void Scene::update()
             }
           }
         }
+        if (m_characters.size() == 0)
+        {
+          m_state = GameState::ENDGAME;
+          Gui::instance()->createEndGameButtons();
+          m_game_started = false;
+          return;
+        }
+
         // preference for this?
         if(true)
         {
@@ -856,7 +855,7 @@ void Scene::draw()
             {
                 ngl::Vec3 pos = ch.getPos();
                 m_transform.setPosition(pos);
-                m_transform.setScale(2.8, 1.4, 2.8);
+                m_transform.setScale(3, 1.4, 3);
                 slib->setRegisteredUniform("id", ch.getID());
                 drawAsset( "person", "", "");
             }
@@ -2739,9 +2738,17 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
-    m_state = GameState::MAIN;
-    m_game_started = true;
-    Gui::instance()->unpause();
+  Gui *gui = Gui::instance();
+  m_state = GameState::MAIN;
+  m_game_started = true;
+  gui->unpause();
+  // add first character
+  createCharacter();
+  m_active_char_id = m_characters[0].getID();
+  gui->updateActiveCharacter();
+  m_characters[0].setActive(true);
+  // clear baddie vector
+  m_baddies.clear();
 }
 
 void Scene::startMove(Direction _d)
@@ -2783,6 +2790,7 @@ void Scene::escapeState()
     Gui *gui = Gui::instance();
     switch (m_state) {
     case GameState::START_MENU:
+    case GameState::ENDGAME:
         startGame();
         break;
     case GameState::MAIN:

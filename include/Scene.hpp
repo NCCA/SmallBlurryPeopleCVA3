@@ -184,7 +184,7 @@ public:
     /// \brief getMaxPopulation get maximum possible population
     /// \return maximum population
     ///
-    int getMaxPopulation() {return m_grid.getNumHouses()*5;}
+    int getMaxPopulation() {return m_grid.getNumHouses()*Prefs::instance()->getIntPref("CHARACTERS_PER_HOUSE");}
 
 private:
     ///

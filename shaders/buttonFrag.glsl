@@ -36,6 +36,9 @@ const uint HUNGER_BAR        = 28;
 const uint POPULATION        = 29;
 const uint CHAR_EAT_BERRIES  = 30;
 const uint CHAR_EAT_FISH     = 31;
+const uint INV_WOOD          = 32;
+const uint INV_BERRIES       = 33;
+const uint INV_FISH          = 34;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -119,10 +122,12 @@ vec3 healthText();
 vec3 hungerText();
 
 ///
-/// \brief populationText write population text to the population button
+/// \brief intText write text to button indicating an int amount out of a maximum
+/// \param amount int value
+/// \param max maximum int
 /// \return greyscale text
 ///
-vec3 populationText();
+vec3 intText(int amount, int maximum);
 
 ///
 /// \brief box draw an SDF represented box, with curved corners
@@ -194,8 +199,14 @@ uniform float character_stamina;
 uniform float character_health;
 uniform float character_hunger;
 uniform vec3 character_color;
+
 uniform int population;
 uniform int max_pop;
+
+uniform int wood;
+uniform int berries;
+uniform int fish;
+uniform int max_inv;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -505,45 +516,45 @@ vec3 hungerText()
   return vec3(max(c, 0.0));
 }
 
-vec3 populationText()
+vec3 intText(int amount, int maximum)
 {
-  float c = 0;
+  float c = 0.0;
   vec2 pos = gl_FragCoord.xy-vec2(0.0, fResolution.y);
   vec2 text_pos = translate(pos, vec2(fragPixelPos.x + (fragPixelSize.x - 7.0 * FONT_SIZE * FONT_SPACE)/2.0, -(fragPixelPos.y + (fragPixelSize.y - (0 - 1) * FONT_SIZE)/2.0)));
   vec2 tp = translate(text_pos/FONT_SIZE, vec2(-1.0, 0.0));
-
+  // spaces to make space for icon
   __ __ __
 
-  int pop = population;
-  while(pop > 10)
+  int a = amount;
+  while(a > 10)
   {
     tp.x-=FONT_SPACE;
-    pop/=10;
+    a/=10;
   }
   vec2 tp0 = tp;
-  pop = population;
+  a = amount;
   do
   {
-    S(pop%10 + 48);
-    pop /= 10;
+    S(a%10 + 48);
+    a /= 10;
     tp.x+=FONT_SPACE*2;
-  } while(pop>0);
+  } while(a>0);
   tp = tp0;
   __ _slash __
 
-  pop = max_pop;
-  while(pop > 10)
+  a = maximum;
+  while(a > 10)
   {
     tp.x-=FONT_SPACE;
-    pop/=10;
+    a/=10;
   }
-  pop = max_pop;
+  a = maximum;
   do
   {
-    S(pop%10 + 48);
-    pop /= 10;
+    S(a%10 + 48);
+    a /= 10;
     tp.x+=FONT_SPACE*2;
-  } while(pop>0);
+  } while(a>0);
 
   return vec3(max(c, 0.0));
 }
@@ -667,8 +678,23 @@ void main()
     }
     else if(fragAction == POPULATION)
     {
-      s += populationText();
+      s += intText(population, max_pop);
       icon_color = getIcon(fragUV, 16, vec2(192, 64));
+    }
+    else if(fragAction == INV_WOOD)
+    {
+      s += intText(wood, max_inv);
+      icon_color = getIcon(fragUV, 32, vec2(192, 64));
+    }
+    else if(fragAction == INV_BERRIES)
+    {
+      s += intText(berries, max_inv);
+      icon_color = getIcon(fragUV, 48, vec2(192, 64));
+    }
+    else if(fragAction == INV_FISH)
+    {
+      s += intText(fish, max_inv);
+      icon_color = getIcon(fragUV, 64, vec2(192, 64));
     }
     else if(fragAction == CENTRECAMERA)
     {
@@ -688,11 +714,11 @@ void main()
     }
     else if(fragAction == CHAR_EAT_BERRIES)
     {
-      icon_color = getIcon(fragUV, 4);
+      icon_color = getIcon(fragUV, 48);
     }
     else if(fragAction == CHAR_EAT_FISH)
     {
-      icon_color = getIcon(fragUV, 5);
+      icon_color = getIcon(fragUV, 64);
     }
     s = mix(s, icon_color.xyz, icon_color.a);
 
