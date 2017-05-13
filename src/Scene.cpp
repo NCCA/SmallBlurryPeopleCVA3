@@ -39,7 +39,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
+    m_grid(&m_world_inventory)
 {
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
