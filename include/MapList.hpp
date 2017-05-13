@@ -20,8 +20,13 @@ public:
   ///
   MapList();
   ///
-  /// \brief getCurrentMapPath get name of map
+  /// \brief getCurrentMapName get name of map
   /// \return name of map as string
+  ///
+  std::string getCurrentMapName();
+  ///
+  /// \brief getCurrentMapPath get path of map
+  /// \return path of map as string
   ///
   std::string getCurrentMapPath();
   ///

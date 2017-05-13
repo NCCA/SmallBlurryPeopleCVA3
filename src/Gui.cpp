@@ -794,7 +794,7 @@ void Gui::mapChanged()
     switch(button->getAction())
     {
     case Action::MAP_NAME:
-      button->setText(maplist->getCurrentMapPath());
+      button->setText(maplist->getCurrentMapName());
       break;
     case Action::MAP_WIDTH:
       button->setText(maplist->getWString());
@@ -817,7 +817,7 @@ void Gui::addMapButtons()
   MapList *maplist = MapList::instance();
   addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-100), ngl::Vec2(350, 40), "CHOOSE MAP:");
 
-  addButton(Action::MAP_NAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-50), ngl::Vec2(250,40), maplist->getCurrentMapPath());
+  addButton(Action::MAP_NAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-50), ngl::Vec2(250,40), maplist->getCurrentMapName());
   addButton(Action::PREV_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,-50), ngl::Vec2(40,40), TEXT_PLAYBACK);
   addButton(Action::NEXT_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,-50), ngl::Vec2(40,40), TEXT_PLAY);
 

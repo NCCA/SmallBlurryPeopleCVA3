@@ -1347,7 +1347,7 @@ void Scene::draw()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       slib->use("levelSelect");
       slib->setRegisteredUniform("resolution", m_viewport);
-      GLuint texture_id = AssetStore::instance()->getTexture("level_"+MapList::instance()->getCurrentMapPath());
+      GLuint texture_id = AssetStore::instance()->getTexture("level_"+MapList::instance()->getCurrentMapName());
       if(texture_id == 0)
       {
         texture_id = AssetStore::instance()->getTexture("level_custom");
@@ -1359,6 +1359,9 @@ void Scene::draw()
 
       glBindVertexArray(0);
 
+      glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+      Gui::instance()->drawButtons();
 
     }
 
@@ -1367,7 +1370,7 @@ void Scene::draw()
     //---------------------------//
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
-    Gui::instance()->drawButtons();
+    //Gui::instance()->drawButtons();
 
     //---------------------------//
     //         DEBUG DRAW        //
@@ -2775,7 +2778,7 @@ void Scene::startGame()
   m_state = GameState::MAIN;
   m_game_started = true;
   gui->unpause();
-  m_grid.updateScript("python/"+maplist->getCurrentMapPath()+".py", maplist->getW(), maplist->getH(), maplist->getSeed());
+  m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
   std::cout << "Constructing terrain...\n";
   m_terrainVAO = constructTerrain();
 
@@ -2789,6 +2792,7 @@ void Scene::startGame()
 
   //Number of clouds.
   int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+  num_clouds = 1;
   //Number of particles per cloud.
   int num_cloud_particles = 32;
 
