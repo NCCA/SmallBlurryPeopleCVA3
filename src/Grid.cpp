@@ -22,7 +22,7 @@ Grid::Grid(Inventory *_world_inventory):
   m_world_inventory(_world_inventory)
 {
   Prefs* prefs = Prefs::instance();
-  updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
+  //updateScript(prefs->getStrPref("MAP_SCRIPT"));
 }
 
 void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _new_seed)

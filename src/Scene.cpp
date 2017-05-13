@@ -11,6 +11,7 @@
 #include "Gui.hpp"
 #include "Utility.hpp"
 #include "Commands.hpp"
+#include "MapList.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -163,9 +164,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("cloud2", "cloud/cloud2.png");
     store->loadTexture("sphericalNormal", "cloud/sphericalNormal.png");
 
-    std::cout << "Constructing terrain...\n";
-    m_terrainVAO = constructTerrain();
-
     std::vector<ngl::Vec4> verts = {
         ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
         ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
@@ -209,11 +207,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    std::cout << "Scene constructor complete.\n";
-
-    initMeshInstances();
-
 
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
@@ -534,12 +527,12 @@ void Scene::update()
 
         for(size_t i=0; i<m_characters.size(); i++)
         {
+          //check if character has health, if it doesn't remove the character
           if (m_characters[i].getHealth() <= 0.0)
           {
               std::string message = m_characters[i].getName() + " has died!";
               ngl::Vec2 pos = m_characters[i].getPos2d();
               Gui::instance()->notify(message, pos );
-              //check if character has health, if it doesn't remove the character
               if (m_active_char_id == m_characters[i].getID())
               {
                   m_active_char_id = -1;
@@ -630,7 +623,6 @@ void Scene::update()
                 t_sundown * ngl::Vec3(1.0f, 0.6f, 0.1f);
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
-    }
 
       m_pointLights.clear();
 
@@ -779,10 +771,10 @@ void Scene::update()
               }
           }
       }
+    }
 
 }
 
-//I'm sorry this function is so long :(
 //Order of operations:
 //  --
 //  SETUP                   : Sets up the scene ready for drawing.
@@ -2034,7 +2026,7 @@ void Scene::mouseSelection()
     Gui *gui = Gui::instance();
     ngl::Vec2 mouse_coords = Utility::getMousePos();
 
-    if(gui->mousePos( mouse_coords ) )
+    if( gui->mousePos( mouse_coords ) )
     {
         gui->click();
     }
@@ -2042,7 +2034,7 @@ void Scene::mouseSelection()
     {
         int red = getCharIDAtMouse();
 
-        if(red < (m_characters.size() + 1) && red > 0)
+        if(red > 0)
         {
             for (Character &character : m_characters)
             {
@@ -2053,7 +2045,7 @@ void Scene::mouseSelection()
                     {
                         m_active_char_id = character.getID();
                         character.setActive(true);
-                        //character.clearState();
+                        // character.clearState();
                         gui->updateActiveCharacter();
                     }
                 }
@@ -2739,6 +2731,7 @@ void Scene::togglePause()
 void Scene::startGame()
 {
   Gui *gui = Gui::instance();
+  MapList *maplist = MapList::instance();
   m_state = GameState::MAIN;
   m_game_started = true;
   gui->unpause();
@@ -2749,6 +2742,11 @@ void Scene::startGame()
   m_characters[0].setActive(true);
   // clear baddie vector
   m_baddies.clear();
+  m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
+  std::cout << "Constructing terrain...\n";
+  m_terrainVAO = constructTerrain();
+
+  initMeshInstances();
 }
 
 void Scene::startMove(Direction _d)

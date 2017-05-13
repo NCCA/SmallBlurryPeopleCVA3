@@ -44,7 +44,7 @@ void Prefs::restoreDefaultPrefs()
   m_float_prefs["TIME_SCALE"] = float_pref_t(0.01, IncType::X0_01);
 
   //setting string values
-  m_str_prefs["MAP_SCRIPT_PATH"] = str_pref_t("python/simplexMap.py", IncType::NONE);
+  m_str_prefs["MAP_SCRIPT"] = str_pref_t("python/simplexMap.py", IncType::NONE);
 
   //setting bool values
   m_bool_prefs["AA"] = bool_pref_t(true, IncType::NONE);

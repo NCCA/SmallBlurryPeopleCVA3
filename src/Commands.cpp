@@ -1,5 +1,6 @@
 #include "Commands.hpp"
 #include "Gui.hpp"
+#include "MapList.hpp"
 //------------------------------------------------------------//
 // Passive Command
 //------------------------------------------------------------//
@@ -177,5 +178,69 @@ SavePreferencesCommand::SavePreferencesCommand()
 
 void SavePreferencesCommand::execute()
 {
+  Gui::instance()->notify("Preferences Saved!", ngl::Vec2(0,0));
   Prefs::instance()->savePrefs();
+}
+
+//------------------------------------------------------------//
+// Change Map Command
+//------------------------------------------------------------//
+
+ChangeMapCommand::ChangeMapCommand(int _dir) :
+  m_dir(_dir)
+{}
+
+void ChangeMapCommand::execute()
+{
+  if(m_dir > 0)
+  {
+    MapList::instance()->nextMap();
+  }
+  else
+  {
+    MapList::instance()->prevMap();
+  }
+  Gui::instance()->mapChanged();
+}
+
+//------------------------------------------------------------//
+// Change Width Command
+//------------------------------------------------------------//
+
+ChangeWidthCommand::ChangeWidthCommand(int _dir) :
+  m_dir(_dir)
+{}
+
+void ChangeWidthCommand::execute()
+{
+  MapList::instance()->addWidth(m_dir);
+  Gui::instance()->mapChanged();
+}
+
+//------------------------------------------------------------//
+// Change Height Command
+//------------------------------------------------------------//
+
+ChangeHeightCommand::ChangeHeightCommand(int _dir) :
+  m_dir(_dir)
+{}
+
+void ChangeHeightCommand::execute()
+{
+  MapList::instance()->addHeight(m_dir);
+  Gui::instance()->mapChanged();
+}
+
+//------------------------------------------------------------//
+// Change Seed Command
+//------------------------------------------------------------//
+
+ChangeSeedCommand::ChangeSeedCommand(int _dir) :
+  m_dir(_dir)
+{}
+
+void ChangeSeedCommand::execute()
+{
+  MapList::instance()->addSeed(m_dir);
+  Gui::instance()->mapChanged();
 }

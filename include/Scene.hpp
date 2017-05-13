@@ -20,7 +20,6 @@
 
 #include "Framebuffer.hpp"
 
-
 ///
 /// \brief The Direction enum clarification for which direction is being used
 ///
