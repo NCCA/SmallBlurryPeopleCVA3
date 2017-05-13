@@ -218,45 +218,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    //Number of clouds.
-    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
-    //Number of particles per cloud.
-    int num_cloud_particles = 32;
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
-                + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
-        m_cloudParticles.m_pos.push_back( p );
-        m_cloudParticles.m_vel.push_back(ngl::Vec3());
-        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-        m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-    }
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        for(int j = 0; j < num_cloud_particles; ++j)
-        {
-            ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
-            m_cloudParticles.m_pos.push_back(p);
-            m_cloudParticles.m_vel.push_back(ngl::Vec3());
-            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-            m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-        }
-    }
-    m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
-
-    glGenVertexArrays(1, &m_cloudParticlesVAO);
-    glBindVertexArray(m_cloudParticlesVAO);
-    m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
-    setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
-    m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
-    setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
-    m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
-    setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
-    m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
-    setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
-    glBindVertexArray(0);
 }
 
 void Scene::initMeshInstances()
@@ -2730,23 +2691,65 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
+  ngl::Random *rnd = ngl::Random::instance();
   Gui *gui = Gui::instance();
   MapList *maplist = MapList::instance();
   m_state = GameState::MAIN;
   m_game_started = true;
   gui->unpause();
+  // clear baddie vector
+  m_baddies.clear();
+  m_grid.updateScript("python/"+maplist->getCurrentMapPath()+".py", maplist->getW(), maplist->getH(), maplist->getSeed());
+  std::cout << "Constructing terrain...\n";
+  m_terrainVAO = constructTerrain();
+
+  initMeshInstances();
+
   // add first character
   createCharacter();
   m_active_char_id = m_characters[0].getID();
   gui->updateActiveCharacter();
   m_characters[0].setActive(true);
-  // clear baddie vector
-  m_baddies.clear();
-  m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
-  std::cout << "Constructing terrain...\n";
-  m_terrainVAO = constructTerrain();
 
-  initMeshInstances();
+  //Number of clouds.
+  int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+  //Number of particles per cloud.
+  int num_cloud_particles = 32;
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
+              + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
+      m_cloudParticles.m_pos.push_back( p );
+      m_cloudParticles.m_vel.push_back(ngl::Vec3());
+      m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+      m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+  }
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      for(int j = 0; j < num_cloud_particles; ++j)
+      {
+          ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
+          m_cloudParticles.m_pos.push_back(p);
+          m_cloudParticles.m_vel.push_back(ngl::Vec3());
+          m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+          m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+      }
+  }
+  m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
+
+  glGenVertexArrays(1, &m_cloudParticlesVAO);
+  glBindVertexArray(m_cloudParticlesVAO);
+  m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
+  setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
+  m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
+  setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
+  m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
+  setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+  m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
+  setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
+  glBindVertexArray(0);
 }
 
 void Scene::startMove(Direction _d)
