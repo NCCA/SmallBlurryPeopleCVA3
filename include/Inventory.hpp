@@ -38,17 +38,17 @@ class Inventory
 		/// @brief addWood, add wood to the global inventory
 		/// @param _amount, amount of wood being added to the inventory
 		///
-		void addWood(int _amount);
+    bool addWood(int _amount);
 		///
 		/// @brief addBerries, add berries to the global inventory
 		/// @param [in] _amount, amount of berries being added to the inventory
 		///
-		void addBerries(int _amount);
+    bool addBerries(int _amount);
 		///
 		/// @brief addFish, add fishes to the global inventory
 		/// @param [in] _amount, amount of fishes being added to the inventory
 		///
-		void addFish(int _amount);
+    bool addFish(int _amount);
 		///
 		/// @brief takeWood, take wood from the global inventory
 		/// @param [in] _amount, amount of wood wanting to be taken
@@ -67,6 +67,25 @@ class Inventory
 		/// @return amount of fishes available/ the amount asked for
 		///
 		int takeFish(int _amount);
+    ///
+    /// @brief getMaxWood, returns maximum number of wood that can be stored
+    /// @return m_max_wood
+    ///
+    int getMaxWood() {return m_max_wood;}
+    ///
+    /// @brief getMaxBerries, returns maximum number of berries that can be stored
+    /// @return m_max_berries
+    ///
+    int getMaxBerries() {return m_max_berries;}
+    ///
+    /// @brief getMaxFish, returns maximum number of fish that can be stored
+    /// @return m_max_fish
+    ///
+    int getMaxFish() {return m_max_fish;}
+    ///
+    /// @brief addStoreSpace, adds onto maximum amount for storing items
+    ///
+    void addStoreSpace();
 
 	private:
 		///
@@ -81,6 +100,18 @@ class Inventory
 		/// @brief m_fish_inventory, amount of fishes in the global inventory
 		///
 		int m_fish_inventory;
+    ///
+    /// @brief m_max_wood, maximum number of wood to store
+    ///
+    int m_max_wood;
+    ///
+    /// @brief m_max_berries, maximum number of berries to store
+    ///
+    int m_max_berries;
+    ///
+    /// @brief m_max_fish, maximum number of fish to store
+    ///
+    int m_max_fish;
 };
 
 #endif//__INVENTORY_HPP__

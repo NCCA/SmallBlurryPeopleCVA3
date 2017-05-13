@@ -13,8 +13,9 @@
 #include <memory>
 
 int Character::m_id_counter(1);
+Inventory *Character::m_world_inventory(nullptr);
 
-Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory *_world_inventory, std::string _name, std::vector<Baddie> *_baddies):
+Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, std::string _name, std::vector<Baddie> *_baddies):
   AI(_height_tracer, _grid),
   m_id(m_id_counter++),
   m_name(_name),
@@ -23,8 +24,7 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_active(false),
   m_sleeping(false),
   m_storing(false),
-	m_forage(false),
-  m_world_inventory(_world_inventory),
+  m_forage(false),
   m_baddies(_baddies),
   m_target_baddie(nullptr),
   m_inventory(CharInventory::NONE),
@@ -65,6 +65,16 @@ Character::Character(TerrainHeightTracer *_height_tracer, Grid *_grid, Inventory
   m_pos = m_grid->getSpawnPoint();
   m_target_id = m_grid->coordToId(m_pos);
   Gui::instance()->notify(m_name+" was born!", getPos2d());
+}
+
+void Character::setWorldInventory(Inventory *_world_inventory)
+{
+  m_world_inventory = _world_inventory;
+}
+
+Inventory *Character::getWorldInventory()
+{
+  return m_world_inventory;
 }
 
 void Character::setState(int _target_id)
@@ -454,20 +464,6 @@ void Character::update()
     {
       case(State::MOVE):
       {
-        //for avoiding baddie, makes them spaz out though
-        /*if(m_idle)
-        {
-          for(auto &baddie : *m_baddies)
-          {
-            ngl::Vec2 baddie_pos = ngl::Vec2(baddie.getPos()[0], baddie.getPos()[2]);
-            float dist = Utility::sqrDistance(m_pos, baddie_pos);
-            if (dist < 10)
-            {
-              randomIdlePos(m_pos, 10);
-            }
-          }
-        }*/
-
         if (move())
         {
           //when the target has been reached, remove the state from the stack
@@ -560,7 +556,6 @@ void Character::update()
         else
         {
           //no wood left to chop
-          generalMessage(" finished chopping wood", m_dest_target_id);
           m_state_stack.clear();
         }
         break;
@@ -575,17 +570,29 @@ void Character::update()
           //if the character is holding wood, add to inventory
           if (m_inventory == CharInventory::WOOD)
           {
-            m_world_inventory->addWood(1);
+            if(!m_world_inventory->addWood(1))
+            {
+              Gui::instance()->notify("The store houses have run out of space for wood",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
           //if the character is holding fish, add to inventory
           else if (m_inventory == CharInventory::FISH)
           {
-            m_world_inventory->addFish(1);
+            if(!m_world_inventory->addFish(1))
+            {
+              Gui::instance()->notify("The store houses have run out of space for fish",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
           //if the character is holding berries, add to inventory
           else if (m_inventory == CharInventory::BERRIES)
           {
-            m_world_inventory->addBerries(5);
+            if(!m_world_inventory->addBerries(5))
+            {
+              Gui::instance()->notify("The store houses have run out of space for berries",m_grid->idToCoord(m_target_id));
+              m_state_stack.clear();
+            }
           }
 
           //reset character inventory
@@ -1193,6 +1200,13 @@ void Character::softResetCharacter()
   //reset speed
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED");
+}
+
+void Character::completedAction()
+{
+  m_state_stack.pop_front();
+  m_action_timer.restart();
+  m_speed = Prefs::instance()->getFloatPref("CHARACTER_SPEED");
 }
 
 void Character::staminaMessage()

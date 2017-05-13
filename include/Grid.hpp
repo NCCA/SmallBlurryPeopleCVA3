@@ -4,7 +4,9 @@
 #include <vector>
 #include <ngl/Vec2.h>
 #include <ngl/Vec3.h>
+
 #include "GridTile.hpp"
+#include "Inventory.hpp"
 
 ///
 /// @file Grid.hpp
@@ -25,7 +27,7 @@ public:
   ///
   /// @brief default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser
   ///
-  Grid();
+  Grid(Inventory *_world_inventory);
 
   ///
   /// @brief updateScript loads the specified script and runs it to create a new map
@@ -35,7 +37,6 @@ public:
   /// @param _new_seed is the seed value for random number generation in the map script
   ///
   void updateScript(std::string _script_path, int _new_w = 50, int _new_h = 50, int _new_seed = 8);
-
 
   void printTrees();
   void printTypes();
@@ -272,6 +273,10 @@ public:
   ///
   std::vector<ngl::Vec2> getStoreHouses();
 
+  std::vector<ngl::Vec2> getChangedTiles();
+
+  void resetChangedTiles();
+
 private:
   ///
   /// \brief runCurrentScript runs the currently sotred python script to generate a map
@@ -342,25 +347,13 @@ private:
   ///
   int m_num_houses;
 
-  ///
-  /// \brief m_num_wood amount of wood stored
-  ///
-  int m_num_wood;
+  Inventory *m_world_inventory;
 
-  ///
-  /// \brief m_num_berries amount of berries stored
-  ///
-  int m_num_berries;
-
-  ///
-  /// \brief m_num_fish amount of fish stored
-  ///
-  int m_num_fish;
-
-  ///
   /// \brief m_spawn_ponit is the spawn point set in the python script
   ///
   ngl::Vec2 m_spawn_ponit;
+
+  std::vector<ngl::Vec2> m_changed_tiles;
 };
 
 #endif//__GRID_HPP__

@@ -14,11 +14,12 @@
 /// @file Grid.cpp
 /// @brief source code for the Grid class
 
-Grid::Grid():
+Grid::Grid(Inventory *_world_inventory):
   m_w(1),
   m_h(1),
   m_store_houses(0),
-  m_num_houses(1) // begin with one house to start
+  m_num_houses(1), // begin with one house to start
+  m_world_inventory(_world_inventory)
 {
   Prefs* prefs = Prefs::instance();
   updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
@@ -218,6 +219,7 @@ int Grid::cutTileTrees(int _id, int _goal_amount)
 {
   int out =  m_tiles[_id].cutTrees(_goal_amount);
   m_has_changes = true;
+  m_changed_tiles.push_back(idToCoord(_id));
   return out;
 }
 
@@ -241,6 +243,7 @@ void Grid::addBuildState(int _id, float _value, TileType _type)
     houseAdded();
   }
   m_has_changes = true;
+  m_changed_tiles.push_back(idToCoord(_id));
 }
 
 void Grid::addBuildState(int _x, int _y, float _value, TileType _type)
@@ -251,6 +254,7 @@ void Grid::addBuildState(int _x, int _y, float _value, TileType _type)
     houseAdded();
   }
   m_has_changes = true;
+  m_changed_tiles.push_back(ngl::Vec2(_x, _y));
 }
 
 float Grid::getBuildState(int _id)
@@ -331,8 +335,12 @@ void Grid::addTileToVectors(ngl::Vec2 _pos, TileType _type)
   switch(_type)
   {
     case TileType::STOREHOUSE:
+    {
       m_store_houses.push_back(_pos);
+      //add extra storage space
+      m_world_inventory->addStoreSpace();
       break;
+    }
     default:
       break;
   }
@@ -344,5 +352,14 @@ std::vector<ngl::Vec2> Grid::getStoreHouses()
 }
 
 
+std::vector<ngl::Vec2> Grid::getChangedTiles()
+{
+  return m_changed_tiles;
+}
+
+void Grid::resetChangedTiles()
+{
+  m_changed_tiles.clear();
+}
 
 
