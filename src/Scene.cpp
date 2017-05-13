@@ -489,6 +489,9 @@ void Scene::update()
     //Gui::instance()->updateNotifications();
     if (m_grid.hasChanges())
     {
+        std::vector<ngl::Vec2> coords;
+        for(auto &coord : m_grid.get)
+            coords.push_back(coord);
         initMeshInstances();
         m_grid.resetHasChanges();
     }
@@ -958,7 +961,7 @@ void Scene::draw()
         m_cam.immediateTransform(camFlip);
         m_cam.immediateTransform(camMove);
 
-        drawTerrain();
+        drawTerrain(true);
 
         drawMeshes();
 
@@ -1366,7 +1369,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    /*glBindVertexArray(m_screenQuad);
+    glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1451,7 +1454,7 @@ void Scene::drawSky(bool _flipped)
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void Scene::drawTerrain()
+void Scene::drawTerrain(bool _shouldClip)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -1466,6 +1469,15 @@ void Scene::drawTerrain()
     float difference = snowLevel - waterLevel;
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
+
+    if(_shouldClip)
+    {
+        slib->setRegisteredUniform("clipAgainstHeight", true);
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
+        std::cout << m_grid.getGlobalWaterLevel() << '\n';
+    }
+    else
+        slib->setRegisteredUniform("clipAgainstHeight", false);
 
     //We shouldn't transform the terrain, this stops us from doing it accidentally.
     m_transform.reset();

@@ -55,7 +55,7 @@ public:
     /// \brief draws the sky
     void drawSky(bool _flipped = false);
     /// \brief draws the terrain
-    void drawTerrain();
+    void drawTerrain(bool _shouldClip = false);
     /// \brief draws the meshes
     void drawMeshes();
 
