@@ -85,6 +85,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("mousebox", "vertDeferredData", "fragMousebox");
     createShader("fragNormals", "vertDeferredData", "fragNormal");
     createShader("clouds", "vertBillboard", "fragCloud", "geoBillboard");
+    createShader("levelSelect", "vertScreenQuad", "levelSelFrag");
 
     slib->use("sky");
     slib->setRegisteredUniform("viewport", m_viewport);
@@ -155,6 +156,13 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("grass", "terrain/grass.png");
     store->loadTexture("rock", "terrain/rock.png");
     store->loadTexture("snow", "terrain/snow.png");
+
+    store->loadTexture("level_arena", "levels/arena.png");
+    store->loadTexture("level_connectedDots", "levels/connectedDots.png");
+    store->loadTexture("level_simplexMap", "levels/simplexMap.png");
+    store->loadTexture("level_survivalIsland", "levels/survivalIsland.png");
+    store->loadTexture("level_uk", "levels/uk.png");
+    store->loadTexture("level_custom", "levels/custom.png");
 
     store->loadMesh("tombstone", "tombstone/tombstone.obj");
     store->loadTexture("tombstone_d", "tombstone/tombstone_diff.tif");
@@ -1336,7 +1344,25 @@ void Scene::draw()
     }
     else
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      slib->use("levelSelect");
+      slib->setRegisteredUniform("resolution", m_viewport);
+      GLuint texture_id = AssetStore::instance()->getTexture("level_"+MapList::instance()->getCurrentMapName());
+      if(texture_id == 0)
+      {
+        texture_id = AssetStore::instance()->getTexture("level_custom");
+      }
+      bindTextureToShader("levelSelect", texture_id, "diffuse", 0);
+      glBindVertexArray(m_screenQuad);
+
+      glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+      glBindVertexArray(0);
+
+      glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
+
+      Gui::instance()->drawButtons();
+
     }
 
     //---------------------------//
@@ -1344,7 +1370,7 @@ void Scene::draw()
     //---------------------------//
     glViewport(0, 0, m_viewport.m_x, m_viewport.m_y);
 
-    Gui::instance()->drawButtons();
+    //Gui::instance()->drawButtons();
 
     //---------------------------//
     //         DEBUG DRAW        //
@@ -2752,7 +2778,7 @@ void Scene::startGame()
   m_state = GameState::MAIN;
   m_game_started = true;
   gui->unpause();
-  m_grid.updateScript("python/"+maplist->getCurrentMapPath()+".py", maplist->getW(), maplist->getH(), maplist->getSeed());
+  m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
   std::cout << "Constructing terrain...\n";
   m_terrainVAO = constructTerrain();
 
@@ -2766,6 +2792,7 @@ void Scene::startGame()
 
   //Number of clouds.
   int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+  num_clouds = 1;
   //Number of particles per cloud.
   int num_cloud_particles = 32;
 

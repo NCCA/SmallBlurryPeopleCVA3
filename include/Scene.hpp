@@ -170,7 +170,10 @@ public:
     /// \brief charactersSpawn spawn characters at houses if there's space
     ///
     void charactersSpawn();
-
+    ///
+    /// \brief endGame return to main menu
+    /// \param _message text for first button in main menu
+    ///
     void endGame(const std::string &_message);
 
     ///
@@ -189,12 +192,21 @@ private:
     /// \brief m_active whether scene is still active (if user has not quit)
     ///
     bool m_active;
-
+    ///
+    /// \brief m_prefs pointer to preferences
+    ///
     Prefs* m_prefs;
-
+    ///
+    /// \brief m_cam camera that user sees through
+    ///
     Camera m_cam;
-
+    ///
+    /// \brief m_grid grid to use for map traversal and terrain generation etc
+    ///
     Grid m_grid;
+    ///
+    /// \brief m_world_inventory user's total inventory
+    ///
     Inventory m_world_inventory;
 
     /// @brief m_file_names, vector of available names for characters
