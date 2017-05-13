@@ -314,6 +314,7 @@ void Gui::createSceneButtons()
   addButton(Action::HUNGER_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 220), ngl::Vec2(190, 20), "");
   addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 190), ngl::Vec2(190, 20), "");
   addButton(Action::HEALTH_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 160), ngl::Vec2(190, 20), "");
+
   updateButtonArrays();
 }
 
