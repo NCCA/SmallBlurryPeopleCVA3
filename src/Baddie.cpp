@@ -20,11 +20,9 @@ Baddie::Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid,
   Prefs* prefs = Prefs::instance();
 	m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
-	//** should be in set preferences **//
-	m_attack_power = 0.1;
-	//** should probably be set in preferences **//
-	m_tracking_distance = 5.0;
-	m_agro_distance = 15.0;
+  m_attack_power = prefs->getFloatPref("BADDIE_ATTACK");
+  m_tracking_distance = prefs->getFloatPref("BADDIE_TRACKING");
+  m_agro_distance = prefs->getFloatPref("BADDIE_AGRO_DIST");
 
 	m_pos = _pos;
 	m_target_id = m_grid->coordToId(m_pos);
@@ -32,6 +30,10 @@ Baddie::Baddie(ngl::Vec2 _pos, TerrainHeightTracer *_height_tracer, Grid *_grid,
 
 void Baddie::update()
 {
+  //for if the prefernces have been changed
+  Prefs* prefs = Prefs::instance();
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
+
 	if(m_health <= 0.0)
 		m_targets.clear();
 
@@ -66,6 +68,8 @@ void Baddie::invadedState(Character *_target)
 
 void Baddie::trackingState()
 {
+  //baddie speeds up to get to enemy
+  m_speed *= 10;
 	//get the target's position and move the baddie to it if they're not on the same grid tile
 	ngl::Vec2 target = ngl::Vec2(m_targets[0]->getPos()[0], m_targets[0]->getPos()[2]);
 	int charID = m_grid->coordToId(target);
@@ -79,8 +83,6 @@ void Baddie::trackingState()
 
 		setTarget(ngl::Vec2(Utility::randInt(0,m_grid->getW()), Utility::randInt(0, m_grid->getH())));
 
-		Prefs* prefs = Prefs::instance();
-		m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 	}
 	else
 		//go to character target
@@ -195,8 +197,6 @@ bool Baddie::findNearestTarget()
 	{
 		//baddie is set to follow enemy
 		m_track = true;
-		//baddie speeds up to get to enemy
-		m_speed = 0.1;
 		//set baddie's target to character enemy
 		ngl::Vec2 target = ngl::Vec2(m_targets[0]->getPos()[0], m_targets[0]->getPos()[2]);
 		setTarget(target);

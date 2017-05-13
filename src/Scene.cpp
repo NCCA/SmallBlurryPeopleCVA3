@@ -2041,7 +2041,6 @@ void Scene::mouseSelection()
     else if(m_state == GameState::MAIN)
     {
         int red = getCharIDAtMouse();
-        std::cout<<"RED:"<<red<<std::endl;
 
         if(red < (m_characters.size() + 1) && red > 0)
         {
@@ -2049,7 +2048,6 @@ void Scene::mouseSelection()
             {
                 if (character.getID() == red)
                 {
-                    std::cout<<"CHAR ID:" <<red<<std::endl;
                     // probably needs changing because vector address is not guaranteed
                     if(character.isActive() == false)
                     {

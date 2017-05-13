@@ -84,7 +84,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
     addTileToVectors(idToCoord(i), t);
     m_tiles[i].setType(t);
     m_tiles[i].setHeight(height);
-    std::cout << height << std::endl;
+    //std::cout << height << std::endl;
     if (t == TileType::TREES)
     {
       m_tiles[i].setNumTrees(max_trees);

@@ -56,7 +56,7 @@ for x in range(map_width):
       map_data[x + map_width * y][0] = tileTypes["WATER"]
 
     #adding trees
-    print noise, tree_band[0], tree_band[1]
+		#print noise, tree_band[0], tree_band[1]
     if int(noise) in range(tree_band[0], tree_band[1]):
       td = gen.fractal(x+100, y+100, octaves, persistence, 0.1, 0, 1)
       if 0 < (td):

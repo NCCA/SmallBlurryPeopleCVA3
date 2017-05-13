@@ -397,7 +397,7 @@ void Character::idleState()
     m_idle_target_id = m_grid->coordToId(m_pos);
   }
 
-  //slow down speed of characters
+  //slow down and for if the prefernces have been changed
   Prefs* prefs = Prefs::instance();
   m_speed = prefs->getFloatPref("CHARACTER_SPEED") * 0.1;
 
@@ -420,6 +420,7 @@ void Character::idleState()
 
 void Character::update()
 {
+
   std::string message;
   //take away health if hunger is too low
   if(m_hunger == 0.0 && m_health_timer.elapsed() >= (100 / m_speed))
