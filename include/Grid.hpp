@@ -273,6 +273,10 @@ public:
   ///
   std::vector<ngl::Vec2> getStoreHouses();
 
+  std::vector<ngl::Vec2> getChangedTiles();
+
+  void resetChangedTiles();
+
 private:
   ///
   /// \brief runCurrentScript runs the currently sotred python script to generate a map
@@ -348,6 +352,8 @@ private:
   /// \brief m_spawn_ponit is the spawn point set in the python script
   ///
   ngl::Vec2 m_spawn_ponit;
+
+  std::vector<ngl::Vec2> m_changed_tiles;
 };
 
 #endif//__GRID_HPP__
