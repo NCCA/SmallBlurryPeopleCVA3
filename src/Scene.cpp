@@ -1467,8 +1467,6 @@ void Scene::drawTerrain()
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
 
-    std::cout << "snow level " << m_grid.getGlobalMountainHeight() << '\n';
-
     //We shouldn't transform the terrain, this stops us from doing it accidentally.
     m_transform.reset();
 
