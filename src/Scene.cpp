@@ -2054,7 +2054,7 @@ void Scene::mouseSelection()
                     {
                         m_active_char_id = character.getID();
                         character.setActive(true);
-                        character.clearState();
+                        //character.clearState();
                         gui->updateActiveCharacter();
                     }
                 }

@@ -182,7 +182,7 @@ public:
 	/// @brief setActive, set's whether the character is active
 	/// @param [in] _selection, a boolean determing whether the character is active or not
 	///
-	void setActive(bool _selection) {m_active = _selection;}
+  void setActive(bool _selection);
 	///
 	/// @brief isActive, returns whether the  character is active
 	/// @return m_active, the boolean stored in the character determining if it is active or not

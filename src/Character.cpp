@@ -1231,6 +1231,13 @@ std::vector<float> Character::getAttributes()
   return attributes;
 }
 
+void Character::setActive(bool _selection)
+{
+  m_active = _selection;
+  if(m_active && m_idle)
+    clearState();
+}
+
 State Character::getState()
 {
   //return the character's current state
