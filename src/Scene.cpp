@@ -268,6 +268,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
 
 void Scene::initMeshInstances()
 {
+    m_meshInstances.clear();
     int iiterations = m_grid.getW() / m_meshInstanceBlockTileSize;
     int jiterations = m_grid.getH() / m_meshInstanceBlockTileSize;
 
@@ -293,6 +294,8 @@ Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int
     int maxx = _x * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
     int miny = _y * m_meshInstanceBlockTileSize;
     int maxy = _y * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
+    b.m_bounds.first = ngl::Vec3(minx, 0.0f, miny);
+    b.m_bounds.second = ngl::Vec3(maxx, 0.0f, maxy);
     for(int i = minx; i < maxx and i < m_grid.getW(); ++i)
         for(int j = miny; j < maxy and j < m_grid.getH(); ++j)
         {
@@ -368,7 +371,7 @@ void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
 {
   int x = _tilex / m_meshInstanceBlockTileSize;
   int y = _tiley / m_meshInstanceBlockTileSize;
-  int index = x * std::ceil(m_grid.getH() / (float)m_meshInstanceBlockTileSize) + y;
+  int index = x * (m_grid.getH() / m_meshInstanceBlockTileSize) + y;
 
   meshInstanceBlock b = generateInstanceMeshTile(x, y);
   m_meshInstances[index] = b;
@@ -489,10 +492,21 @@ void Scene::update()
     //Gui::instance()->updateNotifications();
     if (m_grid.hasChanges())
     {
-        std::vector<ngl::Vec2> coords;
-        for(auto &coord : m_grid.get)
-            coords.push_back(coord);
-        initMeshInstances();
+        std::vector< std::vector< bool > > regenTiles;
+        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize, std::vector< bool >() );
+        for(auto &vec : regenTiles)
+            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize, false );
+
+        for(auto &coord : m_grid.getChangedTiles())
+        {
+            int x = std::floor(coord.m_x / m_meshInstanceBlockTileSize);
+            int y = std::floor(coord.m_y / m_meshInstanceBlockTileSize);
+            if(!regenTiles[x][y])
+                recalculateInstancedMeshes(std::floor(coord.m_x), std::floor(coord.m_y));
+            regenTiles[x][y] = true;
+        }
+
+        //initMeshInstances();
         m_grid.resetHasChanges();
     }
 
@@ -1369,7 +1383,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    glBindVertexArray(m_screenQuad);
+    /*glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1384,7 +1398,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }
+    }*/
 
     /*m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);
@@ -1474,7 +1488,6 @@ void Scene::drawTerrain(bool _shouldClip)
     {
         slib->setRegisteredUniform("clipAgainstHeight", true);
         slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
-        std::cout << m_grid.getGlobalWaterLevel() << '\n';
     }
     else
         slib->setRegisteredUniform("clipAgainstHeight", false);
