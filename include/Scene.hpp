@@ -54,7 +54,7 @@ public:
     /// \brief draws the sky
     void drawSky(bool _flipped = false);
     /// \brief draws the terrain
-    void drawTerrain();
+    void drawTerrain(bool _shouldClip = false);
     /// \brief draws the meshes
     void drawMeshes();
 
@@ -353,7 +353,7 @@ private:
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
     /// This is now stored in blocks, which cuts down on the recalculation time when a mesh changes.
-    const int m_meshInstanceBlockTileSize = 50;
+    const int m_meshInstanceBlockTileSize = 20;
     struct meshInstanceBlock
     {
         //The positions (and implicitly IDs) of the meshes.
