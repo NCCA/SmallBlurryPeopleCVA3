@@ -20,7 +20,6 @@
 
 #include "Framebuffer.hpp"
 
-
 ///
 /// @brief The Direction enum clarification for which direction is being used
 ///
@@ -61,23 +60,22 @@ public:
     /// @brief deconstructor
     /// 
     ~Scene() = default;
+    ///
+    /// @brief draw
+    ///
     void draw();
     ///
     /// @brief draws the sky
-    /// 
-    void drawSky();
+    ///
+    void drawSky(bool _flipped = false);
     ///
     /// @brief draws the terrain
-    /// 
-    void drawTerrain();
+    ///
+    void drawTerrain(bool _shouldClip = false);
     ///
     /// @brief draws the meshes
-    /// 
-    void drawMeshes();
     ///
-    /// @brief draws the meshes, but culls each mesh which falls out of all of the _frustumBoxes.
-    /// 
-    void drawMeshes(const std::vector<bounds> &_frustumBoxes);
+    void drawMeshes();
     ///
     /// @brief update
     ///
@@ -198,9 +196,10 @@ public:
     ///
     void charactersSpawn();
     ///
-    /// @brief initMeshInstances
+    /// @brief endGame
+    /// @param _message
     ///
-    void initMeshInstances();
+    void endGame(const std::string &_message);
     ///
     /// @brief getPopulation get the number of characters in the scene
     /// @return size of the characters vector
@@ -363,8 +362,9 @@ private:
     /// @param _shader
     /// @param _instances
     /// @param _offset
+    /// @param _index
     ///
-    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset);
+    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index);
     ///
     /// @brief drawInstances
     /// @param _model
@@ -372,9 +372,10 @@ private:
     /// @param _shader
     /// @param _instances
     /// @param _offset
+    /// @param _index
     /// @param _VP
     ///
-    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const ngl::Mat4 &_VP);
+    void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index, const ngl::Mat4 &_VP);
     ///
     /// @brief createShader
     /// @param _name
@@ -469,6 +470,10 @@ private:
     ///
     void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
     ///
+    /// @brief m_globalTime
+    ///
+    float m_globalTime;
+    ///
     /// @brief m_sunAngle
     ///
     ngl::Vec3 m_sunAngle;
@@ -555,7 +560,7 @@ private:
     /// @return 
     ///
     terrainFace terrainVerticesToFace(const int _x,
-                                      const int _y,
+                                      const int _y, const float _worldX, const float _worldY,
                                       const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
     ///
@@ -568,7 +573,7 @@ private:
     /// @param _faceNormals
     /// @return 
     ///
-    std::pair<float, ngl::Vec3> generateTerrainFaceData(const int _x,
+    std::pair<ngl::Vec4, ngl::Vec3> generateTerrainFaceData(const int _x,
                                                         const int _y,
                                                         const int _dirX,
                                                         const int _dirY,
@@ -584,15 +589,23 @@ private:
     /// @brief Rather than looping through the grid every frame, and drawing based on tile id, I extract out the positions of the meshes that need
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
-    /// 
-    std::vector< std::vector<ngl::Vec3> > m_meshPositions;
-    ///
-    /// @brief m_instanceTBO
-    ///
-    GLuint m_instanceTBO;
-    ///
-    /// @brief m_debugVAO, Use these to draw debug points to the screen. Should be deleted/hidden at some point.
-    ///
+    /// This is now stored in blocks, which cuts down on the recalculation time when a mesh changes.
+    const int m_meshInstanceBlockTileSize = 20;
+    struct meshInstanceBlock
+    {
+        //The positions (and implicitly IDs) of the meshes.
+        std::vector< std::vector<ngl::Vec3> > m_meshPositions;
+        //The bounds of the block.
+        std::pair<ngl::Vec3, ngl::Vec3> m_bounds;
+        //The texture buffer object containing the transformation data.
+        GLuint m_instanceTBO;
+    };
+    std::vector<meshInstanceBlock> m_meshInstances;
+    void initMeshInstances();
+    meshInstanceBlock generateInstanceMeshTile(const int _x, const int _y);
+    void recalculateInstancedMeshes(int _tilex, int _tiley);
+
+    //Use these to draw debug points to the screen. Should be deleted/hidden at some point.
     GLuint m_debugVAO;
     ///
     /// @brief m_debugVBO

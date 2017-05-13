@@ -1259,7 +1259,6 @@ void Character::completedAction()
   //remove state from stack, restart timer and reset speed
   m_state_stack.pop_front();
   m_action_timer.restart();
-  m_speed = Prefs::instance()->getFloatPref("CHARACTER_SPEED");
 }
 
 void Character::staminaMessage()

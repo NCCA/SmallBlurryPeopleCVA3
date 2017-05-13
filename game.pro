@@ -26,6 +26,7 @@ SOURCES+=$$PWD/src/main.cpp \
          $$PWD/src/PrefsParser.cpp \
          $$PWD/src/IVal.cpp \
          $$PWD/src/Light.cpp \
+         $$PWD/src/MapList.cpp \
          $$PWD/src/ParticleSystem.cpp \
          $$PWD/src/TerrainHeightTracer.cpp
 
@@ -49,6 +50,7 @@ HEADERS+=$$PWD/include/Scene.hpp \
          $$PWD/include/PrefsParser.hpp \
          $$PWD/include/IVal.hpp \
          $$PWD/include/Light.hpp \
+         $$PWD/include/MapList.hpp \
          $$PWD/include/ParticleSystem.hpp \
          $$PWD/include/TerrainHeightTracer.hpp
 

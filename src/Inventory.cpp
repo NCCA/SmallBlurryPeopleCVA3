@@ -4,9 +4,9 @@ Inventory::Inventory():
 	m_wood_inventory(0),
 	m_berry_inventory(0),
   m_fish_inventory(0),
-  m_max_wood(10),
-  m_max_berries(15),
-    m_max_fish(3)
+  m_max_wood(0),
+  m_max_berries(0),
+  m_max_fish(0)
 {
 }
 

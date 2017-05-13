@@ -11,6 +11,7 @@
 #include "Gui.hpp"
 #include "Utility.hpp"
 #include "Commands.hpp"
+#include "MapList.hpp"
 
 #include <ngl/NGLStream.h>
 
@@ -26,6 +27,7 @@ const int shadowResolution = 4096;
 const int waterResolution = 1024;
 
 Scene::Scene(ngl::Vec2 _viewport) :
+    m_globalTime(0.0f),
     m_active(true),
     m_grid(&m_world_inventory),
     m_active_char_id(-1),
@@ -34,7 +36,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_centre_camera(true),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
-    m_day(80),
     m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
     m_state(GameState::START_MENU),
     m_game_started(false),
@@ -159,9 +160,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     store->loadTexture("cloud2", "cloud/cloud2.png");
     store->loadTexture("sphericalNormal", "cloud/sphericalNormal.png");
 
-    std::cout << "Constructing terrain...\n";
-    m_terrainVAO = constructTerrain();
-
     std::vector<ngl::Vec4> verts = {
         ngl::Vec4(-1.0, -1.0, 0.0f, 1.0f),
         ngl::Vec4(1.0, -1.0, 0.0f, 1.0f),
@@ -206,11 +204,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::cout << "Scene constructor complete.\n";
-
-    initMeshInstances();
-
-
     glGenVertexArrays(1, &m_debugVAO);
     glGenBuffers(1, &m_debugVBO);
 
@@ -221,96 +214,80 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    //Number of clouds.
-    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
-    //Number of particles per cloud.
-    int num_cloud_particles = 32;
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
-                + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
-        m_cloudParticles.m_pos.push_back( p );
-        m_cloudParticles.m_vel.push_back(ngl::Vec3());
-        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-        m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-    }
-
-    for(int i = 0; i < num_clouds; ++i)
-    {
-        for(int j = 0; j < num_cloud_particles; ++j)
-        {
-            ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
-            m_cloudParticles.m_pos.push_back(p);
-            m_cloudParticles.m_vel.push_back(ngl::Vec3());
-            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-            m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-        }
-    }
-    m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
-
-    glGenVertexArrays(1, &m_cloudParticlesVAO);
-    glBindVertexArray(m_cloudParticlesVAO);
-    m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
-    setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
-    m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
-    setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
-    m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
-    setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
-    m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
-    setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
-    glBindVertexArray(0);
 }
 
 void Scene::initMeshInstances()
 {
+    m_meshInstances.clear();
+    int iiterations = m_grid.getW() / m_meshInstanceBlockTileSize;
+    int jiterations = m_grid.getH() / m_meshInstanceBlockTileSize;
+
+    for(int x = 0; x < iiterations; ++x)
+    {
+        for(int y = 0; y < jiterations; ++y)
+        {
+            meshInstanceBlock b = generateInstanceMeshTile(x,y);
+            m_meshInstances.push_back(b);
+        }
+    }
+}
+
+Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
+{
+    meshInstanceBlock b;
 
     int meshCount = 0;
     int max_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
     //m_meshPositions.clear()
-    m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
-    for(int i = 0; i < m_grid.getW(); ++i)
-        for(int j = 0; j < m_grid.getH(); ++j)
+    b.m_meshPositions.assign(static_cast<int>(TileType::FOUNDATION_D) + 1, std::vector<ngl::Vec3>());
+    int minx = _x * m_meshInstanceBlockTileSize;
+    int maxx = _x * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
+    int miny = _y * m_meshInstanceBlockTileSize;
+    int maxy = _y * m_meshInstanceBlockTileSize + m_meshInstanceBlockTileSize;
+    b.m_bounds.first = ngl::Vec3(minx, 0.0f, miny);
+    b.m_bounds.second = ngl::Vec3(maxx, 0.0f, maxy);
+    for(int i = minx; i < maxx and i < m_grid.getW(); ++i)
+        for(int j = miny; j < maxy and j < m_grid.getH(); ++j)
         {
             TileType index = m_grid.getTileType(i, j);
             if (index == TileType::TREES)
             {
-              //get num trees
-              int num_trees = m_grid.getNumTrees(i, j);
-              //get position vector
-              std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
-              //for i in trees:
+                //get num trees
+                int num_trees = m_grid.getNumTrees(i, j);
+                //get position vector
+                std::vector<ngl::Vec2> positions = m_grid.getTreePositions(i, j);
+                //for i in trees:
                 for (int n = 0; n < max_trees; n++)
                 {
-                  if (n < num_trees)
-                  {
-                    //push back tree
-                    ngl::Vec2 p = positions[n];
-                    m_meshPositions.at((int)index).push_back(ngl::Vec3(
-                                                          i+p[0],
-                                                          m_height_tracer.getHeight(i+p[0], j+p[1]),
-                                                          j+p[1]
-                                                          ));
-                  }
-                  else
-                  {
-                    ngl::Vec2 p = positions[n];
-                    m_meshPositions.at((int)TileType::STUMPS).push_back(ngl::Vec3(
-                                                        i+p[0],
-                                                        m_height_tracer.getHeight(i+p[0], j+p[1]),
-                                                        j+p[1]
-                                                        ));
-                  }
-                  //increment meshCount
-                  meshCount++;
+                    if (n < num_trees)
+                    {
+                        //push back tree
+                        ngl::Vec2 p = positions[n];
+                        b.m_meshPositions.at((int)index).push_back(ngl::Vec3(
+                                                                       i+p[0],
+                                                                   m_height_tracer.getHeight(i+p[0], j+p[1]),
+                                j+p[1]
+                                ));
+                    }
+                    else
+                    {
+                        ngl::Vec2 p = positions[n];
+                        b.m_meshPositions.at((int)TileType::STUMPS).push_back(ngl::Vec3(
+                                                                                  i+p[0],
+                                                                              m_height_tracer.getHeight(i+p[0], j+p[1]),
+                                j+p[1]
+                                ));
+                    }
+                    //increment meshCount
+                    meshCount++;
                 }
             }
             else{
-                m_meshPositions.at( (int)index ).push_back(ngl::Vec3(
-                                                          i+0.5,
-                                                          m_height_tracer.getHeight(i+0.5, j+0.5),
-                                                          j+0.5
-                                                          ));
+                b.m_meshPositions.at( (int)index ).push_back(ngl::Vec3(
+                                                                 i+0.5,
+                                                                 m_height_tracer.getHeight(i+0.5, j+0.5),
+                                                                 j+0.5
+                                                                 ));
                 meshCount++;
             }
         }
@@ -319,7 +296,7 @@ void Scene::initMeshInstances()
     //ngl::Random * rng = ngl::Random::instance();
     std::vector<ngl::Mat4> transforms;
     transforms.reserve( meshCount );
-    for(auto &slot : m_meshPositions)
+    for(auto &slot : b.m_meshPositions)
         for(auto &vec : slot)
         {
             ngl::Mat4 m;
@@ -332,10 +309,22 @@ void Scene::initMeshInstances()
     glBindBuffer(GL_TEXTURE_BUFFER, buf);
     glBufferData(GL_TEXTURE_BUFFER, transforms.size() * sizeof(ngl::Mat4), &transforms[0].m_00, GL_STATIC_DRAW);
 
-    glGenTextures(1, &m_instanceTBO);
+    glGenTextures(1, &b.m_instanceTBO);
     glActiveTexture( GL_TEXTURE0 );
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
+
+    return b;
+}
+
+void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
+{
+  int x = _tilex / m_meshInstanceBlockTileSize;
+  int y = _tiley / m_meshInstanceBlockTileSize;
+  int index = x * (m_grid.getH() / m_meshInstanceBlockTileSize) + y;
+
+  meshInstanceBlock b = generateInstanceMeshTile(x, y);
+  m_meshInstances[index] = b;
 }
 
 void Scene::initialiseFramebuffers()
@@ -451,56 +440,32 @@ void Scene::createCharacter()
     m_file_names.erase(m_file_names.begin() + name_chosen);
 }
 
-void Scene::charactersSpawn()
-{
-  ngl::Random *rnd = ngl::Random::instance();
-  m_character_timer++;
-  if(m_character_timer > 50)
-  {
-    m_character_timer = 0;
-    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(30) < spawn_chance)
-    {
-      createCharacter();
-    }
-  }
-}
-
-void Scene::baddiesSpawn()
-{
-  m_baddie_timer++;
-  int timer_scale = 10;
-  timer_scale/=getPopulation();
-  timer_scale += 2;
-  if(m_baddie_timer > timer_scale*m_baddies.size())
-  {
-    m_baddie_timer = 0;
-    ngl::Random *rnd = ngl::Random::instance();
-    if(rnd->randomPositiveNumber(20+100/getPopulation()) < 1)
-    {
-      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-      direction *= 12.0f;
-      ngl::Vec2 rand_pos = m_characters[character_index].getPos2D() + direction;
-      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
-      {
-        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
-      }
-    }
-  }
-}
-
 void Scene::update()
 {
     //Gui::instance()->updateNotifications();
     if (m_grid.hasChanges())
     {
-        initMeshInstances();
+        std::vector< std::vector< bool > > regenTiles;
+        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize, std::vector< bool >() );
+        for(auto &vec : regenTiles)
+            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize, false );
+
+        for(auto &coord : m_grid.getChangedTiles())
+        {
+            int x = std::floor(coord.m_x / m_meshInstanceBlockTileSize);
+            int y = std::floor(coord.m_y / m_meshInstanceBlockTileSize);
+            if(!regenTiles[x][y])
+                recalculateInstancedMeshes(std::floor(coord.m_x), std::floor(coord.m_y));
+            regenTiles[x][y] = true;
+        }
+
+        //initMeshInstances();
         m_grid.resetHasChanges();
     }
 
     if(m_state == GameState::MAIN)
     {
+        m_globalTime += 0.1f * m_prefs->getFloatPref("TIME_SCALE");
         //translates
         if(m_mouse_trans_active)
         {
@@ -559,6 +524,12 @@ void Scene::update()
         m_cam.setPos( ngl::Vec3(cp.m_x, -cxyz.m_y - 0.5f, cp.m_z) );
         //---
 
+        //Update camera focal depth
+        ngl::Vec4 tpm = getTerrainPosAtMouse();
+        m_cam.setFocalDepth(
+                    ngl::Vec3(m_cam.getPos() - ngl::Vec3(tpm.m_x, tpm.m_y, tpm.m_z)).length()
+                    );
+        //std::cout << m_cam.getFocalDepth() << '\n';
 
         //Recalculate view matrix.
         m_cam.updateSmoothCamera();
@@ -602,25 +573,27 @@ void Scene::update()
             m_characters[i].update();
             if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
             {
-                //check if character is sleeping, if it is, dont make it the active character
-                m_active_char_id = -1;
-                Gui::instance()->updateActiveCharacter();
+                m_characters[i].update();
+                if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+                {
+                    //check if character is sleeping, if it is, dont make it the active character
+                    m_active_char_id = -1;
+                    Gui::instance()->updateActiveCharacter();
+                }
             }
           }
         }
         //if all characters have died
         if (m_characters.size() == 0)
         {
-          m_state = GameState::ENDGAME;
-          Gui::instance()->createEndGameButtons();
-          m_game_started = false;
-          return;
+            endGame("GAME OVER: everybody died :(");
+            return;
         }
 
         // preference for this?
-        if(true)
+        if(m_prefs->getBoolPref("ENEMIES"))
         {
-          baddiesSpawn();
+            baddiesSpawn();
         }
 
         for(size_t i=0; i<m_baddies.size(); i++)
@@ -639,15 +612,8 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x += m_prefs->getFloatPref("TIME_SCALE");
-        if(m_sunAngle.m_x > 360.0f)
-        {
-            m_day++;
-            m_sunAngle.m_x = 0.0f;
-            //std::cout << "Day " << m_day << " Season " << m_season << '\n';
-        }
-        //std::cout << m_sunAngle.m_x << '\n';
-
+        m_sunAngle.m_x = m_globalTime * 12.0f;
+        m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
         ngl::Transformation t;
@@ -671,137 +637,73 @@ void Scene::update()
                 t_sundown * ngl::Vec3(1.0f, 0.6f, 0.1f);
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
+
+    m_pointLights.clear();
+
+    for(auto &b : m_meshInstances)
+    {
+        ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::HOUSE)])
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+        for(auto &c : m_characters)
+        {
+            //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+            if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
+            {
+                ngl::Vec3 vec = c.getPos() + off;
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+            }
+        }
     }
 
-      m_pointLights.clear();
+    glBindVertexArray(m_cloudParticlesVAO);
 
-      ngl::Vec3 off (0.0f, 0.5f, 0.0f);
-      for(auto &vec : m_meshPositions[static_cast<int>(TileType::HOUSE)])
-          m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-      for(auto &vec : m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-          m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-      for(auto &c : m_characters)
-      {
-          //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
-          if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
-          {
-              ngl::Vec3 vec = c.getPos() + off;
-              m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-          }
-      }
+    //Create a VAO for the clouds.
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
+                 &m_cloudParticles.m_pos[0].m_x,
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
 
-      glBindVertexArray(m_cloudParticlesVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_scale.size(),
+                 &m_cloudParticles.m_scale[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
 
-      //Create a VAO for the clouds.
-      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
-      glBufferData(GL_ARRAY_BUFFER,
-                   sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
-                   &m_cloudParticles.m_pos[0].m_x,
-              GL_STATIC_DRAW
-              );
-      setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_time.size(),
+                 &m_cloudParticles.m_time[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
 
-      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
-      glBufferData(GL_ARRAY_BUFFER,
-                   sizeof(float) * m_cloudParticles.m_scale.size(),
-                   &m_cloudParticles.m_scale[0],
-              GL_STATIC_DRAW
-              );
-      setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
+    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(float) * m_cloudParticles.m_alpha.size(),
+                 &m_cloudParticles.m_alpha[0],
+            GL_STATIC_DRAW
+            );
+    setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
 
-      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
-      glBufferData(GL_ARRAY_BUFFER,
-                   sizeof(float) * m_cloudParticles.m_time.size(),
-                   &m_cloudParticles.m_time[0],
-              GL_STATIC_DRAW
-              );
-      setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
+    glBindVertexArray(0);
 
-      glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
-      glBufferData(GL_ARRAY_BUFFER,
-                   sizeof(float) * m_cloudParticles.m_alpha.size(),
-                   &m_cloudParticles.m_alpha[0],
-              GL_STATIC_DRAW
-              );
-      setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
-
-      glBindVertexArray(0);
-
-      //Update velocity
-      for(auto &vec : m_cloudParticles.m_vel)
-      {
-          vec += m_windDirection.get() * 0.001f;
-          vec -= vec * 0.01f;
-      }
-      //Update position
-      for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-          m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
-
-      for(auto &t : m_cloudParticles.m_time)
-      {
-          t += 0.01f;
-          if(t > 3.0f)
-              t -= 3.0f;
-      }
-
-      //Simple wrapping, now with alpha fading when out of bounds.
-      for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-      {
-          auto vec = m_cloudParticles.m_pos[i];
-          auto vel = m_cloudParticles.m_vel[i];
-          auto alpha = m_cloudParticles.m_alpha[i];
-
-          bool fading = false;
-
-          if(vec.m_x < 0.0f and vel.m_x < 0.0f)
-          {
-              fading = true;
-              m_cloudParticles.m_alpha[i] -= 0.005f;
-              if(alpha <= 0.0f)
-                  m_cloudParticles.m_pos[i].m_x += m_grid.getW();
-          }
-          else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
-          {
-              fading = true;
-              m_cloudParticles.m_alpha[i] -= 0.005f;
-              if(alpha <= 0.0f)
-                  m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
-          }
-
-          if(vec.m_z < 0.0f and vel.m_z < 0.0f)
-          {
-              fading = true;
-              m_cloudParticles.m_alpha[i] -= 0.005f;
-              if(alpha <= 0.0f)
-                  m_cloudParticles.m_pos[i].m_z += m_grid.getH();
-          }
-          else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
-          {
-              fading = true;
-              m_cloudParticles.m_alpha[i] -= 0.005f;
-              if(alpha <= 0.0f)
-                  m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
-          }
-
-          if(!fading)
-              m_cloudParticles.m_alpha[i] += 0.005f;
-
-          m_cloudParticles.m_alpha[i] = Utility::clamp(
-                      m_cloudParticles.m_alpha[i], 0.0f, 1.0f
-                      );
-      }
-
-      ngl::Random * rnd = ngl::Random::instance();
-
-      if(rnd->randomPositiveNumber() > 0.99f)
-      {
-          ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
-          v.m_y /= 6.0f;
-
-          m_windDirection.setEnd( v );
-      }
-
-      m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
+    //Update velocity
+    for(auto &vec : m_cloudParticles.m_vel)
+    {
+        vec += m_windDirection.get() * 0.001f;
+        vec -= vec * 0.01f;
+    }
+    //Update position
+    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+        m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
 
       //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
       for(int i = 0; i < 32; ++i)
@@ -820,10 +722,93 @@ void Scene::update()
               }
           }
       }
+    for(auto &t : m_cloudParticles.m_time)
+    {
+        t += 0.01f;
+        if(t > 3.0f)
+            t -= 3.0f;
+    }
+
+    //Simple wrapping, now with alpha fading when out of bounds.
+    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+    {
+        auto vec = m_cloudParticles.m_pos[i];
+        auto vel = m_cloudParticles.m_vel[i];
+        auto alpha = m_cloudParticles.m_alpha[i];
+
+        bool fading = false;
+
+        if(vec.m_x < 0.0f and vel.m_x < 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_x += m_grid.getW();
+        }
+        else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
+        }
+
+        if(vec.m_z < 0.0f and vel.m_z < 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_z += m_grid.getH();
+        }
+        else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
+        {
+            fading = true;
+            m_cloudParticles.m_alpha[i] -= 0.005f;
+            if(alpha <= 0.0f)
+                m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
+        }
+
+        if(!fading)
+            m_cloudParticles.m_alpha[i] += 0.005f;
+
+        m_cloudParticles.m_alpha[i] = Utility::clamp(
+                    m_cloudParticles.m_alpha[i], 0.0f, 1.0f
+                    );
+    }
+
+    ngl::Random * rnd = ngl::Random::instance();
+
+    if(rnd->randomPositiveNumber() > 0.99f)
+    {
+        ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
+        v.m_y /= 6.0f;
+
+        m_windDirection.setEnd( v );
+    }
+
+    m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
+
+    //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+    for(int i = 0; i < 32; ++i)
+    {
+        for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
+        {
+            ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+            ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+            if(diffc.lengthSquared() < diffn.lengthSquared())
+            {
+                std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
+                std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
+                std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
+                std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+            }
+        }
+    }
+  }
 
 }
 
-//I'm sorry this function is so long :(
 //Order of operations:
 //  --
 //  SETUP                   : Sets up the scene ready for drawing.
@@ -896,7 +881,7 @@ void Scene::draw()
             {
                 ngl::Vec3 pos = ch.getPos();
                 m_transform.setPosition(pos);
-                m_transform.setScale(3, 1.4, 3);
+                m_transform.setScale(1.5f * 2.8, 1.5f * 1.4, 1.5f * 2.8);
                 slib->setRegisteredUniform("id", ch.getID());
                 drawAsset( "person", "", "");
             }
@@ -964,7 +949,7 @@ void Scene::draw()
         m_cam.immediateTransform(camFlip);
         m_cam.immediateTransform(camMove);
 
-        drawTerrain();
+        drawTerrain(true);
 
         drawMeshes();
 
@@ -974,7 +959,7 @@ void Scene::draw()
         glDisable(GL_DEPTH_TEST);
         glCullFace(GL_BACK);
 
-        drawSky();
+        drawSky(true);
 
         camMove.translate(0.0f, 2.0f * m_grid.getGlobalWaterLevel(), 0.0f);
 
@@ -997,6 +982,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+        slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
 
         slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
         for( size_t i = 0; i < cascadeDistances.size(); ++i )
@@ -1031,7 +1017,7 @@ void Scene::draw()
         glBindVertexArray(m_screenQuad);
 
         slib->use("waterDisplacement");
-        slib->setRegisteredUniform("iGlobalTime", m_sunAngle.m_x * 8.0f);
+        slib->setRegisteredUniform("iGlobalTime", m_globalTime * 16.0f);
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1085,9 +1071,11 @@ void Scene::draw()
                                    !m_mouse_trans_active and
                                    !m_mouse_rot_active and
                                    !g->mousePos( Utility::getMousePos() ) and
-                                   mouseTerrainPos.m_x != 0.0f and
-                mouseTerrainPos.m_z != 0.0f
-                );
+                                   mouseTerrainPos.m_x > 0.0f and
+                                   mouseTerrainPos.m_x < m_grid.getW() and
+                                   mouseTerrainPos.m_z > 0.0f and
+                                   mouseTerrainPos.m_z < m_grid.getH()
+                                   );
 
         if(shouldDrawMouseBox)
         {
@@ -1102,9 +1090,16 @@ void Scene::draw()
         glUnmapBuffer(GL_UNIFORM_BUFFER);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        m_postEffectsBuffer.bind();
-        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
-        glClear(GL_COLOR_BUFFER_BIT);
+        //If blur is enabled draw to blur buffer. Else draw to back buffer.
+        Prefs * pref = Prefs::instance();
+        bool blur = pref->getBoolPref("DOP");
+
+        if(blur)
+        {
+            m_postEffectsBuffer.bind();
+            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
 
         slib->use("deferredLight");
         id = slib->getProgramID("deferredLight");
@@ -1116,6 +1111,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+        slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
 
         //Draw god rays here.
         //To-do: Add preference bool to control drawing of god rays.
@@ -1147,29 +1143,47 @@ void Scene::draw()
         //---------------------------//
         //    DEFERRED BLUR PASS     //
         //---------------------------//
-        slib->use("bokeh");
+        if(blur)
+        {
+            slib->use("bokeh");
 
-        id = slib->getProgramID("bokeh");
-        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-        m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
-        slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
+            id = slib->getProgramID("bokeh");
+            m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+            m_mainBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+            slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
 
-        glBindVertexArray(m_screenQuad);
-        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+            glBindVertexArray(m_screenQuad);
+            glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+        }
 
         //---------------------------//
         //      FORWARD SHADING      //
         //---------------------------//
-        m_postEffectsBuffer.bind();
-        m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
+        //If using DOF copy depth data to the post effects buffer. If not copy it straight to the back buffer.
+        if(blur)
+        {
+            m_postEffectsBuffer.bind();
+            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2});
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //Copy depth buffer from main buffer to back buffer.
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
-        glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
-                          GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            //Copy depth buffer from main buffer to back buffer.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_postEffectsBuffer.getID());
+            glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        }
+        else
+        {
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            //Copy depth buffer from main buffer to back buffer.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, m_mainBuffer.getID());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, m_viewport.m_x, m_viewport.m_y, 0, 0, m_viewport.m_x, m_viewport.m_y,
+                              GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        }
+
+        glEnable(GL_DEPTH_TEST);
 
         slib->use("water");
         slib->setRegisteredUniform("mouseWorldPos", mlpos);
@@ -1222,7 +1236,10 @@ void Scene::draw()
         slib->use("clouds");
         slib->setRegisteredUniform("camPos", m_cam.getPos());
         slib->setRegisteredUniform("directionalLightCol", m_directionalLightCol);
-        slib->setRegisteredUniform("lightDir", m_sunDir);
+        if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) > 0.0f)
+            slib->setRegisteredUniform("lightDir", m_sunDir);
+        else
+            slib->setRegisteredUniform("lightDir", -m_sunDir);
         bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud0"), "t0", 0);
         bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud1"), "t1", 1);
         bindTextureToShader("clouds", AssetStore::instance()->getTexture("cloud2"), "t2", 2);
@@ -1279,8 +1296,11 @@ void Scene::draw()
             p.m_y -= 1.0f;
             m_mouseSelectionBoxPosition.setEnd(ngl::Vec3(p.m_x, p.m_y, p.m_z));
 
-            m_postEffectsBuffer.bind();
-            m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+            if(blur)
+            {
+                m_postEffectsBuffer.bind();
+                m_postEffectsBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
+            }
 
             slib->use("mousebox");
             slib->setRegisteredUniform("base", p.m_y);
@@ -1306,14 +1326,18 @@ void Scene::draw()
         //---------------------------//
         //     FORWARD BLUR PASS     //
         //---------------------------//
-        slib->use("bokeh");
+        if(blur)
+        {
+            slib->use("bokeh");
+            slib->setRegisteredUniform("focalDepth", m_cam.getFocalDepth());
 
-        id = slib->getProgramID("bokeh");
-        m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
-        m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
+            id = slib->getProgramID("bokeh");
+            m_postEffectsBuffer.bindTexture(id, "sceneColour", "bgl_RenderedTexture", 0);
+            m_postEffectsBuffer.bindTexture(id, "linearDepth", "bgl_DepthTexture", 1);
 
-        glBindVertexArray(m_screenQuad);
-        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+            glBindVertexArray(m_screenQuad);
+            glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+        }
     }
     else
     {
@@ -1343,25 +1367,25 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        m_utilityBuffer.bindTexture( id, "charid", "tex", 0);
+        m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
         //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }
+    }*/
 
-    m_transform.reset();
+    /*m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);
     slib->use("colour");
     slib->setRegisteredUniform("colour", ngl::Vec4(1.0,0.0,0.0,1.0));
     for(auto &row : faces)
         for(auto &vec : row)
         {
-            m_transform.setPosition(vec);
+            m_transform.setPosition(vec + ngl::Vec3(0.5f, 0.0f, 0.5f));
             drawAsset("debugSphere", "", "");
-        }
+        }*/
 
-    slib->use("colour");
+    /*slib->use("colour");
     for(auto &p : m_debugPoints)
         p.m_w = 1.0;
 
@@ -1400,7 +1424,7 @@ void Scene::draw()
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Scene::drawSky()
+void Scene::drawSky(bool _flipped)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
 
@@ -1411,12 +1435,14 @@ void Scene::drawSky()
     slib->setRegisteredUniform("camPos", m_cam.getPos());
     slib->setRegisteredUniform( "sunDir", m_sunDir );
 
+    slib->setRegisteredUniform("flipped", _flipped);
+
     slib->setRegisteredUniform("surfaceHeight", 0.8f + 0.2f * m_sunDir.dot(ngl::Vec3(0.0f, -1.0f, 0.0f)));
 
     glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void Scene::drawTerrain()
+void Scene::drawTerrain(bool _shouldClip)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -1431,6 +1457,14 @@ void Scene::drawTerrain()
     float difference = snowLevel - waterLevel;
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
+
+    if(_shouldClip)
+    {
+        slib->setRegisteredUniform("clipAgainstHeight", true);
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
+    }
+    else
+        slib->setRegisteredUniform("clipAgainstHeight", false);
 
     //We shouldn't transform the terrain, this stops us from doing it accidentally.
     m_transform.reset();
@@ -1447,126 +1481,47 @@ void Scene::drawMeshes()
 
     slib->use("diffuseInstanced");
 
-    int offset = 0;
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+    for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
-        int instances = m_meshPositions[i].size();
-        switch( i )
+        const auto &block = m_meshInstances[b];
+        int offset = 0;
+        for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
-        case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::STUMPS):
-            drawInstances( "tree_stump", "tree_stump_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset );
-            break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset);
-            break;
-        default:
-            break;
-        }
-        offset += instances;
-    }
-
-    for(Character &character : m_characters)
-    {
-      //if the character is not in a store house or house, draw
-      if(!character.isInside())
-      {
-        m_transform.reset();
-        ngl::Vec3 pos = character.getPos();
-        m_transform.setPosition(pos);
-        m_transform.setRotation(0, character.getRot(), 0);
-
-        slib->use("diffuseCharacter");
-        slib->setRegisteredUniform("colour", ngl::Vec4(character.getColour(),1.0f));
-        drawAsset("person", "person_d", "diffuseCharacter");
-      }
-    }
-
-    for(Baddie &baddie : m_baddies)
-    {
-      m_transform.reset();
-      ngl::Vec3 pos = baddie.getPos();
-      m_transform.setPosition(pos);
-      m_transform.setRotation(0, baddie.getRot(), 0);
-      m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
-
-      slib->use("diffuse");
-      drawAsset("person", "baddie_d", "diffuse");
-    }
-
-    for(ngl::Vec3 &stone : m_tombstones)
-    {
-      m_transform.reset();
-      m_transform.setPosition(stone);
-      drawAsset("tombstone", "tombstone_d", "diffuse");
-    }
-}
-
-void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
-{
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-
-    slib->use("diffuseInstanced");
-
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
-        for(auto &vec : m_meshPositions[i])
-        {
-            bool br = false;
-            for(auto &fb : _frustumBoxes)
-                br = (br or Utility::pointInBox(fb, vec));
-            if(!br)
-                continue;
-
-            m_transform.setPosition(vec);
+            int instances = block.m_meshPositions[i].size();
             switch( i )
             {
             case static_cast<int>(TileType::TREES):
-                drawAsset( "tree", "tree_d", "diffuseInstanced" );
+                drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::STUMPS):
-                drawAsset( "tree_stump", "tree_stump_d", "diffuseInstanced" );
+                drawInstances( "tree_stump", "tree_stump_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::STOREHOUSE):
-                drawAsset( "storehouse", "storehouse_d", "diffuseInstanced" );
+                drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::HOUSE):
-                drawAsset( "house", "house_d", "diffuseInstanced");
+                drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::FOUNDATION_A):
-                drawAsset("foundation_A", "foundation_A_d", "diffuseInstanced");
+                drawInstances( "foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::FOUNDATION_B):
-                drawAsset("foundation_B", "foundation_B_d", "diffuseInstanced");
+                drawInstances( "foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::FOUNDATION_C):
-                drawAsset("foundation_C", "foundation_C_d", "diffuseInstanced");
+                drawInstances( "foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, b );
                 break;
             case static_cast<int>(TileType::FOUNDATION_D):
-                drawAsset("foundation_D", "foundation_D_d", "diffuseInstanced");
+                drawInstances( "foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, b );
                 break;
             default:
                 break;
             }
+            offset += instances;
         }
+    }
 
-    for(auto &character : m_characters)
+    for(Character &character : m_characters)
     {
       //if not inside house or store house, draw
       if(!character.isInside())
@@ -1598,7 +1553,6 @@ void Scene::drawMeshes(const std::vector<bounds> &_frustumBoxes)
     {
       m_transform.reset();
       m_transform.setPosition(stone);
-
       drawAsset("tombstone", "tombstone_d", "diffuse");
     }
 }
@@ -1782,36 +1736,40 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     slib->use("shadowDepthInstanced");
     int offset = 0;
-    for(size_t i = 0; i < m_meshPositions.size(); ++i)
+    for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
-        int instances = m_meshPositions[i].size();
-        switch( i )
+        const auto &block = m_meshInstances[b];
+        for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
-        case static_cast<int>(TileType::TREES):
-            drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::STOREHOUSE):
-            drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::HOUSE):
-            drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_A):
-            drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_B):
-            drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
-            break;
-        case static_cast<int>(TileType::FOUNDATION_C):
-            drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, m_shadowMat[_index] );
-            break;
-        case static_cast<int>(TileType::FOUNDATION_D):
-            drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, m_shadowMat[_index]);
-            break;
-        default:
-            break;
+            int instances = block.m_meshPositions[i].size();
+            switch( i )
+            {
+            case static_cast<int>(TileType::TREES):
+                drawInstances( "tree", "tree_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::STOREHOUSE):
+                drawInstances( "storehouse", "storehouse_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::HOUSE):
+                drawInstances( "house", "house_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_A):
+                drawInstances("foundation_A", "foundation_A_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_B):
+                drawInstances("foundation_B", "foundation_B_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_C):
+                drawInstances("foundation_C", "foundation_C_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            case static_cast<int>(TileType::FOUNDATION_D):
+                drawInstances("foundation_D", "foundation_D_d", "diffuseInstanced", instances, offset, b, m_shadowMat[_index] );
+                break;
+            default:
+                break;
+            }
+            offset += instances;
         }
-        offset += instances;
     }
 
     slib->use("shadowDepth");
@@ -1838,7 +1796,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
       m_transform.reset();
       m_transform.setPosition(pos);
       m_transform.setRotation(0, baddie.getRot(), 0);
-      m_transform.setScale(2.0f, 2.0f, 2.0f);
+      m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
       ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
       ngl::Obj * k = store->getModel( "person" );
@@ -2060,7 +2018,7 @@ void Scene::mouseSelection()
     Gui *gui = Gui::instance();
     ngl::Vec2 mouse_coords = Utility::getMousePos();
 
-    if(gui->mousePos( mouse_coords ) )
+    if( gui->mousePos( mouse_coords ) )
     {
       gui->click();
     }
@@ -2069,7 +2027,7 @@ void Scene::mouseSelection()
       //read from charPick texture
       int red = getCharIDAtMouse();
       //if the value is not -1 (the default), then a character has been clicked
-      if(red < (m_characters.size() + 1) && red > 0)
+      if(red > 0)
       {
         for (Character &character : m_characters)
         {
@@ -2200,7 +2158,7 @@ void Scene::drawAsset(const std::string &_model, const std::string &_texture, co
     m->draw();
 }
 
-void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset)
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -2229,7 +2187,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
 
     slib->setRegisteredUniform("VP", m_cam.getVP());
     slib->setRegisteredUniform("offset", _offset);
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, m_meshInstances[_index].m_instanceTBO);
     //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
 
     m->bindVAO();
@@ -2237,7 +2195,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
     m->unbindVAO();
 }
 
-void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const ngl::Mat4 &_VP)
+void Scene::drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index, const ngl::Mat4 &_VP)
 {
     ngl::ShaderLib * slib = ngl::ShaderLib::instance();
     AssetStore *store = AssetStore::instance();
@@ -2266,7 +2224,7 @@ void Scene::drawInstances(const std::string &_model, const std::string &_texture
 
     slib->setRegisteredUniform("VP", _VP);
     slib->setRegisteredUniform("offset", _offset);
-    glBindTexture(GL_TEXTURE_BUFFER, m_instanceTBO);
+    glBindTexture(GL_TEXTURE_BUFFER, m_meshInstances[_index].m_instanceTBO);
     //bindTextureToShader(_shader, m_instanceTBO, "transform", 1, GL_TEXTURE_BUFFER);
 
     m->bindVAO();
@@ -2472,36 +2430,38 @@ GLuint Scene::constructTerrain()
         }
     }
 
+    std::cout << "Doing edges...\n";
     //Create edges.
-    //x < 0
-    /*faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    //x edges inner
+    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    faces.push_back(std::vector<ngl::Vec3>());
     for(int i = 0; i < m_grid.getH(); ++i)
-        faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));*/
-
-    //Smooth
-    /*const int iterations = 128;
-    const float hardness = 0.02f;
-    for(int it = 0; it < iterations; ++it)
     {
-        for(int i = 1; i < m_grid.getW() - 1; ++i)
-        {
-            for(int j = 1; j < m_grid.getH() - 1; ++j)
-            {
-                float ay = 0.0f;
-                for(int y = -1; y <= 1; ++y)
-                    for(int x = -1; x <= 1; ++x)
-                        ay += faces[i + x][j + y].m_y;
+        faces[0].push_back(ngl::Vec3(-1,m_grid.getTileHeight(0,i),i));
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),m_grid.getTileHeight(m_grid.getW() - 1,i),i));
+    }
+    //x edges outer
+    faces.insert(faces.begin(), std::vector<ngl::Vec3>());
+    faces.push_back(std::vector<ngl::Vec3>());
+    for(int i = 0; i < m_grid.getH(); ++i)
+    {
+        faces[0].push_back(ngl::Vec3(-1,-4.0f,i));
+        faces[faces.size() - 1].push_back(ngl::Vec3(m_grid.getW(),-4.0f,i));
+    }
 
-                ay /= 9.0f;
+    //y edges
+    for(int i = 0; i < faces.size(); ++i)
+    {
+        //break;
+        int clamped = Utility::clamp(i, 0, m_grid.getW() - 1);
+        float fx = faces[i][0].m_x;
+        faces[i].insert(faces[i].begin(), ngl::Vec3(fx, m_grid.getTileHeight(clamped,0), -1.0f));
+        faces[i].insert(faces[i].begin(), ngl::Vec3(fx, -4.0f, -1.0f));
+        faces[i].push_back(ngl::Vec3(fx, m_grid.getTileHeight(clamped, m_grid.getH() - 1), m_grid.getH()));
+        faces[i].push_back(ngl::Vec3(fx, -4.0f, m_grid.getH()));
+    }
 
-                float dy = faces[i][j].m_y - ay;
-
-                faces[i][j].m_y -= hardness * dy;
-            }
-        }
-    }*/
-
-    std::cout << "Calculating terrain normals\n";
+    std::cout << "Calculating terrain  normals\n";
     //Calculate face normals
     for(size_t i = 0; i < faces.size(); ++i)
     {
@@ -2516,9 +2476,6 @@ GLuint Scene::constructTerrain()
             bool top = j < faces[i].size() - 1;
 
             int count = 0;
-
-            //std::cout << "i,j = " << i << "," << j << " / w,h = " << faces.size() << "," << faces[i].size() << '\n';
-
             //->
             if(top and right)
             {
@@ -2577,6 +2534,8 @@ GLuint Scene::constructTerrain()
             terrainFace f = terrainVerticesToFace(
                         i,
                         j,
+                        faces[i][j].m_x,
+                        faces[i][j].m_z,
                         faces,
                         facenorms
                         );
@@ -2615,13 +2574,15 @@ GLuint Scene::constructTerrain()
 
     std::cout << trimesh.size() << " vertices\n" << normesh.size() << " normals\n" << uvmesh.size() << " uvs\n";
 
-    /*for(auto &i : trimesh)
-        std::cout << i << '\n';*/
-
     //exit(EXIT_SUCCESS);
     m_terrainVAOSize = trimesh.size();
 
     m_height_tracer = TerrainHeightTracer(trimesh);
+
+    std::cout << "Size : " << faces.size() << "x\n";
+    for(auto &f : faces)
+        std::cout << f.size() << '\n';
+
     return createVAO(
                 trimesh,
                 normesh,
@@ -2631,34 +2592,33 @@ GLuint Scene::constructTerrain()
 
 Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
                                                  const int _y,
+                                                 const float _worldX,
+                                                 const float _worldY,
                                                  const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                                  const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                                  )
 {
+    std::cout << "terrainVerticesToFace()\n";
     //  2---3
     //  |   |
     //  0---1
     terrainFace face;
 
-    //Generate xy positions
-    face.m_verts[0].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y - 1.0f,   1.0f);
-    face.m_verts[1].m_pos = ngl::Vec4(_x,       0.0f,  _y - 1.0f,   1.0f);
-    face.m_verts[2].m_pos = ngl::Vec4(_x - 1.0f,0.0f,  _y,          1.0f);
-    face.m_verts[3].m_pos = ngl::Vec4(_x,       0.0f,  _y,          1.0f);
+    //Generate xz positions
+    face.m_verts[0].m_pos = ngl::Vec4(_worldX - 0.5f,0.0f,  _worldY - 0.5f,   1.0f);
+    face.m_verts[1].m_pos = ngl::Vec4(_worldX + 0.5f,0.0f,  _worldY - 0.5f,   1.0f);
+    face.m_verts[2].m_pos = ngl::Vec4(_worldX - 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
+    face.m_verts[3].m_pos = ngl::Vec4(_worldX + 0.5f,0.0f,  _worldY + 0.5f,   1.0f);
 
-    //Due to the edges of the terrain, this offset must be applied to maintain the mapping from indices -> coordinates.
-    /*for(auto &v : face.m_verts)
-        v.m_pos -= ngl::Vec4(0.5f, 0.0f, 0.5f, 0.0f);*/
+    std::pair<ngl::Vec4, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
+    std::pair<ngl::Vec4, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
 
-    std::pair<float, ngl::Vec3> v0 = generateTerrainFaceData( _x, _y, -1, -1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v1 = generateTerrainFaceData( _x, _y, 1, -1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v2 = generateTerrainFaceData( _x, _y, -1, 1, _facePositions, _faceNormals );
-    std::pair<float, ngl::Vec3> v3 = generateTerrainFaceData( _x, _y, 1, 1, _facePositions, _faceNormals );
-
-    face.m_verts[0].m_pos.m_y = v0.first;
-    face.m_verts[1].m_pos.m_y = v1.first;
-    face.m_verts[2].m_pos.m_y = v2.first;
-    face.m_verts[3].m_pos.m_y = v3.first;
+    face.m_verts[0].m_pos = v0.first;
+    face.m_verts[1].m_pos = v1.first;
+    face.m_verts[2].m_pos = v2.first;
+    face.m_verts[3].m_pos = v3.first;
 
     face.m_verts[0].m_norm = v0.second;
     face.m_verts[1].m_norm = v1.second;
@@ -2668,38 +2628,47 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
     return face;
 }
 
-std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
-                                                           const int _y,
-                                                           const int _dirX,
-                                                           const int _dirY,
-                                                           const std::vector<std::vector<ngl::Vec3>> &_facePositions,
-                                                           const std::vector<std::vector<ngl::Vec3>> &_faceNormals
-                                                           )
+// We give this function an x and y coordinate to start from, and a desired direction.
+// The function averages attributes from neighbouring faces in the desired directions, if it is able.
+// For example, starting at 0,0 (bottom left) with desired direction 1,-1 would explore only 1,0, since 0,-1 and 1,-1 do not exist.
+std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
+                                                               const int _y,
+                                                               const int _dirX,
+                                                               const int _dirY,
+                                                               const std::vector<std::vector<ngl::Vec3>> &_facePositions,
+                                                               const std::vector<std::vector<ngl::Vec3>> &_faceNormals
+                                                               )
 {
-    float yCoord = _facePositions[_x][_y].m_y;
+    std::cout << "generateTerrainFaceData()\n";
+    ngl::Vec4 position = _facePositions[_x][_y];
     ngl::Vec3 normal = _faceNormals[_x][_y];
     size_t count = 1;
 
     //Can we move in the horizontal direction?
-    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) <= _facePositions.size() - 1;
+    bool horizontal = (_x + _dirX) >= 0 and (_x + _dirX) < _facePositions.size();
     //Can we move in the vertical direction?
-    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) <= _facePositions[_y].size() - 1;
+    bool vertical = (_y + _dirY) >= 0 and (_y + _dirY) < _facePositions[_x].size();
+    //Can we move in the diagonal direction?
+    bool diagonal = horizontal and (_y + _dirY) < _facePositions[_x + _dirX].size();
 
     if(horizontal)
     {
-        yCoord += _facePositions[_x + _dirX][_y].m_y;
+        std::cout << "      horizontal accessing " << (_x + _dirX) << ", " << _y << " : " << _facePositions[_x + _dirX][_y] << '\n';
+        position += _facePositions[_x + _dirX][_y];
         normal += _faceNormals[_x + _dirX][_y];
         count++;
     }
     if(vertical)
     {
-        yCoord += _facePositions[_x][_y + _dirY].m_y;
+        std::cout << "      vertical accessing " << (_x) << ", " << (_y + _dirY) << " : " << _facePositions[_x][_y + _dirY] << '\n';
+        position += _facePositions[_x][_y + _dirY];
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
-    if(vertical and horizontal)
+    if(diagonal)
     {
-        yCoord += _facePositions[_x + _dirX][_y + _dirY].m_y;
+        std::cout << "      diagonal accessing " << (_x + _dirX) << ", " << (_y + _dirY) << " : " << _facePositions[_x + _dirX][_y + _dirY] << '\n';
+        position += _facePositions[_x + _dirX][_y + _dirY];
         normal += _faceNormals[_x + _dirX][_y + _dirY];
         count++;
     }
@@ -2708,8 +2677,12 @@ std::pair<float, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
     normal /= static_cast<float>(count);
     normal.normalize();
 
+    position /= static_cast<float>(count);
+    position.m_w = 1.0f;
+    //position.m_y = _facePositions[_x][_y].m_y;
+
     return std::make_pair(
-                yCoord / static_cast<float>(count),
+                position,
                 normal
                 );
 }
@@ -2769,17 +2742,63 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
+  ngl::Random *rnd = ngl::Random::instance();
   Gui *gui = Gui::instance();
+  MapList *maplist = MapList::instance();
   m_state = GameState::MAIN;
   m_game_started = true;
   gui->unpause();
+  m_grid.updateScript("python/"+maplist->getCurrentMapPath()+".py", maplist->getW(), maplist->getH(), maplist->getSeed());
+  std::cout << "Constructing terrain...\n";
+  m_terrainVAO = constructTerrain();
+
+  initMeshInstances();
+
   // add first character
   createCharacter();
   m_active_char_id = m_characters[0].getID();
   gui->updateActiveCharacter();
   m_characters[0].setActive(true);
-  // clear baddie vector
-  m_baddies.clear();
+
+  //Number of clouds.
+  int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+  //Number of particles per cloud.
+  int num_cloud_particles = 32;
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
+              + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
+      m_cloudParticles.m_pos.push_back( p );
+      m_cloudParticles.m_vel.push_back(ngl::Vec3());
+      m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+      m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+  }
+
+  for(int i = 0; i < num_clouds; ++i)
+  {
+      for(int j = 0; j < num_cloud_particles; ++j)
+      {
+          ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
+          m_cloudParticles.m_pos.push_back(p);
+          m_cloudParticles.m_vel.push_back(ngl::Vec3());
+          m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+          m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+      }
+  }
+  m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
+
+  glGenVertexArrays(1, &m_cloudParticlesVAO);
+  glBindVertexArray(m_cloudParticlesVAO);
+  m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
+  setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
+  m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
+  setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
+  m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
+  setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+  m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
+  setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
+  glBindVertexArray(0);
 }
 
 void Scene::startMove(Direction _d)
@@ -2855,6 +2874,59 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
     std::cout << "moved camera" << std::endl;
     // negative values needed?
     m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
+}
+
+void Scene::baddiesSpawn()
+{
+  m_baddie_timer++;
+
+  if(m_baddie_timer > (1000 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
+  {
+    m_baddie_timer = 0;
+    ngl::Random *rnd = ngl::Random::instance();
+
+    size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+    for (size_t i = 0; i < 1000; i++)
+    {
+      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+      float dist = 10 + rnd->randomPositiveNumber(10);
+      direction *= dist;
+      ngl::Vec2 rand_pos = m_characters[character_index].getPos2D() + direction;
+      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+      {
+        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+        break;
+      }
+    }
+  }
+}
+
+void Scene::charactersSpawn()
+{
+  m_character_timer++;
+  if(m_character_timer > (1000 / m_prefs->getFloatPref("CHARACTER_SPAWN_RATE")))
+  {
+    m_character_timer = 0;
+    int population = getPopulation();
+    int max_population = getMaxPopulation();
+    if (population < max_population)
+    {
+      createCharacter();
+    }
+  }
+}
+
+void Scene::endGame(const std::string &_message)
+{
+  m_state = GameState::ENDGAME;
+  Gui::instance()->createEndGameButtons(_message);
+  m_game_started = false;
+  m_grid.hasChanges();
+  m_meshInstances.clear();
+  // clear baddie vector
+  m_baddies.clear();
+  m_characters.clear();
+  m_active_char_id = -1;
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()
