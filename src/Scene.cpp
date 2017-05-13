@@ -34,7 +34,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_centre_camera(true),
     m_mouse_prev_pos(0.0f, 0.0f),
     m_sunAngle(90.0f, 0.0f, 5.0f),
-    m_day(80),
     m_windDirection(ngl::Vec3(0.05f, 0.0f, 0.0f), ngl::Vec3(0.05f, 0.0f, 0.0f), 0.01f),
     m_state(GameState::START_MENU),
     m_game_started(false),
@@ -639,7 +638,7 @@ void Scene::update()
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
         m_sunAngle.m_x = m_globalTime * 12.0f;
-        m_day = floor(m_globalTime / 365);
+        m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
         ngl::Transformation t;
@@ -1467,6 +1466,8 @@ void Scene::drawTerrain()
     float difference = snowLevel - waterLevel;
     float snow = 0.5f * difference * sinf(m_season * 2.0f * M_PI - M_PI / 2.0f) + 0.5f * difference + waterLevel;
     slib->setRegisteredUniform( "snowline", snow);
+
+    std::cout << "snow level " << m_grid.getGlobalMountainHeight() << '\n';
 
     //We shouldn't transform the terrain, this stops us from doing it accidentally.
     m_transform.reset();
