@@ -284,6 +284,7 @@ void Scene::initMeshInstances()
 
 Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
 {
+    std::cout << "generateInstanceMeshTile start\n";
     meshInstanceBlock b;
 
     int meshCount = 0;
@@ -364,17 +365,21 @@ Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int
     glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 
+    std::cout << "generateInstanceMeshTile end\n";
     return b;
 }
 
 void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
 {
-  int x = _tilex / m_meshInstanceBlockTileSize;
-  int y = _tiley / m_meshInstanceBlockTileSize;
-  int index = x * (m_grid.getH() / m_meshInstanceBlockTileSize) + y;
+    std::cout << "recalculateInstancedMeshes start\n";
+    int x = _tilex / m_meshInstanceBlockTileSize;
+    int y = _tiley / m_meshInstanceBlockTileSize;
+    int index = x * std::floor(m_grid.getH() / m_meshInstanceBlockTileSize) + y;
 
-  meshInstanceBlock b = generateInstanceMeshTile(x, y);
-  m_meshInstances[index] = b;
+    meshInstanceBlock b = generateInstanceMeshTile(x, y);
+    std::cout << "Accessing " << index << " of " << m_meshInstances.size() << '\n';
+    m_meshInstances[index] = b;
+    std::cout << "recalculateInstancedMeshes end\n";
 }
 
 void Scene::initialiseFramebuffers()
@@ -492,10 +497,11 @@ void Scene::update()
     //Gui::instance()->updateNotifications();
     if (m_grid.hasChanges())
     {
+        std::cout << "tiles change start\n";
         std::vector< std::vector< bool > > regenTiles;
-        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize, std::vector< bool >() );
+        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize + 1, std::vector< bool >() );
         for(auto &vec : regenTiles)
-            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize, false );
+            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize + 1, false );
 
         for(auto &coord : m_grid.getChangedTiles())
         {
@@ -507,7 +513,9 @@ void Scene::update()
         }
 
         //initMeshInstances();
+        m_grid.resetChangedTiles();
         m_grid.resetHasChanges();
+        std::cout << "tiles change end\n";
     }
 
     if(m_state == GameState::MAIN)
@@ -654,7 +662,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x = m_globalTime * 12.0f;
+        m_sunAngle.m_x = m_globalTime * 4.0f;
         m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
@@ -687,16 +695,16 @@ void Scene::update()
     {
         ngl::Vec3 off (0.0f, 0.5f, 0.0f);
         for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::HOUSE)])
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
         for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
         for(auto &c : m_characters)
         {
             //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
             if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
             {
                 ngl::Vec3 vec = c.getPos() + off;
-                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
             }
         }
     }
@@ -1118,7 +1126,7 @@ void Scene::draw()
 
         //If blur is enabled draw to blur buffer. Else draw to back buffer.
         Prefs * pref = Prefs::instance();
-        bool blur = pref->getBoolPref("DOP");
+        bool blur = pref->getBoolPref("DOF");
 
         if(blur)
         {
@@ -1487,7 +1495,7 @@ void Scene::drawTerrain(bool _shouldClip)
     if(_shouldClip)
     {
         slib->setRegisteredUniform("clipAgainstHeight", true);
-        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel() + 2.0f);
     }
     else
         slib->setRegisteredUniform("clipAgainstHeight", false);
@@ -2867,46 +2875,46 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 
 void Scene::baddiesSpawn()
 {
-  m_baddie_timer++;
+    m_baddie_timer++;
 
-  if(m_baddie_timer > (100 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
-  {
-    m_baddie_timer = 0;
-    ngl::Random *rnd = ngl::Random::instance();
-    double rand = rnd->randomNumber();
-    if (rand < (0.001))
+    if(m_baddie_timer > (100 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
     {
-      size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-      bool found = false;
-      while(!found)
-      {
-        ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-        float dist = 10 + rnd->randomPositiveNumber(10);
-        direction *= dist;
-        ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
-        if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+        m_baddie_timer = 0;
+        ngl::Random *rnd = ngl::Random::instance();
+        double rand = rnd->randomNumber();
+        if (rand < (0.001))
         {
-          m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
-          found = true;
+            size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+            bool found = false;
+            while(!found)
+            {
+                ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+                float dist = 10 + rnd->randomPositiveNumber(10);
+                direction *= dist;
+                ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
+                if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+                {
+                    m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+                    found = true;
+                }
+            }
         }
-      }
     }
-  }
 }
 
 void Scene::charactersSpawn()
 {
-  m_character_timer++;
-  if(m_character_timer > (100 / m_prefs->getFloatPref("CHARACERT_SPAWN_RATE")))
-  {
-    ngl::Random* rnd = ngl::Random::instance();
-    m_character_timer = 0;
-    float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
-    if(rnd->randomPositiveNumber(30) < spawn_chance)
+    m_character_timer++;
+    if(m_character_timer > (100 / m_prefs->getFloatPref("CHARACERT_SPAWN_RATE")))
     {
-        createCharacter();
+        ngl::Random* rnd = ngl::Random::instance();
+        m_character_timer = 0;
+        float spawn_chance = 1.0f-(float)getPopulation()/(float)getMaxPopulation();
+        if(rnd->randomPositiveNumber(30) < spawn_chance)
+        {
+            createCharacter();
+        }
     }
-  }
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()
