@@ -1257,6 +1257,8 @@ void Character::softResetCharacter()
 void Character::completedAction()
 {
   //remove state from stack, restart timer and reset speed
+  Prefs* prefs = Prefs::instance();
+  m_speed = prefs->getFloatPref("CHARACTER_SPEED");
   m_state_stack.pop_front();
   m_action_timer.restart();
 }
