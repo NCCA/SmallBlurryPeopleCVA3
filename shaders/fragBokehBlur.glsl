@@ -179,6 +179,8 @@ void main()
         blur = clamp((abs(depth - fDepth)/range) * 100.0,-maxblur,maxblur);
     }
 
+    blur = abs(uv.y - 0.5) * 2.0 * maxblur;
+
     vec2 noise = rand(uv)*namount*blur;
 
     float w = (1.0/width)*blur+noise.x;

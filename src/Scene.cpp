@@ -242,7 +242,6 @@ void Scene::initMeshInstances()
 
 Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
 {
-
     meshInstanceBlock b;
 
     int meshCount = 0;
@@ -637,7 +636,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x = m_globalTime * 4.0f;
+        m_sunAngle.m_x = m_globalTime * 4.0f + 60.0f;
         m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
@@ -1060,7 +1059,7 @@ void Scene::draw()
 
         slib->use("waterDisplacementNormal");
         id = slib->getProgramID("waterDisplacementNormal");
-        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+        m_displacementBuffer.bindTexture(id, "waterDisplacementBlended", "displacement", 0);
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1509,7 +1508,7 @@ void Scene::drawTerrain(bool _shouldClip)
     if(_shouldClip)
     {
         slib->setRegisteredUniform("clipAgainstHeight", true);
-        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel() + 2.0f);
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
     }
     else
         slib->setRegisteredUniform("clipAgainstHeight", false);
@@ -2627,10 +2626,6 @@ GLuint Scene::constructTerrain()
 
     m_height_tracer = TerrainHeightTracer(trimesh);
 
-    std::cout << "Size : " << faces.size() << "x\n";
-    for(auto &f : faces)
-        std::cout << f.size() << '\n';
-
     return createVAO(
                 trimesh,
                 normesh,
@@ -2646,6 +2641,7 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
                                                  const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                                  )
 {
+
     //  2---3
     //  |   |
     //  0---1
