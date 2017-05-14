@@ -36,7 +36,7 @@ int main()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    SDL_Window *window=SDL_CreateWindow("window_test",
+    SDL_Window *window=SDL_CreateWindow("Tiny People",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
                                         rect.w,
