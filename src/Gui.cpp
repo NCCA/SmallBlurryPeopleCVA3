@@ -41,12 +41,14 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("fResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
+    // button positions need updating if screen res has changed:
     updateButtonArrays();
   }
 }
 
 void Gui::initGL()
 {
+  // generate/load required GL stuff
   glGenVertexArrays(1, &m_vao_id);
   glGenBuffers(4, m_vbo_ids);
   AssetStore::instance()->loadTexture("icons", "buttons/icons.png");
@@ -57,6 +59,7 @@ void Gui::click()
 {
   if(m_selected_button)
   {
+    // if button is selected, execute that button's action
     executeAction(m_selected_button->getAction());
   }
 }
@@ -88,6 +91,7 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::MAP_WIDTH:
   case Action::MAP_HEIGHT:
   case Action::MAP_SEED:
+    // all passive buttons, so generate passive command
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
