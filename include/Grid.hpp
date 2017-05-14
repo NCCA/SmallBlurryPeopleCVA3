@@ -29,6 +29,8 @@ public:
   ///
   Grid(Inventory *_world_inventory);
 
+  ~Grid();
+
   ///
   /// @brief updateScript loads the specified script and runs it to create a new map
   /// @param _script_path is the file path to the python script

@@ -21,8 +21,15 @@ Grid::Grid(Inventory *_world_inventory):
   m_num_houses(1), // begin with one house to start
   m_world_inventory(_world_inventory)
 {
+  // init python stuff
+  Py_Initialize();
   Prefs* prefs = Prefs::instance();
   //updateScript(prefs->getStrPref("MAP_SCRIPT"));
+}
+
+Grid::~Grid()
+{
+  Py_Finalize();
 }
 
 void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _new_seed)
@@ -33,8 +40,7 @@ void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _n
 
 void Grid::runCurrentScript(int _w, int _h, int _seed)
 {
-  // init python stuff
-  Py_Initialize();
+
 
   //create pyobjects to represent the python variables
   //py_main represents the python script to be imported
@@ -92,7 +98,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
   }
 
   //now that all python operations have finished, I can un-initialize the python libraries
-  Py_Finalize();
+
 }
 
 ngl::Vec2 Grid::idToCoord(int _tileId)
@@ -109,13 +115,13 @@ int Grid::coordToId(ngl::Vec2 _coord)
 
 void Grid::loadScript(std::string _script_path)
 {
-
+ m_script.clear();
   std::ifstream script_file(_script_path.c_str());
   if (!script_file.is_open())
   {
     //if the file is not found, an empty string is returned
     std::cerr << "error opening script: " << _script_path << std::endl;
-    m_script =  std::string();
+    m_script =  "";
   }
   m_script = std::string((std::istreambuf_iterator<char>(script_file)),
              std::istreambuf_iterator<char>());

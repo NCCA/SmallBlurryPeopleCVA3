@@ -36,7 +36,7 @@ def len(x, y):
 def isClearArea(map_data, map_width, x, y, radius, empty_type):
   for i in range(x - radius, x + radius + 1):
     for j in range(y - radius, y + radius + 1):
-			#print i, j
+      #print i, j
       if map_data[i + map_width * j][0] != empty_type:
         return False
   return True
@@ -56,6 +56,7 @@ def getRandomSpawn(map_data, width, height, empty_type):
   while not found:
     x = rand.randrange(width)
     y = rand.randrange(height)
+    print "looking for clear spot at: ", x, y
     if isClearArea(map_data, width, x, y, 1, empty_type):
       found = True
   print "found ", x, y

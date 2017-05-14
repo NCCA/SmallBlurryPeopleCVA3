@@ -1,4 +1,4 @@
-from PIL import Image
+
 import random as rand
 import os
 cwd = os.getcwd()+ "/python/"
@@ -7,6 +7,9 @@ sys.path.append(cwd)
 import gameUtils.noise as n
 import gameUtils.helperFunctions as hf
 
+import PIL.Image as pimage
+sys.modules['Image'] = pimage
+
 #parameters from game
 map_width = width_in
 map_height = height_in
@@ -14,8 +17,8 @@ map_seed = seed_in
 tileTypes = tileTypes_in
 
 img_filename = "resources/textures/maps/connectedDots.png"
-im = Image.open(img_filename)
-im = im.resize((map_width, map_height), Image.ANTIALIAS)
+im = pimage.open(img_filename)
+im = im.resize((map_width, map_height), pimage.ANTIALIAS)
 
 #seed for the noise generator
 gen = n.fractalNoise(map_seed)

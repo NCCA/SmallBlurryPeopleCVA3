@@ -6,7 +6,7 @@ GridTile::GridTile(int _id)
 {
   auto rand = ngl::Random::instance();
   int num_trees = Prefs::instance()->getIntPref("TREES_PER_TILE");
-  rand->setSeed(_id);
+  //rand->setSeed(_id);
   for (int i = 0; i < num_trees; i++)
   {
     ngl::Vec2 rand_pos = rand->getRandomVec2();

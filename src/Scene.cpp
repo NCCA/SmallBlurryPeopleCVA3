@@ -46,8 +46,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
 
-    //reads file with list of names
-    readNameFile();
     //pass reference of world inventory to character class
     Character::setWorldInventory(&m_world_inventory);
 
@@ -244,7 +242,7 @@ void Scene::initMeshInstances()
 
 Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
 {
-    std::cout << "generateInstanceMeshTile start\n";
+
     meshInstanceBlock b;
 
     int meshCount = 0;
@@ -325,7 +323,6 @@ Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int
     glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 
-    std::cout << "generateInstanceMeshTile end\n";
     return b;
 }
 
@@ -419,6 +416,7 @@ void Scene::initialiseFramebuffers()
 void Scene::readNameFile()
 {
     //open file of names
+    m_file_names.clear();
     std::ifstream namesFile;
     namesFile.open("names/game_names.txt");
 
@@ -428,19 +426,27 @@ void Scene::readNameFile()
         std::cerr<<"Couldnt open file\n";
         exit(EXIT_FAILURE);
     }
-
+    std::cout << "abut to go through file" << std::endl;
     //go through file line by line and add to vector of names, m_file_names
     int lineNo = 0;
     std::string lineBuffer;
     while (!namesFile.eof())
     {
         std::getline(namesFile, lineBuffer, '\n');
+        std::cout << "line is: " << lineBuffer << lineBuffer.size() << std::endl;
         if(lineBuffer.size() != 0)
         {
             m_file_names.push_back(lineBuffer);
             lineNo++;
         }
-        namesFile.close();
+
+    }
+    namesFile.close();
+
+    std::cout << "\n\n\n\n\n\n names:" << std::endl;
+    for (auto i: m_file_names)
+    {
+      std::cout << i << std::endl;
     }
 }
 
@@ -448,10 +454,8 @@ void Scene::createCharacter()
 {
     int numberNames = m_file_names.size();
     //pick random name
-    std::random_device rnd;
-    std::mt19937 mt_rand(rnd());
-    std::uniform_int_distribution<int> nameNo(0,numberNames - 1);
-    int name_chosen = nameNo(mt_rand);
+    ngl::Random *r = ngl::Random::instance();
+    int name_chosen = floor(r->randomPositiveNumber(numberNames));
     //create character with random name
     m_characters.push_back(Character(&m_height_tracer, &m_grid, m_file_names[name_chosen], &m_baddies));
     //remove name from list so no multiples
@@ -2642,7 +2646,6 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
                                                  const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                                  )
 {
-    std::cout << "terrainVerticesToFace()\n";
     //  2---3
     //  |   |
     //  0---1
@@ -2683,7 +2686,6 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
                                                                const std::vector<std::vector<ngl::Vec3>> &_faceNormals
                                                                )
 {
-    std::cout << "generateTerrainFaceData()\n";
     ngl::Vec4 position = _facePositions[_x][_y];
     ngl::Vec3 normal = _faceNormals[_x][_y];
     size_t count = 1;
@@ -2697,21 +2699,18 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
 
     if(horizontal)
     {
-        std::cout << "      horizontal accessing " << (_x + _dirX) << ", " << _y << " : " << _facePositions[_x + _dirX][_y] << '\n';
         position += _facePositions[_x + _dirX][_y];
         normal += _faceNormals[_x + _dirX][_y];
         count++;
     }
     if(vertical)
     {
-        std::cout << "      vertical accessing " << (_x) << ", " << (_y + _dirY) << " : " << _facePositions[_x][_y + _dirY] << '\n';
         position += _facePositions[_x][_y + _dirY];
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
     if(diagonal)
     {
-        std::cout << "      diagonal accessing " << (_x + _dirX) << ", " << (_y + _dirY) << " : " << _facePositions[_x + _dirX][_y + _dirY] << '\n';
         position += _facePositions[_x + _dirX][_y + _dirY];
         normal += _faceNormals[_x + _dirX][_y + _dirY];
         count++;
@@ -2786,6 +2785,7 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
+    readNameFile();
     ngl::Random *rnd = ngl::Random::instance();
     Gui *gui = Gui::instance();
     MapList *maplist = MapList::instance();
@@ -2793,17 +2793,17 @@ void Scene::startGame()
     m_game_started = true;
     gui->unpause();
     m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
-    std::cout << "Constructing terrain...\n";
+    std::cout << "script run sicessfully" << std::endl;
     m_terrainVAO = constructTerrain();
 
     initMeshInstances();
-
+    std::cout << "mesh built sucessfully" << std::endl;
     // add first character
     createCharacter();
     m_active_char_id = m_characters[0].getID();
     gui->updateActiveCharacter();
     m_characters[0].setActive(true);
-
+    std::cout << "character sicessfully" << std::endl;
     //Number of clouds.
     int num_clouds = m_grid.getW() * m_grid.getH() / 200;
     //Number of particles per cloud.
@@ -2843,6 +2843,7 @@ void Scene::startGame()
     m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
     setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
     glBindVertexArray(0);
+    std::cout << "mesh scene sicessfully" << std::endl;
 }
 
 void Scene::startMove(Direction _d)
@@ -2915,7 +2916,6 @@ GameState Scene::getState()
 
 void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 {
-    std::cout << "moved camera" << std::endl;
     // negative values needed?
     m_cam.setPos(ngl::Vec3(-_pos.m_x, 0, -_pos.m_y));
 }
