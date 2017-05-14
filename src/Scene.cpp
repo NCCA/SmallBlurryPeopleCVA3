@@ -244,7 +244,6 @@ void Scene::initMeshInstances()
 
 Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
 {
-    std::cout << "generateInstanceMeshTile start\n";
     meshInstanceBlock b;
 
     int meshCount = 0;
@@ -325,7 +324,6 @@ Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int
     glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 
-    std::cout << "generateInstanceMeshTile end\n";
     return b;
 }
 
@@ -1056,7 +1054,7 @@ void Scene::draw()
 
         slib->use("waterDisplacementNormal");
         id = slib->getProgramID("waterDisplacementNormal");
-        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+        m_displacementBuffer.bindTexture(id, "waterDisplacementBlended", "displacement", 0);
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
@@ -1401,7 +1399,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    /*glBindVertexArray(m_screenQuad);
+    glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1416,7 +1414,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }*/
+    }
 
     /*m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);
@@ -1505,7 +1503,7 @@ void Scene::drawTerrain(bool _shouldClip)
     if(_shouldClip)
     {
         slib->setRegisteredUniform("clipAgainstHeight", true);
-        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel() + 2.0f);
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
     }
     else
         slib->setRegisteredUniform("clipAgainstHeight", false);
@@ -2623,10 +2621,6 @@ GLuint Scene::constructTerrain()
 
     m_height_tracer = TerrainHeightTracer(trimesh);
 
-    std::cout << "Size : " << faces.size() << "x\n";
-    for(auto &f : faces)
-        std::cout << f.size() << '\n';
-
     return createVAO(
                 trimesh,
                 normesh,
@@ -2642,7 +2636,7 @@ Scene::terrainFace Scene::terrainVerticesToFace( const int _x,
                                                  const std::vector<std::vector<ngl::Vec3> > &_faceNormals
                                                  )
 {
-    std::cout << "terrainVerticesToFace()\n";
+    //std::cout << "terrainVerticesToFace()\n";
     //  2---3
     //  |   |
     //  0---1
@@ -2683,7 +2677,6 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
                                                                const std::vector<std::vector<ngl::Vec3>> &_faceNormals
                                                                )
 {
-    std::cout << "generateTerrainFaceData()\n";
     ngl::Vec4 position = _facePositions[_x][_y];
     ngl::Vec3 normal = _faceNormals[_x][_y];
     size_t count = 1;
@@ -2697,21 +2690,18 @@ std::pair<ngl::Vec4, ngl::Vec3> Scene::generateTerrainFaceData(const int _x,
 
     if(horizontal)
     {
-        std::cout << "      horizontal accessing " << (_x + _dirX) << ", " << _y << " : " << _facePositions[_x + _dirX][_y] << '\n';
         position += _facePositions[_x + _dirX][_y];
         normal += _faceNormals[_x + _dirX][_y];
         count++;
     }
     if(vertical)
     {
-        std::cout << "      vertical accessing " << (_x) << ", " << (_y + _dirY) << " : " << _facePositions[_x][_y + _dirY] << '\n';
         position += _facePositions[_x][_y + _dirY];
         normal += _faceNormals[_x][_y + _dirY];
         count++;
     }
     if(diagonal)
     {
-        std::cout << "      diagonal accessing " << (_x + _dirX) << ", " << (_y + _dirY) << " : " << _facePositions[_x + _dirX][_y + _dirY] << '\n';
         position += _facePositions[_x + _dirX][_y + _dirY];
         normal += _faceNormals[_x + _dirX][_y + _dirY];
         count++;
