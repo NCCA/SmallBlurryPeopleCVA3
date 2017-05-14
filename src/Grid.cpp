@@ -22,7 +22,7 @@ Grid::Grid(Inventory *_world_inventory):
   m_world_inventory(_world_inventory)
 {
   Prefs* prefs = Prefs::instance();
-  updateScript(prefs->getStrPref("MAP_SCRIPT_PATH"));
+  //updateScript(prefs->getStrPref("MAP_SCRIPT"));
 }
 
 void Grid::updateScript(std::string _script_path, int _new_w, int _new_h, int _new_seed)
@@ -84,7 +84,7 @@ void Grid::runCurrentScript(int _w, int _h, int _seed)
     addTileToVectors(idToCoord(i), t);
     m_tiles[i].setType(t);
     m_tiles[i].setHeight(height);
-    std::cout << height << std::endl;
+    //std::cout << height << std::endl;
     if (t == TileType::TREES)
     {
       m_tiles[i].setNumTrees(max_trees);

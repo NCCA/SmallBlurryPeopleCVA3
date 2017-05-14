@@ -36,7 +36,7 @@ def len(x, y):
 def isClearArea(map_data, map_width, x, y, radius, empty_type):
   for i in range(x - radius, x + radius + 1):
     for j in range(y - radius, y + radius + 1):
-      print i, j
+			#print i, j
       if map_data[i + map_width * j][0] != empty_type:
         return False
   return True

@@ -42,6 +42,19 @@
 /// INV_WOOD display amount of wood in inventory
 /// INV_BERRIES display amount of berries in inventory
 /// INV_FISH display amount of fish in inventory
+/// NEXT_MAP go to the next map
+/// PREV_MAP go to the previous map
+/// MAP_NAME display name of current map
+/// PLUS_WIDTH add to the map width
+/// SUB_WIDTH subtract from the map width
+/// PLUS_HEIGHT add to the map height
+/// SUB_HEIGHT subtract from the map height
+/// PLUS_SEED add to the map seed
+/// SUB_SEED subtract from the map seed
+/// MAP_WIDTH display map width
+/// MAP_HEIGHT display map height
+/// MAP_SEED display map seed
+/// END_GAME go to the main menu
 ///
 enum class Action
 {
@@ -79,7 +92,20 @@ enum class Action
   CHAR_EAT_FISH,     // 31
   INV_WOOD,          // 32
   INV_BERRIES,       // 33
-  INV_FISH           // 34
+  INV_FISH,          // 34
+  NEXT_MAP,          // 35
+  PREV_MAP,          // 36
+  MAP_NAME,          // 37
+  PLUS_WIDTH,        // 38
+  SUB_WIDTH,         // 39
+  PLUS_HEIGHT,       // 40
+  SUB_HEIGHT,        // 41
+  PLUS_SEED,         // 42
+  SUB_SEED,          // 43
+  MAP_WIDTH,         // 44
+  MAP_HEIGHT,        // 45
+  MAP_SEED,          // 46
+  END_GAME           // 47
 };
 
 ///
@@ -436,6 +462,61 @@ public:
   /// \brief execute writes out preferences to file
   ///
   virtual void execute();
+};
+
+class ChangeMapCommand : public Command
+{
+public:
+  ChangeMapCommand(int _dir);
+  ~ChangeMapCommand() = default;
+
+  virtual void execute();
+private:
+  int m_dir;
+};
+
+class ChangeWidthCommand : public Command
+{
+public:
+  ChangeWidthCommand(int _dir);
+  ~ChangeWidthCommand() = default;
+
+  virtual void execute();
+private:
+  int m_dir;
+};
+
+class ChangeHeightCommand : public Command
+{
+public:
+  ChangeHeightCommand(int _dir);
+  ~ChangeHeightCommand() = default;
+
+  virtual void execute();
+private:
+  int m_dir;
+};
+
+class ChangeSeedCommand : public Command
+{
+public:
+  ChangeSeedCommand(int _dir);
+  ~ChangeSeedCommand() = default;
+
+  virtual void execute();
+private:
+  int m_dir;
+};
+
+class EndGameCommand :public Command
+{
+public:
+  EndGameCommand(Scene *_scene);
+  ~EndGameCommand() = default;
+
+  virtual void execute();
+private:
+  Scene *m_scene;
 };
 
 #endif//__COMMANDS_HPP__

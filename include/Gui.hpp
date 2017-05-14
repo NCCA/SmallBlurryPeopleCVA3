@@ -92,7 +92,7 @@ public :
   ///
   /// \brief createEndGameButtons create set of buttons for the game over screen
   ///
-  void createEndGameButtons();
+  void createEndGameButtons(const std::string &_message);
   ///
   /// \brief addButton add a button to the button vector
   /// \param _action button's action when clicked
@@ -171,6 +171,18 @@ public :
   /// \param _dir positive for increment, negative for decrement
   ///
   void scrollButton(int _dir);
+  ///
+  /// \brief mapChanged update buttons which require name of current map
+  ///
+  void mapChanged();
+  ///
+  /// \brief addMapButtons add map selection buttons to a menu
+  ///
+  void addMapButtons();
+  ///
+  /// \brief addMenuButtons add buttons for menu
+  ///
+  void addMenuButtons();
 private :
   ///
   /// \brief Gui private default constructor due to singleton pattern

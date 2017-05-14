@@ -39,6 +39,19 @@ const uint CHAR_EAT_FISH     = 31;
 const uint INV_WOOD          = 32;
 const uint INV_BERRIES       = 33;
 const uint INV_FISH          = 34;
+const uint NEXT_MAP          = 35;
+const uint PREV_MAP          = 36;
+const uint MAP_NAME          = 37;
+const uint PLUS_WIDTH        = 38;
+const uint SUB_WIDTH         = 39;
+const uint PLUS_HEIGHT       = 40;
+const uint SUB_HEIGHT        = 41;
+const uint PLUS_SEED         = 42;
+const uint SUB_SEED          = 43;
+const uint MAP_WIDTH         = 44;
+const uint MAP_HEIGHT        = 45;
+const uint MAP_SEED          = 46;
+const uint END_GAME          = 47;
 
 //game states
 const uint STATE_MAIN  = 0;
@@ -206,7 +219,9 @@ uniform int max_pop;
 uniform int wood;
 uniform int berries;
 uniform int fish;
-uniform int max_inv;
+uniform int max_wood;
+uniform int max_berries;
+uniform int max_fish;
 
 in vec2 fragPos;
 in vec2 fragSize;
@@ -683,17 +698,17 @@ void main()
     }
     else if(fragAction == INV_WOOD)
     {
-      s += intText(wood, max_inv);
+      s += intText(wood, max_wood);
       icon_color = getIcon(fragUV, 32, vec2(192, 64));
     }
     else if(fragAction == INV_BERRIES)
     {
-      s += intText(berries, max_inv);
+      s += intText(berries, max_berries);
       icon_color = getIcon(fragUV, 48, vec2(192, 64));
     }
     else if(fragAction == INV_FISH)
     {
-      s += intText(fish, max_inv);
+      s += intText(fish, max_fish);
       icon_color = getIcon(fragUV, 64, vec2(192, 64));
     }
     else if(fragAction == CENTRECAMERA)

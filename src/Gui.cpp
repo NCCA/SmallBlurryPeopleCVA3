@@ -3,10 +3,12 @@
 #include "ngl/Vec2.h"
 #include "ngl/NGLStream.h"
 #include "AssetStore.hpp"
+#include "MapList.hpp"
 
-constexpr char TEXT_PLAY[2]   = {5, 0};
-constexpr char TEXT_PAUSE[2]  = {6, 0};
-constexpr char TEXT_SMILEY[2] = {29,0};
+constexpr char TEXT_PLAY[2]     = {5, 0};
+constexpr char TEXT_PLAYBACK[2] = {2, 0};
+constexpr char TEXT_PAUSE[2]    = {6, 0};
+constexpr char TEXT_SMILEY[2]   = {29,0};
 //constexpr char TEXT_CROSS[2] = {32,0}; // exception for cross
 
 constexpr float FONT_SIZE = 20;
@@ -39,12 +41,14 @@ void Gui::setResolution(ngl::Vec2 _res)
   ngl::ShaderLib::instance()->setRegisteredUniform("fResolution", ngl::Vec2(m_win_w, m_win_h));
   if(!m_buttons.empty())
   {
+    // button positions need updating if screen res has changed:
     updateButtonArrays();
   }
 }
 
 void Gui::initGL()
 {
+  // generate/load required GL stuff
   glGenVertexArrays(1, &m_vao_id);
   glGenBuffers(4, m_vbo_ids);
   AssetStore::instance()->loadTexture("icons", "buttons/icons.png");
@@ -55,6 +59,7 @@ void Gui::click()
 {
   if(m_selected_button)
   {
+    // if button is selected, execute that button's action
     executeAction(m_selected_button->getAction());
   }
 }
@@ -82,6 +87,11 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::INV_WOOD:
   case Action::INV_BERRIES:
   case Action::INV_FISH:
+  case Action::MAP_NAME:
+  case Action::MAP_WIDTH:
+  case Action::MAP_HEIGHT:
+  case Action::MAP_SEED:
+    // all passive buttons, so generate passive command
     command.reset(new PassiveCommand);
     break;
   case Action::QUIT:
@@ -192,6 +202,33 @@ std::shared_ptr<Command> Gui::generateCommand(Action _action)
   case Action::CHAR_EAT_FISH:
     command.reset(new EatFishCommand(m_scene->getActiveCharacter()));
     break;
+  case Action::NEXT_MAP:
+    command.reset(new ChangeMapCommand(1));
+    break;
+  case Action::PREV_MAP:
+    command.reset(new ChangeMapCommand(-1));
+    break;
+  case Action::PLUS_WIDTH:
+    command.reset(new ChangeWidthCommand(10));
+    break;
+  case Action::SUB_WIDTH:
+    command.reset(new ChangeWidthCommand(-10));
+    break;
+  case Action::PLUS_HEIGHT:
+    command.reset(new ChangeHeightCommand(10));
+    break;
+  case Action::SUB_HEIGHT:
+    command.reset(new ChangeHeightCommand(-10));
+    break;
+  case Action::PLUS_SEED:
+    command.reset(new ChangeSeedCommand(1));
+    break;
+  case Action::SUB_SEED:
+    command.reset(new ChangeSeedCommand(-1));
+    break;
+  case Action::END_GAME:
+    command.reset(new EndGameCommand(m_scene));
+    break;
   }
   return command;
 }
@@ -250,10 +287,11 @@ void Gui::unpause()
 void Gui::createStartMenuButtons()
 {
   wipeButtons();
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(130,40), "TINY PEOPLE");
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), TEXT_PLAY);
-  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-250), ngl::Vec2(130,40), "TINY PEOPLE");
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -150), ngl::Vec2(130,40), TEXT_PLAY);
+
+  addMapButtons();
+  addMenuButtons();
 
   updateButtonArrays();
 }
@@ -280,6 +318,7 @@ void Gui::createSceneButtons()
   addButton(Action::HUNGER_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 220), ngl::Vec2(190, 20), "");
   addButton(Action::STAMINA_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 190), ngl::Vec2(190, 20), "");
   addButton(Action::HEALTH_BAR, XAlignment::LEFT, YAlignment::BOTTOM, ngl::Vec2(10, 160), ngl::Vec2(190, 20), "");
+
   updateButtonArrays();
 }
 
@@ -288,7 +327,7 @@ void Gui::createPauseButtons()
   wipeButtons();
   addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, -50), ngl::Vec2(130, 40), TEXT_PLAY);
   addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 0), ngl::Vec2(130, 40), "PREFERENCES");
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "QUIT");
+  addButton(Action::END_GAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 50), ngl::Vec2(130, 40), "MAIN MENU");
   updateButtonArrays();
 }
 
@@ -334,14 +373,14 @@ void Gui::createPrefsButtons()
   updateButtonArrays();
 }
 
-void Gui::createEndGameButtons()
+void Gui::createEndGameButtons(const std::string &_message)
 {
   wipeButtons();
-  std::string end_message = "GAME OVER: everyone died :(";
-  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-125), ngl::Vec2(getButtonLength(end_message), 40), end_message);
-  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-25), ngl::Vec2(130,40), "PLAY AGAIN");
-  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 25), ngl::Vec2(130,40), "PREFERENCES");
-  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 75), ngl::Vec2(130, 40), "QUIT");
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-250), ngl::Vec2(getButtonLength(_message), 40), _message);
+  addButton(Action::ESCAPE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-150), ngl::Vec2(130,40), "PLAY AGAIN");
+
+  addMapButtons();
+  addMenuButtons();
 
   updateButtonArrays();
 }
@@ -515,10 +554,13 @@ void Gui::drawButtons()
   slib->setRegisteredUniform("max_pop", m_scene->getMaxPopulation());
 
   // send inventory data
-  slib->setRegisteredUniform("wood", Character::getWorldInventory()->getWoodInventory());
-  slib->setRegisteredUniform("berries", Character::getWorldInventory()->getBerryInventory());
-  slib->setRegisteredUniform("fish", Character::getWorldInventory()->getFishInventory());
-  slib->setRegisteredUniform("max_inv", 0);
+  Inventory *inventory = Character::getWorldInventory();
+  slib->setRegisteredUniform("wood", inventory->getWoodInventory());
+  slib->setRegisteredUniform("berries", inventory->getBerryInventory());
+  slib->setRegisteredUniform("fish", inventory->getFishInventory());
+  slib->setRegisteredUniform("max_wood", inventory->getMaxWood());
+  slib->setRegisteredUniform("max_berries", inventory->getMaxBerries());
+  slib->setRegisteredUniform("max_fish", inventory->getMaxFish());
 
   // if there's an active character, send character data
   Character *character = m_scene->getActiveCharacter();
@@ -576,22 +618,22 @@ void Gui::mouseUp()
 
 void Gui::bindTextureToShader(const GLuint _tex, const char *_uniform, int _target)
 {
-    ngl::ShaderLib * slib = ngl::ShaderLib::instance();
-    GLint id = slib->getProgramID("button");
-    GLint loc = glGetUniformLocation(id, _uniform);
+  ngl::ShaderLib * slib = ngl::ShaderLib::instance();
+  GLint id = slib->getProgramID("button");
+  GLint loc = glGetUniformLocation(id, _uniform);
 
-    if(loc == -1)
-    {
-        //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
-        //std::cerr << "shader name: " << m_shader_name << std::endl;
-        //std::cerr << "program id" << id << std::endl;
-        // don't exit, because texture is optimised out when shader is compiled
-        //exit(EXIT_FAILURE);
-    }
-    glUniform1i(loc, _target);
+  if(loc == -1)
+  {
+    //std::cerr << "Uh oh! Invalid uniform location in Gui::bindTextureToShader!! " << _uniform << std::endl;
+    //std::cerr << "shader name: " << m_shader_name << std::endl;
+    //std::cerr << "program id" << id << std::endl;
+    // don't exit, because texture is optimised out when shader is compiled
+    //exit(EXIT_FAILURE);
+  }
+  glUniform1i(loc, _target);
 
-    glActiveTexture(GL_TEXTURE0 + _target);
-    glBindTexture(GL_TEXTURE_2D, _tex);
+  glActiveTexture(GL_TEXTURE0 + _target);
+  glBindTexture(GL_TEXTURE_2D, _tex);
 }
 
 void Gui::updateText()
@@ -713,8 +755,92 @@ void Gui::scrollButton(int _dir)
         executeAction(Action::DECR_PREFS);
       }
       break;
+    case Action::MAP_WIDTH:
+      if(_dir>0)
+      {
+        executeAction(Action::PLUS_WIDTH);
+      }
+      else
+      {
+        executeAction(Action::SUB_WIDTH);
+      }
+      break;
+    case Action::MAP_HEIGHT:
+      if(_dir>0)
+      {
+        executeAction(Action::PLUS_HEIGHT);
+      }
+      else
+      {
+        executeAction(Action::SUB_HEIGHT);
+      }
+      break;
+    case Action::MAP_SEED:
+      if(_dir>0)
+      {
+        executeAction(Action::PLUS_SEED);
+      }
+      else
+      {
+        executeAction(Action::SUB_SEED);
+      }
+      break;
     default:
       break;
     }
   }
+}
+
+void Gui::mapChanged()
+{
+  MapList *maplist = MapList::instance();
+  for(std::shared_ptr<Button> &button : m_buttons)
+  {
+    switch(button->getAction())
+    {
+    case Action::MAP_NAME:
+      button->setText(maplist->getCurrentMapName());
+      break;
+    case Action::MAP_WIDTH:
+      button->setText(maplist->getWString());
+      break;
+    case Action::MAP_HEIGHT:
+      button->setText(maplist->getHString());
+      break;
+    case Action::MAP_SEED:
+      button->setText(maplist->getSeedString());
+      break;
+    default:
+      break;
+    }
+  }
+  m_text_outdated = true;
+}
+
+void Gui::addMapButtons()
+{
+  MapList *maplist = MapList::instance();
+  addButton(Action::PASSIVE, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-100), ngl::Vec2(350, 40), "CHOOSE MAP:");
+
+  addButton(Action::MAP_NAME, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,-50), ngl::Vec2(250,40), maplist->getCurrentMapName());
+  addButton(Action::PREV_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,-50), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::NEXT_MAP, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,-50), ngl::Vec2(40,40), TEXT_PLAY);
+
+  addButton(Action::MAP_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,0), ngl::Vec2(250,40), maplist->getWString());
+  addButton(Action::SUB_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,0), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_WIDTH, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,0), ngl::Vec2(40,40), TEXT_PLAY);
+
+  addButton(Action::MAP_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,50), ngl::Vec2(250,40), maplist->getHString());
+  addButton(Action::SUB_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,50), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_HEIGHT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,50), ngl::Vec2(40,40), TEXT_PLAY);
+
+  addButton(Action::MAP_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0,100), ngl::Vec2(250,40), maplist->getSeedString());
+  addButton(Action::SUB_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(-155,100), ngl::Vec2(40,40), TEXT_PLAYBACK);
+  addButton(Action::PLUS_SEED, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(155,100), ngl::Vec2(40,40), TEXT_PLAY);
+}
+
+void Gui::addMenuButtons()
+{
+  addButton(Action::PREFERENCES, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 150), ngl::Vec2(130,40), "PREFERENCES");
+  addButton(Action::QUIT, XAlignment::CENTER, YAlignment::CENTER, ngl::Vec2(0, 200), ngl::Vec2(130, 40), "QUIT");
 }

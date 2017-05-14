@@ -15,7 +15,7 @@ tileTypes = tileTypes_in
 
 img_filename = "resources/textures/maps/connectedDots.png"
 im = Image.open(img_filename)
-im.thumbnail((map_width, map_height))
+im = im.resize((map_width, map_height), Image.ANTIALIAS)
 
 #seed for the noise generator
 gen = n.fractalNoise(map_seed)

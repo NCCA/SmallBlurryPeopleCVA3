@@ -19,7 +19,7 @@ Camera::Camera()
     m_maxPitch = 60.0f;
     m_minPitch = 0.0f;
 
-    m_minDolly = 10.0f;
+    m_minDolly = 5.0f;
     m_maxDolly = 35.0f;
 }
 

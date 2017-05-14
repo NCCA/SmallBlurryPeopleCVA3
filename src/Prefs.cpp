@@ -35,18 +35,21 @@ void Prefs::restoreDefaultPrefs()
   m_int_prefs["X_RES"] = int_pref_t(1920, IncType::X10);
   m_int_prefs["Y_RES"] = int_pref_t(1080, IncType::X10);
   m_int_prefs["CHARACTER_BUILDING"] = int_pref_t(6, IncType::X1);
-  m_int_prefs["CHARACTERS_PER_HOUSE"] = int_pref_t(5, IncType::X1);
+  m_int_prefs["CHARACTERS_PER_HOUSE"] = int_pref_t(2, IncType::X1);
   m_int_prefs["MAX_TILE_OCCUPANTS"] = int_pref_t(4, IncType::X1);
   m_int_prefs["TREES_PER_TILE"] = int_pref_t(4, IncType::X1);
 
   //setting float values
   m_float_prefs["CHARACTER_SPEED"] = float_pref_t(0.1, IncType::X0_1);
+  m_float_prefs["BADDIE_ATTACK"] = float_pref_t(0.1, IncType::X0_1);
+  m_float_prefs["BADDIE_TRACKING"] = float_pref_t(5.0, IncType::X0_1);
+  m_float_prefs["BADDIE_AGRO_DIST"] = float_pref_t(15.0, IncType::X0_1);
   m_float_prefs["TIME_SCALE"] = float_pref_t(0.01, IncType::X0_01);
   m_float_prefs["ENEMIE_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
-  m_float_prefs["CHARACERT_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
+  m_float_prefs["CHARACTER_SPAWN_RATE"] = float_pref_t(1.0, IncType::X0_01);
 
   //setting string values
-  m_str_prefs["MAP_SCRIPT_PATH"] = str_pref_t("python/simplexMap.py", IncType::NONE);
+  m_str_prefs["MAP_SCRIPT"] = str_pref_t("python/simplexMap.py", IncType::NONE);
 
   //setting bool values
   m_bool_prefs["AA"] = bool_pref_t(true, IncType::NONE);

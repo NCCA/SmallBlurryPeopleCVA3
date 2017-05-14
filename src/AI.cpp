@@ -8,11 +8,13 @@
 AI::AI(TerrainHeightTracer *_height_tracer, Grid *_grid):
 	m_grid(_grid),
 	m_height_tracer(_height_tracer),
-	m_idle(true),
-	m_health(1.0),
-	m_speed(0.0),
-	m_rot(0.0)
+  m_health(1.0),
+  m_rot(0.0),
+  m_speed(0.0),
+  m_idle(true)
 {
+  //offset between -0.5 and 0.5 as the centre of a tile is (0,0) and are 1 unit length
+  m_offset = Utility::randFlt(-0.5, 0.5);
 	m_action_timer.start();
 	m_pos = ngl::Vec2(0.0,0.0);
 }
@@ -91,7 +93,7 @@ ngl::Vec2 AI::calcAimVec(float *dist)
 
 bool AI::setTarget(ngl::Vec2 _target_pos)
 {
-	setTarget(m_grid->coordToId(_target_pos));
+  return (setTarget(m_grid->coordToId(_target_pos)));
 }
 
 bool AI::setTarget(int _tile_id)
@@ -118,13 +120,15 @@ bool AI::setTarget(int _tile_id)
 ngl::Vec3 AI::getPos()
 {
 	//get grid height at AI's position
-	float height = m_height_tracer->getHeight(m_pos[0], m_pos[1]);
-	return ngl::Vec3(m_pos[0], height, m_pos[1]);
+  float height = m_height_tracer->getHeight(m_pos[0]+ m_offset, m_pos[1]+ m_offset);
+  return ngl::Vec3(m_pos[0]+ m_offset, height, m_pos[1]+ m_offset);
 }
 
-ngl::Vec2 AI::getPos2d()
+ngl::Vec2 AI::getPos2D()
 {
-	return m_pos;
+  //return AI's position
+  ngl::Vec2 m_2d_pos = ngl::Vec2(m_pos[0] + m_offset, m_pos[1] + m_offset);
+  return m_2d_pos;
 }
 
 void AI::updateRot()

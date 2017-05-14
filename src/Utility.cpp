@@ -20,20 +20,24 @@ float degrees(const float _radians)
 
 float randFlt(const float _min, const float _max)
 {
-		if( _min == _max )
-				return _min;
+  //if there is not range to find a number between
+  if( _min == _max )
+      return _min;
 
-		std::uniform_real_distribution< float > uni( _min, _max );
-    return uni( randomDevice );
+  //random number generator
+  std::uniform_real_distribution< float > uni( _min, _max );
+  return uni( randomDevice );
 }
 
 int randInt(const int _min, const int _max)
 {
-		if( _min == _max )
-				return _min;
+  //if there is not range to find a number between
+  if( _min == _max )
+    return _min;
 
-		std::uniform_int_distribution<int> uni( _min, _max );
-		return uni( randomDevice );
+  //random number generator
+  std::uniform_int_distribution<int> uni( _min, _max );
+  return uni( randomDevice );
 }
 
 float average(std::vector<float> _values)
@@ -53,13 +57,15 @@ float clamp(float _in, float _lo, float _hi)
 
 float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b)
 {
+  //compute pythagoras
 	return ((_a.m_x -_b.m_x) * (_a.m_x -_b.m_x)) + ((_a.m_y - _b.m_y) * (_a.m_y - _b.m_y));
 }
 
-//remaps a number to be between 0 and 1
 float remap01(float _in_value, float _max_in_range, float _min_in_range)
 {
+  //remap number
   float num = (_in_value - _min_in_range) / (_max_in_range - _min_in_range);
+  //return absolute value (sometimes 0 was being returned as -0)
   return std::abs(num);
 }
 

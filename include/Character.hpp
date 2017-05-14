@@ -112,7 +112,7 @@ public:
 	///
 	/// @brief invadedState, enemy intiates fight with character
 	///
-	void invadedState( Baddie *_target);
+  void invadedState( int _target);
 	///
 	/// @brief chopState, character collects wood from a tree
 	///
@@ -192,7 +192,7 @@ public:
 	/// @brief setActive, set's whether the character is active
 	/// @param [in] _selection, a boolean determing whether the character is active or not
 	///
-	void setActive(bool _selection) {m_active = _selection;}
+  void setActive(bool _selection);
 	///
 	/// @brief isActive, returns whether the  character is active
 	/// @return m_active, the boolean stored in the character determining if it is active or not
@@ -259,9 +259,9 @@ private:
 	///
 	std::vector<Baddie> *m_baddies;
 	///
-	/// @brief m_target_baddie, current enemy
+  /// @brief m_target_baddie, current enemy's ID
 	///
-	Baddie *m_target_baddie;
+  int m_target_baddie;
 	///
 	/// @brief m_dest_target_id, id of character's final destination or reoccuring destination
 	///
