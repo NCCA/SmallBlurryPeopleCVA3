@@ -589,6 +589,7 @@ private:
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
     /// This is now stored in blocks, which cuts down on the recalculation time when a mesh changes.
+    /// Each block contains the positions and IDs of each mesh, CPU side, the world space bounds of the chunk (can be used for culling) and the texture buffer object containing the transformation data.
     const int m_meshInstanceBlockTileSize = 20;
     struct meshInstanceBlock
     {

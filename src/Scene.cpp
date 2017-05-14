@@ -1003,6 +1003,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[0]", m_shadowMat[0] );
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
+        slib->setRegisteredUniform( "waterLevel", (float)m_grid.getGlobalWaterLevel() );
         slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
 
         slib->setRegisteredUniform( "camPos", ngl::Vec4(m_cam.getPos()) );
@@ -1140,6 +1141,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "shadowMatrix[1]", m_shadowMat[1] );
         slib->setRegisteredUniform( "shadowMatrix[2]", m_shadowMat[2] );
         slib->setRegisteredUniform( "gridDimensions", ngl::Vec2(m_grid.getW(), m_grid.getH() ));
+        slib->setRegisteredUniform( "waterLevel", (float)m_grid.getGlobalWaterLevel());
 
         //Draw god rays here.
         //To-do: Add preference bool to control drawing of god rays.
