@@ -104,8 +104,8 @@ void Framebuffer::bindTexture(const GLint _shaderID, const std::string &_tex, co
 {
     GLint loc = glGetUniformLocation(_shaderID, _uniform);
 
-    if(loc == -1)
-        std::cerr << "Uh oh! Invalid uniform location in Framebuffer::bindTexture!! " << _uniform << '\n';
+    /*if(loc == -1)
+        std::cerr << "Uh oh! Invalid uniform location in Framebuffer::bindTexture!! " << _uniform << '\n';*/
 
     glUniform1i(loc, _target);
 

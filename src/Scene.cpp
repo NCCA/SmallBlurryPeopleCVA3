@@ -631,7 +631,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x = m_globalTime * 4.0f;
+        m_sunAngle.m_x = m_globalTime * 4.0f + 60.0f;
         m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
@@ -1399,7 +1399,7 @@ void Scene::draw()
 
     //It'd be good to have some kind of m_debugViewModeGLuint to control this section.
 
-    glBindVertexArray(m_screenQuad);
+    /*glBindVertexArray(m_screenQuad);
 
     for(int i = 0; i < 3; ++i)
     {
@@ -1414,7 +1414,7 @@ void Scene::draw()
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
-    }
+    }*/
 
     /*m_transform.reset();
     m_transform.setScale(0.1,0.1,0.1);

@@ -15,28 +15,10 @@ void main()
 {
     //Calculate normal from displacement.
     float heights[4];
-    bool use[4];
-    use[0] = false; use[1] = false; use[2] = false; use[3] = false;
-    if((UV.y + pixelstep.y) < 1.0)
-    {
-      use[0] = true;
-      heights[0] = textureOffset(displacement, UV, ivec2(0, 1)).r;
-    }
-    if((UV.x + pixelstep.x) < 1.0)
-    {
-      use[1] = true;
+    heights[0] = textureOffset(displacement, UV, ivec2(0, 1)).r;
     heights[1] = textureOffset(displacement, UV, ivec2(1, 0)).r;
-    }
-    if((UV.y - pixelstep.y) > 0.0)
-    {
-      use[2] = true;
     heights[2] = textureOffset(displacement, UV, ivec2(0, -1)).r;
-    }
-    if((UV.x - pixelstep.x) > 0.0)
-    {
-      use[3] = true;
     heights[3] = textureOffset(displacement, UV, ivec2(-1, 0)).r;
-    }
 
     vec3 center = vec3(UV.xy, texture(displacement, UV).r);
 
@@ -61,5 +43,4 @@ void main()
     vec3 normal = normalize( nav );
 
     outNormal = vec4(normal.xyz, 1.0);
-    outNormal = vec4(1.0);
 }
