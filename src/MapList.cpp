@@ -6,7 +6,7 @@ MapList::MapList() :
   m_current_map(0),
   m_w(50),
   m_h(50),
-  m_seed(0)
+  m_seed(1)
 {
   m_map_names.push_back("arena");
   m_map_names.push_back("connectedDots");

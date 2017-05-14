@@ -1095,7 +1095,7 @@ void Scene::draw()
 
         //If blur is enabled draw to blur buffer. Else draw to back buffer.
         Prefs * pref = Prefs::instance();
-        bool blur = pref->getBoolPref("DOP");
+        bool blur = pref->getBoolPref("DOF");
 
         if(blur)
         {
