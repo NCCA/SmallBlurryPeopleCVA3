@@ -79,6 +79,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("waterDisplacementBlend", "vertScreenQuad", "fragWaterDisplacementBlend");
     createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
@@ -111,6 +112,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     //creates characters with random names
 
     initialiseFramebuffers();
+    std::cout << "Framebuffers initialised!\n";
 
     m_shadowMat.assign(3, ngl::Mat4());
 
@@ -217,7 +219,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+    std::cout << "Scene contructed.\n";
 }
 
 void Scene::initMeshInstances()
@@ -386,6 +388,7 @@ void Scene::initialiseFramebuffers()
     m_displacementBuffer.initialise(waterResolution, waterResolution);
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
     m_displacementBuffer.addTexture("waterNormal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_displacementBuffer.addTexture("waterDisplacementBlended", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT2);
     if(!m_displacementBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
@@ -428,8 +431,8 @@ void Scene::readNameFile()
             m_file_names.push_back(lineBuffer);
             lineNo++;
         }
+        namesFile.close();
     }
-    namesFile.close();
 }
 
 void Scene::createCharacter()
@@ -1026,6 +1029,13 @@ void Scene::draw()
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
+        //Blending
+        m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
+        slib->use("waterDisplacementBlend");
+        id = slib->getProgramID("waterDisplacementBlend");
+        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
         //Normals
         m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
 
@@ -1372,8 +1382,8 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        //m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
-        m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
+        m_displacementBuffer.bindTexture( id, "waterDisplacementBlended", "tex", 0);
+        //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
