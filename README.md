@@ -1,11 +1,9 @@
 # SmallBlurryPeopleCVA3
 CA2 Group project
 
-CA2 Project 
+Welcome to the Small Blury People Game repository!
 
-Put all you work in this repository, you should use the wiki for all of the work and to help tracking jobs for the team members.
-
-You must also figure out a workflow for how the team will use GitHub and submit work. Read here for more details on approaches https://guides.github.com/
+Information on how to install, run and play the game can be found on the [wiki](https://github.com/NCCA/SmallBlurryPeopleCVA3/wiki).
 
 
 Felix Marrington-Reeve
