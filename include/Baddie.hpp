@@ -41,7 +41,7 @@ public:
   ///
   /// \brief invadedState, character intiates fight with baddie
   ///
-  void invadedState(Character *_target);
+  void invadedState(int _target);
   ///
   /// \brief setInvade, stop character looking for an enemy
   ///
@@ -68,7 +68,28 @@ public:
   /// \param _scale, amount to add onto scale
   ///
   void addScale(float _scale) {m_scale += _scale;}
+  ///
+  /// \brief getID, return baddie ID
+  /// \return m_id, baddies ID
+  ///
+  float getID() {return m_id;}
 private:
+  ///
+  /// @brief m_id_counter, counts how many baddies have been created
+  ///
+  static int m_id_counter;
+  ///
+  /// \brief m_id, baddies ID
+  ///
+  int m_id;
+  ///
+  /// \brief m_characters, vector of characters
+  ///
+  std::vector<Character> *m_characters;
+  ///
+  /// \brief m_targets, current character target's
+  ///
+  std::vector<int> m_targets;
   ///
   /// \brief m_combat, if the character is in combat
   ///
@@ -81,14 +102,6 @@ private:
   /// \brief m_track, if the character is following character
   ///
   bool m_track;
-  ///
-  /// \brief m_characters, vector of characters
-  ///
-  std::vector<Character> *m_characters;
-  ///
-  /// \brief m_targets, current character target's
-  ///
-  std::vector<Character*> m_targets;
   ///
   /// \brief m_attack_power, how much the baddie attacks for
   ///

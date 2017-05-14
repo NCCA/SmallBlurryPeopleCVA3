@@ -26,7 +26,7 @@ public:
 	/// at its position
 	///
 	AI(TerrainHeightTracer *_height_tracer, Grid *_grid);
-	///
+  ///
 	/// @brief destructor
 	///
 	~AI() = default;
@@ -40,7 +40,7 @@ public:
 	virtual void update() = 0;
 	///
 	/// @brief move, moves AI along its path
-	/// @return true if gets to target
+  /// @return a boolean determing if its reached its target
 	///
 	bool move();
 	///
@@ -61,7 +61,7 @@ public:
 	std::vector<ngl::Vec2> getPath(int _target_id);
 	///
 	/// @brief calcAimVec, calculate vector towards next point
-	/// @return
+  /// @return vec2 of direction vector character is aiming towards
 	///
 	ngl::Vec2 calcAimVec(float *dist);
 	///
@@ -92,12 +92,12 @@ public:
 	///
 	ngl::Vec3 getPos();
 	///
-	/// \brief getPos2d get 2d position
-	/// \return m_pos
+  /// @brief getPos2D, get 2D position
+  /// @return m_pos, AI's position
 	///
-	ngl::Vec2 getPos2d();
+  ngl::Vec2 getPos2D();
 	///
-	/// \brief updateRot update m_rot, eg if direction has changed
+  /// @brief updateRot update m_rot, eg if direction has changed
 	///
 	void updateRot();
 	///
@@ -113,21 +113,29 @@ public:
 
 protected:
   ///
-  /// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
-  ///
-  float m_health;
-  ///
   /// @brief m_grid, grid pointer to reference for pathfinding
   ///
   Grid *m_grid;
   ///
-  /// @brief m_pos, character position
+  /// @brief m_height_tracer, for grid height
+  ///
+  TerrainHeightTracer *m_height_tracer;
+  ///
+  /// @brief m_pos, AI's position
   /// ///
   ngl::Vec2 m_pos;
+  ///
+  /// @brief m_offset, offset AI on current tile, to avoid clipping between AIs
+  ///
+  float m_offset;
   ///
   /// @brief m_target_id, id of target tile on grid
   ///
   int m_target_id;
+  ///
+  /// @brief m_health, how much health the character has: 1 = full health, 0 = no health/dead
+  ///
+  float m_health;
   ///
   /// @brief m_rot character's rotation to face current direction (degrees)
   ///
@@ -148,10 +156,6 @@ protected:
   /// @brief m_idle, set when character is idle, for checking if idle
   ///
   bool m_idle;
-  ///
-  /// @brief m_height_tracer, for grid height
-  ///
-  TerrainHeightTracer *m_height_tracer;
 };
 
 #endif//__CHARACTER_HPP__

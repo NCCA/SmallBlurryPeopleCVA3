@@ -19,7 +19,7 @@ namespace Utility
 constexpr float floatInfinity = std::numeric_limits<float>::infinity();
 constexpr float pi = atan(1.0) * 4.0;
 
-//Given a vector of input points, computes the min and max bounds. Use it to make an AABB around a bunch of stuff.
+//Given a vector of input points, computes the min and max bounds. Use it to make an AABB around a bunch of stuff
 template<class T>
 std::pair<ngl::Vec3, ngl::Vec3> enclose(const T &_pts)
 {
@@ -48,19 +48,53 @@ std::pair<ngl::Vec3, ngl::Vec3> enclose(const T &_pts)
     }
     return bounds;
 }
-
+///
+/// \brief radians
+/// \param _degrees
+/// \return 
+///
 float radians(const float _degrees);
+///
+/// \brief degrees
+/// \param _radians
+/// \return 
+///
 float degrees(const float _radians);
-
+///
+/// \brief randFlt, returns a random float within the given range
+/// \param _min, minimum range
+/// \param _max, maximum range
+/// \return the random float generated
+///
 float randFlt(const float _min, const float _max);
+///
+/// \brief randInt, return a random integer within the given range
+/// \param _min, minimum range
+/// \param _max, maximum range
+/// \return  the random integer generated
+///
 int randInt(const int _min, const int _max);
-
+///
+/// \brief average
+/// \param _values
+/// \return 
+///
 float average(std::vector<float> _values);
-
 float clamp(float _in, float _lo, float _hi);
-
+///
+/// \brief sqrDistance, finds the distance squared between two vectors
+/// \param _a, the first vector 
+/// \param _b, the second vector
+/// \return the squared distance between the two vectors
+///
 float sqrDistance(ngl::Vec2 _a, ngl::Vec2 _b);
-
+///
+/// \brief remap01, remaps a value to be between 0 and 1
+/// \param _in_value, the value to remap
+/// \param _max_in_range, the old minimum range the value was created from
+/// \param _min_in_range, the old maximum range the value was created from
+/// \return the value remapped between 0 and 1
+///
 float remap01(float _in_value, float _max_in_range, float _min_in_range);
 
 int findSetElement(std::set<int> _set, int index);

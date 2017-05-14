@@ -29,6 +29,7 @@ const int waterResolution = 1024;
 Scene::Scene(ngl::Vec2 _viewport) :
     m_globalTime(0.0f),
     m_active(true),
+    m_grid(&m_world_inventory),
     m_active_char_id(-1),
     m_mouse_trans_active(false),
     m_mouse_rot_active(false),
@@ -40,12 +41,14 @@ Scene::Scene(ngl::Vec2 _viewport) :
     m_game_started(false),
     m_movement_held{false},
     m_mouseSelectionBoxPosition( ngl::Vec3(), ngl::Vec3(), 0.75f),
-    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f),
-    m_grid(&m_world_inventory)
+    m_mouseSelectionBoxScale( ngl::Vec3(1.0f, 1.0f, 1.0f), ngl::Vec3(1.0f, 1.0f, 1.0f), 0.75f)
 {
     Gui *gui = Gui::instance();
     gui->init(this, _viewport, "button");
 
+    //reads file with list of names
+    readNameFile();
+    //pass reference of world inventory to character class
     Character::setWorldInventory(&m_world_inventory);
 
     ngl::Random * rnd = ngl::Random::instance();
@@ -79,6 +82,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("waterDisplacementBlend", "vertScreenQuad", "fragWaterDisplacementBlend");
     createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
@@ -107,11 +111,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->use("bokeh");
     slib->setRegisteredUniform("bgl_dim", m_viewport);
 
-    //reads file with list of names
-    readNameFile();
-    //creates characters with random names
-
     initialiseFramebuffers();
+    std::cout << "Framebuffers initialised!\n";
 
     m_shadowMat.assign(3, ngl::Mat4());
 
@@ -121,9 +122,6 @@ Scene::Scene(ngl::Vec2 _viewport) :
     prim->createSphere( "sphere", 0.1, 12 );
 
     std::cout << "Loading assets...\n";
-
-    //store->loadMesh("mountain", "mountain/mountain.obj");
-    //store->loadTexture("mountain_d", "mountain/mountain_diff.png");
 
     //playing with trees and houses and such
     store->loadMesh("debugSphere", "sphere.obj");
@@ -225,7 +223,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+    std::cout << "Scene contructed.\n";
 }
 
 void Scene::initMeshInstances()
@@ -246,6 +244,7 @@ void Scene::initMeshInstances()
 
 Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int _y)
 {
+    std::cout << "generateInstanceMeshTile start\n";
     meshInstanceBlock b;
 
     int meshCount = 0;
@@ -326,17 +325,21 @@ Scene::meshInstanceBlock Scene::generateInstanceMeshTile(const int _x, const int
     glBindTexture(GL_TEXTURE_BUFFER, b.m_instanceTBO);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, buf);
 
+    std::cout << "generateInstanceMeshTile end\n";
     return b;
 }
 
 void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
 {
-  int x = _tilex / m_meshInstanceBlockTileSize;
-  int y = _tiley / m_meshInstanceBlockTileSize;
-  int index = x * (m_grid.getH() / m_meshInstanceBlockTileSize) + y;
+    std::cout << "recalculateInstancedMeshes start\n";
+    int x = _tilex / m_meshInstanceBlockTileSize;
+    int y = _tiley / m_meshInstanceBlockTileSize;
+    int index = x * std::floor(m_grid.getH() / m_meshInstanceBlockTileSize) + y;
 
-  meshInstanceBlock b = generateInstanceMeshTile(x, y);
-  m_meshInstances[index] = b;
+    meshInstanceBlock b = generateInstanceMeshTile(x, y);
+    std::cout << "Accessing " << index << " of " << m_meshInstances.size() << '\n';
+    m_meshInstances[index] = b;
+    std::cout << "recalculateInstancedMeshes end\n";
 }
 
 void Scene::initialiseFramebuffers()
@@ -389,6 +392,7 @@ void Scene::initialiseFramebuffers()
     m_displacementBuffer.initialise(waterResolution, waterResolution);
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
     m_displacementBuffer.addTexture("waterNormal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_displacementBuffer.addTexture("waterDisplacementBlended", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT2);
     if(!m_displacementBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
@@ -412,15 +416,18 @@ void Scene::initialiseFramebuffers()
 
 void Scene::readNameFile()
 {
+    //open file of names
     std::ifstream namesFile;
     namesFile.open("names/game_names.txt");
 
+    //if can't open file
     if(!namesFile.is_open())
     {
         std::cerr<<"Couldnt open file\n";
         exit(EXIT_FAILURE);
     }
 
+    //go through file line by line and add to vector of names, m_file_names
     int lineNo = 0;
     std::string lineBuffer;
     while (!namesFile.eof())
@@ -431,8 +438,8 @@ void Scene::readNameFile()
             m_file_names.push_back(lineBuffer);
             lineNo++;
         }
+        namesFile.close();
     }
-    namesFile.close();
 }
 
 void Scene::createCharacter()
@@ -454,10 +461,11 @@ void Scene::update()
     //Gui::instance()->updateNotifications();
     if (m_grid.hasChanges())
     {
+        std::cout << "tiles change start\n";
         std::vector< std::vector< bool > > regenTiles;
-        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize, std::vector< bool >() );
+        regenTiles.assign( m_grid.getW() / m_meshInstanceBlockTileSize + 1, std::vector< bool >() );
         for(auto &vec : regenTiles)
-            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize, false );
+            vec.assign( m_grid.getH() / m_meshInstanceBlockTileSize + 1, false );
 
         for(auto &coord : m_grid.getChangedTiles())
         {
@@ -469,7 +477,9 @@ void Scene::update()
         }
 
         //initMeshInstances();
+        m_grid.resetChangedTiles();
         m_grid.resetHasChanges();
+        std::cout << "tiles change end\n";
     }
 
     if(m_state == GameState::MAIN)
@@ -512,7 +522,9 @@ void Scene::update()
 
         if(m_centre_camera == true)
         {
+            //centre camera onto character
             for (Character &character : m_characters)
+                //if the character has been selected/ the one being controlled by the user
                 if (character.isActive())
                     m_cam.setPos(-character.getPos());
         }
@@ -552,42 +564,45 @@ void Scene::update()
 
         for(size_t i=0; i<m_characters.size(); i++)
         {
-          //check if character has health, if it doesn't remove the character
-          if (m_characters[i].getHealth() <= 0.0)
-          {
-              std::string message = m_characters[i].getName() + " has died!";
-              ngl::Vec2 pos = m_characters[i].getPos2d();
-              Gui::instance()->notify(message, pos );
-              //check if character has health, if it doesn't remove the character
-              if (m_active_char_id == m_characters[i].getID())
-              {
-                  m_active_char_id = -1;
-                  Gui::instance()->updateActiveCharacter();
-              }
-              //ID's start from 1 so negate 1 to get index in vector m_characters
-              //int index = (m_characters[i].getID() - 1);
-              //add name back to available list
-              m_file_names.push_back(m_characters[i].getName());
-              //add position to tombstone positions
-              ngl::Vec3 stone_pos(m_characters[i].getPos());
-              m_tombstones.push_back(stone_pos);
-              //remove character from vector
-              m_characters.erase(m_characters.begin() + i);
-              for(auto &baddie: m_baddies)
-                  baddie.addScale(0.5f);
-              break;
-            }
-            else
+            //if a character has died
+            if (m_characters[i].getHealth() <= 0.0)
             {
-                m_characters[i].update();
-                if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+                //print a message in the UI
+                ngl::Vec2 pos = m_characters[i].getPos2D();
+                std::string message = m_characters[i].getName() + " has died!";
+                Gui::instance()->notify(message, pos );
+                //if its the active character, update the selected character to none
+                if (m_active_char_id == m_characters[i].getID())
                 {
-                    //check if character is sleeping, if it is, dont make it the active character
                     m_active_char_id = -1;
                     Gui::instance()->updateActiveCharacter();
                 }
+                //add name back to available list
+                m_file_names.push_back(m_characters[i].getName());
+                //add position to tombstone positions
+                ngl::Vec3 stone_pos(m_characters[i].getPos());
+                m_tombstones.push_back(stone_pos);
+                //remove character from vector
+                m_characters.erase(m_characters.begin() + i);
+                break;
+            }
+            else
+            {
+                //update characters
+                m_characters[i].update();
+                if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+                {
+                    m_characters[i].update();
+                    if (m_characters[i].isSleeping() && m_characters[i].getID() == m_active_char_id)
+                    {
+                        //check if character is sleeping, if it is, dont make it the active character
+                        m_active_char_id = -1;
+                        Gui::instance()->updateActiveCharacter();
+                    }
+                }
             }
         }
+        //if all characters have died
         if (m_characters.size() == 0)
         {
             endGame("GAME OVER: everybody died :(");
@@ -602,12 +617,13 @@ void Scene::update()
 
         for(size_t i=0; i<m_baddies.size(); i++)
         {
+            //if have health, update
             if(m_baddies[i].getHealth() > 0.0)
                 m_baddies[i].update();
             else
             {
-                ngl::Vec2 pos = ngl::Vec2(m_baddies[i].getPos()[0], m_baddies[i].getPos()[2]);
-                Gui::instance()->notify("Enemy defeated", pos);
+                //if the baddies has died, message and erase from vector
+                Gui::instance()->notify("Enemy defeated", m_baddies[i].getPos2D());
                 m_baddies.erase(m_baddies.begin() + i);
             }
         }
@@ -615,7 +631,7 @@ void Scene::update()
 
         //m_sunAngle.m_x = 150.0f;
         m_sunAngle.m_z = 30.0f - 25.0f * sinf(m_season * M_PI - M_PI / 2.0f);
-        m_sunAngle.m_x = m_globalTime * 12.0f;
+        m_sunAngle.m_x = m_globalTime * 4.0f;
         m_day = floor(m_globalTime / 365) + 80;
         m_season = (m_day % 365) / 365.0f;
 
@@ -641,174 +657,176 @@ void Scene::update()
 
         m_directionalLightCol /= t_midday + t_midnight + t_sundown;
 
-    m_pointLights.clear();
+        m_pointLights.clear();
 
-    for(auto &b : m_meshInstances)
-    {
-        ngl::Vec3 off (0.0f, 0.5f, 0.0f);
-        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::HOUSE)])
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
-        for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
-            m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 2.0f) );
+        for(auto &b : m_meshInstances)
+        {
+            ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+            for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::HOUSE)])
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+            for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+        }
+
         for(auto &c : m_characters)
         {
+            ngl::Vec3 off (0.0f, 0.5f, 0.0f);
             //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
             if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
             {
                 ngl::Vec3 vec = c.getPos() + off;
-                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
             }
         }
-    }
 
-    glBindVertexArray(m_cloudParticlesVAO);
+        glBindVertexArray(m_cloudParticlesVAO);
 
-    //Create a VAO for the clouds.
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
-                 &m_cloudParticles.m_pos[0].m_x,
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
+        //Create a VAO for the clouds.
+        glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesPositionVBO);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(ngl::Vec3) * m_cloudParticles.m_pos.size(),
+                     &m_cloudParticles.m_pos[0].m_x,
+                GL_STATIC_DRAW
+                );
+        setBufferLocation(m_cloudParticlesPositionVBO, 0, 3);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_scale.size(),
-                 &m_cloudParticles.m_scale[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesScaleVBO);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(float) * m_cloudParticles.m_scale.size(),
+                     &m_cloudParticles.m_scale[0],
+                GL_STATIC_DRAW
+                );
+        setBufferLocation(m_cloudParticlesScaleVBO, 1, 1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_time.size(),
-                 &m_cloudParticles.m_time[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesTimeVBO);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(float) * m_cloudParticles.m_time.size(),
+                     &m_cloudParticles.m_time[0],
+                GL_STATIC_DRAW
+                );
+        setBufferLocation(m_cloudParticlesTimeVBO, 2, 1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(float) * m_cloudParticles.m_alpha.size(),
-                 &m_cloudParticles.m_alpha[0],
-            GL_STATIC_DRAW
-            );
-    setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, m_cloudParticlesAlphaVBO);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(float) * m_cloudParticles.m_alpha.size(),
+                     &m_cloudParticles.m_alpha[0],
+                GL_STATIC_DRAW
+                );
+        setBufferLocation(m_cloudParticlesAlphaVBO, 3, 1);
 
-    glBindVertexArray(0);
+        glBindVertexArray(0);
 
-    //Update velocity
-    for(auto &vec : m_cloudParticles.m_vel)
-    {
-        vec += m_windDirection.get() * 0.001f;
-        vec -= vec * 0.01f;
-    }
-    //Update position
-    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-        m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
-
-      //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
-      for(int i = 0; i < 32; ++i)
-      {
-          for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
-          {
-              ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
-              ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
-              if(diffc.lengthSquared() < diffn.lengthSquared())
-              {
-                  std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
-                  std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
-                  std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
-                  std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
-                  std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
-              }
-          }
-      }
-    for(auto &t : m_cloudParticles.m_time)
-    {
-        t += 0.01f;
-        if(t > 3.0f)
-            t -= 3.0f;
-    }
-
-    //Simple wrapping, now with alpha fading when out of bounds.
-    for(size_t i = 0; i < m_cloudParticles.size(); ++i)
-    {
-        auto vec = m_cloudParticles.m_pos[i];
-        auto vel = m_cloudParticles.m_vel[i];
-        auto alpha = m_cloudParticles.m_alpha[i];
-
-        bool fading = false;
-
-        if(vec.m_x < 0.0f and vel.m_x < 0.0f)
+        //Update velocity
+        for(auto &vec : m_cloudParticles.m_vel)
         {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_x += m_grid.getW();
+            vec += m_windDirection.get() * 0.001f;
+            vec -= vec * 0.01f;
         }
-        else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
+        //Update position
+        for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+            m_cloudParticles.m_pos[i] += m_cloudParticles.m_vel[i];
+
+        //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+        for(int i = 0; i < 32; ++i)
         {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
-        }
-
-        if(vec.m_z < 0.0f and vel.m_z < 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_z += m_grid.getH();
-        }
-        else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
-        {
-            fading = true;
-            m_cloudParticles.m_alpha[i] -= 0.005f;
-            if(alpha <= 0.0f)
-                m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
-        }
-
-        if(!fading)
-            m_cloudParticles.m_alpha[i] += 0.005f;
-
-        m_cloudParticles.m_alpha[i] = Utility::clamp(
-                    m_cloudParticles.m_alpha[i], 0.0f, 1.0f
-                    );
-    }
-
-    ngl::Random * rnd = ngl::Random::instance();
-
-    if(rnd->randomPositiveNumber() > 0.99f)
-    {
-        ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
-        v.m_y /= 6.0f;
-
-        m_windDirection.setEnd( v );
-    }
-
-    m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
-
-    //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
-    for(int i = 0; i < 32; ++i)
-    {
-        for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
-        {
-            ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
-            ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
-            if(diffc.lengthSquared() < diffn.lengthSquared())
+            for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
             {
-                std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
-                std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
-                std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
-                std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
-                std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+                ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+                ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+                if(diffc.lengthSquared() < diffn.lengthSquared())
+                {
+                    std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
+                    std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
+                    std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
+                    std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                    std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+                }
+            }
+        }
+        for(auto &t : m_cloudParticles.m_time)
+        {
+            t += 0.01f;
+            if(t > 3.0f)
+                t -= 3.0f;
+        }
+
+        //Simple wrapping, now with alpha fading when out of bounds.
+        for(size_t i = 0; i < m_cloudParticles.size(); ++i)
+        {
+            auto vec = m_cloudParticles.m_pos[i];
+            auto vel = m_cloudParticles.m_vel[i];
+            auto alpha = m_cloudParticles.m_alpha[i];
+
+            bool fading = false;
+
+            if(vec.m_x < 0.0f and vel.m_x < 0.0f)
+            {
+                fading = true;
+                m_cloudParticles.m_alpha[i] -= 0.005f;
+                if(alpha <= 0.0f)
+                    m_cloudParticles.m_pos[i].m_x += m_grid.getW();
+            }
+            else if(vec.m_x > m_grid.getW() and vec.m_x > 0.0f)
+            {
+                fading = true;
+                m_cloudParticles.m_alpha[i] -= 0.005f;
+                if(alpha <= 0.0f)
+                    m_cloudParticles.m_pos[i].m_x -= m_grid.getW();
+            }
+
+            if(vec.m_z < 0.0f and vel.m_z < 0.0f)
+            {
+                fading = true;
+                m_cloudParticles.m_alpha[i] -= 0.005f;
+                if(alpha <= 0.0f)
+                    m_cloudParticles.m_pos[i].m_z += m_grid.getH();
+            }
+            else if(vec.m_z > m_grid.getH() and vel.m_z > 0.0f)
+            {
+                fading = true;
+                m_cloudParticles.m_alpha[i] -= 0.005f;
+                if(alpha <= 0.0f)
+                    m_cloudParticles.m_pos[i].m_z -= m_grid.getH();
+            }
+
+            if(!fading)
+                m_cloudParticles.m_alpha[i] += 0.005f;
+
+            m_cloudParticles.m_alpha[i] = Utility::clamp(
+                        m_cloudParticles.m_alpha[i], 0.0f, 1.0f
+                        );
+        }
+
+        ngl::Random * rnd = ngl::Random::instance();
+
+        if(rnd->randomPositiveNumber() > 0.99f)
+        {
+            ngl::Vec3 v = rnd->getRandomNormalizedVec3() * 0.05f;
+            v.m_y /= 6.0f;
+
+            m_windDirection.setEnd( v );
+        }
+
+        m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
+
+        //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
+        for(int i = 0; i < 32; ++i)
+        {
+            for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
+            {
+                ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
+                ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
+                if(diffc.lengthSquared() < diffn.lengthSquared())
+                {
+                    std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
+                    std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
+                    std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
+                    std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
+                    std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
+                }
             }
         }
     }
-  }
 
 }
 
@@ -1022,6 +1040,13 @@ void Scene::draw()
         slib->use("waterDisplacement");
         slib->setRegisteredUniform("iGlobalTime", m_globalTime * 16.0f);
 
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
+        //Blending
+        m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
+        slib->use("waterDisplacementBlend");
+        id = slib->getProgramID("waterDisplacementBlend");
+        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
         //Normals
@@ -1344,20 +1369,20 @@ void Scene::draw()
     }
     else
     {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      slib->use("levelSelect");
-      slib->setRegisteredUniform("resolution", m_viewport);
-      GLuint texture_id = AssetStore::instance()->getTexture("level_"+MapList::instance()->getCurrentMapName());
-      if(texture_id == 0)
-      {
-        texture_id = AssetStore::instance()->getTexture("level_custom");
-      }
-      bindTextureToShader("levelSelect", texture_id, "diffuse", 0);
-      glBindVertexArray(m_screenQuad);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        slib->use("levelSelect");
+        slib->setRegisteredUniform("resolution", m_viewport);
+        GLuint texture_id = AssetStore::instance()->getTexture("level_"+MapList::instance()->getCurrentMapName());
+        if(texture_id == 0)
+        {
+            texture_id = AssetStore::instance()->getTexture("level_custom");
+        }
+        bindTextureToShader("levelSelect", texture_id, "diffuse", 0);
+        glBindVertexArray(m_screenQuad);
 
-      glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
-      glBindVertexArray(0);
+        glBindVertexArray(0);
 
     }
 
@@ -1384,7 +1409,7 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
+        m_displacementBuffer.bindTexture( id, "waterDisplacementBlended", "tex", 0);
         //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
@@ -1478,7 +1503,7 @@ void Scene::drawTerrain(bool _shouldClip)
     if(_shouldClip)
     {
         slib->setRegisteredUniform("clipAgainstHeight", true);
-        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel());
+        slib->setRegisteredUniform("clipHeight", m_grid.getGlobalWaterLevel() + 2.0f);
     }
     else
         slib->setRegisteredUniform("clipAgainstHeight", false);
@@ -1540,10 +1565,11 @@ void Scene::drawMeshes()
 
     for(Character &character : m_characters)
     {
-        if(character.isInside() == false)
+        //if not inside house or store house, draw
+        if(!character.isInside())
         {
-            m_transform.reset();
             ngl::Vec3 pos = character.getPos();
+            m_transform.reset();
             m_transform.setPosition(pos);
             m_transform.setRotation(0, character.getRot(), 0);
 
@@ -1555,35 +1581,22 @@ void Scene::drawMeshes()
 
     for(Baddie &baddie : m_baddies)
     {
-        if(baddie.getHealth() > 0.0)
-        {
-            m_transform.reset();
-            ngl::Vec3 pos = baddie.getPos();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, baddie.getRot(), 0);
-            m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
+        ngl::Vec3 pos = baddie.getPos();
+        m_transform.reset();
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(2.0f, 2.0f, 2.0f);
 
-            slib->use("diffuse");
-            drawAsset("person", "baddie_d", "diffuse");
-        }
+        slib->use("diffuse");
+        drawAsset("person", "baddie_d", "diffuse");
     }
 
-    for(auto &stone : m_tombstones)
+    for(ngl::Vec3 &stone : m_tombstones)
     {
         m_transform.reset();
         m_transform.setPosition(stone);
         drawAsset("tombstone", "tombstone_d", "diffuse");
     }
-}
-
-void Scene::quit()
-{
-    m_active = false;
-}
-
-bool Scene::isActive()
-{
-    return m_active;
 }
 
 //First = world space aabbs
@@ -1764,9 +1777,9 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     glBindVertexArray(0);
 
     slib->use("shadowDepthInstanced");
-    int offset = 0;
     for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
+        int offset = 0;
         const auto &block = m_meshInstances[b];
         for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
@@ -1804,6 +1817,7 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     slib->use("shadowDepth");
     for(auto &character : m_characters)
     {
+        //if character is not in house or store house, draw
         if(character.isInside() == false)
         {
             ngl::Vec3 pos = character.getPos();
@@ -1820,22 +1834,19 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
 
     for(Baddie &baddie : m_baddies)
     {
-        if(baddie.getHealth() > 0.0)
-        {
-            ngl::Vec3 pos = baddie.getPos();
-            m_transform.reset();
-            m_transform.setPosition(pos);
-            m_transform.setRotation(0, baddie.getRot(), 0);
-            m_transform.setScale(2.0f, 2.0f, 2.0f);
-            ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
+        ngl::Vec3 pos = baddie.getPos();
+        m_transform.reset();
+        m_transform.setPosition(pos);
+        m_transform.setRotation(0, baddie.getRot(), 0);
+        m_transform.setScale(baddie.getScale(), baddie.getScale(), baddie.getScale());
+        ngl::Mat4 mvp = m_transform.getMatrix() * m_shadowMat[_index];
 
-            ngl::Obj * k = store->getModel( "person" );
-            loadMatricesToShader( m_transform.getMatrix(), mvp );
-            k->draw();
-        }
+        ngl::Obj * k = store->getModel( "person" );
+        loadMatricesToShader( m_transform.getMatrix(), mvp );
+        k->draw();
     }
 
-    for(auto &stone : m_tombstones)
+    for(ngl::Vec3 &stone : m_tombstones)
     {
         m_transform.reset();
         m_transform.setPosition(stone);
@@ -2055,45 +2066,50 @@ void Scene::mouseSelection()
     }
     else if(m_state == GameState::MAIN)
     {
+        //read from charPick texture
         int red = getCharIDAtMouse();
-
+        //if the value is not -1 (the default), then a character has been clicked
         if(red > 0)
         {
             for (Character &character : m_characters)
             {
+                //if the value of the pixel matches a character's ID
                 if (character.getID() == red)
                 {
-                    // probably needs changing because vector address is not guaranteed
-                    if(character.isActive() == false)
+                    //if the character is not already the active character
+                    if(!character.isActive())
                     {
+                        //make the active character
                         m_active_char_id = character.getID();
                         character.setActive(true);
-                        // character.clearState();
                         gui->updateActiveCharacter();
                     }
                 }
                 else
-                    if (character.isActive() == true)
+                    //make any other active character unactive
+                    if (character.isActive())
                         character.setActive(false);
             }
         }
         //check grid_id texture
         else
         {
+            //get the pixel value from the terrainPick texture
             ngl::Vec4 grid_coord = getTerrainPosAtMouse();
-
+            //if the coordinate doesn't equal the default (0,0), then the grid has been clicked
             if(grid_coord[0] != 0 && grid_coord[2] != 0)
             {
+                //floor to get integer value (to find tile)
                 int grid_coord_x = floor(grid_coord[0]);
                 grid_coord_x = Utility::clamp(grid_coord_x, 0, m_grid.getW());
 
                 int grid_coord_y = floor(grid_coord[2]);
                 grid_coord_y = Utility::clamp(grid_coord_y, 0, m_grid.getH());
-
+                //set as target for active character
                 int target_id = m_grid.coordToId(ngl::Vec2(grid_coord_x, grid_coord_y));
                 for (Character &character : m_characters)
                 {
-                    if(character.isActive() == true)
+                    if(character.isActive())
                     {
                         character.setState(target_id);
                     }
@@ -2768,63 +2784,63 @@ void Scene::togglePause()
 
 void Scene::startGame()
 {
-  ngl::Random *rnd = ngl::Random::instance();
-  Gui *gui = Gui::instance();
-  MapList *maplist = MapList::instance();
-  m_state = GameState::MAIN;
-  m_game_started = true;
-  gui->unpause();
-  m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
-  std::cout << "Constructing terrain...\n";
-  m_terrainVAO = constructTerrain();
+    ngl::Random *rnd = ngl::Random::instance();
+    Gui *gui = Gui::instance();
+    MapList *maplist = MapList::instance();
+    m_state = GameState::MAIN;
+    m_game_started = true;
+    gui->unpause();
+    m_grid.updateScript(maplist->getCurrentMapPath(), maplist->getW(), maplist->getH(), maplist->getSeed());
+    std::cout << "Constructing terrain...\n";
+    m_terrainVAO = constructTerrain();
 
-  initMeshInstances();
+    initMeshInstances();
 
-  // add first character
-  createCharacter();
-  m_active_char_id = m_characters[0].getID();
-  gui->updateActiveCharacter();
-  m_characters[0].setActive(true);
+    // add first character
+    createCharacter();
+    m_active_char_id = m_characters[0].getID();
+    gui->updateActiveCharacter();
+    m_characters[0].setActive(true);
 
-  //Number of clouds.
-  int num_clouds = m_grid.getW() * m_grid.getH() / 200;
-  //Number of particles per cloud.
-  int num_cloud_particles = 32;
+    //Number of clouds.
+    int num_clouds = m_grid.getW() * m_grid.getH() / 200;
+    //Number of particles per cloud.
+    int num_cloud_particles = 32;
 
-  for(int i = 0; i < num_clouds; ++i)
-  {
-      ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
-              + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
-      m_cloudParticles.m_pos.push_back( p );
-      m_cloudParticles.m_vel.push_back(ngl::Vec3());
-      m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-      m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-  }
+    for(int i = 0; i < num_clouds; ++i)
+    {
+        ngl::Vec3 p = rnd->getRandomPoint( m_grid.getW() / 2.0f, 4.0f, m_grid.getH() / 2.0f )
+                + ngl::Vec3(m_grid.getW() / 2.0f, 25.0f, m_grid.getH() / 2.0f);
+        m_cloudParticles.m_pos.push_back( p );
+        m_cloudParticles.m_vel.push_back(ngl::Vec3());
+        m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+        m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+    }
 
-  for(int i = 0; i < num_clouds; ++i)
-  {
-      for(int j = 0; j < num_cloud_particles; ++j)
-      {
-          ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
-          m_cloudParticles.m_pos.push_back(p);
-          m_cloudParticles.m_vel.push_back(ngl::Vec3());
-          m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
-          m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
-      }
-  }
-  m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
+    for(int i = 0; i < num_clouds; ++i)
+    {
+        for(int j = 0; j < num_cloud_particles; ++j)
+        {
+            ngl::Vec3 p = m_cloudParticles.m_pos[i] + rnd->getRandomPoint( 4.0f, 0.5f, 4.0f );
+            m_cloudParticles.m_pos.push_back(p);
+            m_cloudParticles.m_vel.push_back(ngl::Vec3());
+            m_cloudParticles.m_scale.push_back( rnd->randomPositiveNumber(1.0f) + 2.5f );
+            m_cloudParticles.m_time.push_back(rnd->randomPositiveNumber(3.0f));
+        }
+    }
+    m_cloudParticles.m_alpha.assign( m_cloudParticles.size(), 1.0f );
 
-  glGenVertexArrays(1, &m_cloudParticlesVAO);
-  glBindVertexArray(m_cloudParticlesVAO);
-  m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
-  setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
-  m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
-  setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
-  m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
-  setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
-  m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
-  setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
-  glBindVertexArray(0);
+    glGenVertexArrays(1, &m_cloudParticlesVAO);
+    glBindVertexArray(m_cloudParticlesVAO);
+    m_cloudParticlesPositionVBO = createBuffer3f(m_cloudParticles.m_pos);
+    setBufferLocation( m_cloudParticlesPositionVBO, 0, 3 );
+    m_cloudParticlesScaleVBO = createBuffer1f(m_cloudParticles.m_scale);
+    setBufferLocation( m_cloudParticlesScaleVBO, 1, 1 );
+    m_cloudParticlesTimeVBO = createBuffer1f(m_cloudParticles.m_time);
+    setBufferLocation( m_cloudParticlesTimeVBO, 2, 1 );
+    m_cloudParticlesAlphaVBO = createBuffer1f(m_cloudParticles.m_alpha);
+    setBufferLocation( m_cloudParticlesAlphaVBO, 3, 1 );
+    glBindVertexArray(0);
 }
 
 void Scene::startMove(Direction _d)
@@ -2904,55 +2920,55 @@ void Scene::focusCamToGridPos(ngl::Vec2 _pos)
 
 void Scene::baddiesSpawn()
 {
-  m_baddie_timer++;
+    m_baddie_timer++;
 
-  if(m_baddie_timer > (1000 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
-  {
-    m_baddie_timer = 0;
-    ngl::Random *rnd = ngl::Random::instance();
-
-    size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
-    for (size_t i = 0; i < 1000; i++)
+    if(m_baddie_timer > (1000 / m_prefs->getFloatPref("ENEMIE_SPAWN_RATE")))
     {
-      ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
-      float dist = 10 + rnd->randomPositiveNumber(10);
-      direction *= dist;
-      ngl::Vec2 rand_pos = m_characters[character_index].getPos2d() + direction;
-      if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
-      {
-        m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
-        break;
-      }
+        m_baddie_timer = 0;
+        ngl::Random *rnd = ngl::Random::instance();
+
+        size_t character_index = floor(rnd->randomPositiveNumber(m_characters.size()));
+        for (size_t i = 0; i < 1000; i++)
+        {
+            ngl::Vec2 direction = rnd->getRandomNormalizedVec2();
+            float dist = 10 + rnd->randomPositiveNumber(10);
+            direction *= dist;
+            ngl::Vec2 rand_pos = m_characters[character_index].getPos2D() + direction;
+            if(m_grid.isTileTraversable(rand_pos.m_x, rand_pos.m_y))
+            {
+                m_baddies.push_back(Baddie(rand_pos, &m_height_tracer, &m_grid, &m_characters));
+                break;
+            }
+        }
     }
-  }
 }
 
 void Scene::charactersSpawn()
 {
-  m_character_timer++;
-  if(m_character_timer > (1000 / m_prefs->getFloatPref("CHARACTER_SPAWN_RATE")))
-  {
-    m_character_timer = 0;
-    int population = getPopulation();
-    int max_population = getMaxPopulation();
-    if (population < max_population)
+    m_character_timer++;
+    if(m_character_timer > (1000 / m_prefs->getFloatPref("CHARACTER_SPAWN_RATE")))
     {
-      createCharacter();
+        m_character_timer = 0;
+        int population = getPopulation();
+        int max_population = getMaxPopulation();
+        if (population < max_population)
+        {
+            createCharacter();
+        }
     }
-  }
 }
 
 void Scene::endGame(const std::string &_message)
 {
-  m_state = GameState::ENDGAME;
-  Gui::instance()->createEndGameButtons(_message);
-  m_game_started = false;
-  m_grid.hasChanges();
-  m_meshInstances.clear();
-  // clear baddie vector
-  m_baddies.clear();
-  m_characters.clear();
-  m_active_char_id = -1;
+    m_state = GameState::ENDGAME;
+    Gui::instance()->createEndGameButtons(_message);
+    m_game_started = false;
+    m_grid.hasChanges();
+    m_meshInstances.clear();
+    // clear baddie vector
+    m_baddies.clear();
+    m_characters.clear();
+    m_active_char_id = -1;
 }
 
 ngl::Vec4 Scene::getTerrainPosAtMouse()
@@ -2975,20 +2991,33 @@ ngl::Vec4 Scene::getTerrainPosAtMouse()
 
 int Scene::getCharIDAtMouse()
 {
+    //bind fbo
     m_utilityBuffer.bind();
 
     ngl::Vec2 mousePos = Utility::getMousePos();
 
-    //check character_id texture
+    //bind charPick texture
     GLuint char_texID = getCharPickTexture();
     glBindTexture(GL_TEXTURE_2D, char_texID);
     glReadBuffer(GL_COLOR_ATTACHMENT1);
 
     int red = 0;
-
+    //read the pixel in the texture
     glReadPixels(mousePos.m_x, (m_viewport.m_y - mousePos.m_y), 1, 1, GL_RED_INTEGER, GL_INT, &red);
 
+    //unbind fbo
     m_utilityBuffer.unbind();
 
+    //red defaults to 0, so use -1 for checking
     return red - 1;
+}
+
+void Scene::quit()
+{
+    m_active = false;
+}
+
+bool Scene::isActive()
+{
+    return m_active;
 }
