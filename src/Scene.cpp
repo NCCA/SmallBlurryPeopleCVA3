@@ -813,24 +813,6 @@ void Scene::update()
         }
 
         m_windDirection.setEnd( m_windDirection.getEnd() * 0.001f );
-
-        //Bubble sort the particles. Approach from http://answers.unity3d.com/questions/20984/depth-sorting-of-billboard-particles-how-can-i-do.html
-        for(int i = 0; i < 32; ++i)
-        {
-            for(size_t j = 0; j < m_cloudParticles.size() - 1; ++j)
-            {
-                ngl::Vec3 diffc = (m_cloudParticles.m_pos[j] - m_cam.getPos());
-                ngl::Vec3 diffn = (m_cloudParticles.m_pos[j + 1] - m_cam.getPos());
-                if(diffc.lengthSquared() < diffn.lengthSquared())
-                {
-                    std::swap(m_cloudParticles.m_pos[j], m_cloudParticles.m_pos[j+1]);
-                    std::swap(m_cloudParticles.m_vel[j], m_cloudParticles.m_vel[j+1]);
-                    std::swap(m_cloudParticles.m_scale[j], m_cloudParticles.m_scale[j+1]);
-                    std::swap(m_cloudParticles.m_time[j], m_cloudParticles.m_time[j+1]);
-                    std::swap(m_cloudParticles.m_alpha[j], m_cloudParticles.m_alpha[j+1]);
-                }
-            }
-        }
     }
 
 }
