@@ -82,6 +82,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     createShader("button", "buttonVert", "buttonFrag", "buttonGeo");
     createShader("water", "vertWater", "fragWater", "", "tescWater", "teseWater");
     createShader("waterDisplacement", "vertScreenQuad", "fragWaterDisplacement");
+    createShader("waterDisplacementBlend", "vertScreenQuad", "fragWaterDisplacementBlend");
     createShader("waterDisplacementNormal", "vertScreenQuad", "fragWaterDisplacementNormal");
     createShader("bokeh", "vertScreenQuad", "fragBokehBlur");
     createShader("debugTexture", "vertScreenQuadTransform", "fragDebugTexture");
@@ -111,6 +112,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     slib->setRegisteredUniform("bgl_dim", m_viewport);
 
     initialiseFramebuffers();
+    std::cout << "Framebuffers initialised!\n";
 
     m_shadowMat.assign(3, ngl::Mat4());
 
@@ -221,7 +223,7 @@ Scene::Scene(ngl::Vec2 _viewport) :
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightBuffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Light) * m_maxLights, &m_pointLights[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+    std::cout << "Scene contructed.\n";
 }
 
 void Scene::initMeshInstances()
@@ -390,6 +392,7 @@ void Scene::initialiseFramebuffers()
     m_displacementBuffer.initialise(waterResolution, waterResolution);
     m_displacementBuffer.addTexture("waterDisplacement", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT0);
     m_displacementBuffer.addTexture("waterNormal", GL_RGBA, GL_RGBA16F, GL_COLOR_ATTACHMENT1);
+    m_displacementBuffer.addTexture("waterDisplacementBlended", GL_RED, GL_R16F, GL_COLOR_ATTACHMENT2);
     if(!m_displacementBuffer.checkComplete())
     {
         std::cerr << "Uh oh! Framebuffer incomplete! Error code " << glGetError() << '\n';
@@ -435,8 +438,8 @@ void Scene::readNameFile()
             m_file_names.push_back(lineBuffer);
             lineNo++;
         }
+        namesFile.close();
     }
-    namesFile.close();
 }
 
 void Scene::createCharacter()
@@ -663,14 +666,16 @@ void Scene::update()
                 m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
             for(auto &vec : b.m_meshPositions[static_cast<int>(TileType::STOREHOUSE)])
                 m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.5f) );
-            for(auto &c : m_characters)
+        }
+
+        for(auto &c : m_characters)
+        {
+            ngl::Vec3 off (0.0f, 0.5f, 0.0f);
+            //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
+            if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
             {
-                //We don't want everything to light up at the same time, so the characters ids offer a tiny offset.
-                if(m_sunDir.dot(ngl::Vec3(0.0f, 1.0f, 0.0f)) < (float)c.getID() * 0.05f)
-                {
-                    ngl::Vec3 vec = c.getPos() + off;
-                    m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
-                }
+                ngl::Vec3 vec = c.getPos() + off;
+                m_pointLights.push_back( Light(vec + off, ngl::Vec3(1.0f, 0.8f, 0.4f), 0.15f) );
             }
         }
 
@@ -1037,6 +1042,13 @@ void Scene::draw()
 
         glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
 
+        //Blending
+        m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT2});
+        slib->use("waterDisplacementBlend");
+        id = slib->getProgramID("waterDisplacementBlend");
+        m_displacementBuffer.bindTexture(id, "waterDisplacement", "displacement", 0);
+        glDrawArraysEXT(GL_TRIANGLE_FAN, 0, 4);
+
         //Normals
         m_displacementBuffer.activeColourAttachments({GL_COLOR_ATTACHMENT1});
 
@@ -1397,7 +1409,7 @@ void Scene::draw()
 
         slib->use("debugTexture");
         GLuint id = slib->getProgramID("debugTexture");
-        m_postEffectsBuffer.bindTexture( id, "reflection", "tex", 0);
+        m_displacementBuffer.bindTexture( id, "waterDisplacementBlended", "tex", 0);
         //m_shadowBuffer.bindTexture( id, "depth[" + std::to_string(i) + "]", "tex", 0 );
         slib->setRegisteredUniform( "M", m_transform.getMatrix() );
 
@@ -1765,9 +1777,9 @@ void Scene::shadowPass(bounds _worldbox, bounds _lightbox, size_t _index)
     glBindVertexArray(0);
 
     slib->use("shadowDepthInstanced");
-    int offset = 0;
     for(size_t b = 0; b < m_meshInstances.size(); ++b)
     {
+        int offset = 0;
         const auto &block = m_meshInstances[b];
         for(size_t i = 0; i < block.m_meshPositions.size(); ++i)
         {
