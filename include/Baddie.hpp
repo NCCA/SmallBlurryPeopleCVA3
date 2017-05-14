@@ -41,7 +41,7 @@ public:
   ///
   /// \brief invadedState, character intiates fight with baddie
   ///
-  void invadedState(Character *_target);
+  void invadedState(int _target);
   ///
   /// \brief setInvade, stop character looking for an enemy
   ///
@@ -89,7 +89,7 @@ private:
   ///
   /// \brief m_targets, current character target's
   ///
-  std::vector<Character*> m_targets;
+  std::vector<int> m_targets;
   ///
   /// \brief m_combat, if the character is in combat
   ///

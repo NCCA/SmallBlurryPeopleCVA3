@@ -495,7 +495,7 @@ void Character::update()
               if (m_grid->coordToId(m_pos) == baddieID)
               {
               //if reached enemy, initiate fighting
-                baddie.invadedState(this);
+                baddie.invadedState(m_id);
                 completedAction();
               }
               else
