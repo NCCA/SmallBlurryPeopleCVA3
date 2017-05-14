@@ -34,6 +34,7 @@ void main()
   n = normalize(n * 2.0 - 1.0);
   n = mat3(tangent_fs, bitangent_fs, normal_fs.xyz) * n;
   n = -n;
+  //n = normal_fs.xyz;
 
   if(time_fs > 0.0 && time_fs < 1.0)
     outColour = mix(texture(t0, UV_fs), texture(t1, UV_fs), vec4(time_fs));
