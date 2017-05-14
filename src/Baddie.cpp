@@ -178,7 +178,7 @@ void Baddie::fight()
 	else if(!chase)
 	{
 		int target_no = (int)m_targets.size();
-		if(m_action_timer.elapsed() >= 1000)
+    if(m_action_timer.elapsed() >= (10 / m_speed))
 		{
       for (size_t i=0; i<m_targets.size(); i++)
 			{
