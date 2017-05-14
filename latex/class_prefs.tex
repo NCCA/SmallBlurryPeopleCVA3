@@ -1,0 +1,614 @@
+\hypertarget{class_prefs}{}\section{Prefs Class Reference}
+\label{class_prefs}\index{Prefs@{Prefs}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_prefs}{Prefs} class holds all of the preferences stored in the file preferences.\+conf the file is parsed by the \hyperlink{class_prefs_parser}{Prefs\+Parser} class and the contentse are stored in 3 std\+::maps that link string keys to their corresponding values. \hyperlink{namespace_the}{The} three maps store int, float and string preferences respectively. \hyperlink{namespace_the}{The} \hyperlink{class_prefs}{Prefs} class also has the capacity to restore default parameters and save the current state of the parameters to the same text file they were read from.  
+
+
+
+
+{\ttfamily \#include $<$Prefs.\+hpp$>$}
+
+Inheritance diagram for Prefs\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_prefs}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{class_prefs_a6a519af5b4ddc87023111c80332a1895}{init} (std\+::string \+\_\+pref\+\_\+file=\char`\"{}preferences.\+conf\char`\"{})
+\begin{DoxyCompactList}\small\item\em init initialises the \hyperlink{class_prefs}{Prefs} class by running the \hyperlink{class_prefs_parser}{Prefs\+Parser} to build the preferences from the given file \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_aa74c172ddda1876616263fc8cfc36050}{}void \hyperlink{class_prefs_aa74c172ddda1876616263fc8cfc36050}{restore\+Default\+Prefs} ()\label{class_prefs_aa74c172ddda1876616263fc8cfc36050}
+
+\begin{DoxyCompactList}\small\item\em restore\+Default\+Prefs clears the three maps and fills them with default values \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_aeecc6a555bbb40a57a3e23d39f1e599c}{}Inc\+Type {\bfseries get\+Inc\+Type} (std\+::string \+\_\+key)\label{class_prefs_aeecc6a555bbb40a57a3e23d39f1e599c}
+
+\item 
+float \hyperlink{class_prefs_a152c738ff64ba39640067d01b9c1c68d}{get\+Float\+Inc\+Value} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Float\+Inc\+Value get value for incrementing given preference \end{DoxyCompactList}\item 
+float \hyperlink{class_prefs_ad36b9c6a831366911a40abb4dbfbd673}{get\+Float\+Dec\+Value} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Float\+Dec\+Value get value for decrementing given preference \end{DoxyCompactList}\item 
+float \hyperlink{class_prefs_a3129674442845c24ed3a4bab58354179}{get\+Float\+Change\+Value} (const std\+::string \&\+\_\+key, int \+\_\+dir)
+\begin{DoxyCompactList}\small\item\em get\+Float\+Change\+Value get float value required for changing given preference in given direction \end{DoxyCompactList}\item 
+int \hyperlink{class_prefs_aef0285b443ab4e5aaaa2d2dfab77d44d}{get\+Int\+Inc\+Value} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Int\+Inc\+Value get value for incrementing given preference \end{DoxyCompactList}\item 
+int \hyperlink{class_prefs_a3ea75fdb113cde7ed5578ed341bbbcb1}{get\+Int\+Dec\+Value} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Int\+Dec\+Value get value for decrementing given preference \end{DoxyCompactList}\item 
+int \hyperlink{class_prefs_a7216daf0f85aed4d4d5756d91963bc6d}{get\+Int\+Change\+Value} (const std\+::string \&\+\_\+key, int \+\_\+dir)
+\begin{DoxyCompactList}\small\item\em get\+Int\+Change\+Value get int value required for changing given preference in given direction \end{DoxyCompactList}\item 
+void \hyperlink{class_prefs_a6450d0a6f69a631b5ebc405c61d93a33}{set\+Int\+Pref} (std\+::string \+\_\+key, int \+\_\+val)
+\begin{DoxyCompactList}\small\item\em set\+Int\+Pref adds an integer preference key value pair to the interger preferences map \end{DoxyCompactList}\item 
+void \hyperlink{class_prefs_a8f429735290c3199efde4ee0c34263ce}{set\+Float\+Pref} (std\+::string \+\_\+key, float \+\_\+val)
+\begin{DoxyCompactList}\small\item\em set\+Float\+Pref adds a float preference key value pair to the float preferences map \end{DoxyCompactList}\item 
+void \hyperlink{class_prefs_a9aabf5ecb5277447229125a673881d0a}{set\+Str\+Pref} (std\+::string \+\_\+key, std\+::string \+\_\+val)
+\begin{DoxyCompactList}\small\item\em set\+Str\+Pref adds an integer preference key value pair to the interger preferences map \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_aa780a6a550da534c477454ef3df3f1cb}{}void {\bfseries set\+Bool\+Pref} (std\+::string \+\_\+key, bool \+\_\+val)\label{class_prefs_aa780a6a550da534c477454ef3df3f1cb}
+
+\item 
+int \hyperlink{class_prefs_adfc47432669292edf36c6972a963200e}{get\+Int\+Pref} (std\+::string \+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Int\+Pref retrieves an integer preference with the given key \end{DoxyCompactList}\item 
+float \hyperlink{class_prefs_ab52937d7b42026f8989c6bb9e14f9f88}{get\+Float\+Pref} (std\+::string \+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Float\+Pref retrieves a float preference with the given key \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_prefs_ab9ff6556d04e07512bf1fe238c31e3cf}{get\+Str\+Pref} (std\+::string \+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Str\+Pref retrieves a string preference with the given key \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_aab3526aa618b728655196fa88549a2dc}{}bool {\bfseries get\+Bool\+Pref} (std\+::string \+\_\+key)\label{class_prefs_aab3526aa618b728655196fa88549a2dc}
+
+\item 
+const std\+::map$<$ std\+::string, std\+::pair$<$ int, Inc\+Type $>$ $>$ \& \hyperlink{class_prefs_afd4dc2154410d35f8b68daf2fd4b261e}{get\+Int\+Map} ()
+\begin{DoxyCompactList}\small\item\em get\+Int\+Map retrieves the whole integer preference map \end{DoxyCompactList}\item 
+const std\+::map$<$ std\+::string, std\+::pair$<$ float, Inc\+Type $>$ $>$ \& \hyperlink{class_prefs_ac9c4890be5513e22acca32ccb71fd695}{get\+Float\+Map} ()
+\begin{DoxyCompactList}\small\item\em get\+Float\+Map retrieves the entire float preference map \end{DoxyCompactList}\item 
+const std\+::map$<$ std\+::string, std\+::pair$<$ std\+::string, Inc\+Type $>$ $>$ \& \hyperlink{class_prefs_af97b292fad51f096a49a012593f0b6e3}{get\+Str\+Map} ()
+\begin{DoxyCompactList}\small\item\em get\+Str\+Map retrieves the entire string preference map \end{DoxyCompactList}\item 
+const std\+::map$<$ std\+::string, std\+::pair$<$ bool, Inc\+Type $>$ $>$ \& \hyperlink{class_prefs_a9707513ccb9e1018ab987b8620c961ce}{get\+Bool\+Map} ()
+\begin{DoxyCompactList}\small\item\em get\+Bool\+Map retrieves the entire string preference map \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_afa1c9b1ef43523e0acd54e41e7dcb55e}{}void \hyperlink{class_prefs_afa1c9b1ef43523e0acd54e41e7dcb55e}{print\+Prefs} ()\label{class_prefs_afa1c9b1ef43523e0acd54e41e7dcb55e}
+
+\begin{DoxyCompactList}\small\item\em print\+Prefs prints out all key-\/value pairs stored in the three maps \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_a44f9f3bfff7a83393ccde65d77522dc6}{}void \hyperlink{class_prefs_a44f9f3bfff7a83393ccde65d77522dc6}{save\+Prefs} ()\label{class_prefs_a44f9f3bfff7a83393ccde65d77522dc6}
+
+\begin{DoxyCompactList}\small\item\em save\+Prefs saves the preferences to the preferences.\+conf text file \end{DoxyCompactList}\item 
+Pref\+Type \hyperlink{class_prefs_a9ba03172930b21b2e60f390c39304627}{get\+Type\+Of\+Pref} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Type\+Of\+Pref find what type the preference is \end{DoxyCompactList}\item 
+void \hyperlink{class_prefs_a0747811585196ca1f4793618feeba49a}{set\+Pref} (std\+::string \&\+\_\+key, int \+\_\+val)
+\begin{DoxyCompactList}\small\item\em set\+Pref generic template for setting preference \end{DoxyCompactList}\item 
+\hypertarget{class_prefs_a7b4a75da465d0911b55696dc55744d27}{}void {\bfseries set\+Pref} (std\+::string \&\+\_\+key, float \+\_\+val)\label{class_prefs_a7b4a75da465d0911b55696dc55744d27}
+
+\item 
+\hypertarget{class_prefs_a5508ec6cff49fc4d2e5e416c3e4eba30}{}void {\bfseries set\+Pref} (std\+::string \&\+\_\+key, const std\+::string \&\+\_\+val)\label{class_prefs_a5508ec6cff49fc4d2e5e416c3e4eba30}
+
+\item 
+\hypertarget{class_prefs_a4f423e1536c62cd6fe4e165a77af6c53}{}void {\bfseries set\+Pref} (std\+::string \&\+\_\+key, bool \+\_\+val)\label{class_prefs_a4f423e1536c62cd6fe4e165a77af6c53}
+
+\item 
+std\+::string \hyperlink{class_prefs_a02c61a39dead1ac6f590df97a5eec9a3}{get\+Pref\+Value\+String} (const std\+::string \&\+\_\+key)
+\begin{DoxyCompactList}\small\item\em get\+Pref\+Value\+String get text for value of string \end{DoxyCompactList}\item 
+int \hyperlink{class_prefs_a6fa32524ac3fccc26fda2d0a26f4cb29}{get\+Num\+Prefs} ()
+\begin{DoxyCompactList}\small\item\em get\+Num\+Prefs get total number of preference options \end{DoxyCompactList}\item 
+int \hyperlink{class_prefs_a6279df26b85ead4284eb8dadabad37bf}{get\+Num\+Changeable\+Prefs} ()
+\begin{DoxyCompactList}\small\item\em get\+Num\+Changeable\+Prefs get number of preferences that can be changed by the \hyperlink{class_gui}{Gui} \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_prefs_a6ae72a257da7d2e72d63a47e5782ea65}{bool\+To\+String} (bool \+\_\+b)
+\begin{DoxyCompactList}\small\item\em bool\+To\+String convert bool to string for \hyperlink{class_gui}{Gui} \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_prefs_a76acd714d838296134fb22641ac427a8}{}class {\bfseries Singleton$<$ Prefs $>$}\label{class_prefs_a76acd714d838296134fb22641ac427a8}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_prefs}{Prefs} class holds all of the preferences stored in the file preferences.\+conf the file is parsed by the \hyperlink{class_prefs_parser}{Prefs\+Parser} class and the contentse are stored in 3 std\+::maps that link string keys to their corresponding values. \hyperlink{namespace_the}{The} three maps store int, float and string preferences respectively. \hyperlink{namespace_the}{The} \hyperlink{class_prefs}{Prefs} class also has the capacity to restore default parameters and save the current state of the parameters to the same text file they were read from. 
+
+To add a new preference, it only needs to be added to the preferences.\+conf text file and a default value defined in the function \hyperlink{class_prefs_aa74c172ddda1876616263fc8cfc36050}{restore\+Default\+Prefs()} 
+
+Definition at line 43 of file Prefs.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_prefs_a6ae72a257da7d2e72d63a47e5782ea65}{}\index{Prefs@{Prefs}!bool\+To\+String@{bool\+To\+String}}
+\index{bool\+To\+String@{bool\+To\+String}!Prefs@{Prefs}}
+\subsubsection[{bool\+To\+String}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string Prefs\+::bool\+To\+String (
+\begin{DoxyParamCaption}
+\item[{bool}]{\+\_\+b}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a6ae72a257da7d2e72d63a47e5782ea65}
+
+
+bool\+To\+String convert bool to string for \hyperlink{class_gui}{Gui} 
+
+\begin{DoxyReturn}{Returns}
+string, either \char`\"{}0\char`\"{} or \char`\"{}1\char`\"{} 
+\end{DoxyReturn}
+
+
+Definition at line 416 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a9707513ccb9e1018ab987b8620c961ce}{}\index{Prefs@{Prefs}!get\+Bool\+Map@{get\+Bool\+Map}}
+\index{get\+Bool\+Map@{get\+Bool\+Map}!Prefs@{Prefs}}
+\subsubsection[{get\+Bool\+Map}]{\setlength{\rightskip}{0pt plus 5cm}const std\+::map$<$ std\+::string, std\+::pair$<$ bool, Inc\+Type $>$ $>$ \& Prefs\+::get\+Bool\+Map (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a9707513ccb9e1018ab987b8620c961ce}
+
+
+get\+Bool\+Map retrieves the entire string preference map 
+
+\begin{DoxyReturn}{Returns}
+the map containing all of the boolean preference key-\/value pairs 
+\end{DoxyReturn}
+
+
+Definition at line 294 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a3129674442845c24ed3a4bab58354179}{}\index{Prefs@{Prefs}!get\+Float\+Change\+Value@{get\+Float\+Change\+Value}}
+\index{get\+Float\+Change\+Value@{get\+Float\+Change\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Float\+Change\+Value}]{\setlength{\rightskip}{0pt plus 5cm}float Prefs\+::get\+Float\+Change\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key, }
+\item[{int}]{\+\_\+dir}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a3129674442845c24ed3a4bab58354179}
+
+
+get\+Float\+Change\+Value get float value required for changing given preference in given direction 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+{\em \+\_\+dir} & positive or negative for up/down \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+value to add/subtract 
+\end{DoxyReturn}
+
+
+Definition at line 105 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_ad36b9c6a831366911a40abb4dbfbd673}{}\index{Prefs@{Prefs}!get\+Float\+Dec\+Value@{get\+Float\+Dec\+Value}}
+\index{get\+Float\+Dec\+Value@{get\+Float\+Dec\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Float\+Dec\+Value}]{\setlength{\rightskip}{0pt plus 5cm}float Prefs\+::get\+Float\+Dec\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_ad36b9c6a831366911a40abb4dbfbd673}
+
+
+get\+Float\+Dec\+Value get value for decrementing given preference 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+float value to subtract from preference 
+\end{DoxyReturn}
+
+
+Definition at line 100 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a152c738ff64ba39640067d01b9c1c68d}{}\index{Prefs@{Prefs}!get\+Float\+Inc\+Value@{get\+Float\+Inc\+Value}}
+\index{get\+Float\+Inc\+Value@{get\+Float\+Inc\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Float\+Inc\+Value}]{\setlength{\rightskip}{0pt plus 5cm}float Prefs\+::get\+Float\+Inc\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a152c738ff64ba39640067d01b9c1c68d}
+
+
+get\+Float\+Inc\+Value get value for incrementing given preference 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+float value to add to preference 
+\end{DoxyReturn}
+
+
+Definition at line 95 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_ac9c4890be5513e22acca32ccb71fd695}{}\index{Prefs@{Prefs}!get\+Float\+Map@{get\+Float\+Map}}
+\index{get\+Float\+Map@{get\+Float\+Map}!Prefs@{Prefs}}
+\subsubsection[{get\+Float\+Map}]{\setlength{\rightskip}{0pt plus 5cm}const std\+::map$<$ std\+::string, std\+::pair$<$ float, Inc\+Type $>$ $>$ \& Prefs\+::get\+Float\+Map (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_ac9c4890be5513e22acca32ccb71fd695}
+
+
+get\+Float\+Map retrieves the entire float preference map 
+
+\begin{DoxyReturn}{Returns}
+the map containing all of the integer preference key-\/value pairs 
+\end{DoxyReturn}
+
+
+Definition at line 284 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_ab52937d7b42026f8989c6bb9e14f9f88}{}\index{Prefs@{Prefs}!get\+Float\+Pref@{get\+Float\+Pref}}
+\index{get\+Float\+Pref@{get\+Float\+Pref}!Prefs@{Prefs}}
+\subsubsection[{get\+Float\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}float Prefs\+::get\+Float\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_ab52937d7b42026f8989c6bb9e14f9f88}
+
+
+get\+Float\+Pref retrieves a float preference with the given key 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key associated with the value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value of the preference 
+\end{DoxyReturn}
+
+
+Definition at line 214 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a7216daf0f85aed4d4d5756d91963bc6d}{}\index{Prefs@{Prefs}!get\+Int\+Change\+Value@{get\+Int\+Change\+Value}}
+\index{get\+Int\+Change\+Value@{get\+Int\+Change\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Int\+Change\+Value}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Int\+Change\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key, }
+\item[{int}]{\+\_\+dir}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a7216daf0f85aed4d4d5756d91963bc6d}
+
+
+get\+Int\+Change\+Value get int value required for changing given preference in given direction 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+{\em \+\_\+dir} & positive or negative for up/down \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+value to add/subtract 
+\end{DoxyReturn}
+
+
+Definition at line 156 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a3ea75fdb113cde7ed5578ed341bbbcb1}{}\index{Prefs@{Prefs}!get\+Int\+Dec\+Value@{get\+Int\+Dec\+Value}}
+\index{get\+Int\+Dec\+Value@{get\+Int\+Dec\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Int\+Dec\+Value}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Int\+Dec\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a3ea75fdb113cde7ed5578ed341bbbcb1}
+
+
+get\+Int\+Dec\+Value get value for decrementing given preference 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int value to subtract to preference 
+\end{DoxyReturn}
+
+
+Definition at line 151 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_aef0285b443ab4e5aaaa2d2dfab77d44d}{}\index{Prefs@{Prefs}!get\+Int\+Inc\+Value@{get\+Int\+Inc\+Value}}
+\index{get\+Int\+Inc\+Value@{get\+Int\+Inc\+Value}!Prefs@{Prefs}}
+\subsubsection[{get\+Int\+Inc\+Value}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Int\+Inc\+Value (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_aef0285b443ab4e5aaaa2d2dfab77d44d}
+
+
+get\+Int\+Inc\+Value get value for incrementing given preference 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int value to add to preference 
+\end{DoxyReturn}
+
+
+Definition at line 146 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_afd4dc2154410d35f8b68daf2fd4b261e}{}\index{Prefs@{Prefs}!get\+Int\+Map@{get\+Int\+Map}}
+\index{get\+Int\+Map@{get\+Int\+Map}!Prefs@{Prefs}}
+\subsubsection[{get\+Int\+Map}]{\setlength{\rightskip}{0pt plus 5cm}const std\+::map$<$ std\+::string, std\+::pair$<$ int, Inc\+Type $>$ $>$ \& Prefs\+::get\+Int\+Map (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_afd4dc2154410d35f8b68daf2fd4b261e}
+
+
+get\+Int\+Map retrieves the whole integer preference map 
+
+\begin{DoxyReturn}{Returns}
+the map containing all of the integer preference key-\/value pairs 
+\end{DoxyReturn}
+
+
+Definition at line 279 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_adfc47432669292edf36c6972a963200e}{}\index{Prefs@{Prefs}!get\+Int\+Pref@{get\+Int\+Pref}}
+\index{get\+Int\+Pref@{get\+Int\+Pref}!Prefs@{Prefs}}
+\subsubsection[{get\+Int\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Int\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_adfc47432669292edf36c6972a963200e}
+
+
+get\+Int\+Pref retrieves an integer preference with the given key 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key associated with the value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value of the preference 
+\end{DoxyReturn}
+
+
+Definition at line 209 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a6279df26b85ead4284eb8dadabad37bf}{}\index{Prefs@{Prefs}!get\+Num\+Changeable\+Prefs@{get\+Num\+Changeable\+Prefs}}
+\index{get\+Num\+Changeable\+Prefs@{get\+Num\+Changeable\+Prefs}!Prefs@{Prefs}}
+\subsubsection[{get\+Num\+Changeable\+Prefs}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Num\+Changeable\+Prefs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a6279df26b85ead4284eb8dadabad37bf}
+
+
+get\+Num\+Changeable\+Prefs get number of preferences that can be changed by the \hyperlink{class_gui}{Gui} 
+
+\begin{DoxyReturn}{Returns}
+number of prefs that can be changed by the \hyperlink{class_gui}{Gui} 
+\end{DoxyReturn}
+
+
+Definition at line 411 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a6fa32524ac3fccc26fda2d0a26f4cb29}{}\index{Prefs@{Prefs}!get\+Num\+Prefs@{get\+Num\+Prefs}}
+\index{get\+Num\+Prefs@{get\+Num\+Prefs}!Prefs@{Prefs}}
+\subsubsection[{get\+Num\+Prefs}]{\setlength{\rightskip}{0pt plus 5cm}int Prefs\+::get\+Num\+Prefs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a6fa32524ac3fccc26fda2d0a26f4cb29}
+
+
+get\+Num\+Prefs get total number of preference options 
+
+\begin{DoxyReturn}{Returns}
+total number of preference options 
+\end{DoxyReturn}
+
+
+Definition at line 406 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a02c61a39dead1ac6f590df97a5eec9a3}{}\index{Prefs@{Prefs}!get\+Pref\+Value\+String@{get\+Pref\+Value\+String}}
+\index{get\+Pref\+Value\+String@{get\+Pref\+Value\+String}!Prefs@{Prefs}}
+\subsubsection[{get\+Pref\+Value\+String}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string Prefs\+::get\+Pref\+Value\+String (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a02c61a39dead1ac6f590df97a5eec9a3}
+
+
+get\+Pref\+Value\+String get text for value of string 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & preferences key value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+string representing value, eg \char`\"{}10\char`\"{} if value is 10 
+\end{DoxyReturn}
+
+
+Definition at line 352 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_af97b292fad51f096a49a012593f0b6e3}{}\index{Prefs@{Prefs}!get\+Str\+Map@{get\+Str\+Map}}
+\index{get\+Str\+Map@{get\+Str\+Map}!Prefs@{Prefs}}
+\subsubsection[{get\+Str\+Map}]{\setlength{\rightskip}{0pt plus 5cm}const std\+::map$<$ std\+::string, std\+::pair$<$ std\+::string, Inc\+Type $>$ $>$ \& Prefs\+::get\+Str\+Map (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_prefs_af97b292fad51f096a49a012593f0b6e3}
+
+
+get\+Str\+Map retrieves the entire string preference map 
+
+\begin{DoxyReturn}{Returns}
+the map containing all of the integer preference key-\/value pairs 
+\end{DoxyReturn}
+
+
+Definition at line 289 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_ab9ff6556d04e07512bf1fe238c31e3cf}{}\index{Prefs@{Prefs}!get\+Str\+Pref@{get\+Str\+Pref}}
+\index{get\+Str\+Pref@{get\+Str\+Pref}!Prefs@{Prefs}}
+\subsubsection[{get\+Str\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string Prefs\+::get\+Str\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_ab9ff6556d04e07512bf1fe238c31e3cf}
+
+
+get\+Str\+Pref retrieves a string preference with the given key 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key associated with the value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the value of the preference 
+\end{DoxyReturn}
+
+
+Definition at line 219 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a9ba03172930b21b2e60f390c39304627}{}\index{Prefs@{Prefs}!get\+Type\+Of\+Pref@{get\+Type\+Of\+Pref}}
+\index{get\+Type\+Of\+Pref@{get\+Type\+Of\+Pref}!Prefs@{Prefs}}
+\subsubsection[{get\+Type\+Of\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}Pref\+Type Prefs\+::get\+Type\+Of\+Pref (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+key}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a9ba03172930b21b2e60f390c39304627}
+
+
+get\+Type\+Of\+Pref find what type the preference is 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & name of preference \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+I\+N\+T, F\+L\+O\+A\+T or S\+T\+R\+I\+N\+G Pref\+Type enum 
+\end{DoxyReturn}
+
+
+Definition at line 299 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a6a519af5b4ddc87023111c80332a1895}{}\index{Prefs@{Prefs}!init@{init}}
+\index{init@{init}!Prefs@{Prefs}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+::init (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+pref\+\_\+file = {\ttfamily \char`\"{}preferences.conf\char`\"{}}}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a6a519af5b4ddc87023111c80332a1895}
+
+
+init initialises the \hyperlink{class_prefs}{Prefs} class by running the \hyperlink{class_prefs_parser}{Prefs\+Parser} to build the preferences from the given file 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+pref\+\_\+file} & is the file name of the preferences file \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 16 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a8f429735290c3199efde4ee0c34263ce}{}\index{Prefs@{Prefs}!set\+Float\+Pref@{set\+Float\+Pref}}
+\index{set\+Float\+Pref@{set\+Float\+Pref}!Prefs@{Prefs}}
+\subsubsection[{set\+Float\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+::set\+Float\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key, }
+\item[{float}]{\+\_\+val}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a8f429735290c3199efde4ee0c34263ce}
+
+
+set\+Float\+Pref adds a float preference key value pair to the float preferences map 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key, which is the phrase to the left of the equals sign in the conf file \\
+\hline
+{\em \+\_\+val} & is the float value to be asociated with the string key \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 194 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a6450d0a6f69a631b5ebc405c61d93a33}{}\index{Prefs@{Prefs}!set\+Int\+Pref@{set\+Int\+Pref}}
+\index{set\+Int\+Pref@{set\+Int\+Pref}!Prefs@{Prefs}}
+\subsubsection[{set\+Int\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+::set\+Int\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key, }
+\item[{int}]{\+\_\+val}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a6450d0a6f69a631b5ebc405c61d93a33}
+
+
+set\+Int\+Pref adds an integer preference key value pair to the interger preferences map 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key, which is the phrase to the left of the equals sign in the conf file \\
+\hline
+{\em \+\_\+val} & is the interger value to be asociated with the string key \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 189 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a0747811585196ca1f4793618feeba49a}{}\index{Prefs@{Prefs}!set\+Pref@{set\+Pref}}
+\index{set\+Pref@{set\+Pref}!Prefs@{Prefs}}
+\subsubsection[{set\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+::set\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string \&}]{\+\_\+key, }
+\item[{int}]{\+\_\+val}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a0747811585196ca1f4793618feeba49a}
+
+
+set\+Pref generic template for setting preference 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key \\
+\hline
+{\em \+\_\+val} & is the value to be associated with the string key, either int, float or string \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 332 of file Prefs.\+cpp.
+
+\hypertarget{class_prefs_a9aabf5ecb5277447229125a673881d0a}{}\index{Prefs@{Prefs}!set\+Str\+Pref@{set\+Str\+Pref}}
+\index{set\+Str\+Pref@{set\+Str\+Pref}!Prefs@{Prefs}}
+\subsubsection[{set\+Str\+Pref}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+::set\+Str\+Pref (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+key, }
+\item[{std\+::string}]{\+\_\+val}
+\end{DoxyParamCaption}
+)}\label{class_prefs_a9aabf5ecb5277447229125a673881d0a}
+
+
+set\+Str\+Pref adds an integer preference key value pair to the interger preferences map 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+key} & is the string key, which is the phrase to the left of the equals sign in the conf file \\
+\hline
+{\em \+\_\+val} & is the interger value to be asociated with the string key \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 199 of file Prefs.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Prefs.\+hpp\item 
+src/Prefs.\+cpp\end{DoxyCompactItemize}

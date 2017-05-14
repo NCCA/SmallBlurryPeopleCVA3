@@ -1,0 +1,64 @@
+\hypertarget{_character_8hpp}{}\section{include/\+Character.hpp File Reference}
+\label{_character_8hpp}\index{include/\+Character.\+hpp@{include/\+Character.\+hpp}}
+
+
+Has multiple states for actions, responsible for updating itself.  
+
+
+{\ttfamily \#include \char`\"{}A\+I.\+hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Grid.\+hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Inventory.\+hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Terrain\+Height\+Tracer.\+hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ngl/\+Vec2.\+h\char`\"{}}\\*
+{\ttfamily \#include $<$Q\+Time$>$}\\*
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$stack$>$}\\*
+{\ttfamily \#include $<$set$>$}\\*
+{\ttfamily \#include $<$S\+D\+L.\+h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_character}{Character}
+\begin{DoxyCompactList}\small\item\em Information for ingame characters, containing position, states and targets. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{_character_8hpp_a5d74787dedbc4e11c1ab15bf487e61f8}{}enum \hyperlink{_character_8hpp_a5d74787dedbc4e11c1ab15bf487e61f8}{State} \{ \\*
+{\bfseries C\+H\+O\+P\+\_\+\+W\+O\+O\+D}, 
+{\bfseries S\+T\+O\+R\+E}, 
+{\bfseries F\+I\+S\+H}, 
+{\bfseries F\+O\+R\+A\+G\+E}, 
+\\*
+{\bfseries C\+H\+E\+C\+K\+\_\+\+W\+O\+O\+D}, 
+{\bfseries C\+H\+E\+C\+K\+\_\+\+B\+E\+R\+R\+I\+E\+S}, 
+{\bfseries C\+H\+E\+C\+K\+\_\+\+F\+I\+S\+H}, 
+{\bfseries G\+E\+T\+\_\+\+W\+O\+O\+D}, 
+\\*
+{\bfseries G\+E\+T\+\_\+\+B\+E\+R\+R\+I\+E\+S}, 
+{\bfseries G\+E\+T\+\_\+\+F\+I\+S\+H}, 
+{\bfseries B\+U\+I\+L\+D}, 
+{\bfseries S\+L\+E\+E\+P}, 
+\\*
+{\bfseries E\+A\+T\+\_\+\+B\+E\+R\+R\+I\+E\+S}, 
+{\bfseries E\+A\+T\+\_\+\+F\+I\+S\+H}, 
+{\bfseries M\+O\+V\+E}, 
+{\bfseries T\+R\+A\+C\+K}, 
+\\*
+{\bfseries F\+I\+G\+H\+T}, 
+{\bfseries R\+E\+P\+E\+A\+T}, 
+{\bfseries I\+D\+L\+E}
+ \}\label{_character_8hpp_a5d74787dedbc4e11c1ab15bf487e61f8}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} State enum, used for stack of states that are handled internally in a switch statment. \end{DoxyCompactList}\item 
+\hypertarget{_character_8hpp_a5081866fc59e56d06dbdeb370a5cd7a3}{}enum \hyperlink{_character_8hpp_a5081866fc59e56d06dbdeb370a5cd7a3}{Char\+Inventory} \{ {\bfseries W\+O\+O\+D}, 
+{\bfseries F\+I\+S\+H}, 
+{\bfseries B\+E\+R\+R\+I\+E\+S}, 
+{\bfseries N\+O\+N\+E}
+ \}\label{_character_8hpp_a5081866fc59e56d06dbdeb370a5cd7a3}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} Char\+Inventory enum, used to define what the character is holding. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Has multiple states for actions, responsible for updating itself. 
+

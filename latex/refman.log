@@ -1,0 +1,2879 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2017.4.22)  14 MAY 2017 18:50
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**refman
+(./refman.tex
+LaTeX2e <2016/03/31>
+Babel <3.9r> and hyphenation patterns for 83 language(s) loaded.
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/bk10.clo
+File: bk10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/fixltx2e.sty
+Package: fixltx2e 2015/06/22 v2.0b fixes to LaTeX (obsolete)
+
+
+Package fixltx2e Warning: fixltx2e is not required with releases after 2015
+(fixltx2e)                All fixes are now in the LaTeX kernel.
+(fixltx2e)                See the latexrelease package for details.
+
+) (/usr/local/texlive/2016/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2014/10/28 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count88
+\calc@Bcount=\count89
+\calc@Adimen=\dimen103
+\calc@Bdimen=\dimen104
+\calc@Askip=\skip43
+\calc@Bskip=\skip44
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count90
+\calc@Cskip=\skip45
+) (./doxygen.sty
+Package: doxygen 
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/alltt.sty
+Package: alltt 1997/06/16 v2.0g defines alltt environment
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/tools/array.sty
+Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen105
+\extrarowheight=\dimen106
+\NC@list=\toks14
+\extratabsurround=\skip46
+\backup@length=\skip47
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count91
+\float@exts=\toks15
+\float@box=\box26
+\@float@everytoks=\toks16
+\@floatcapt=\box27
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks17
+\verbatim@line=\toks18
+\verbatim@in@stream=\read1
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 225.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)
+\Gread@gobject=\count92
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/colortbl/colortbl.sty
+Package: colortbl 2012/02/13 v1.0a Color table columns (DPC)
+\everycr=\toks19
+\minrowclearance=\skip48
+)
+\rownum=\count93
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/xtab/xtab.sty
+Package: xtab 2011/07/31 v2.3f Extended supertabular package
+\c@tracingst=\count94
+\PWSTcapht=\dimen107
+\ST@wd=\dimen108
+\ST@rightskip=\skip49
+\ST@leftskip=\skip50
+\ST@parfillskip=\skip51
+\c@PWSTtable=\count95
+\PWSTlastpage=\count96
+\PWSTpenultimate=\count97
+\PWSTcurpage=\count98
+\PWSTtempc=\count99
+\PWSTlines=\count100
+\PWST@lastht=\dimen109
+\PWST@generalht=\dimen110
+\PWST@ht=\dimen111
+\ST@pageleft=\dimen112
+\ST@headht=\dimen113
+\ST@tailht=\dimen114
+\ST@pagesofar=\dimen115
+\ST@pboxht=\dimen116
+\ST@lineht=\dimen117
+\ST@stretchht=\dimen118
+\ST@prevht=\dimen119
+\ST@toadd=\dimen120
+\ST@dimen=\dimen121
+\ST@pbox=\box28
+)
+\xrefbox=\box29
+\xreflength=\skip52
+\tmplength=\skip53
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+Package: adjustbox 2012/05/21 v1.0 Adjusting TeX boxes (trim, clip, ...)
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2014/12/03 v2.7a package option processing (HA)
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/local/texlive/2016/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks20
+\XKV@tempa@toks=\toks21
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/xkeyval/keyval.tex))
+\XKV@depth=\count101
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(/usr/local/texlive/2016/texmf-dist/tex/latex/adjustbox/adjcalc.sty
+Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back
+-ends (calc, etex, pgfmath)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/adjustbox/trimclip.sty
+Package: trimclip 2012/05/16 v1.0 Trim and clip general TeX material
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2016/05/09 v1.0r Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/01/02 v1.10 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 96.
+)
+\Gin@req@height=\dimen122
+\Gin@req@width=\dimen123
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/collectbox/collectbox.sty
+Package: collectbox 2012/05/17 v0.4b Collect macro arguments as boxes
+\collectedbox=\box30
+)
+\tc@llx=\dimen124
+\tc@lly=\dimen125
+\tc@urx=\dimen126
+\tc@ury=\dimen127
+Package trimclip Info: Using driver 'tc-pdftex.def'.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/adjustbox/tc-pdftex.def
+File: tc-pdftex.def 2012/05/13 v1.0 Clipping driver for pdftex
+))
+\adjbox@Width=\dimen128
+\adjbox@Height=\dimen129
+\adjbox@Depth=\dimen130
+\adjbox@Totalheight=\dimen131
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
+Package: ifoddpage 2016/04/23 v1.1 Conditionals for odd/even page detection
+\c@checkoddpage=\count102
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/varwidth/varwidth.sty
+Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
+\@vwid@box=\box31
+\sift@deathcycles=\count103
+\@vwid@loff=\dimen132
+\@vwid@roff=\dimen133
+))
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2015/03/17 v1.2c Input encoding file
+\inpenc@prehook=\toks22
+\inpenc@posthook=\toks23
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/utf8.def
+File: utf8.def 2016/02/28 v1.1s UTF-8 support for inputenc
+Now handling font encoding OML ...
+... no UTF-8 mapping file for font encoding OML
+Now handling font encoding T1 ...
+... processing UTF-8 mapping file for font encoding T1
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/t1enc.dfu
+File: t1enc.dfu 2016/02/28 v1.1s UTF-8 support for inputenc
+   defining Unicode char U+00A0 (decimal 160)
+   defining Unicode char U+00A1 (decimal 161)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00AB (decimal 171)
+   defining Unicode char U+00AD (decimal 173)
+   defining Unicode char U+00BB (decimal 187)
+   defining Unicode char U+00BF (decimal 191)
+   defining Unicode char U+00C0 (decimal 192)
+   defining Unicode char U+00C1 (decimal 193)
+   defining Unicode char U+00C2 (decimal 194)
+   defining Unicode char U+00C3 (decimal 195)
+   defining Unicode char U+00C4 (decimal 196)
+   defining Unicode char U+00C5 (decimal 197)
+   defining Unicode char U+00C6 (decimal 198)
+   defining Unicode char U+00C7 (decimal 199)
+   defining Unicode char U+00C8 (decimal 200)
+   defining Unicode char U+00C9 (decimal 201)
+   defining Unicode char U+00CA (decimal 202)
+   defining Unicode char U+00CB (decimal 203)
+   defining Unicode char U+00CC (decimal 204)
+   defining Unicode char U+00CD (decimal 205)
+   defining Unicode char U+00CE (decimal 206)
+   defining Unicode char U+00CF (decimal 207)
+   defining Unicode char U+00D0 (decimal 208)
+   defining Unicode char U+00D1 (decimal 209)
+   defining Unicode char U+00D2 (decimal 210)
+   defining Unicode char U+00D3 (decimal 211)
+   defining Unicode char U+00D4 (decimal 212)
+   defining Unicode char U+00D5 (decimal 213)
+   defining Unicode char U+00D6 (decimal 214)
+   defining Unicode char U+00D8 (decimal 216)
+   defining Unicode char U+00D9 (decimal 217)
+   defining Unicode char U+00DA (decimal 218)
+   defining Unicode char U+00DB (decimal 219)
+   defining Unicode char U+00DC (decimal 220)
+   defining Unicode char U+00DD (decimal 221)
+   defining Unicode char U+00DE (decimal 222)
+   defining Unicode char U+00DF (decimal 223)
+   defining Unicode char U+00E0 (decimal 224)
+   defining Unicode char U+00E1 (decimal 225)
+   defining Unicode char U+00E2 (decimal 226)
+   defining Unicode char U+00E3 (decimal 227)
+   defining Unicode char U+00E4 (decimal 228)
+   defining Unicode char U+00E5 (decimal 229)
+   defining Unicode char U+00E6 (decimal 230)
+   defining Unicode char U+00E7 (decimal 231)
+   defining Unicode char U+00E8 (decimal 232)
+   defining Unicode char U+00E9 (decimal 233)
+   defining Unicode char U+00EA (decimal 234)
+   defining Unicode char U+00EB (decimal 235)
+   defining Unicode char U+00EC (decimal 236)
+   defining Unicode char U+00ED (decimal 237)
+   defining Unicode char U+00EE (decimal 238)
+   defining Unicode char U+00EF (decimal 239)
+   defining Unicode char U+00F0 (decimal 240)
+   defining Unicode char U+00F1 (decimal 241)
+   defining Unicode char U+00F2 (decimal 242)
+   defining Unicode char U+00F3 (decimal 243)
+   defining Unicode char U+00F4 (decimal 244)
+   defining Unicode char U+00F5 (decimal 245)
+   defining Unicode char U+00F6 (decimal 246)
+   defining Unicode char U+00F8 (decimal 248)
+   defining Unicode char U+00F9 (decimal 249)
+   defining Unicode char U+00FA (decimal 250)
+   defining Unicode char U+00FB (decimal 251)
+   defining Unicode char U+00FC (decimal 252)
+   defining Unicode char U+00FD (decimal 253)
+   defining Unicode char U+00FE (decimal 254)
+   defining Unicode char U+00FF (decimal 255)
+   defining Unicode char U+0100 (decimal 256)
+   defining Unicode char U+0101 (decimal 257)
+   defining Unicode char U+0102 (decimal 258)
+   defining Unicode char U+0103 (decimal 259)
+   defining Unicode char U+0104 (decimal 260)
+   defining Unicode char U+0105 (decimal 261)
+   defining Unicode char U+0106 (decimal 262)
+   defining Unicode char U+0107 (decimal 263)
+   defining Unicode char U+0108 (decimal 264)
+   defining Unicode char U+0109 (decimal 265)
+   defining Unicode char U+010A (decimal 266)
+   defining Unicode char U+010B (decimal 267)
+   defining Unicode char U+010C (decimal 268)
+   defining Unicode char U+010D (decimal 269)
+   defining Unicode char U+010E (decimal 270)
+   defining Unicode char U+010F (decimal 271)
+   defining Unicode char U+0110 (decimal 272)
+   defining Unicode char U+0111 (decimal 273)
+   defining Unicode char U+0112 (decimal 274)
+   defining Unicode char U+0113 (decimal 275)
+   defining Unicode char U+0114 (decimal 276)
+   defining Unicode char U+0115 (decimal 277)
+   defining Unicode char U+0116 (decimal 278)
+   defining Unicode char U+0117 (decimal 279)
+   defining Unicode char U+0118 (decimal 280)
+   defining Unicode char U+0119 (decimal 281)
+   defining Unicode char U+011A (decimal 282)
+   defining Unicode char U+011B (decimal 283)
+   defining Unicode char U+011C (decimal 284)
+   defining Unicode char U+011D (decimal 285)
+   defining Unicode char U+011E (decimal 286)
+   defining Unicode char U+011F (decimal 287)
+   defining Unicode char U+0120 (decimal 288)
+   defining Unicode char U+0121 (decimal 289)
+   defining Unicode char U+0122 (decimal 290)
+   defining Unicode char U+0123 (decimal 291)
+   defining Unicode char U+0124 (decimal 292)
+   defining Unicode char U+0125 (decimal 293)
+   defining Unicode char U+0128 (decimal 296)
+   defining Unicode char U+0129 (decimal 297)
+   defining Unicode char U+012A (decimal 298)
+   defining Unicode char U+012B (decimal 299)
+   defining Unicode char U+012C (decimal 300)
+   defining Unicode char U+012D (decimal 301)
+   defining Unicode char U+012E (decimal 302)
+   defining Unicode char U+012F (decimal 303)
+   defining Unicode char U+0130 (decimal 304)
+   defining Unicode char U+0131 (decimal 305)
+   defining Unicode char U+0132 (decimal 306)
+   defining Unicode char U+0133 (decimal 307)
+   defining Unicode char U+0134 (decimal 308)
+   defining Unicode char U+0135 (decimal 309)
+   defining Unicode char U+0136 (decimal 310)
+   defining Unicode char U+0137 (decimal 311)
+   defining Unicode char U+0139 (decimal 313)
+   defining Unicode char U+013A (decimal 314)
+   defining Unicode char U+013B (decimal 315)
+   defining Unicode char U+013C (decimal 316)
+   defining Unicode char U+013D (decimal 317)
+   defining Unicode char U+013E (decimal 318)
+   defining Unicode char U+0141 (decimal 321)
+   defining Unicode char U+0142 (decimal 322)
+   defining Unicode char U+0143 (decimal 323)
+   defining Unicode char U+0144 (decimal 324)
+   defining Unicode char U+0145 (decimal 325)
+   defining Unicode char U+0146 (decimal 326)
+   defining Unicode char U+0147 (decimal 327)
+   defining Unicode char U+0148 (decimal 328)
+   defining Unicode char U+014A (decimal 330)
+   defining Unicode char U+014B (decimal 331)
+   defining Unicode char U+014C (decimal 332)
+   defining Unicode char U+014D (decimal 333)
+   defining Unicode char U+014E (decimal 334)
+   defining Unicode char U+014F (decimal 335)
+   defining Unicode char U+0150 (decimal 336)
+   defining Unicode char U+0151 (decimal 337)
+   defining Unicode char U+0152 (decimal 338)
+   defining Unicode char U+0153 (decimal 339)
+   defining Unicode char U+0154 (decimal 340)
+   defining Unicode char U+0155 (decimal 341)
+   defining Unicode char U+0156 (decimal 342)
+   defining Unicode char U+0157 (decimal 343)
+   defining Unicode char U+0158 (decimal 344)
+   defining Unicode char U+0159 (decimal 345)
+   defining Unicode char U+015A (decimal 346)
+   defining Unicode char U+015B (decimal 347)
+   defining Unicode char U+015C (decimal 348)
+   defining Unicode char U+015D (decimal 349)
+   defining Unicode char U+015E (decimal 350)
+   defining Unicode char U+015F (decimal 351)
+   defining Unicode char U+0160 (decimal 352)
+   defining Unicode char U+0161 (decimal 353)
+   defining Unicode char U+0162 (decimal 354)
+   defining Unicode char U+0163 (decimal 355)
+   defining Unicode char U+0164 (decimal 356)
+   defining Unicode char U+0165 (decimal 357)
+   defining Unicode char U+0168 (decimal 360)
+   defining Unicode char U+0169 (decimal 361)
+   defining Unicode char U+016A (decimal 362)
+   defining Unicode char U+016B (decimal 363)
+   defining Unicode char U+016C (decimal 364)
+   defining Unicode char U+016D (decimal 365)
+   defining Unicode char U+016E (decimal 366)
+   defining Unicode char U+016F (decimal 367)
+   defining Unicode char U+0170 (decimal 368)
+   defining Unicode char U+0171 (decimal 369)
+   defining Unicode char U+0172 (decimal 370)
+   defining Unicode char U+0173 (decimal 371)
+   defining Unicode char U+0174 (decimal 372)
+   defining Unicode char U+0175 (decimal 373)
+   defining Unicode char U+0176 (decimal 374)
+   defining Unicode char U+0177 (decimal 375)
+   defining Unicode char U+0178 (decimal 376)
+   defining Unicode char U+0179 (decimal 377)
+   defining Unicode char U+017A (decimal 378)
+   defining Unicode char U+017B (decimal 379)
+   defining Unicode char U+017C (decimal 380)
+   defining Unicode char U+017D (decimal 381)
+   defining Unicode char U+017E (decimal 382)
+   defining Unicode char U+01CD (decimal 461)
+   defining Unicode char U+01CE (decimal 462)
+   defining Unicode char U+01CF (decimal 463)
+   defining Unicode char U+01D0 (decimal 464)
+   defining Unicode char U+01D1 (decimal 465)
+   defining Unicode char U+01D2 (decimal 466)
+   defining Unicode char U+01D3 (decimal 467)
+   defining Unicode char U+01D4 (decimal 468)
+   defining Unicode char U+01E2 (decimal 482)
+   defining Unicode char U+01E3 (decimal 483)
+   defining Unicode char U+01E6 (decimal 486)
+   defining Unicode char U+01E7 (decimal 487)
+   defining Unicode char U+01E8 (decimal 488)
+   defining Unicode char U+01E9 (decimal 489)
+   defining Unicode char U+01EA (decimal 490)
+   defining Unicode char U+01EB (decimal 491)
+   defining Unicode char U+01F0 (decimal 496)
+   defining Unicode char U+01F4 (decimal 500)
+   defining Unicode char U+01F5 (decimal 501)
+   defining Unicode char U+0218 (decimal 536)
+   defining Unicode char U+0219 (decimal 537)
+   defining Unicode char U+021A (decimal 538)
+   defining Unicode char U+021B (decimal 539)
+   defining Unicode char U+1E02 (decimal 7682)
+   defining Unicode char U+1E03 (decimal 7683)
+   defining Unicode char U+200C (decimal 8204)
+   defining Unicode char U+2010 (decimal 8208)
+   defining Unicode char U+2011 (decimal 8209)
+   defining Unicode char U+2012 (decimal 8210)
+   defining Unicode char U+2013 (decimal 8211)
+   defining Unicode char U+2014 (decimal 8212)
+   defining Unicode char U+2015 (decimal 8213)
+   defining Unicode char U+2018 (decimal 8216)
+   defining Unicode char U+2019 (decimal 8217)
+   defining Unicode char U+201A (decimal 8218)
+   defining Unicode char U+201C (decimal 8220)
+   defining Unicode char U+201D (decimal 8221)
+   defining Unicode char U+201E (decimal 8222)
+   defining Unicode char U+2030 (decimal 8240)
+   defining Unicode char U+2031 (decimal 8241)
+   defining Unicode char U+2039 (decimal 8249)
+   defining Unicode char U+203A (decimal 8250)
+   defining Unicode char U+2423 (decimal 9251)
+)
+Now handling font encoding OT1 ...
+... processing UTF-8 mapping file for font encoding OT1
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/ot1enc.dfu
+File: ot1enc.dfu 2016/02/28 v1.1s UTF-8 support for inputenc
+   defining Unicode char U+00A0 (decimal 160)
+   defining Unicode char U+00A1 (decimal 161)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00AD (decimal 173)
+   defining Unicode char U+00B8 (decimal 184)
+   defining Unicode char U+00BF (decimal 191)
+   defining Unicode char U+00C5 (decimal 197)
+   defining Unicode char U+00C6 (decimal 198)
+   defining Unicode char U+00D8 (decimal 216)
+   defining Unicode char U+00DF (decimal 223)
+   defining Unicode char U+00E6 (decimal 230)
+   defining Unicode char U+00EC (decimal 236)
+   defining Unicode char U+00ED (decimal 237)
+   defining Unicode char U+00EE (decimal 238)
+   defining Unicode char U+00EF (decimal 239)
+   defining Unicode char U+00F8 (decimal 248)
+   defining Unicode char U+0131 (decimal 305)
+   defining Unicode char U+0141 (decimal 321)
+   defining Unicode char U+0142 (decimal 322)
+   defining Unicode char U+0152 (decimal 338)
+   defining Unicode char U+0153 (decimal 339)
+   defining Unicode char U+0174 (decimal 372)
+   defining Unicode char U+0175 (decimal 373)
+   defining Unicode char U+0176 (decimal 374)
+   defining Unicode char U+0177 (decimal 375)
+   defining Unicode char U+0218 (decimal 536)
+   defining Unicode char U+0219 (decimal 537)
+   defining Unicode char U+021A (decimal 538)
+   defining Unicode char U+021B (decimal 539)
+   defining Unicode char U+2013 (decimal 8211)
+   defining Unicode char U+2014 (decimal 8212)
+   defining Unicode char U+2018 (decimal 8216)
+   defining Unicode char U+2019 (decimal 8217)
+   defining Unicode char U+201C (decimal 8220)
+   defining Unicode char U+201D (decimal 8221)
+)
+Now handling font encoding OMS ...
+... processing UTF-8 mapping file for font encoding OMS
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/omsenc.dfu
+File: omsenc.dfu 2016/02/28 v1.1s UTF-8 support for inputenc
+   defining Unicode char U+00A7 (decimal 167)
+   defining Unicode char U+00B6 (decimal 182)
+   defining Unicode char U+00B7 (decimal 183)
+   defining Unicode char U+2020 (decimal 8224)
+   defining Unicode char U+2021 (decimal 8225)
+   defining Unicode char U+2022 (decimal 8226)
+)
+Now handling font encoding OMX ...
+... no UTF-8 mapping file for font encoding OMX
+Now handling font encoding U ...
+... no UTF-8 mapping file for font encoding U
+   defining Unicode char U+00A9 (decimal 169)
+   defining Unicode char U+00AA (decimal 170)
+   defining Unicode char U+00AE (decimal 174)
+   defining Unicode char U+00BA (decimal 186)
+   defining Unicode char U+02C6 (decimal 710)
+   defining Unicode char U+02DC (decimal 732)
+   defining Unicode char U+200C (decimal 8204)
+   defining Unicode char U+2026 (decimal 8230)
+   defining Unicode char U+2122 (decimal 8482)
+   defining Unicode char U+2423 (decimal 9251)
+))
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/makeidx.sty
+Package: makeidx 2014/09/29 v1.0m Standard LaTeX package
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/tools/multicol.sty
+Package: multicol 2016/04/07 v1.8p multicolumn formatting (FMi)
+\c@tracingmulticols=\count104
+\mult@box=\box32
+\multicol@leftmargin=\dimen134
+\c@unbalance=\count105
+\c@collectmore=\count106
+\doublecol@number=\count107
+\multicoltolerance=\count108
+\multicolpretolerance=\count109
+\full@width=\dimen135
+\page@free=\dimen136
+\premulticols=\dimen137
+\postmulticols=\dimen138
+\multicolsep=\skip54
+\multicolbaselineskip=\skip55
+\partial@page=\box33
+\last@line=\box34
+\maxbalancingoverflow=\dimen139
+\mult@rightbox=\box35
+\mult@grightbox=\box36
+\mult@gfirstbox=\box37
+\mult@firstbox=\box38
+\@tempa=\box39
+\@tempa=\box40
+\@tempa=\box41
+\@tempa=\box42
+\@tempa=\box43
+\@tempa=\box44
+\@tempa=\box45
+\@tempa=\box46
+\@tempa=\box47
+\@tempa=\box48
+\@tempa=\box49
+\@tempa=\box50
+\@tempa=\box51
+\@tempa=\box52
+\@tempa=\box53
+\@tempa=\box54
+\@tempa=\box55
+\c@columnbadness=\count110
+\c@finalcolumnbadness=\count111
+\last@try=\dimen140
+\multicolovershoot=\dimen141
+\multicolundershoot=\dimen142
+\mult@nat@firstbox=\box56
+\colbreak@box=\box57
+\mc@col@check@num=\count112
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/multirow/multirow.sty
+\bigstrutjot=\dimen143
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2005/09/27 v1.99g Standard LaTeX package
+Package textcomp Info: Sub-encoding information:
+(textcomp)               5 = only ISO-Adobe without \textcurrency
+(textcomp)               4 = 5 + \texteuro
+(textcomp)               3 = 4 + \textohm
+(textcomp)               2 = 3 + \textestimated + \textcurrency
+(textcomp)               1 = TS1 - \textcircled - \t
+(textcomp)               0 = TS1 (full)
+(textcomp)             Font families with sub-encoding setting implement
+(textcomp)             only a restricted character set as indicated.
+(textcomp)             Family '?' is the default used for unknown fonts.
+(textcomp)             See the documentation for details.
+Package textcomp Info: Setting ? sub-encoding to TS1/1 on input line 79.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/ts1enc.def
+File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
+Now handling font encoding TS1 ...
+... processing UTF-8 mapping file for font encoding TS1
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/ts1enc.dfu
+File: ts1enc.dfu 2016/02/28 v1.1s UTF-8 support for inputenc
+   defining Unicode char U+00A2 (decimal 162)
+   defining Unicode char U+00A3 (decimal 163)
+   defining Unicode char U+00A4 (decimal 164)
+   defining Unicode char U+00A5 (decimal 165)
+   defining Unicode char U+00A6 (decimal 166)
+   defining Unicode char U+00A7 (decimal 167)
+   defining Unicode char U+00A8 (decimal 168)
+   defining Unicode char U+00A9 (decimal 169)
+   defining Unicode char U+00AA (decimal 170)
+   defining Unicode char U+00AC (decimal 172)
+   defining Unicode char U+00AE (decimal 174)
+   defining Unicode char U+00AF (decimal 175)
+   defining Unicode char U+00B0 (decimal 176)
+   defining Unicode char U+00B1 (decimal 177)
+   defining Unicode char U+00B2 (decimal 178)
+   defining Unicode char U+00B3 (decimal 179)
+   defining Unicode char U+00B4 (decimal 180)
+   defining Unicode char U+00B5 (decimal 181)
+   defining Unicode char U+00B6 (decimal 182)
+   defining Unicode char U+00B7 (decimal 183)
+   defining Unicode char U+00B9 (decimal 185)
+   defining Unicode char U+00BA (decimal 186)
+   defining Unicode char U+00BC (decimal 188)
+   defining Unicode char U+00BD (decimal 189)
+   defining Unicode char U+00BE (decimal 190)
+   defining Unicode char U+00D7 (decimal 215)
+   defining Unicode char U+00F7 (decimal 247)
+   defining Unicode char U+0192 (decimal 402)
+   defining Unicode char U+02C7 (decimal 711)
+   defining Unicode char U+02D8 (decimal 728)
+   defining Unicode char U+02DD (decimal 733)
+   defining Unicode char U+0E3F (decimal 3647)
+   defining Unicode char U+2016 (decimal 8214)
+   defining Unicode char U+2020 (decimal 8224)
+   defining Unicode char U+2021 (decimal 8225)
+   defining Unicode char U+2022 (decimal 8226)
+   defining Unicode char U+2030 (decimal 8240)
+   defining Unicode char U+2031 (decimal 8241)
+   defining Unicode char U+203B (decimal 8251)
+   defining Unicode char U+203D (decimal 8253)
+   defining Unicode char U+2044 (decimal 8260)
+   defining Unicode char U+204E (decimal 8270)
+   defining Unicode char U+2052 (decimal 8274)
+   defining Unicode char U+20A1 (decimal 8353)
+   defining Unicode char U+20A4 (decimal 8356)
+   defining Unicode char U+20A6 (decimal 8358)
+   defining Unicode char U+20A9 (decimal 8361)
+   defining Unicode char U+20AB (decimal 8363)
+   defining Unicode char U+20AC (decimal 8364)
+   defining Unicode char U+20B1 (decimal 8369)
+   defining Unicode char U+2103 (decimal 8451)
+   defining Unicode char U+2116 (decimal 8470)
+   defining Unicode char U+2117 (decimal 8471)
+   defining Unicode char U+211E (decimal 8478)
+   defining Unicode char U+2120 (decimal 8480)
+   defining Unicode char U+2122 (decimal 8482)
+   defining Unicode char U+2126 (decimal 8486)
+   defining Unicode char U+2127 (decimal 8487)
+   defining Unicode char U+212E (decimal 8494)
+   defining Unicode char U+2190 (decimal 8592)
+   defining Unicode char U+2191 (decimal 8593)
+   defining Unicode char U+2192 (decimal 8594)
+   defining Unicode char U+2193 (decimal 8595)
+   defining Unicode char U+2329 (decimal 9001)
+   defining Unicode char U+232A (decimal 9002)
+   defining Unicode char U+2422 (decimal 9250)
+   defining Unicode char U+25E6 (decimal 9702)
+   defining Unicode char U+25EF (decimal 9711)
+   defining Unicode char U+266A (decimal 9834)
+))
+LaTeX Info: Redefining \oldstylenums on input line 334.
+Package textcomp Info: Setting cmr sub-encoding to TS1/0 on input line 349.
+Package textcomp Info: Setting cmss sub-encoding to TS1/0 on input line 350.
+Package textcomp Info: Setting cmtt sub-encoding to TS1/0 on input line 351.
+Package textcomp Info: Setting cmvtt sub-encoding to TS1/0 on input line 352.
+Package textcomp Info: Setting cmbr sub-encoding to TS1/0 on input line 353.
+Package textcomp Info: Setting cmtl sub-encoding to TS1/0 on input line 354.
+Package textcomp Info: Setting ccr sub-encoding to TS1/0 on input line 355.
+Package textcomp Info: Setting ptm sub-encoding to TS1/4 on input line 356.
+Package textcomp Info: Setting pcr sub-encoding to TS1/4 on input line 357.
+Package textcomp Info: Setting phv sub-encoding to TS1/4 on input line 358.
+Package textcomp Info: Setting ppl sub-encoding to TS1/3 on input line 359.
+Package textcomp Info: Setting pag sub-encoding to TS1/4 on input line 360.
+Package textcomp Info: Setting pbk sub-encoding to TS1/4 on input line 361.
+Package textcomp Info: Setting pnc sub-encoding to TS1/4 on input line 362.
+Package textcomp Info: Setting pzc sub-encoding to TS1/4 on input line 363.
+Package textcomp Info: Setting bch sub-encoding to TS1/4 on input line 364.
+Package textcomp Info: Setting put sub-encoding to TS1/5 on input line 365.
+Package textcomp Info: Setting uag sub-encoding to TS1/5 on input line 366.
+Package textcomp Info: Setting ugq sub-encoding to TS1/5 on input line 367.
+Package textcomp Info: Setting ul8 sub-encoding to TS1/4 on input line 368.
+Package textcomp Info: Setting ul9 sub-encoding to TS1/4 on input line 369.
+Package textcomp Info: Setting augie sub-encoding to TS1/5 on input line 370.
+Package textcomp Info: Setting dayrom sub-encoding to TS1/3 on input line 371.
+Package textcomp Info: Setting dayroms sub-encoding to TS1/3 on input line 372.
+
+Package textcomp Info: Setting pxr sub-encoding to TS1/0 on input line 373.
+Package textcomp Info: Setting pxss sub-encoding to TS1/0 on input line 374.
+Package textcomp Info: Setting pxtt sub-encoding to TS1/0 on input line 375.
+Package textcomp Info: Setting txr sub-encoding to TS1/0 on input line 376.
+Package textcomp Info: Setting txss sub-encoding to TS1/0 on input line 377.
+Package textcomp Info: Setting txtt sub-encoding to TS1/0 on input line 378.
+Package textcomp Info: Setting lmr sub-encoding to TS1/0 on input line 379.
+Package textcomp Info: Setting lmdh sub-encoding to TS1/0 on input line 380.
+Package textcomp Info: Setting lmss sub-encoding to TS1/0 on input line 381.
+Package textcomp Info: Setting lmssq sub-encoding to TS1/0 on input line 382.
+Package textcomp Info: Setting lmvtt sub-encoding to TS1/0 on input line 383.
+Package textcomp Info: Setting lmtt sub-encoding to TS1/0 on input line 384.
+Package textcomp Info: Setting qhv sub-encoding to TS1/0 on input line 385.
+Package textcomp Info: Setting qag sub-encoding to TS1/0 on input line 386.
+Package textcomp Info: Setting qbk sub-encoding to TS1/0 on input line 387.
+Package textcomp Info: Setting qcr sub-encoding to TS1/0 on input line 388.
+Package textcomp Info: Setting qcs sub-encoding to TS1/0 on input line 389.
+Package textcomp Info: Setting qpl sub-encoding to TS1/0 on input line 390.
+Package textcomp Info: Setting qtm sub-encoding to TS1/0 on input line 391.
+Package textcomp Info: Setting qzc sub-encoding to TS1/0 on input line 392.
+Package textcomp Info: Setting qhvc sub-encoding to TS1/0 on input line 393.
+Package textcomp Info: Setting futs sub-encoding to TS1/4 on input line 394.
+Package textcomp Info: Setting futx sub-encoding to TS1/4 on input line 395.
+Package textcomp Info: Setting futj sub-encoding to TS1/4 on input line 396.
+Package textcomp Info: Setting hlh sub-encoding to TS1/3 on input line 397.
+Package textcomp Info: Setting hls sub-encoding to TS1/3 on input line 398.
+Package textcomp Info: Setting hlst sub-encoding to TS1/3 on input line 399.
+Package textcomp Info: Setting hlct sub-encoding to TS1/5 on input line 400.
+Package textcomp Info: Setting hlx sub-encoding to TS1/5 on input line 401.
+Package textcomp Info: Setting hlce sub-encoding to TS1/5 on input line 402.
+Package textcomp Info: Setting hlcn sub-encoding to TS1/5 on input line 403.
+Package textcomp Info: Setting hlcw sub-encoding to TS1/5 on input line 404.
+Package textcomp Info: Setting hlcf sub-encoding to TS1/5 on input line 405.
+Package textcomp Info: Setting pplx sub-encoding to TS1/3 on input line 406.
+Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 407.
+Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 408.
+Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 409.
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/wasysym/wasysym.sty
+Package: wasysym 2003/10/30 v2.0 Wasy-2 symbol support package
+\symwasy=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `wasy' in version `bold'
+(Font)                  U/wasy/m/n --> U/wasy/b/n on input line 90.
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/base/t1enc.def
+File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
+))
+(/usr/local/texlive/2016/texmf-dist/tex/latex/psnfss/helvet.sty
+Package: helvet 2005/04/12 PSNFSS-v9.2a (WaS) 
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/psnfss/courier.sty
+Package: courier 2005/04/12 PSNFSS-v9.2a (WaS) 
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\@emptytoks=\toks24
+\symAMSa=\mathgroup5
+\symAMSb=\mathgroup6
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(/usr/local/texlive/2016/texmf-dist/tex/latex/sectsty/sectsty.sty
+Package: sectsty 2002/02/25 v2.0.2 Commands to change all sectional heading sty
+les
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/09/12 v5.6 Page Geometry
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2016/05/14 v3.1 Provides the ifpdf switch
+)
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/local/texlive/2016/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count113
+\Gm@cntv=\count114
+\c@Gm@tempcnt=\count115
+\Gm@bindingoffset=\dimen144
+\Gm@wd@mp=\dimen145
+\Gm@odd@mp=\dimen146
+\Gm@even@mp=\dimen147
+\Gm@layoutwidth=\dimen148
+\Gm@layoutheight=\dimen149
+\Gm@layouthoffset=\dimen150
+\Gm@layoutvoffset=\dimen151
+\Gm@dimlist=\toks25
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+\fancy@headwidth=\skip56
+\f@ncyO@elh=\skip57
+\f@ncyO@erh=\skip58
+\f@ncyO@olh=\skip59
+\f@ncyO@orh=\skip60
+\f@ncyO@elf=\skip61
+\f@ncyO@erf=\skip62
+\f@ncyO@olf=\skip63
+\f@ncyO@orf=\skip64
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip65
+\bibsep=\skip66
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count116
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/tocloft/tocloft.sty
+Package: tocloft 2013/05/02 v2.3f parameterised ToC, etc., typesetting
+Package tocloft Info: The document has chapter divisions on input line 44.
+\cftparskip=\skip67
+\cftbeforetoctitleskip=\skip68
+\cftaftertoctitleskip=\skip69
+\cftbeforepartskip=\skip70
+\cftpartnumwidth=\skip71
+\cftpartindent=\skip72
+\cftbeforechapskip=\skip73
+\cftchapindent=\skip74
+\cftchapnumwidth=\skip75
+\cftbeforesecskip=\skip76
+\cftsecindent=\skip77
+\cftsecnumwidth=\skip78
+\cftbeforesubsecskip=\skip79
+\cftsubsecindent=\skip80
+\cftsubsecnumwidth=\skip81
+\cftbeforesubsubsecskip=\skip82
+\cftsubsubsecindent=\skip83
+\cftsubsubsecnumwidth=\skip84
+\cftbeforeparaskip=\skip85
+\cftparaindent=\skip86
+\cftparanumwidth=\skip87
+\cftbeforesubparaskip=\skip88
+\cftsubparaindent=\skip89
+\cftsubparanumwidth=\skip90
+\cftbeforeloftitleskip=\skip91
+\cftafterloftitleskip=\skip92
+\cftbeforefigskip=\skip93
+\cftfigindent=\skip94
+\cftfignumwidth=\skip95
+\c@lofdepth=\count117
+\c@lotdepth=\count118
+\cftbeforelottitleskip=\skip96
+\cftafterlottitleskip=\skip97
+\cftbeforetabskip=\skip98
+\cfttabindent=\skip99
+\cfttabnumwidth=\skip100
+)
+\@indexfile=\write3
+\openout3 = `refman.idx'.
+
+
+Writing index file refman.idx
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2016/05/05 v6.83n Hypertext links for LaTeX
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+Package: hobsub-hyperref 2016/05/16 v1.14 Bundle oberdiek, subset hyperref (HO)
+
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+Package: hobsub-generic 2016/05/16 v1.14 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2016/05/16 v1.14 Construct package bundles (HO)
+Package hobsub Info: Skipping package `infwarerr' (already loaded).
+Package hobsub Info: Skipping package `ltxcmds' (already loaded).
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+Package hobsub Info: Skipping package `ifvtex' (already loaded).
+Package: intcalc 2016/05/16 v1.2 Expandable calculations with integers (HO)
+Package hobsub Info: Skipping package `ifpdf' (already loaded).
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+Package: pdftexcmds 2016/05/10 v0.21 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+Package: pdfescape 2016/05/16 v1.14 Implements pdfTeX's escape features (HO)
+Package: bigintcalc 2016/05/16 v1.4 Expandable calculations on big integers (HO
+)
+Package: bitset 2016/05/16 v1.2 Handle bit-vector datatype (HO)
+Package: uniquecounter 2016/05/16 v1.3 Provide unlimited unique counter (HO)
+)
+Package hobsub Info: Skipping package `hobsub' (already loaded).
+Package: letltxmacro 2016/05/16 v1.5 Let assignment for LaTeX macros (HO)
+Package: hopatch 2016/05/16 v1.3 Wrapper for package hooks (HO)
+Package: xcolor-patch 2016/05/16 xcolor patch
+Package: atveryend 2016/05/16 v1.9 Hooks at the very end of document (HO)
+Package atveryend Info: \enddocument detected (standard20110627).
+Package: atbegshi 2016/05/16 v1.17 At begin shipout hook (HO)
+Package: refcount 2016/05/16 v3.5 Data extraction from label references (HO)
+Package: hycolor 2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/auxhook.sty
+Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
+)
+(/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+)
+\@linkdim=\dimen152
+\Hy@linkcounter=\count119
+\Hy@pagecounter=\count120
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2016/05/05 v6.83n Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+)
+\Hy@SavedSpaceFactor=\count121
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/latexconfig/hyperref.cfg
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+Package hyperref Info: Hyper figures OFF on input line 4446.
+Package hyperref Info: Link nesting OFF on input line 4451.
+Package hyperref Info: Hyper index ON on input line 4454.
+Package hyperref Info: Plain pages OFF on input line 4461.
+Package hyperref Info: Backreferencing ON on input line 4464.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4691.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/backref.sty
+Package: backref 2012/07/25 v1.38 Bibliographical back referencing
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
+Package: rerunfilecheck 2016/05/16 v1.8 Rerun checks for auxiliary files (HO)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+82.
+))
+\c@Hy@tempcnt=\count122
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip10
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 5044.
+\XeTeXLinkMargin=\dimen153
+\Fld@menulength=\count123
+\Field@Width=\dimen154
+\Fld@charsize=\dimen155
+Package hyperref Info: Hyper figures OFF on input line 6298.
+Package hyperref Info: Link nesting OFF on input line 6303.
+Package hyperref Info: Hyper index ON on input line 6306.
+Package hyperref Info: backreferencing ON on input line 6311.
+Package hyperref Info: Link coloring OFF on input line 6318.
+Package hyperref Info: Link coloring with OCG OFF on input line 6323.
+Package hyperref Info: PDF/A mode OFF on input line 6328.
+LaTeX Info: Redefining \ref on input line 6368.
+LaTeX Info: Redefining \pageref on input line 6372.
+\Hy@abspage=\count124
+\c@Item=\count125
+\c@Hfootnote=\count126
+)
+
+Package hyperref Message: Driver: hpdftex.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2016/05/05 v6.83n Hyperref driver for pdfTeX
+\Fld@listcount=\count127
+\c@bookmark@seq@number=\count128
+\Hy@SectionHShift=\skip101
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 105.
+Package hyperref Info: Option `unicode' set `true' on input line 105.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2016/05/05 v6.83n Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+) (./refman.aux)
+\openout1 = `refman.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 115.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 115.
+
+ (/usr/local/texlive/2016/texmf-dist/tex/latex/base/ts1cmr.fd
+File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 115.
+LaTeX Font Info:    ... okay on input line 115.
+LaTeX Font Info:    Try loading font information for T1+phv on input line 115.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/psnfss/t1phv.fd
+File: t1phv.fd 2001/06/04 scalable font definitions for T1/phv.
+)
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 8.99994pt on input line 115.
+
+(/usr/local/texlive/2016/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count129
+\scratchdimen=\dimen156
+\scratchbox=\box58
+\nofMPsegments=\count130
+\nofMParguments=\count131
+\everyMPshowfont=\toks26
+\MPscratchCnt=\count132
+\MPscratchDim=\dimen157
+\MPnumerator=\count133
+\makeMPintoPDFobject=\count134
+\everyMPtoPDFconversion=\toks27
+) (/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+)
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: twoside 
+* h-part:(L,W,R)=(71.13188pt, 455.24411pt, 71.13188pt)
+* v-part:(T,H,B)=(71.13188pt, 702.78308pt, 71.13188pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=455.24411pt
+* \textheight=702.78308pt
+* \oddsidemargin=-1.1381pt
+* \evensidemargin=-1.1381pt
+* \topmargin=-31.2056pt
+* \headheight=12.0pt
+* \headsep=18.06749pt
+* \topskip=10.0pt
+* \footskip=25.29494pt
+* \marginparwidth=125.0pt
+* \marginparsep=7.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidetrue
+* \@mparswitchtrue
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+\AtBeginShipoutBox=\box59
+Package backref Info: ** backref set up for natbib ** on input line 115.
+Package hyperref Info: Link coloring ON on input line 115.
+(/usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
+
+(/usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
+)
+\c@section@level=\count135
+)
+LaTeX Info: Redefining \ref on input line 115.
+LaTeX Info: Redefining \pageref on input line 115.
+LaTeX Info: Redefining \nameref on input line 115.
+
+(./refman.out) (./refman.out)
+\@outlinefile=\write4
+\openout4 = `refman.out'.
+
+Package hyperref Info: Option `pageanchor' set `false' on input line 122.
+
+
+Package hyperref Warning: Option `bookmarks' has already been used,
+(hyperref)                setting the option has no effect on input line 122.
+
+Package hyperref Info: Option `bookmarksnumbered' set `true' on input line 122.
+
+Package hyperref Info: Option `unicode' set `true' on input line 122.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 12.9599pt on input line 127.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 6.29996pt on input line 127.
+LaTeX Font Info:    Try loading font information for U+wasy on input line 127.
+(/usr/local/texlive/2016/texmf-dist/tex/latex/wasysym/uwasy.fd
+File: uwasy.fd 2003/10/30 v2.0 Wasy-2 symbol font definitions
+)
+LaTeX Font Info:    Try loading font information for U+msa on input line 127.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Try loading font information for U+msb on input line 127.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 10.79993pt on input line 129.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 8.09995pt on input line 131.
+ [1
+
+
+{/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2
+
+]
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 22.39185pt on input line 135.
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <24.88> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 135.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 22.39185pt on input line 135.
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 22.39185pt on input line 135.
+ (./refman.toc
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <10> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 8.99994pt on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <7> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 6.29996pt on input line 1.
+
+[3
+
+] [4] [5] [6] [7] [8] [9] [10] [11] [12])
+\tf@toc=\write5
+\openout5 = `refman.toc'.
+
+ [13] [14
+
+]
+Package hyperref Info: Option `pageanchor' set `true' on input line 138.
+
+Chapter 1.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 18.66588pt on input line 141.
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <20.74> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 141.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 18.66588pt on input line 141.
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 18.66588pt on input line 141.
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 6.29996pt on input line 141.
+(./md_geo__r_e_a_d_m_e.tex) [1
+
+] [2
+
+]
+Chapter 2.
+(./md_include__r_e_a_d_m_e.tex) [3] [4
+
+]
+Chapter 3.
+(./md_obj__r_e_a_d_m_e.tex) [5] [6
+
+]
+Chapter 4.
+(./md__r_e_a_d_m_e.tex
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 5.
+
+(/usr/local/texlive/2016/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)) [7] [8
+
+]
+Chapter 5.
+(./md_shaders__r_e_a_d_m_e.tex) [9] [10
+
+]
+Chapter 6.
+(./md_src__r_e_a_d_m_e.tex) [11] [12
+
+]
+Chapter 7.
+(./namespaces.tex
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 12.9599pt on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 12.9599pt on input line 1.
+) [13] [14
+
+]
+Chapter 8.
+(./hierarchy.tex [15]) [16]
+Chapter 9.
+(./annotated.tex
+LaTeX Font Info:    Try loading font information for TS1+phv on input line 10.
+ (/usr/local/texlive/2016/texmf-dist/tex/latex/psnfss/ts1phv.fd
+File: ts1phv.fd 2001/06/04 scalable font definitions for TS1/phv.
+)
+LaTeX Font Info:    Font shape `TS1/phv/m/n' will be
+(Font)              scaled to size 8.99994pt on input line 10.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [17
+
+])
+[18]
+Chapter 10.
+(./files.tex
+
+LaTeX Warning: Reference `_asset_store_8hpp' on page 19 undefined on input line
+ 4.
+
+
+LaTeX Warning: Reference `_button_8hpp' on page 19 undefined on input line 6.
+
+
+LaTeX Warning: Reference `_commands_8hpp' on page 19 undefined on input line 9.
+
+
+
+LaTeX Warning: Reference `_framebuffer_8hpp' on page 19 undefined on input line
+ 10.
+
+
+LaTeX Warning: Reference `_particle_system_8hpp' on page 19 undefined on input 
+line 20.
+
+[19
+
+]
+
+LaTeX Warning: Reference `_preferences_8hpp' on page 20 undefined on input line
+ 21.
+
+
+LaTeX Warning: Reference `_prefs_8hpp' on page 20 undefined on input line 22.
+
+
+LaTeX Warning: Reference `_prefs_parser_8hpp' on page 20 undefined on input lin
+e 23.
+
+
+LaTeX Warning: Reference `_scene_8hpp' on page 20 undefined on input line 24.
+
+
+LaTeX Warning: Reference `_terrain_height_tracer_8hpp' on page 20 undefined on 
+input line 25.
+
+
+LaTeX Warning: Reference `_text_8hpp' on page 20 undefined on input line 26.
+
+
+LaTeX Warning: Reference `_utility_8hpp' on page 20 undefined on input line 27.
+
+
+
+LaTeX Warning: Reference `arena_8py' on page 20 undefined on input line 28.
+
+
+LaTeX Warning: Reference `connected_dots_8py' on page 20 undefined on input lin
+e 29.
+
+
+LaTeX Warning: Reference `distribute__setup_8py' on page 20 undefined on input 
+line 30.
+
+
+LaTeX Warning: Reference `get-pip_8py' on page 20 undefined on input line 31.
+
+
+LaTeX Warning: Reference `simplex_map_8py' on page 20 undefined on input line 3
+2.
+
+
+LaTeX Warning: Reference `simplextest_8py' on page 20 undefined on input line 3
+3.
+
+
+LaTeX Warning: Reference `survival_island_8py' on page 20 undefined on input li
+ne 34.
+
+
+LaTeX Warning: Reference `uk_8py' on page 20 undefined on input line 35.
+
+
+LaTeX Warning: Reference `____init_____8py' on page 20 undefined on input line 
+36.
+
+
+LaTeX Warning: Reference `helper_functions_8py' on page 20 undefined on input l
+ine 37.
+
+
+LaTeX Warning: Reference `map_viewer_8py' on page 20 undefined on input line 38
+.
+
+
+LaTeX Warning: Reference `noise_8py' on page 20 undefined on input line 39.
+
+
+LaTeX Warning: Reference `_a_i_8cpp' on page 20 undefined on input line 40.
+
+
+LaTeX Warning: Reference `_asset_store_8cpp' on page 20 undefined on input line
+ 41.
+
+
+LaTeX Warning: Reference `_baddie_8cpp' on page 20 undefined on input line 42.
+
+
+LaTeX Warning: Reference `_button_8cpp' on page 20 undefined on input line 43.
+
+
+LaTeX Warning: Reference `_camera_8cpp' on page 20 undefined on input line 44.
+
+
+LaTeX Warning: Reference `_character_8cpp' on page 20 undefined on input line 4
+5.
+
+
+LaTeX Warning: Reference `_commands_8cpp' on page 20 undefined on input line 46
+.
+
+
+LaTeX Warning: Reference `_framebuffer_8cpp' on page 20 undefined on input line
+ 47.
+
+
+LaTeX Warning: Reference `_grid_tile_8cpp' on page 20 undefined on input line 4
+9.
+
+
+LaTeX Warning: Reference `_gui_8cpp' on page 20 undefined on input line 50.
+
+
+LaTeX Warning: Reference `_inventory_8cpp' on page 20 undefined on input line 5
+1.
+
+
+LaTeX Warning: Reference `_i_val_8cpp' on page 20 undefined on input line 52.
+
+
+LaTeX Warning: Reference `_light_8cpp' on page 20 undefined on input line 53.
+
+
+LaTeX Warning: Reference `main_8cpp' on page 20 undefined on input line 54.
+
+
+LaTeX Warning: Reference `_map_list_8cpp' on page 20 undefined on input line 55
+.
+
+
+LaTeX Warning: Reference `_node_8cpp' on page 20 undefined on input line 56.
+
+
+LaTeX Warning: Reference `_node_network_8cpp' on page 20 undefined on input lin
+e 57.
+
+
+LaTeX Warning: Reference `_particle_system_8cpp' on page 20 undefined on input 
+line 58.
+
+
+LaTeX Warning: Reference `_preferences_8cpp' on page 20 undefined on input line
+ 59.
+
+
+LaTeX Warning: Reference `_prefs_8cpp' on page 20 undefined on input line 60.
+
+
+LaTeX Warning: Reference `_prefs_parser_8cpp' on page 20 undefined on input lin
+e 61.
+
+
+LaTeX Warning: Reference `_scene_8cpp' on page 20 undefined on input line 62.
+
+
+LaTeX Warning: Reference `_terrain_height_tracer_8cpp' on page 20 undefined on 
+input line 63.
+
+
+LaTeX Warning: Reference `_text_8cpp' on page 20 undefined on input line 64.
+
+
+LaTeX Warning: Reference `_utility_8cpp' on page 20 undefined on input line 65.
+
+
+
+LaTeX Warning: Reference `_colour_picker_8cpp' on page 20 undefined on input li
+ne 66.
+
+
+LaTeX Warning: Reference `imgui_8cpp' on page 20 undefined on input line 67.
+
+
+LaTeX Warning: Reference `imgui__draw_8cpp' on page 20 undefined on input line 
+68.
+
+
+LaTeX Warning: Reference `_im_g_u_i_impl_8cpp' on page 20 undefined on input li
+ne 69.
+
+) [20]
+Chapter 11.
+(./namespacegame_utils.tex
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 8.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 10.79993pt on input line 8.
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 10.79993pt on input line 8.
+) (./namespacehelper_functions.tex)
+(./namespacemap_viewer.tex [21
+
+]) (./namespace_the.tex) [22]
+Chapter 12.
+(./class_a_i.tex
+Package epstopdf Info: Source file: <class_a_i.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3875 bytes
+(epstopdf)             Output file: <class_a_i-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:07
+(epstopdf)                    size: 4927 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_a_i-eps-converted-to
+.pdf class_a_i.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_a_i-eps-converted-to.pdf, id=2387, 501.875pt x 260.71402pt>
+File: class_a_i-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_a_i-eps-converted-to.pdf>
+Package pdftex.def Info: class_a_i-eps-converted-to.pdf used on input line 15.
+(pdftex.def)             Requested size: 109.53983pt x 56.9055pt.
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <9> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 22.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 8.09995pt on input line 22.
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <7> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 28.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 6.29996pt on input line 28.
+LaTeX Font Info:    Font shape `TS1/phv/m/it' in size <9> not available
+(Font)              Font shape `TS1/phv/m/sl' tried instead on input line 47.
+LaTeX Font Info:    Font shape `TS1/phv/m/sl' will be
+(Font)              scaled to size 8.09995pt on input line 47.
+ [23
+
+ <./class_a_i-eps-converted-to.pdf>]
+LaTeX Font Info:    Font shape `T1/phv/bc/n' will be
+(Font)              scaled to size 8.99994pt on input line 114.
+LaTeX Font Info:    Font shape `T1/phv/bc/it' in size <10> not available
+(Font)              Font shape `T1/phv/bc/sl' tried instead on input line 114.
+LaTeX Font Info:    Font shape `T1/phv/bc/sl' will be
+(Font)              scaled to size 8.99994pt on input line 114.
+LaTeX Font Info:    Font shape `T1/phv/bc/it' in size <7> not available
+(Font)              Font shape `T1/phv/bc/sl' tried instead on input line 114.
+LaTeX Font Info:    Font shape `T1/phv/bc/sl' will be
+(Font)              scaled to size 6.29996pt on input line 114.
+
+[24]
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <10> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 121.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 8.99994pt on input line 121.
+
+Underfull \hbox (badness 10000) detected at line 144
+[][][]
+ []
+
+
+LaTeX Font Warning: Font shape `T1/pcr/bc/n' undefined
+(Font)              using `T1/pcr/m/n' instead on input line 197.
+
+
+Underfull \hbox (badness 10000) detected at line 202
+[][][]
+ []
+
+[25]
+Underfull \hbox (badness 10000) detected at line 225
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 243
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 261
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 279
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 297
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 315
+[][][]
+ []
+
+[26] [27]
+Underfull \hbox (badness 10000) detected at line 338
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 361
+[][][]
+ []
+
+) (./class_asset_store.tex
+Package epstopdf Info: Source file: <class_asset_store.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3818 bytes
+(epstopdf)             Output file: <class_asset_store-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:08
+(epstopdf)                    size: 5094 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_asset_store-eps-conv
+erted-to.pdf class_asset_store.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_asset_store-eps-converted-to.pdf, id=2507, 501.875pt x 223.05333pt>
+File: class_asset_store-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_asset_store-eps-converted-to.pdf>
+Package pdftex.def Info: class_asset_store-eps-converted-to.pdf used on input l
+ine 6.
+(pdftex.def)             Requested size: 128.03386pt x 56.9055pt.
+ [28 <./class_asset_store-eps-converted-to.pdf>]) (./class_baddie.tex
+Package epstopdf Info: Source file: <class_baddie.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3758 bytes
+(epstopdf)             Output file: <class_baddie-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:08
+(epstopdf)                    size: 4366 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_baddie-eps-converted
+-to.pdf class_baddie.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_baddie-eps-converted-to.pdf, id=2524, 501.875pt x 680.51236pt>
+File: class_baddie-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_baddie-eps-converted-to.pdf>
+Package pdftex.def Info: class_baddie-eps-converted-to.pdf used on input line 1
+5.
+(pdftex.def)             Requested size: 41.96576pt x 56.9055pt.
+ [29 <./class_baddie-eps-converted-to.pdf>]
+Underfull \hbox (badness 10000) detected at line 124
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 142
+[][][]
+ []
+
+) (./class_build_command.tex [30]
+Package epstopdf Info: Source file: <class_build_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3780 bytes
+(epstopdf)             Output file: <class_build_command-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:08
+(epstopdf)                    size: 4822 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_build_command-eps-co
+nverted-to.pdf class_build_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_build_command-eps-converted-to.pdf, id=2576, 501.875pt x 389.80632pt>
+File: class_build_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_build_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_build_command-eps-converted-to.pdf used on input
+ line 15.
+(pdftex.def)             Requested size: 73.26395pt x 56.9055pt.
+) (./class_button.tex
+Package epstopdf Info: Source file: <class_button.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3790 bytes
+(epstopdf)             Output file: <class_button-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:09
+(epstopdf)                    size: 4725 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_button-eps-converted
+-to.pdf class_button.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_button-eps-converted-to.pdf, id=2586, 501.875pt x 340.25119pt>
+File: class_button-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_button-eps-converted-to.pdf>
+Package pdftex.def Info: class_button-eps-converted-to.pdf used on input line 1
+5.
+(pdftex.def)             Requested size: 83.93152pt x 56.9055pt.
+ [31 <./class_build_command-eps-converted-to.pdf>] [32 <./class_button-eps-conv
+erted-to.pdf>]
+Underfull \hbox (badness 10000) detected at line 143
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 161
+[][][]
+ []
+
+[33]
+Underfull \hbox (badness 10000) detected at line 179
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 197
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 220
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 243
+[][][]
+ []
+
+[34]) (./class_camera.tex [35] [36] [37]) (./class_centre_camera_command.tex
+Package epstopdf Info: Source file: <class_centre_camera_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3794 bytes
+(epstopdf)             Output file: <class_centre_camera_command-eps-converted-
+to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:09
+(epstopdf)                    size: 4621 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_centre_camera_comman
+d-eps-converted-to.pdf class_centre_camera_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_centre_camera_command-eps-converted-to.pdf, id=2748, 501.875pt x 255.735
+43pt>
+File: class_centre_camera_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_centre_camera_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_centre_camera_command-eps-converted-to.pdf used 
+on input line 15.
+(pdftex.def)             Requested size: 111.66875pt x 56.9055pt.
+)
+(./class_centre_notification_command.tex [38 <./class_centre_camera_command-eps
+-converted-to.pdf>]
+Package epstopdf Info: Source file: <class_centre_notification_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3806 bytes
+(epstopdf)             Output file: <class_centre_notification_command-eps-conv
+erted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:09
+(epstopdf)                    size: 4996 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_centre_notification_
+command-eps-converted-to.pdf class_centre_notification_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_centre_notification_command-eps-converted-to.pdf, id=2771, 501.875pt x 2
+28.12227pt>
+File: class_centre_notification_command-eps-converted-to.pdf Graphic file (type
+ pdf)
+ <use class_centre_notification_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_centre_notification_command-eps-converted-to.pdf
+ used on input line 15.
+(pdftex.def)             Requested size: 125.19275pt x 56.9055pt.
+)
+(./class_change_height_command.tex
+Package epstopdf Info: Source file: <class_change_height_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3794 bytes
+(epstopdf)             Output file: <class_change_height_command-eps-converted-
+to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:10
+(epstopdf)                    size: 5037 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_change_height_comman
+d-eps-converted-to.pdf class_change_height_command.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_change_height_command-eps-converted-to.pdf, id=2779, 501.875pt x 259.027
+73pt>
+File: class_change_height_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_change_height_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_change_height_command-eps-converted-to.pdf used 
+on input line 6.
+(pdftex.def)             Requested size: 110.25201pt x 56.9055pt.
+ [39 <./class_centre_notification_command-eps-converted-to.pdf> <./class_change
+_height_command-eps-converted-to.pdf>]) (./class_change_map_command.tex
+Package epstopdf Info: Source file: <class_change_map_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3788 bytes
+(epstopdf)             Output file: <class_change_map_command-eps-converted-to.
+pdf>
+(epstopdf)                    date: 2017-05-14 18:50:10
+(epstopdf)                    size: 5007 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_change_map_command-e
+ps-converted-to.pdf class_change_map_command.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_change_map_command-eps-converted-to.pdf, id=2797, 501.875pt x 278.82167p
+t>
+File: class_change_map_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_change_map_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_change_map_command-eps-converted-to.pdf used on 
+input line 6.
+(pdftex.def)             Requested size: 102.42555pt x 56.9055pt.
+)
+(./class_change_seed_command.tex
+Package epstopdf Info: Source file: <class_change_seed_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3790 bytes
+(epstopdf)             Output file: <class_change_seed_command-eps-converted-to
+.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:10
+(epstopdf)                    size: 4927 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_change_seed_command-
+eps-converted-to.pdf class_change_seed_command.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_change_seed_command-eps-converted-to.pdf, id=2798, 501.875pt x 271.28351
+pt>
+File: class_change_seed_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_change_seed_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_change_seed_command-eps-converted-to.pdf used on
+ input line 6.
+(pdftex.def)             Requested size: 105.27432pt x 56.9055pt.
+ [40 <./class_change_map_command-eps-converted-to.pdf> <./class_change_seed_com
+mand-eps-converted-to.pdf>]) (./class_change_width_command.tex
+Package epstopdf Info: Source file: <class_change_width_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3792 bytes
+(epstopdf)             Output file: <class_change_width_command-eps-converted-t
+o.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:10
+(epstopdf)                    size: 5142 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_change_width_command
+-eps-converted-to.pdf class_change_width_command.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_change_width_command-eps-converted-to.pdf, id=2822, 501.875pt x 267.6700
+3pt>
+File: class_change_width_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_change_width_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_change_width_command-eps-converted-to.pdf used o
+n input line 6.
+(pdftex.def)             Requested size: 106.69106pt x 56.9055pt.
+)
+(./class_character.tex
+Package epstopdf Info: Source file: <class_character.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3764 bytes
+(epstopdf)             Output file: <class_character-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:11
+(epstopdf)                    size: 4516 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_character-eps-conver
+ted-to.pdf class_character.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_character-eps-converted-to.pdf, id=2823, 501.875pt x 521.42802pt>
+File: class_character-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_character-eps-converted-to.pdf>
+Package pdftex.def Info: class_character-eps-converted-to.pdf used on input lin
+e 15.
+(pdftex.def)             Requested size: 54.76991pt x 56.9055pt.
+ [41 <./class_change_width_command-eps-converted-to.pdf> <./class_character-eps
+-converted-to.pdf>] [42] [43]
+Underfull \hbox (badness 10000) detected at line 181
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 199
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 217
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 235
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 253
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 271
+[][][]
+ []
+
+[44]
+Underfull \hbox (badness 10000) detected at line 289
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 307
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 325
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 343
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 361
+[][][]
+ []
+
+[45]) (./class_command.tex
+Package epstopdf Info: Source file: <class_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 5575 bytes
+(epstopdf)             Output file: <class_command-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:11
+(epstopdf)                    size: 8444 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_command-eps-converte
+d-to.pdf class_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_command-eps-converted-to.pdf, id=2936, 501.875pt x 1140.62134pt>
+File: class_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_command-eps-converted-to.pdf used on input line 
+15.
+(pdftex.def)             Requested size: 150.2267pt x 341.43306pt.
+ [46 <./class_command-eps-converted-to.pdf>]) (./class_eat_berries_command.tex
+Package epstopdf Info: Source file: <class_eat_berries_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3790 bytes
+(epstopdf)             Output file: <class_eat_berries_command-eps-converted-to
+.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:11
+(epstopdf)                    size: 5192 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_eat_berries_command-
+eps-converted-to.pdf class_eat_berries_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_eat_berries_command-eps-converted-to.pdf, id=2951, 501.875pt x 299.62943
+pt>
+File: class_eat_berries_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_eat_berries_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_eat_berries_command-eps-converted-to.pdf used on
+ input line 15.
+(pdftex.def)             Requested size: 95.31128pt x 56.9055pt.
+ [47 <./class_eat_berries_command-eps-converted-to.pdf>]) (./class_eat_fish_com
+mand.tex
+Package epstopdf Info: Source file: <class_eat_fish_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3784 bytes
+(epstopdf)             Output file: <class_eat_fish_command-eps-converted-to.pd
+f>
+(epstopdf)                    date: 2017-05-14 18:50:12
+(epstopdf)                    size: 4963 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_eat_fish_command-eps
+-converted-to.pdf class_eat_fish_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_eat_fish_command-eps-converted-to.pdf, id=2976, 501.875pt x 343.16205pt>
+File: class_eat_fish_command-eps-converted-to.pdf Graphic file (type pdf)
+<use class_eat_fish_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_eat_fish_command-eps-converted-to.pdf used on in
+put line 15.
+(pdftex.def)             Requested size: 83.21933pt x 56.9055pt.
+)
+(./class_end_game_command.tex
+Package epstopdf Info: Source file: <class_end_game_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3784 bytes
+(epstopdf)             Output file: <class_end_game_command-eps-converted-to.pd
+f>
+(epstopdf)                    date: 2017-05-14 18:50:12
+(epstopdf)                    size: 4730 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_end_game_command-eps
+-converted-to.pdf class_end_game_command.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_end_game_command-eps-converted-to.pdf, id=2984, 501.875pt x 311.24278pt>
+File: class_end_game_command-eps-converted-to.pdf Graphic file (type pdf)
+<use class_end_game_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_end_game_command-eps-converted-to.pdf used on in
+put line 6.
+(pdftex.def)             Requested size: 91.75798pt x 56.9055pt.
+ [48 <./class_eat_fish_command-eps-converted-to.pdf>]) (./class_escape_command.
+tex
+Package epstopdf Info: Source file: <class_escape_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3782 bytes
+(epstopdf)             Output file: <class_escape_command-eps-converted-to.pdf>
+
+(epstopdf)                    date: 2017-05-14 18:50:12
+(epstopdf)                    size: 4916 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_escape_command-eps-c
+onverted-to.pdf class_escape_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_escape_command-eps-converted-to.pdf, id=3000, 501.875pt x 343.16205pt>
+File: class_escape_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_escape_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_escape_command-eps-converted-to.pdf used on inpu
+t line 15.
+(pdftex.def)             Requested size: 83.21933pt x 56.9055pt.
+ [49 <./class_end_game_command-eps-converted-to.pdf> <./class_escape_command-ep
+s-converted-to.pdf>])
+(./class_forage_command.tex
+Package epstopdf Info: Source file: <class_forage_command.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3782 bytes
+(epstopdf)             Output file: <class_forage_command-eps-converted-to.pdf>
+
+(epstopdf)                    date: 2017-05-14 18:50:12
+(epstopdf)                    size: 4896 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_forage_command-eps-c
+onverted-to.pdf class_forage_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_forage_command-eps-converted-to.pdf, id=3028, 501.875pt x 346.1231pt>
+File: class_forage_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_forage_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_forage_command-eps-converted-to.pdf used on inpu
+t line 15.
+(pdftex.def)             Requested size: 82.50713pt x 56.9055pt.
+)
+(./classgame_utils_1_1noise_1_1fractal_noise.tex [50 <./class_forage_command-ep
+s-converted-to.pdf>]
+LaTeX Font Info:    Font shape `T1/phv/bx/it' in size <9> not available
+(Font)              Font shape `T1/phv/b/it' tried instead on input line 12.
+LaTeX Font Info:    Font shape `T1/phv/b/it' in size <9> not available
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 12.
+LaTeX Font Info:    Font shape `T1/phv/b/sl' will be
+(Font)              scaled to size 8.09995pt on input line 12.
+ [51]
+Underfull \hbox (badness 10000) detected at line 89
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 131
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 158
+[][][]
+ []
+
+) (./class_framebuffer.tex [52]) (./class_grid.tex [53] [54] [55]
+Underfull \hbox (badness 10000) detected at line 185
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 208
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 231
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 254
+[][][]
+ []
+
+[56]
+Underfull \hbox (badness 10000) detected at line 280
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 303
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 329
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 347
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 365
+[][][]
+ []
+
+[57]
+Underfull \hbox (badness 10000) detected at line 383
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 409
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 427
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 453
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 471
+[][][]
+ []
+
+[58]
+Underfull \hbox (badness 10000) detected at line 489
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 515
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 538
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 564
+[][][]
+ []
+
+[59]
+Underfull \hbox (badness 10000) detected at line 587
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 610
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 636
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 654
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 672
+[][][]
+ []
+
+[60] [61]
+Underfull \hbox (badness 10000) detected at line 695
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 721
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 744
+[][][]
+ []
+
+[62]
+
+LaTeX Font Warning: Font shape `T1/pcr/bc/it' undefined
+(Font)              using `T1/pcr/bc/n' instead on input line 809.
+
+) (./class_grid_tile.tex [63]
+Underfull \hbox (badness 10000) detected at line 111
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 129
+[][][]
+ []
+
+[64]
+Underfull \hbox (badness 10000) detected at line 147
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 165
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 183
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 201
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 219
+[][][]
+ []
+
+[65]) (./class_gui.tex
+Package epstopdf Info: Source file: <class_gui.eps>
+(epstopdf)                    date: 2017-05-14 18:46:59
+(epstopdf)                    size: 3790 bytes
+(epstopdf)             Output file: <class_gui-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:13
+(epstopdf)                    size: 4941 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_gui-eps-converted-to
+.pdf class_gui.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_gui-eps-converted-to.pdf, id=3266, 501.875pt x 290.94696pt>
+File: class_gui-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_gui-eps-converted-to.pdf>
+Package pdftex.def Info: class_gui-eps-converted-to.pdf used on input line 15.
+(pdftex.def)             Requested size: 98.16005pt x 56.9055pt.
+ [66 <./class_gui-eps-converted-to.pdf>]
+[67] [68]
+Underfull \hbox (badness 10000) detected at line 243
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 261
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 284
+[][][]
+ []
+
+[69]) (./struct_im_gui_plot_array_getter_data.tex [70]) (./class_inventory.tex
+[71]
+Underfull \hbox (badness 10000) detected at line 129
+[][][]
+ []
+
+[72]
+Underfull \hbox (badness 10000) detected at line 147
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 165
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 183
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 201
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 219
+[][][]
+ []
+
+[73]
+Underfull \hbox (badness 10000) detected at line 242
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 265
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 288
+[][][]
+ []
+
+) (./class_i_val.tex
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+[74]) (./struct_light.tex) (./classlight.tex) (./class_map_list.tex [75]
+Package epstopdf Info: Source file: <class_map_list.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3806 bytes
+(epstopdf)             Output file: <class_map_list-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:13
+(epstopdf)                    size: 5323 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_map_list-eps-convert
+ed-to.pdf class_map_list.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_map_list-eps-converted-to.pdf, id=3467, 501.875pt x 246.32025pt>
+File: class_map_list-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_map_list-eps-converted-to.pdf>
+Package pdftex.def Info: class_map_list-eps-converted-to.pdf used on input line
+ 15.
+(pdftex.def)             Requested size: 115.9419pt x 56.9055pt.
+ [76 <./class_map_list-eps-converted-to.pdf>]
+Underfull \hbox (badness 10000) detected at line 139
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 157
+[][][]
+ []
+
+[77]
+Underfull \hbox (badness 10000) detected at line 175
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 193
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 211
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 229
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 247
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 265
+[][][]
+ []
+
+[78]) (./classgame_utils_1_1map_viewer_1_1map_viewer.tex [79])
+(./class_move_cam_command.tex
+Package epstopdf Info: Source file: <class_move_cam_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3784 bytes
+(epstopdf)             Output file: <class_move_cam_command-eps-converted-to.pd
+f>
+(epstopdf)                    date: 2017-05-14 18:50:14
+(epstopdf)                    size: 4662 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_move_cam_command-eps
+-converted-to.pdf class_move_cam_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_move_cam_command-eps-converted-to.pdf, id=3546, 501.875pt x 304.16637pt>
+File: class_move_cam_command-eps-converted-to.pdf Graphic file (type pdf)
+<use class_move_cam_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_move_cam_command-eps-converted-to.pdf used on in
+put line 15.
+(pdftex.def)             Requested size: 93.89456pt x 56.9055pt.
+ [80 <./class_move_cam_command-eps-converted-to.pdf>]) (./class_node.tex [81]
+Underfull \hbox (badness 10000) detected at line 101
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 119
+[][][]
+ []
+
+[82]
+Underfull \hbox (badness 10000) detected at line 137
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 155
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 173
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 191
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 209
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 227
+[][][]
+ []
+
+[83] [84]
+Underfull \hbox (badness 10000) detected at line 250
+[][][]
+ []
+
+) (./class_node_network.tex [85]
+Underfull \hbox (badness 10000) detected at line 86
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 104
+[][][]
+ []
+
+[86]
+Underfull \hbox (badness 10000) detected at line 153
+[][][]
+ []
+
+) (./class_notification_button.tex
+Package epstopdf Info: Source file: <class_notification_button.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3790 bytes
+(epstopdf)             Output file: <class_notification_button-eps-converted-to
+.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:14
+(epstopdf)                    size: 4729 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_notification_button-
+eps-converted-to.pdf class_notification_button.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_notification_button-eps-converted-to.pdf, id=3651, 501.875pt x 340.25119
+pt>
+File: class_notification_button-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_notification_button-eps-converted-to.pdf>
+Package pdftex.def Info: class_notification_button-eps-converted-to.pdf used on
+ input line 6.
+(pdftex.def)             Requested size: 83.93152pt x 56.9055pt.
+)
+(./struct_particle_system.tex [87 <./class_notification_button-eps-converted-to
+.pdf>]) (./class_passive_command.tex
+Package epstopdf Info: Source file: <class_passive_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3784 bytes
+(epstopdf)             Output file: <class_passive_command-eps-converted-to.pdf
+>
+(epstopdf)                    date: 2017-05-14 18:50:14
+(epstopdf)                    size: 4952 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_passive_command-eps-
+converted-to.pdf class_passive_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_passive_command-eps-converted-to.pdf, id=3671, 501.875pt x 337.39049pt>
+File: class_passive_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_passive_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_passive_command-eps-converted-to.pdf used on inp
+ut line 15.
+(pdftex.def)             Requested size: 84.6437pt x 56.9055pt.
+) (./class_preferences.tex
+Package epstopdf Info: Source file: <class_preferences.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3822 bytes
+(epstopdf)             Output file: <class_preferences-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:15
+(epstopdf)                    size: 5299 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_preferences-eps-conv
+erted-to.pdf class_preferences.eps>
+(epstopdf)             \includegraphics on input line 6.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_preferences-eps-converted-to.pdf, id=3677, 501.875pt x 212.43365pt>
+File: class_preferences-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_preferences-eps-converted-to.pdf>
+Package pdftex.def Info: class_preferences-eps-converted-to.pdf used on input l
+ine 6.
+(pdftex.def)             Requested size: 134.43593pt x 56.9055pt.
+ [88 <./class_passive_command-eps-converted-to.pdf>]) (./class_prefs.tex
+Package epstopdf Info: Source file: <class_prefs.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3798 bytes
+(epstopdf)             Output file: <class_prefs-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:15
+(epstopdf)                    size: 5206 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_prefs-eps-converted-
+to.pdf class_prefs.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_prefs-eps-converted-to.pdf, id=3702, 501.875pt x 269.46672pt>
+File: class_prefs-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_prefs-eps-converted-to.pdf>
+Package pdftex.def Info: class_prefs-eps-converted-to.pdf used on input line 15
+.
+(pdftex.def)             Requested size: 105.97887pt x 56.9055pt.
+ [89 <./class_preferences-eps-converted-to.pdf> <./class_prefs-eps-converted-to
+.pdf>] [90]
+Underfull \hbox (badness 10000) detected at line 123
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 141
+[][][]
+ []
+
+[91]
+Underfull \hbox (badness 10000) detected at line 167
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 190
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 213
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 231
+[][][]
+ []
+
+[92]
+Underfull \hbox (badness 10000) detected at line 254
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 280
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 303
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 326
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 344
+[][][]
+ []
+
+[93]
+Underfull \hbox (badness 10000) detected at line 367
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 385
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 403
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 426
+[][][]
+ []
+
+[94]
+Underfull \hbox (badness 10000) detected at line 444
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 467
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 490
+[][][]
+ []
+
+[95]) (./class_prefs_command.tex
+Package epstopdf Info: Source file: <class_prefs_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3780 bytes
+(epstopdf)             Output file: <class_prefs_command-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:15
+(epstopdf)                    size: 4878 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_prefs_command-eps-co
+nverted-to.pdf class_prefs_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_prefs_command-eps-converted-to.pdf, id=3840, 501.875pt x 382.37857pt>
+File: class_prefs_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_prefs_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_prefs_command-eps-converted-to.pdf used on input
+ line 15.
+(pdftex.def)             Requested size: 74.68832pt x 56.9055pt.
+ [96 <./class_prefs_command-eps-converted-to.pdf>]) (./class_prefs_parser.tex [
+97] [98])
+(./class_quit_command.tex
+Package epstopdf Info: Source file: <class_quit_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3778 bytes
+(epstopdf)             Output file: <class_quit_command-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:16
+(epstopdf)                    size: 4820 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_quit_command-eps-con
+verted-to.pdf class_quit_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_quit_command-eps-converted-to.pdf, id=3882, 501.875pt x 409.6906pt>
+File: class_quit_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_quit_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_quit_command-eps-converted-to.pdf used on input 
+line 15.
+(pdftex.def)             Requested size: 69.70299pt x 56.9055pt.
+)
+(./class_save_preferences_command.tex [99 <./class_quit_command-eps-converted-t
+o.pdf>]
+Package epstopdf Info: Source file: <class_save_preferences_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3800 bytes
+(epstopdf)             Output file: <class_save_preferences_command-eps-convert
+ed-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:16
+(epstopdf)                    size: 5262 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_save_preferences_com
+mand-eps-converted-to.pdf class_save_preferences_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_save_preferences_command-eps-converted-to.pdf, id=3904, 501.875pt x 230.
+75209pt>
+File: class_save_preferences_command-eps-converted-to.pdf Graphic file (type pd
+f)
+ <use class_save_preferences_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_save_preferences_command-eps-converted-to.pdf us
+ed on input line 15.
+(pdftex.def)             Requested size: 123.7607pt x 56.9055pt.
+)
+(./class_scene.tex [100 <./class_save_preferences_command-eps-converted-to.pdf>
+] [101]
+Underfull \hbox (badness 10000) detected at line 177
+[][][]
+ []
+
+[102]
+Underfull \hbox (badness 10000) detected at line 195
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 213
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 231
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 249
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 267
+[][][]
+ []
+
+[103] [104]) (./class_set_prefs_command.tex
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1.
+
+Package epstopdf Info: Source file: <class_set_prefs_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3796 bytes
+(epstopdf)             Output file: <class_set_prefs_command-eps-converted-to.p
+df>
+(epstopdf)                    date: 2017-05-14 18:50:16
+(epstopdf)                    size: 5427 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_set_prefs_command-ep
+s-converted-to.pdf class_set_prefs_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_set_prefs_command-eps-converted-to.pdf, id=4015, 501.875pt x 260.71402pt
+>
+File: class_set_prefs_command-eps-converted-to.pdf Graphic file (type pdf)
+ <use class_set_prefs_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_set_prefs_command-eps-converted-to.pdf used on i
+nput line 15.
+(pdftex.def)             Requested size: 109.53983pt x 56.9055pt.
+ [105 <./class_set_prefs_command-eps-converted-to.pdf>]) (./class_terrain_heigh
+t_tracer.tex)
+(./class_zoom_command.tex
+Package epstopdf Info: Source file: <class_zoom_command.eps>
+(epstopdf)                    date: 2017-05-14 18:47:00
+(epstopdf)                    size: 3778 bytes
+(epstopdf)             Output file: <class_zoom_command-eps-converted-to.pdf>
+(epstopdf)                    date: 2017-05-14 18:50:17
+(epstopdf)                    size: 4457 bytes
+(epstopdf)             Command: <repstopdf --outfile=class_zoom_command-eps-con
+verted-to.pdf class_zoom_command.eps>
+(epstopdf)             \includegraphics on input line 15.
+Package epstopdf Info: Output file is already uptodate.
+
+<class_zoom_command-eps-converted-to.pdf, id=4037, 501.875pt x 375.23184pt>
+File: class_zoom_command-eps-converted-to.pdf Graphic file (type pdf)
+
+<use class_zoom_command-eps-converted-to.pdf>
+Package pdftex.def Info: class_zoom_command-eps-converted-to.pdf used on input 
+line 15.
+(pdftex.def)             Requested size: 76.10506pt x 56.9055pt.
+ [106 <./class_zoom_command-eps-converted-to.pdf>]) [107] [108
+
+]
+Chapter 13.
+(./_a_i_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--15
+
+ []
+
+) (./_baddie_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--13
+
+ []
+
+[109]) (./_camera_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--13
+
+ []
+
+) (./_character_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--18
+
+ []
+
+[110]) (./_grid_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--13
+
+ []
+
+) (./_grid_tile_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--10
+
+ []
+
+[111]) (./_gui_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--15
+
+ []
+
+) (./_inventory_8hpp.tex) (./_i_val_8hpp.tex [112]) (./_light_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--9
+
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 19
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 22
+[][][]
+ []
+
+
+Underfull \hbox (badness 10000) detected at line 25
+[][][]
+ []
+
+) (./_map_list_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 3--6
+
+ []
+
+[113]
+Underfull \hbox (badness 10000) detected at line 14
+[][][]
+ []
+
+) (./_node_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--9
+
+ []
+
+) (./_node_network_8hpp.tex
+Underfull \hbox (badness 10000) in paragraph at lines 8--12
+
+ []
+
+) (./_grid_8cpp.tex [114]
+Underfull \hbox (badness 10000) in paragraph at lines 8--19
+
+ []
+
+) [115] [116
+
+] (./refman.ind [117
+
+
+] [118] [119] [120] [121] [122
+
+])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 251.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 251.
+ (./refman.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 251.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 251.
+Package rerunfilecheck Info: File `refman.out' has not changed.
+(rerunfilecheck)             Checksum: 7B920C86C224AD73DED63005E6A4E60B;79861.
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were undefined references.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 251.
+ ) 
+Here is how much of TeX's memory you used:
+ 15570 strings out of 493014
+ 258285 string characters out of 6133351
+ 313333 words of memory out of 5000000
+ 17579 multiletter control sequences out of 15000+600000
+ 70019 words of font info for 80 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 48i,16n,43p,1048b,532s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{_scene_8hpp_source} has been referenced but does 
+not exist, replaced by a fixed one
+
+{/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/tex
+live/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texl
+ive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texli
+ve/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive
+/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/
+2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/20
+16/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2016/texmf
+-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2016/texmf-dist/f
+onts/type1/urw/helvetic/uhvb8ac.pfb></usr/local/texlive/2016/texmf-dist/fonts/t
+ype1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/u
+rw/helvetic/uhvbo8ac.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/he
+lvetic/uhvr8a.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/urw/helvetic/
+uhvro8a.pfb>
+Output written on refman.pdf (136 pages, 493846 bytes).
+PDF statistics:
+ 4928 PDF objects out of 5155 (max. 8388607)
+ 4671 compressed objects within 47 object streams
+ 1130 named destinations out of 1200 (max. 500000)
+ 3247 words of extra memory for PDF output out of 10000 (max. 10000000)
+

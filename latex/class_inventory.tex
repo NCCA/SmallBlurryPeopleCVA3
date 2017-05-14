@@ -1,0 +1,300 @@
+\hypertarget{class_inventory}{}\section{Inventory Class Reference}
+\label{class_inventory}\index{Inventory@{Inventory}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_inventory}{Inventory} class for management of the global inventory as accessed by the character through storehouses.  
+
+
+
+
+{\ttfamily \#include $<$Inventory.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_inventory_a10485613fc8bfb32ee564d9b5110f8fb}{}\hyperlink{class_inventory_a10485613fc8bfb32ee564d9b5110f8fb}{Inventory} ()\label{class_inventory_a10485613fc8bfb32ee564d9b5110f8fb}
+
+\begin{DoxyCompactList}\small\item\em ctor, sets up intial values of inventory items \end{DoxyCompactList}\item 
+\hypertarget{class_inventory_a6a62abfbed83022510a4e5ba64543288}{}\hyperlink{class_inventory_a6a62abfbed83022510a4e5ba64543288}{$\sim$\+Inventory} ()=default\label{class_inventory_a6a62abfbed83022510a4e5ba64543288}
+
+\begin{DoxyCompactList}\small\item\em destructor \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_ae7c976e073da5bb5dbb50ccf75b77514}{get\+Wood\+Inventory} ()
+\begin{DoxyCompactList}\small\item\em get\+Wood\+Inventory, get the amount of wood form the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a09aabe66b77e1eaeab0af7f64fc98b06}{get\+Berry\+Inventory} ()
+\begin{DoxyCompactList}\small\item\em get\+Berry\+Inventory, get the amount of berries from the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a9073255708aec050676ee9457e661e92}{get\+Fish\+Inventory} ()
+\begin{DoxyCompactList}\small\item\em get\+Fish\+Inventory, get the amount of fishes from the global inventory \end{DoxyCompactList}\item 
+bool \hyperlink{class_inventory_a15a3a48902555258c2b621e49a71bd35}{add\+Wood} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em add\+Wood, add wood to the global inventory \end{DoxyCompactList}\item 
+bool \hyperlink{class_inventory_a910d0cede635b76e0ceae407f47661f1}{add\+Berries} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em add\+Berries, add berries to the global inventory \end{DoxyCompactList}\item 
+bool \hyperlink{class_inventory_ac6a68a15e817c0bf293dee99d45d2096}{add\+Fish} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em add\+Fish, add fishes to the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_aa3a1293b7a674e5c2408d492baa197c5}{take\+Wood} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em take\+Wood, take wood from the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a02d5441c18093a68ce6fbf6b4306212e}{take\+Berries} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em take\+Berries, take berries from the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a883cf42541a46a27f1acbdb5e8274190}{take\+Fish} (int \+\_\+amount)
+\begin{DoxyCompactList}\small\item\em take\+Fish, take fish from the global inventory \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a68a43af73c512bea2073cb6acc5f256f}{get\+Max\+Wood} ()
+\begin{DoxyCompactList}\small\item\em get\+Max\+Wood, returns maximum number of wood that can be stored \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a775ce8ba8c0492e80637aa0cb4f85aff}{get\+Max\+Berries} ()
+\begin{DoxyCompactList}\small\item\em get\+Max\+Berries, returns maximum number of berries that can be stored \end{DoxyCompactList}\item 
+int \hyperlink{class_inventory_a7ba388cc1b56b751b9b996a3cae609d8}{get\+Max\+Fish} ()
+\begin{DoxyCompactList}\small\item\em get\+Max\+Fish, returns maximum number of fish that can be stored \end{DoxyCompactList}\item 
+\hypertarget{class_inventory_a0f02fa71866c3d4ea25108824c8ed8ee}{}void \hyperlink{class_inventory_a0f02fa71866c3d4ea25108824c8ed8ee}{add\+Store\+Space} ()\label{class_inventory_a0f02fa71866c3d4ea25108824c8ed8ee}
+
+\begin{DoxyCompactList}\small\item\em add\+Store\+Space, adds onto maximum amount for storing items \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_inventory}{Inventory} class for management of the global inventory as accessed by the character through storehouses. 
+
+Definition at line 11 of file Inventory.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_inventory_a910d0cede635b76e0ceae407f47661f1}{}\index{Inventory@{Inventory}!add\+Berries@{add\+Berries}}
+\index{add\+Berries@{add\+Berries}!Inventory@{Inventory}}
+\subsubsection[{add\+Berries}]{\setlength{\rightskip}{0pt plus 5cm}bool Inventory\+::add\+Berries (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_a910d0cede635b76e0ceae407f47661f1}
+
+
+add\+Berries, add berries to the global inventory 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+amount,amount} & of berries being added to the inventory \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 26 of file Inventory.\+cpp.
+
+\hypertarget{class_inventory_ac6a68a15e817c0bf293dee99d45d2096}{}\index{Inventory@{Inventory}!add\+Fish@{add\+Fish}}
+\index{add\+Fish@{add\+Fish}!Inventory@{Inventory}}
+\subsubsection[{add\+Fish}]{\setlength{\rightskip}{0pt plus 5cm}bool Inventory\+::add\+Fish (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_ac6a68a15e817c0bf293dee99d45d2096}
+
+
+add\+Fish, add fishes to the global inventory 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+amount,amount} & of fishes being added to the inventory \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 39 of file Inventory.\+cpp.
+
+\hypertarget{class_inventory_a15a3a48902555258c2b621e49a71bd35}{}\index{Inventory@{Inventory}!add\+Wood@{add\+Wood}}
+\index{add\+Wood@{add\+Wood}!Inventory@{Inventory}}
+\subsubsection[{add\+Wood}]{\setlength{\rightskip}{0pt plus 5cm}bool Inventory\+::add\+Wood (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_a15a3a48902555258c2b621e49a71bd35}
+
+
+add\+Wood, add wood to the global inventory 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+amount,amount} & of wood being added to the inventory \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 13 of file Inventory.\+cpp.
+
+\hypertarget{class_inventory_a09aabe66b77e1eaeab0af7f64fc98b06}{}\index{Inventory@{Inventory}!get\+Berry\+Inventory@{get\+Berry\+Inventory}}
+\index{get\+Berry\+Inventory@{get\+Berry\+Inventory}!Inventory@{Inventory}}
+\subsubsection[{get\+Berry\+Inventory}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Berry\+Inventory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_a09aabe66b77e1eaeab0af7f64fc98b06}
+
+
+get\+Berry\+Inventory, get the amount of berries from the global inventory 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+berry\+\_\+inventory, amount of berries in the inventory 
+\end{DoxyReturn}
+
+
+Definition at line 31 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_a9073255708aec050676ee9457e661e92}{}\index{Inventory@{Inventory}!get\+Fish\+Inventory@{get\+Fish\+Inventory}}
+\index{get\+Fish\+Inventory@{get\+Fish\+Inventory}!Inventory@{Inventory}}
+\subsubsection[{get\+Fish\+Inventory}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Fish\+Inventory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_a9073255708aec050676ee9457e661e92}
+
+
+get\+Fish\+Inventory, get the amount of fishes from the global inventory 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+fish\+\_\+inventory, amount of fishes in the inventory 
+\end{DoxyReturn}
+
+
+Definition at line 36 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_a775ce8ba8c0492e80637aa0cb4f85aff}{}\index{Inventory@{Inventory}!get\+Max\+Berries@{get\+Max\+Berries}}
+\index{get\+Max\+Berries@{get\+Max\+Berries}!Inventory@{Inventory}}
+\subsubsection[{get\+Max\+Berries}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Max\+Berries (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_a775ce8ba8c0492e80637aa0cb4f85aff}
+
+
+get\+Max\+Berries, returns maximum number of berries that can be stored 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+max\+\_\+berries 
+\end{DoxyReturn}
+
+
+Definition at line 79 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_a7ba388cc1b56b751b9b996a3cae609d8}{}\index{Inventory@{Inventory}!get\+Max\+Fish@{get\+Max\+Fish}}
+\index{get\+Max\+Fish@{get\+Max\+Fish}!Inventory@{Inventory}}
+\subsubsection[{get\+Max\+Fish}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Max\+Fish (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_a7ba388cc1b56b751b9b996a3cae609d8}
+
+
+get\+Max\+Fish, returns maximum number of fish that can be stored 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+max\+\_\+fish 
+\end{DoxyReturn}
+
+
+Definition at line 84 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_a68a43af73c512bea2073cb6acc5f256f}{}\index{Inventory@{Inventory}!get\+Max\+Wood@{get\+Max\+Wood}}
+\index{get\+Max\+Wood@{get\+Max\+Wood}!Inventory@{Inventory}}
+\subsubsection[{get\+Max\+Wood}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Max\+Wood (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_a68a43af73c512bea2073cb6acc5f256f}
+
+
+get\+Max\+Wood, returns maximum number of wood that can be stored 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+max\+\_\+wood 
+\end{DoxyReturn}
+
+
+Definition at line 74 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_ae7c976e073da5bb5dbb50ccf75b77514}{}\index{Inventory@{Inventory}!get\+Wood\+Inventory@{get\+Wood\+Inventory}}
+\index{get\+Wood\+Inventory@{get\+Wood\+Inventory}!Inventory@{Inventory}}
+\subsubsection[{get\+Wood\+Inventory}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::get\+Wood\+Inventory (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_inventory_ae7c976e073da5bb5dbb50ccf75b77514}
+
+
+get\+Wood\+Inventory, get the amount of wood form the global inventory 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+wood\+\_\+inventory, amount of wood in the inventory 
+\end{DoxyReturn}
+
+
+Definition at line 26 of file Inventory.\+hpp.
+
+\hypertarget{class_inventory_a02d5441c18093a68ce6fbf6b4306212e}{}\index{Inventory@{Inventory}!take\+Berries@{take\+Berries}}
+\index{take\+Berries@{take\+Berries}!Inventory@{Inventory}}
+\subsubsection[{take\+Berries}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::take\+Berries (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_a02d5441c18093a68ce6fbf6b4306212e}
+
+
+take\+Berries, take berries from the global inventory 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+amount,amount} & of berries wanting to be taken \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+amount of berries available/the amount asked for 
+\end{DoxyReturn}
+
+
+Definition at line 75 of file Inventory.\+cpp.
+
+\hypertarget{class_inventory_a883cf42541a46a27f1acbdb5e8274190}{}\index{Inventory@{Inventory}!take\+Fish@{take\+Fish}}
+\index{take\+Fish@{take\+Fish}!Inventory@{Inventory}}
+\subsubsection[{take\+Fish}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::take\+Fish (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_a883cf42541a46a27f1acbdb5e8274190}
+
+
+take\+Fish, take fish from the global inventory 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+amount,amount} & of fishes wanting to be taken \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+amount of fishes available/ the amount asked for 
+\end{DoxyReturn}
+
+
+Definition at line 98 of file Inventory.\+cpp.
+
+\hypertarget{class_inventory_aa3a1293b7a674e5c2408d492baa197c5}{}\index{Inventory@{Inventory}!take\+Wood@{take\+Wood}}
+\index{take\+Wood@{take\+Wood}!Inventory@{Inventory}}
+\subsubsection[{take\+Wood}]{\setlength{\rightskip}{0pt plus 5cm}int Inventory\+::take\+Wood (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_inventory_aa3a1293b7a674e5c2408d492baa197c5}
+
+
+take\+Wood, take wood from the global inventory 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+amount,amount} & of wood wanting to be taken \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+amount of wood available/the amount asked for 
+\end{DoxyReturn}
+
+
+Definition at line 52 of file Inventory.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_inventory_8hpp}{Inventory.\+hpp}\item 
+src/Inventory.\+cpp\end{DoxyCompactItemize}

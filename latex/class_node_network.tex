@@ -1,0 +1,165 @@
+\hypertarget{class_node_network}{}\section{Node\+Network Class Reference}
+\label{class_node_network}\index{Node\+Network@{Node\+Network}}
+
+
+Wraps up a \hyperlink{class_node}{Node} vector and uses it to find a path on the \hyperlink{class_grid}{Grid} object given in its constructor.  
+
+
+
+
+{\ttfamily \#include $<$Node\+Network.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_node_network_a93ba016a84ac0ec294395fcde8050af4}{Node\+Network} (\hyperlink{class_grid}{Grid} $\ast$\+\_\+grid, ngl\+::\+Vec2 \+\_\+pos, ngl\+::\+Vec2 \+\_\+target\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_node_network}{Node\+Network} Constructor requires a grid and a start and end point for pathfinding. \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_node_network_af34a29c8383e967a871bf75d0be86f8d}{find\+Path} ()
+\begin{DoxyCompactList}\small\item\em find\+Path returns a vector of 2d points that can be traversed \end{DoxyCompactList}\item 
+\hypertarget{class_node_network_ae97ea4f9c7fad5babb3a13b05a3b971a}{}void \hyperlink{class_node_network_ae97ea4f9c7fad5babb3a13b05a3b971a}{print\+Network} ()\label{class_node_network_ae97ea4f9c7fad5babb3a13b05a3b971a}
+
+\begin{DoxyCompactList}\small\item\em print\+Network used for debugging node network \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_node_network_af0b9d2a76beb113d7e1ac1e2e259adf3}{create\+Found\+Path} (\hyperlink{class_node}{Node} \+\_\+end\+\_\+node)
+\begin{DoxyCompactList}\small\item\em create\+Found\+Path go through parent nodes and return list of positions of valid path \end{DoxyCompactList}\item 
+void \hyperlink{class_node_network_a211cc3d6bddaf7bbee62cb18295e11ce}{print\+Path} (std\+::vector$<$ ngl\+::\+Vec2 $>$ \&\+\_\+path)
+\begin{DoxyCompactList}\small\item\em print\+Path prints final path \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static bool \hyperlink{class_node_network_a61ce6e6f1a9963a38ddf8865665f6459}{raytrace} (\hyperlink{class_grid}{Grid} $\ast$\+\_\+grid, ngl\+::\+Vec2 \+\_\+start\+\_\+pos, ngl\+::\+Vec2 \+\_\+end\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em raytrace check whether straight path is possible between given points. Does not require instance of class. Algorithm from \href{http://playtechs.blogspot.co.uk/2007/03/raytracing-on-grid.html}{\tt http\+://playtechs.\+blogspot.\+co.\+uk/2007/03/raytracing-\/on-\/grid.\+html} \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wraps up a \hyperlink{class_node}{Node} vector and uses it to find a path on the \hyperlink{class_grid}{Grid} object given in its constructor. 
+
+Definition at line 16 of file Node\+Network.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_node_network_a93ba016a84ac0ec294395fcde8050af4}{}\index{Node\+Network@{Node\+Network}!Node\+Network@{Node\+Network}}
+\index{Node\+Network@{Node\+Network}!Node\+Network@{Node\+Network}}
+\subsubsection[{Node\+Network}]{\setlength{\rightskip}{0pt plus 5cm}Node\+Network\+::\+Node\+Network (
+\begin{DoxyParamCaption}
+\item[{{\bf Grid} $\ast$}]{\+\_\+grid, }
+\item[{ngl\+::\+Vec2}]{\+\_\+pos, }
+\item[{ngl\+::\+Vec2}]{\+\_\+target\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_node_network_a93ba016a84ac0ec294395fcde8050af4}
+
+
+\hyperlink{class_node_network}{Node\+Network} Constructor requires a grid and a start and end point for pathfinding. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+grid} & the grid used to check tile traversability \\
+\hline
+{\em \+\_\+pos} & initial position of character \\
+\hline
+{\em \+\_\+target\+\_\+pos} & target position to find a path to \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 4 of file Node\+Network.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_node_network_af0b9d2a76beb113d7e1ac1e2e259adf3}{}\index{Node\+Network@{Node\+Network}!create\+Found\+Path@{create\+Found\+Path}}
+\index{create\+Found\+Path@{create\+Found\+Path}!Node\+Network@{Node\+Network}}
+\subsubsection[{create\+Found\+Path}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ Node\+Network\+::create\+Found\+Path (
+\begin{DoxyParamCaption}
+\item[{{\bf Node}}]{\+\_\+end\+\_\+node}
+\end{DoxyParamCaption}
+)}\label{class_node_network_af0b9d2a76beb113d7e1ac1e2e259adf3}
+
+
+create\+Found\+Path go through parent nodes and return list of positions of valid path 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+end\+\_\+node} & last node in path \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of points in path 
+\end{DoxyReturn}
+
+
+Definition at line 172 of file Node\+Network.\+cpp.
+
+\hypertarget{class_node_network_af34a29c8383e967a871bf75d0be86f8d}{}\index{Node\+Network@{Node\+Network}!find\+Path@{find\+Path}}
+\index{find\+Path@{find\+Path}!Node\+Network@{Node\+Network}}
+\subsubsection[{find\+Path}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ Node\+Network\+::find\+Path (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_network_af34a29c8383e967a871bf75d0be86f8d}
+
+
+find\+Path returns a vector of 2d points that can be traversed 
+
+\begin{DoxyReturn}{Returns}
+vector of points in a path to target, or 0 length vector if no path is found 
+\end{DoxyReturn}
+
+
+Definition at line 12 of file Node\+Network.\+cpp.
+
+\hypertarget{class_node_network_a211cc3d6bddaf7bbee62cb18295e11ce}{}\index{Node\+Network@{Node\+Network}!print\+Path@{print\+Path}}
+\index{print\+Path@{print\+Path}!Node\+Network@{Node\+Network}}
+\subsubsection[{print\+Path}]{\setlength{\rightskip}{0pt plus 5cm}void Node\+Network\+::print\+Path (
+\begin{DoxyParamCaption}
+\item[{std\+::vector$<$ ngl\+::\+Vec2 $>$ \&}]{\+\_\+path}
+\end{DoxyParamCaption}
+)}\label{class_node_network_a211cc3d6bddaf7bbee62cb18295e11ce}
+
+
+print\+Path prints final path 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+path} & list of nodes that make up path \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 192 of file Node\+Network.\+cpp.
+
+\hypertarget{class_node_network_a61ce6e6f1a9963a38ddf8865665f6459}{}\index{Node\+Network@{Node\+Network}!raytrace@{raytrace}}
+\index{raytrace@{raytrace}!Node\+Network@{Node\+Network}}
+\subsubsection[{raytrace}]{\setlength{\rightskip}{0pt plus 5cm}bool Node\+Network\+::raytrace (
+\begin{DoxyParamCaption}
+\item[{{\bf Grid} $\ast$}]{\+\_\+grid, }
+\item[{ngl\+::\+Vec2}]{\+\_\+start\+\_\+pos, }
+\item[{ngl\+::\+Vec2}]{\+\_\+end\+\_\+pos}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}\label{class_node_network_a61ce6e6f1a9963a38ddf8865665f6459}
+
+
+raytrace check whether straight path is possible between given points. Does not require instance of class. Algorithm from \href{http://playtechs.blogspot.co.uk/2007/03/raytracing-on-grid.html}{\tt http\+://playtechs.\+blogspot.\+co.\+uk/2007/03/raytracing-\/on-\/grid.\+html} 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+grid} & grid to check \\
+\hline
+{\em \+\_\+start\+\_\+pos} & start of line \\
+\hline
+{\em \+\_\+end\+\_\+pos} & end of line \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true for line of sight between \+\_\+start\+\_\+pos and \+\_\+end\+\_\+pos 
+\end{DoxyReturn}
+
+
+Definition at line 228 of file Node\+Network.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_node_network_8hpp}{Node\+Network.\+hpp}\item 
+src/Node\+Network.\+cpp\end{DoxyCompactItemize}

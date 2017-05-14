@@ -1,0 +1,315 @@
+\hypertarget{class_button}{}\section{Button Class Reference}
+\label{class_button}\index{Button@{Button}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_button}{Button} class defines a button with a position that can be activated if clicked.  
+
+
+
+
+{\ttfamily \#include $<$Button.\+hpp$>$}
+
+Inheritance diagram for Button\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_button}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_button_aa45a9b2d50ae10e791b80910d91dcb51}{Button} (Action \+\_\+action, X\+Alignment \+\_\+x\+\_\+align, Y\+Alignment \+\_\+y\+\_\+align, ngl\+::\+Vec2 \+\_\+window\+\_\+res, ngl\+::\+Vec2 \+\_\+offset, ngl\+::\+Vec2 \+\_\+size, const std\+::string \&\+\_\+text)
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_button}{Button} default constructor, takes alignment information. \end{DoxyCompactList}\item 
+void \hyperlink{class_button_a1f4031837f5c0db319dcc840a1eff177}{update\+Pos} (ngl\+::\+Vec2 \+\_\+window\+\_\+res)
+\begin{DoxyCompactList}\small\item\em update\+Pos update the button\textquotesingle{}s position based on the offset and screen res \end{DoxyCompactList}\item 
+bool \hyperlink{class_button_a342c05f57833ea0bb12531e45f5458d4}{is\+Inside} (ngl\+::\+Vec2 \+\_\+pos)
+\begin{DoxyCompactList}\small\item\em is\+Inside check if given position is inside the button, used for mouse position \end{DoxyCompactList}\item 
+\hypertarget{class_button_a8247c77e9bdb3b1f2af58bc69df39d90}{}Action \hyperlink{class_button_a8247c77e9bdb3b1f2af58bc69df39d90}{get\+Action} () const \label{class_button_a8247c77e9bdb3b1f2af58bc69df39d90}
+
+\begin{DoxyCompactList}\small\item\em get\+Action get command from button \end{DoxyCompactList}\item 
+int \hyperlink{class_button_a7742284b70f51fa2dc01261bdb1a85cc}{get\+I\+D} ()
+\begin{DoxyCompactList}\small\item\em get\+I\+D get the button id \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_button_a081804797f423289a39b53ec8a3b5081}{get\+Pos} ()
+\begin{DoxyCompactList}\small\item\em get\+Pos get position of button \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_button_a4c78e21af0948f71b4309ac213b1a8a4}{get\+Size} ()
+\begin{DoxyCompactList}\small\item\em get\+Size get size of button \end{DoxyCompactList}\item 
+const std\+::string \& \hyperlink{class_button_a04fc244e0ef86558e79b8f431009da98}{get\+Text} ()
+\begin{DoxyCompactList}\small\item\em get\+Text get button text \end{DoxyCompactList}\item 
+void \hyperlink{class_button_a508c680bc1e2df818da8aac915d4f679}{set\+Text} (const std\+::string \&\+\_\+text)
+\begin{DoxyCompactList}\small\item\em set\+Text change the text on a button \end{DoxyCompactList}\item 
+bool \hyperlink{class_button_a32272696b66994639151e87126756cf5}{is\+Passive} (bool character\+\_\+selected)
+\begin{DoxyCompactList}\small\item\em is\+Passive whether button is clickable \end{DoxyCompactList}\item 
+void \hyperlink{class_button_adceec3c7035099c448a7e0b8e4fc0ae1}{move} (ngl\+::\+Vec2 \+\_\+move\+\_\+vec)
+\begin{DoxyCompactList}\small\item\em move move a button by a given amount \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_button_a5ba57a0cbdb63e916098035e4e0d9a4a}{}static void \hyperlink{class_button_a5ba57a0cbdb63e916098035e4e0d9a4a}{reset\+Id\+Counter} ()\label{class_button_a5ba57a0cbdb63e916098035e4e0d9a4a}
+
+\begin{DoxyCompactList}\small\item\em reset\+Id\+Counter set id counter of buttons to 0, N\+E\+E\+D T\+O W\+I\+P\+E A\+L\+L B\+U\+T\+T\+O\+N\+S B\+E\+F\+O\+R\+E D\+O\+I\+N\+G T\+H\+I\+S \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_button_a8d446cc1bff0dad800e74e151eaeaf38}{}const int \hyperlink{class_button_a8d446cc1bff0dad800e74e151eaeaf38}{m\+\_\+id}\label{class_button_a8d446cc1bff0dad800e74e151eaeaf38}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+id unique button id \end{DoxyCompactList}\item 
+\hypertarget{class_button_a20ef475ad8fec530edf763d329984a23}{}ngl\+::\+Vec2 \hyperlink{class_button_a20ef475ad8fec530edf763d329984a23}{m\+\_\+offset}\label{class_button_a20ef475ad8fec530edf763d329984a23}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+offset offset in x and y from the button\textquotesingle{}s alignment \end{DoxyCompactList}\item 
+\hypertarget{class_button_a69d3cbc6e82f975ed030b3e375c6c24c}{}ngl\+::\+Vec2 \hyperlink{class_button_a69d3cbc6e82f975ed030b3e375c6c24c}{m\+\_\+pos}\label{class_button_a69d3cbc6e82f975ed030b3e375c6c24c}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+pos button absolute position \end{DoxyCompactList}\item 
+\hypertarget{class_button_aeb2d26941560d1780bea586ad38d8393}{}ngl\+::\+Vec2 \hyperlink{class_button_aeb2d26941560d1780bea586ad38d8393}{m\+\_\+size}\label{class_button_aeb2d26941560d1780bea586ad38d8393}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+size size of button, in x and y \end{DoxyCompactList}\item 
+\hypertarget{class_button_a8fe3f35f9eebbbe83e809cb23dd2c7a6}{}X\+Alignment \hyperlink{class_button_a8fe3f35f9eebbbe83e809cb23dd2c7a6}{m\+\_\+x\+\_\+align}\label{class_button_a8fe3f35f9eebbbe83e809cb23dd2c7a6}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+x\+\_\+align alignment of button left/center/right \end{DoxyCompactList}\item 
+\hypertarget{class_button_a8bd3166ddceefaed2c73e1d559213b6b}{}Y\+Alignment \hyperlink{class_button_a8bd3166ddceefaed2c73e1d559213b6b}{m\+\_\+y\+\_\+align}\label{class_button_a8bd3166ddceefaed2c73e1d559213b6b}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+y\+\_\+align alignment of button top/center/bottom \end{DoxyCompactList}\item 
+\hypertarget{class_button_a70ace223d5a3510f893625434963cd67}{}Action \hyperlink{class_button_a70ace223d5a3510f893625434963cd67}{m\+\_\+action}\label{class_button_a70ace223d5a3510f893625434963cd67}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+action action that button does upon activation \end{DoxyCompactList}\item 
+\hypertarget{class_button_a06388dbd60485e80ad8e856057f13489}{}std\+::string \hyperlink{class_button_a06388dbd60485e80ad8e856057f13489}{m\+\_\+text}\label{class_button_a06388dbd60485e80ad8e856057f13489}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+text button text displayed on button, or used for setting buttons to store key \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_button_a303c28c6a024ef6854ef3f32bacd5c0b}{}static int \hyperlink{class_button_a303c28c6a024ef6854ef3f32bacd5c0b}{m\+\_\+id\+\_\+counter}\label{class_button_a303c28c6a024ef6854ef3f32bacd5c0b}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+id\+\_\+counter keeps track of number of buttons \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_button}{Button} class defines a button with a position that can be activated if clicked. 
+
+Definition at line 27 of file Button.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_button_aa45a9b2d50ae10e791b80910d91dcb51}{}\index{Button@{Button}!Button@{Button}}
+\index{Button@{Button}!Button@{Button}}
+\subsubsection[{Button}]{\setlength{\rightskip}{0pt plus 5cm}Button\+::\+Button (
+\begin{DoxyParamCaption}
+\item[{Action}]{\+\_\+action, }
+\item[{X\+Alignment}]{\+\_\+x\+\_\+align, }
+\item[{Y\+Alignment}]{\+\_\+y\+\_\+align, }
+\item[{ngl\+::\+Vec2}]{\+\_\+window\+\_\+res, }
+\item[{ngl\+::\+Vec2}]{\+\_\+offset, }
+\item[{ngl\+::\+Vec2}]{\+\_\+size, }
+\item[{const std\+::string \&}]{\+\_\+text}
+\end{DoxyParamCaption}
+)}\label{class_button_aa45a9b2d50ae10e791b80910d91dcb51}
+
+
+\hyperlink{class_button}{Button} default constructor, takes alignment information. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+action} & functionality of the button \\
+\hline
+{\em \+\_\+x\+\_\+align} & which side the button is bound to, either left, right or center \\
+\hline
+{\em \+\_\+y\+\_\+align} & which level the button is bound to, either up, down or center \\
+\hline
+{\em \+\_\+window\+\_\+res} & window resolution for calculating postion from offset \\
+\hline
+{\em \+\_\+offset} & button offset from given alignments \\
+\hline
+{\em \+\_\+size} & size of the button \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 6 of file Button.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_button_a7742284b70f51fa2dc01261bdb1a85cc}{}\index{Button@{Button}!get\+I\+D@{get\+I\+D}}
+\index{get\+I\+D@{get\+I\+D}!Button@{Button}}
+\subsubsection[{get\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}int Button\+::get\+I\+D (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_button_a7742284b70f51fa2dc01261bdb1a85cc}
+
+
+get\+I\+D get the button id 
+
+\begin{DoxyReturn}{Returns}
+id of the button 
+\end{DoxyReturn}
+
+
+Definition at line 71 of file Button.\+cpp.
+
+\hypertarget{class_button_a081804797f423289a39b53ec8a3b5081}{}\index{Button@{Button}!get\+Pos@{get\+Pos}}
+\index{get\+Pos@{get\+Pos}!Button@{Button}}
+\subsubsection[{get\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 Button\+::get\+Pos (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_button_a081804797f423289a39b53ec8a3b5081}
+
+
+get\+Pos get position of button 
+
+\begin{DoxyReturn}{Returns}
+position of button as vec2 
+\end{DoxyReturn}
+
+
+Definition at line 76 of file Button.\+cpp.
+
+\hypertarget{class_button_a4c78e21af0948f71b4309ac213b1a8a4}{}\index{Button@{Button}!get\+Size@{get\+Size}}
+\index{get\+Size@{get\+Size}!Button@{Button}}
+\subsubsection[{get\+Size}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 Button\+::get\+Size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_button_a4c78e21af0948f71b4309ac213b1a8a4}
+
+
+get\+Size get size of button 
+
+\begin{DoxyReturn}{Returns}
+vec2 of x and y size 
+\end{DoxyReturn}
+
+
+Definition at line 81 of file Button.\+cpp.
+
+\hypertarget{class_button_a04fc244e0ef86558e79b8f431009da98}{}\index{Button@{Button}!get\+Text@{get\+Text}}
+\index{get\+Text@{get\+Text}!Button@{Button}}
+\subsubsection[{get\+Text}]{\setlength{\rightskip}{0pt plus 5cm}const std\+::string \& Button\+::get\+Text (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_button_a04fc244e0ef86558e79b8f431009da98}
+
+
+get\+Text get button text 
+
+\begin{DoxyReturn}{Returns}
+text of button, or \char`\"{}\textbackslash{}0\char`\"{} 
+\end{DoxyReturn}
+
+
+Definition at line 86 of file Button.\+cpp.
+
+\hypertarget{class_button_a342c05f57833ea0bb12531e45f5458d4}{}\index{Button@{Button}!is\+Inside@{is\+Inside}}
+\index{is\+Inside@{is\+Inside}!Button@{Button}}
+\subsubsection[{is\+Inside}]{\setlength{\rightskip}{0pt plus 5cm}bool Button\+::is\+Inside (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_button_a342c05f57833ea0bb12531e45f5458d4}
+
+
+is\+Inside check if given position is inside the button, used for mouse position 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+pos} & position to check button position and size against \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true for inside, false for outside 
+\end{DoxyReturn}
+
+
+Definition at line 53 of file Button.\+cpp.
+
+\hypertarget{class_button_a32272696b66994639151e87126756cf5}{}\index{Button@{Button}!is\+Passive@{is\+Passive}}
+\index{is\+Passive@{is\+Passive}!Button@{Button}}
+\subsubsection[{is\+Passive}]{\setlength{\rightskip}{0pt plus 5cm}bool Button\+::is\+Passive (
+\begin{DoxyParamCaption}
+\item[{bool}]{character\+\_\+selected}
+\end{DoxyParamCaption}
+)}\label{class_button_a32272696b66994639151e87126756cf5}
+
+
+is\+Passive whether button is clickable 
+
+
+\begin{DoxyParams}{Parameters}
+{\em character\+\_\+selected} & whether there is currently a selected character \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if button has no action 
+\end{DoxyReturn}
+
+
+Definition at line 96 of file Button.\+cpp.
+
+\hypertarget{class_button_adceec3c7035099c448a7e0b8e4fc0ae1}{}\index{Button@{Button}!move@{move}}
+\index{move@{move}!Button@{Button}}
+\subsubsection[{move}]{\setlength{\rightskip}{0pt plus 5cm}void Button\+::move (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+move\+\_\+vec}
+\end{DoxyParamCaption}
+)}\label{class_button_adceec3c7035099c448a7e0b8e4fc0ae1}
+
+
+move move a button by a given amount 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+move\+\_\+vec} & the vector to move the button by \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 128 of file Button.\+cpp.
+
+\hypertarget{class_button_a508c680bc1e2df818da8aac915d4f679}{}\index{Button@{Button}!set\+Text@{set\+Text}}
+\index{set\+Text@{set\+Text}!Button@{Button}}
+\subsubsection[{set\+Text}]{\setlength{\rightskip}{0pt plus 5cm}void Button\+::set\+Text (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+text}
+\end{DoxyParamCaption}
+)}\label{class_button_a508c680bc1e2df818da8aac915d4f679}
+
+
+set\+Text change the text on a button 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+text} & string to set the text to \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 91 of file Button.\+cpp.
+
+\hypertarget{class_button_a1f4031837f5c0db319dcc840a1eff177}{}\index{Button@{Button}!update\+Pos@{update\+Pos}}
+\index{update\+Pos@{update\+Pos}!Button@{Button}}
+\subsubsection[{update\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}void Button\+::update\+Pos (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+window\+\_\+res}
+\end{DoxyParamCaption}
+)}\label{class_button_a1f4031837f5c0db319dcc840a1eff177}
+
+
+update\+Pos update the button\textquotesingle{}s position based on the offset and screen res 
+
+
+\begin{DoxyParams}{Parameters}
+{\em screen\+\_\+res} & resolution of the window \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 19 of file Button.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Button.\+hpp\item 
+src/Button.\+cpp\end{DoxyCompactItemize}

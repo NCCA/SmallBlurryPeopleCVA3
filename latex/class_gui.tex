@@ -1,0 +1,423 @@
+\hypertarget{class_gui}{}\section{Gui Class Reference}
+\label{class_gui}\index{Gui@{Gui}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_gui}{Gui} class contains button positions and managing their use.  
+
+
+
+
+{\ttfamily \#include $<$Gui.\+hpp$>$}
+
+Inheritance diagram for Gui\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_gui}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{class_gui_ab494eaa66729e584466e0af49d38495d}{init} (\hyperlink{class_scene}{Scene} $\ast$\+\_\+scene, ngl\+::\+Vec2 \+\_\+res, const std\+::string \&\+\_\+shader\+\_\+name)
+\begin{DoxyCompactList}\small\item\em init initialise or reset \hyperlink{class_gui}{Gui} with specific resolution \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a920c7449785d0e0647d097bb3c10ce00}{}void \hyperlink{class_gui_a920c7449785d0e0647d097bb3c10ce00}{set\+Resolution} (ngl\+::\+Vec2 \+\_\+res)\label{class_gui_a920c7449785d0e0647d097bb3c10ce00}
+
+\begin{DoxyCompactList}\small\item\em set\+Resolution set the window width and window height \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a379674b073c95c007cab558fcc4f6211}{}void \hyperlink{class_gui_a379674b073c95c007cab558fcc4f6211}{init\+G\+L} ()\label{class_gui_a379674b073c95c007cab558fcc4f6211}
+
+\begin{DoxyCompactList}\small\item\em init\+G\+L initialise gl values \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_af0f43b8a1cfb88675c9a7cea741306f1}{click} ()
+\begin{DoxyCompactList}\small\item\em click check if user has clicked inside any button area \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ \hyperlink{class_command}{Command} $>$ \hyperlink{class_gui_a0b14b6b38305c133341b2e396d299056}{generate\+Command} (Action \+\_\+action)
+\begin{DoxyCompactList}\small\item\em generate\+Command create a command to be executed \end{DoxyCompactList}\item 
+int \hyperlink{class_gui_a6f41a2f17db655a640dca0a01f5b89d0}{execute\+Action} (Action \+\_\+action)
+\begin{DoxyCompactList}\small\item\em execute\+Action generate a command and execute it \end{DoxyCompactList}\item 
+bool \hyperlink{class_gui_a24e2191386f1b05259d9c029efd2d876}{mouse\+Pos} (ngl\+::\+Vec2 \+\_\+pos)
+\begin{DoxyCompactList}\small\item\em mouse\+Pos update mouse position \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ac9a9c05daeecd9b9719599992afc4baa}{}void \hyperlink{class_gui_ac9a9c05daeecd9b9719599992afc4baa}{wipe\+Buttons} ()\label{class_gui_ac9a9c05daeecd9b9719599992afc4baa}
+
+\begin{DoxyCompactList}\small\item\em wipe\+Buttons used to clear buttons, and button id counter is reset to 0 \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a925aaf59068dec101a1fd17c55e81645}{}void \hyperlink{class_gui_a925aaf59068dec101a1fd17c55e81645}{pause} ()\label{class_gui_a925aaf59068dec101a1fd17c55e81645}
+
+\begin{DoxyCompactList}\small\item\em pause create pause menu and set pause uniform \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ad6def026b549e134edd59b8b31927d24}{}void \hyperlink{class_gui_ad6def026b549e134edd59b8b31927d24}{unpause} ()\label{class_gui_ad6def026b549e134edd59b8b31927d24}
+
+\begin{DoxyCompactList}\small\item\em unpause leave pause menu and set pause uniform \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ab9f1b8bd0ca81a7c2ea19d5aabe34ef8}{}void \hyperlink{class_gui_ab9f1b8bd0ca81a7c2ea19d5aabe34ef8}{create\+Start\+Menu\+Buttons} ()\label{class_gui_ab9f1b8bd0ca81a7c2ea19d5aabe34ef8}
+
+\begin{DoxyCompactList}\small\item\em create\+Start\+Menu\+Buttons creates the set of buttons for start menu \end{DoxyCompactList}\item 
+\hypertarget{class_gui_aa1c676af422be41e51ee6ef8822f5375}{}void \hyperlink{class_gui_aa1c676af422be41e51ee6ef8822f5375}{create\+Scene\+Buttons} ()\label{class_gui_aa1c676af422be41e51ee6ef8822f5375}
+
+\begin{DoxyCompactList}\small\item\em create\+Scene\+Buttons creates the set of default buttons for the scene \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a7eccf8c2cb3f618697901f19b07f8423}{}void \hyperlink{class_gui_a7eccf8c2cb3f618697901f19b07f8423}{create\+Pause\+Buttons} ()\label{class_gui_a7eccf8c2cb3f618697901f19b07f8423}
+
+\begin{DoxyCompactList}\small\item\em create\+Pause\+Buttons create the set of buttons for the pause menu \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a0d617614927b7505423a01bb305f925e}{}void \hyperlink{class_gui_a0d617614927b7505423a01bb305f925e}{create\+Prefs\+Buttons} ()\label{class_gui_a0d617614927b7505423a01bb305f925e}
+
+\begin{DoxyCompactList}\small\item\em create\+Prefs\+Buttons create the set of buttons for the preferences menu \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a2a4e35862034a6f6cb1fc72ae1e092c3}{}void \hyperlink{class_gui_a2a4e35862034a6f6cb1fc72ae1e092c3}{create\+End\+Game\+Buttons} (const std\+::string \&\+\_\+message)\label{class_gui_a2a4e35862034a6f6cb1fc72ae1e092c3}
+
+\begin{DoxyCompactList}\small\item\em create\+End\+Game\+Buttons create set of buttons for the game over screen \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a4b0fe96dae38c2ed21254d485cc44f8a}{add\+Button} (Action \+\_\+action, X\+Alignment \+\_\+x\+\_\+align, Y\+Alignment \+\_\+y\+\_\+align, ngl\+::\+Vec2 \+\_\+offset, ngl\+::\+Vec2 \+\_\+size, const std\+::string \&\+\_\+text)
+\begin{DoxyCompactList}\small\item\em add\+Button add a button to the button vector \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a40c1d90297aba24deeee87be41766856}{add\+Notification} (const std\+::string \&\+\_\+text, ngl\+::\+Vec2 \+\_\+map\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em add\+Notification add a notificaion to the button vector \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a95012bb614a2cc32f18bf8ecd29019ef}{remove\+Button} (std\+::shared\+\_\+ptr$<$ \hyperlink{class_button}{Button} $>$ button)
+\begin{DoxyCompactList}\small\item\em remove\+Button delete a button from the vector \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ad611c7f7b5cac900229fcfef4c090166}{}void \hyperlink{class_gui_ad611c7f7b5cac900229fcfef4c090166}{update\+Button\+Arrays} ()\label{class_gui_ad611c7f7b5cac900229fcfef4c090166}
+
+\begin{DoxyCompactList}\small\item\em update\+Button\+Arrays updates positions and passes them to open\+G\+L, useful for changing buttons or resizing screen \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a649d94eae69852d92b59861c774287c4}{}void \hyperlink{class_gui_a649d94eae69852d92b59861c774287c4}{update\+Notifications} ()\label{class_gui_a649d94eae69852d92b59861c774287c4}
+
+\begin{DoxyCompactList}\small\item\em update\+Notifications update age of notifications and delete any if necessary \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a31d2eaddba4843354b0db41a05197d47}{}void \hyperlink{class_gui_a31d2eaddba4843354b0db41a05197d47}{draw\+Buttons} ()\label{class_gui_a31d2eaddba4843354b0db41a05197d47}
+
+\begin{DoxyCompactList}\small\item\em draw\+Buttons draw buttons to screen \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ada706cacea65e2005bbf49db7ebc9258}{}void \hyperlink{class_gui_ada706cacea65e2005bbf49db7ebc9258}{mouse\+Down} ()\label{class_gui_ada706cacea65e2005bbf49db7ebc9258}
+
+\begin{DoxyCompactList}\small\item\em mouse\+Down register mouse as clicked \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a47afc0cd87f5b64b4eae9aebfb619eea}{}void \hyperlink{class_gui_a47afc0cd87f5b64b4eae9aebfb619eea}{mouse\+Up} ()\label{class_gui_a47afc0cd87f5b64b4eae9aebfb619eea}
+
+\begin{DoxyCompactList}\small\item\em mouse\+Up register mouse as not clicked \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a788432634f4333cd6f9d1579565a0250}{bind\+Texture\+To\+Shader} (const G\+Luint \+\_\+tex, const char $\ast$\+\_\+uniform, int \+\_\+target)
+\begin{DoxyCompactList}\small\item\em bind\+Texture\+To\+Shader bind the given texture to the button shader \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a538696f7ef301fda882c525842634ac5}{}void \hyperlink{class_gui_a538696f7ef301fda882c525842634ac5}{update\+Text} ()\label{class_gui_a538696f7ef301fda882c525842634ac5}
+
+\begin{DoxyCompactList}\small\item\em update\+Text send m\+\_\+button\+\_\+text to shader \end{DoxyCompactList}\item 
+\hypertarget{class_gui_a32cd15ef494701303d853af6a9ab0020}{}void \hyperlink{class_gui_a32cd15ef494701303d853af6a9ab0020}{update\+Active\+Character} ()\label{class_gui_a32cd15ef494701303d853af6a9ab0020}
+
+\begin{DoxyCompactList}\small\item\em update\+Active\+Character if active character changes, this function updates button text \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a2c1f54d7583accb97d684fc022d0e63e}{notify} (const std\+::string \&\+\_\+text, ngl\+::\+Vec2 \+\_\+pos)
+\begin{DoxyCompactList}\small\item\em notify create a notification command \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a5b9e1f5e066356ed773a15df52e1d94d}{move\+Notifications} (ngl\+::\+Vec2 \+\_\+move\+\_\+vec)
+\begin{DoxyCompactList}\small\item\em move\+Notifications move all notifications eg up or down \end{DoxyCompactList}\item 
+int \hyperlink{class_gui_aac291c98bb1a3a3191f1fc273f2b6320}{get\+Button\+Length} (const std\+::string \&\+\_\+text)
+\begin{DoxyCompactList}\small\item\em get\+Button\+Length find out how long a button should be to fit a string \end{DoxyCompactList}\item 
+void \hyperlink{class_gui_a9279b4ccbb94ceb79e878345c25e567f}{scroll\+Button} (int \+\_\+dir)
+\begin{DoxyCompactList}\small\item\em scroll\+Button send an increment or decrement command \end{DoxyCompactList}\item 
+\hypertarget{class_gui_adcb9a0227d1bef379a2fe39e98dea619}{}void \hyperlink{class_gui_adcb9a0227d1bef379a2fe39e98dea619}{map\+Changed} ()\label{class_gui_adcb9a0227d1bef379a2fe39e98dea619}
+
+\begin{DoxyCompactList}\small\item\em map\+Changed update buttons which require name of current map \end{DoxyCompactList}\item 
+\hypertarget{class_gui_af662508cdbbc88b11c4e07a7efc65642}{}void \hyperlink{class_gui_af662508cdbbc88b11c4e07a7efc65642}{add\+Map\+Buttons} ()\label{class_gui_af662508cdbbc88b11c4e07a7efc65642}
+
+\begin{DoxyCompactList}\small\item\em add\+Map\+Buttons add map selection buttons to a menu \end{DoxyCompactList}\item 
+\hypertarget{class_gui_ad7440d909357b8c5d1def89acda8d423}{}void \hyperlink{class_gui_ad7440d909357b8c5d1def89acda8d423}{add\+Menu\+Buttons} ()\label{class_gui_ad7440d909357b8c5d1def89acda8d423}
+
+\begin{DoxyCompactList}\small\item\em add\+Menu\+Buttons add buttons for menu \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_gui_a04e5911e7d7e477bc9bf6722758c321a}{}class {\bfseries Singleton$<$ Gui $>$}\label{class_gui_a04e5911e7d7e477bc9bf6722758c321a}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_gui}{Gui} class contains button positions and managing their use. 
+
+Definition at line 25 of file Gui.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_gui_a4b0fe96dae38c2ed21254d485cc44f8a}{}\index{Gui@{Gui}!add\+Button@{add\+Button}}
+\index{add\+Button@{add\+Button}!Gui@{Gui}}
+\subsubsection[{add\+Button}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::add\+Button (
+\begin{DoxyParamCaption}
+\item[{Action}]{\+\_\+action, }
+\item[{X\+Alignment}]{\+\_\+x\+\_\+align, }
+\item[{Y\+Alignment}]{\+\_\+y\+\_\+align, }
+\item[{ngl\+::\+Vec2}]{\+\_\+offset, }
+\item[{ngl\+::\+Vec2}]{\+\_\+size, }
+\item[{const std\+::string \&}]{\+\_\+text}
+\end{DoxyParamCaption}
+)}\label{class_gui_a4b0fe96dae38c2ed21254d485cc44f8a}
+
+
+add\+Button add a button to the button vector 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+action} & button\textquotesingle{}s action when clicked \\
+\hline
+{\em \+\_\+x\+\_\+align} & horizonal alignment (to left/right/center of screen) \\
+\hline
+{\em \+\_\+y\+\_\+align} & vertical alignment (to top/bottom/center of screen) \\
+\hline
+{\em \+\_\+offset} & offset from edge/center \\
+\hline
+{\em \+\_\+size} & size of button \\
+\hline
+{\em \+\_\+text} & button\textquotesingle{}s text \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 388 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a40c1d90297aba24deeee87be41766856}{}\index{Gui@{Gui}!add\+Notification@{add\+Notification}}
+\index{add\+Notification@{add\+Notification}!Gui@{Gui}}
+\subsubsection[{add\+Notification}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::add\+Notification (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+text, }
+\item[{ngl\+::\+Vec2}]{\+\_\+map\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_gui_a40c1d90297aba24deeee87be41766856}
+
+
+add\+Notification add a notificaion to the button vector 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+text} & text of notification \\
+\hline
+{\em \+\_\+map\+\_\+pos} & position notification comes from \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 393 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a788432634f4333cd6f9d1579565a0250}{}\index{Gui@{Gui}!bind\+Texture\+To\+Shader@{bind\+Texture\+To\+Shader}}
+\index{bind\+Texture\+To\+Shader@{bind\+Texture\+To\+Shader}!Gui@{Gui}}
+\subsubsection[{bind\+Texture\+To\+Shader}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::bind\+Texture\+To\+Shader (
+\begin{DoxyParamCaption}
+\item[{const G\+Luint}]{\+\_\+tex, }
+\item[{const char $\ast$}]{\+\_\+uniform, }
+\item[{int}]{\+\_\+target}
+\end{DoxyParamCaption}
+)}\label{class_gui_a788432634f4333cd6f9d1579565a0250}
+
+
+bind\+Texture\+To\+Shader bind the given texture to the button shader 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+tex} & texture id to use \\
+\hline
+{\em \+\_\+uniform} & name of texture in shader \\
+\hline
+{\em \+\_\+target} & which number texture unit to use \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 619 of file Gui.\+cpp.
+
+\hypertarget{class_gui_af0f43b8a1cfb88675c9a7cea741306f1}{}\index{Gui@{Gui}!click@{click}}
+\index{click@{click}!Gui@{Gui}}
+\subsubsection[{click}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::click (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_gui_af0f43b8a1cfb88675c9a7cea741306f1}
+
+
+click check if user has clicked inside any button area 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & mouse position to compare buttons against \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 58 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a6f41a2f17db655a640dca0a01f5b89d0}{}\index{Gui@{Gui}!execute\+Action@{execute\+Action}}
+\index{execute\+Action@{execute\+Action}!Gui@{Gui}}
+\subsubsection[{execute\+Action}]{\setlength{\rightskip}{0pt plus 5cm}int Gui\+::execute\+Action (
+\begin{DoxyParamCaption}
+\item[{Action}]{\+\_\+action}
+\end{DoxyParamCaption}
+)}\label{class_gui_a6f41a2f17db655a640dca0a01f5b89d0}
+
+
+execute\+Action generate a command and execute it 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+action} & action to execute \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 for no errors, 1 for nothing executed 
+\end{DoxyReturn}
+
+
+Definition at line 236 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a0b14b6b38305c133341b2e396d299056}{}\index{Gui@{Gui}!generate\+Command@{generate\+Command}}
+\index{generate\+Command@{generate\+Command}!Gui@{Gui}}
+\subsubsection[{generate\+Command}]{\setlength{\rightskip}{0pt plus 5cm}std\+::shared\+\_\+ptr$<$ {\bf Command} $>$ Gui\+::generate\+Command (
+\begin{DoxyParamCaption}
+\item[{Action}]{\+\_\+action}
+\end{DoxyParamCaption}
+)}\label{class_gui_a0b14b6b38305c133341b2e396d299056}
+
+
+generate\+Command create a command to be executed 
+
+\begin{DoxyReturn}{Returns}
+command to be executed 
+\end{DoxyReturn}
+
+
+Definition at line 67 of file Gui.\+cpp.
+
+\hypertarget{class_gui_aac291c98bb1a3a3191f1fc273f2b6320}{}\index{Gui@{Gui}!get\+Button\+Length@{get\+Button\+Length}}
+\index{get\+Button\+Length@{get\+Button\+Length}!Gui@{Gui}}
+\subsubsection[{get\+Button\+Length}]{\setlength{\rightskip}{0pt plus 5cm}int Gui\+::get\+Button\+Length (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+text}
+\end{DoxyParamCaption}
+)}\label{class_gui_aac291c98bb1a3a3191f1fc273f2b6320}
+
+
+get\+Button\+Length find out how long a button should be to fit a string 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+text} & text on button \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+length of button needed 
+\end{DoxyReturn}
+
+
+Definition at line 736 of file Gui.\+cpp.
+
+\hypertarget{class_gui_ab494eaa66729e584466e0af49d38495d}{}\index{Gui@{Gui}!init@{init}}
+\index{init@{init}!Gui@{Gui}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::init (
+\begin{DoxyParamCaption}
+\item[{{\bf Scene} $\ast$}]{\+\_\+scene, }
+\item[{ngl\+::\+Vec2}]{\+\_\+res, }
+\item[{const std\+::string \&}]{\+\_\+shader\+\_\+name}
+\end{DoxyParamCaption}
+)}\label{class_gui_ab494eaa66729e584466e0af49d38495d}
+
+
+init initialise or reset \hyperlink{class_gui}{Gui} with specific resolution 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+res} & resolution to initialise with \\
+\hline
+{\em \+\_\+shader\+\_\+name} & name of gui shader \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 25 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a24e2191386f1b05259d9c029efd2d876}{}\index{Gui@{Gui}!mouse\+Pos@{mouse\+Pos}}
+\index{mouse\+Pos@{mouse\+Pos}!Gui@{Gui}}
+\subsubsection[{mouse\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}bool Gui\+::mouse\+Pos (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_gui_a24e2191386f1b05259d9c029efd2d876}
+
+
+mouse\+Pos update mouse position 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+pos} & current mouse position \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 253 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a5b9e1f5e066356ed773a15df52e1d94d}{}\index{Gui@{Gui}!move\+Notifications@{move\+Notifications}}
+\index{move\+Notifications@{move\+Notifications}!Gui@{Gui}}
+\subsubsection[{move\+Notifications}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::move\+Notifications (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+move\+\_\+vec}
+\end{DoxyParamCaption}
+)}\label{class_gui_a5b9e1f5e066356ed773a15df52e1d94d}
+
+
+move\+Notifications move all notifications eg up or down 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+move\+\_\+vec} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 724 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a2c1f54d7583accb97d684fc022d0e63e}{}\index{Gui@{Gui}!notify@{notify}}
+\index{notify@{notify}!Gui@{Gui}}
+\subsubsection[{notify}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::notify (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+text, }
+\item[{ngl\+::\+Vec2}]{\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_gui_a2c1f54d7583accb97d684fc022d0e63e}
+
+
+notify create a notification command 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+text} & text for notification \\
+\hline
+{\em \+\_\+pos} & position on map that notification comes from \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 697 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a95012bb614a2cc32f18bf8ecd29019ef}{}\index{Gui@{Gui}!remove\+Button@{remove\+Button}}
+\index{remove\+Button@{remove\+Button}!Gui@{Gui}}
+\subsubsection[{remove\+Button}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::remove\+Button (
+\begin{DoxyParamCaption}
+\item[{std\+::shared\+\_\+ptr$<$ {\bf Button} $>$}]{button}
+\end{DoxyParamCaption}
+)}\label{class_gui_a95012bb614a2cc32f18bf8ecd29019ef}
+
+
+remove\+Button delete a button from the vector 
+
+
+\begin{DoxyParams}{Parameters}
+{\em button} & button to remove \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 401 of file Gui.\+cpp.
+
+\hypertarget{class_gui_a9279b4ccbb94ceb79e878345c25e567f}{}\index{Gui@{Gui}!scroll\+Button@{scroll\+Button}}
+\index{scroll\+Button@{scroll\+Button}!Gui@{Gui}}
+\subsubsection[{scroll\+Button}]{\setlength{\rightskip}{0pt plus 5cm}void Gui\+::scroll\+Button (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+dir}
+\end{DoxyParamCaption}
+)}\label{class_gui_a9279b4ccbb94ceb79e878345c25e567f}
+
+
+scroll\+Button send an increment or decrement command 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+dir} & positive for increment, negative for decrement \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 741 of file Gui.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_gui_8hpp}{Gui.\+hpp}\item 
+src/Gui.\+cpp\end{DoxyCompactItemize}

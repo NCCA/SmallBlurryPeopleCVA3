@@ -1,0 +1,291 @@
+\hypertarget{class_grid_tile}{}\section{Grid\+Tile Class Reference}
+\label{class_grid_tile}\index{Grid\+Tile@{Grid\+Tile}}
+
+
+stores all of the data associated with each tile in the map  
+
+
+
+
+{\ttfamily \#include $<$Grid\+Tile.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_grid_tile_a6ba79edb185d1e6a5d7d9fe01c36ffd8}{Grid\+Tile} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em ctor that takes a tile id that represents its position on the map \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_tile_a2aad8cf6129ba54b034b64e2831777c5}{is\+Traversable} ()
+\begin{DoxyCompactList}\small\item\em is\+Traversable returns a bool to indicate if the tile can be walked across, currently trees and buildings are not traversable \end{DoxyCompactList}\item 
+Tile\+Type \hyperlink{class_grid_tile_ad3ad533f3fecb500ca598863388a8e1f}{get\+Type} ()
+\begin{DoxyCompactList}\small\item\em get\+Type gets the type of the tile \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_tile_a85f7230f5cc42c6b7e878f2d32c965d4}{set\+Type} (Tile\+Type \+\_\+t)
+\begin{DoxyCompactList}\small\item\em set\+Type sets the type of the tile \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_tile_a04d62e39a1ccf3ce7e073363713041a2}{get\+Height} ()
+\begin{DoxyCompactList}\small\item\em get\+Height gets the height stored in the tile \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_tile_ade3a37f993cb0e0aa28a93df6a2d7c03}{set\+Height} (int \+\_\+height)
+\begin{DoxyCompactList}\small\item\em set\+Height sets the height of the tile \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_tile_a7519797658aedf4c3a5593eef2c8612e}{get\+Num\+Trees} ()
+\begin{DoxyCompactList}\small\item\em get\+Num\+Trees returns the number of trees on a tile \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_tile_a1a5b16033129e696a04d1158afd30f4a}{set\+Num\+Trees} (int \+\_\+num\+\_\+trees)
+\begin{DoxyCompactList}\small\item\em set\+Num\+Trees sets the number of trees stored in the tile \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_tile_a372058d00e9573715a07914e086f98ae}{cut\+Trees} (int \+\_\+goal\+\_\+amount)
+\begin{DoxyCompactList}\small\item\em cut\+Trees try to reduce the number of treesm returning the number of trees cut \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_tile_af474b1185c91d6b9edc19e456a7227e9}{add\+Build\+State} (float \+\_\+value, Tile\+Type \+\_\+type)
+\begin{DoxyCompactList}\small\item\em set\+Build\+State adds to the build state for a building tile \end{DoxyCompactList}\item 
+float \hyperlink{class_grid_tile_abf2c072dd742f3f1581c399d27db6077}{get\+Build\+State} ()
+\begin{DoxyCompactList}\small\item\em get\+Build\+State gets the completion of a building in the range \mbox{[}0 ... 1\mbox{]} \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_grid_tile_a3e964d7cefe5b100ae9f15326a2eecbd}{get\+Tree\+Positions} ()
+\begin{DoxyCompactList}\small\item\em get\+Tree\+Positions gets the positions of the trees on a tile \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+stores all of the data associated with each tile in the map 
+
+Definition at line 26 of file Grid\+Tile.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_grid_tile_a6ba79edb185d1e6a5d7d9fe01c36ffd8}{}\index{Grid\+Tile@{Grid\+Tile}!Grid\+Tile@{Grid\+Tile}}
+\index{Grid\+Tile@{Grid\+Tile}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{Grid\+Tile}]{\setlength{\rightskip}{0pt plus 5cm}Grid\+Tile\+::\+Grid\+Tile (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a6ba79edb185d1e6a5d7d9fe01c36ffd8}
+
+
+ctor that takes a tile id that represents its position on the map 
+
+
+\begin{DoxyParams}{Parameters}
+{\em the} & id of the tile \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 5 of file Grid\+Tile.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_grid_tile_af474b1185c91d6b9edc19e456a7227e9}{}\index{Grid\+Tile@{Grid\+Tile}!add\+Build\+State@{add\+Build\+State}}
+\index{add\+Build\+State@{add\+Build\+State}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{add\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+Tile\+::add\+Build\+State (
+\begin{DoxyParamCaption}
+\item[{float}]{\+\_\+value, }
+\item[{Tile\+Type}]{\+\_\+type}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_af474b1185c91d6b9edc19e456a7227e9}
+
+
+set\+Build\+State adds to the build state for a building tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+value} & is the amount to increment the build state variable by \\
+\hline
+{\em \+\_\+type} & is the type of building being built \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 75 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a372058d00e9573715a07914e086f98ae}{}\index{Grid\+Tile@{Grid\+Tile}!cut\+Trees@{cut\+Trees}}
+\index{cut\+Trees@{cut\+Trees}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{cut\+Trees}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+Tile\+::cut\+Trees (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+goal\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a372058d00e9573715a07914e086f98ae}
+
+
+cut\+Trees try to reduce the number of treesm returning the number of trees cut 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+goal\+\_\+amount} & is the desired abount of trees to cut \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the actualy amount of trees cut (for instances where 3 are reuqested but ony one is there for example) 
+\end{DoxyReturn}
+
+
+Definition at line 58 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_abf2c072dd742f3f1581c399d27db6077}{}\index{Grid\+Tile@{Grid\+Tile}!get\+Build\+State@{get\+Build\+State}}
+\index{get\+Build\+State@{get\+Build\+State}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{get\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}float Grid\+Tile\+::get\+Build\+State (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_grid_tile_abf2c072dd742f3f1581c399d27db6077}
+
+
+get\+Build\+State gets the completion of a building in the range \mbox{[}0 ... 1\mbox{]} 
+
+\begin{DoxyReturn}{Returns}
+the tiles build state 
+\end{DoxyReturn}
+
+
+Definition at line 96 of file Grid\+Tile.\+hpp.
+
+\hypertarget{class_grid_tile_a04d62e39a1ccf3ce7e073363713041a2}{}\index{Grid\+Tile@{Grid\+Tile}!get\+Height@{get\+Height}}
+\index{get\+Height@{get\+Height}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{get\+Height}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+Tile\+::get\+Height (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a04d62e39a1ccf3ce7e073363713041a2}
+
+
+get\+Height gets the height stored in the tile 
+
+\begin{DoxyReturn}{Returns}
+the height of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 38 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a7519797658aedf4c3a5593eef2c8612e}{}\index{Grid\+Tile@{Grid\+Tile}!get\+Num\+Trees@{get\+Num\+Trees}}
+\index{get\+Num\+Trees@{get\+Num\+Trees}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{get\+Num\+Trees}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+Tile\+::get\+Num\+Trees (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a7519797658aedf4c3a5593eef2c8612e}
+
+
+get\+Num\+Trees returns the number of trees on a tile 
+
+\begin{DoxyReturn}{Returns}
+the number of trees left on the tile 
+\end{DoxyReturn}
+
+
+Definition at line 48 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a3e964d7cefe5b100ae9f15326a2eecbd}{}\index{Grid\+Tile@{Grid\+Tile}!get\+Tree\+Positions@{get\+Tree\+Positions}}
+\index{get\+Tree\+Positions@{get\+Tree\+Positions}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{get\+Tree\+Positions}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ Grid\+Tile\+::get\+Tree\+Positions (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a3e964d7cefe5b100ae9f15326a2eecbd}
+
+
+get\+Tree\+Positions gets the positions of the trees on a tile 
+
+\begin{DoxyReturn}{Returns}
+a vector of Vec2\textquotesingle{}s that store the trees positions as offsets of the tiles position \mbox{[}-\/0.\+4 ... 0.\+4\mbox{]} 
+\end{DoxyReturn}
+
+
+Definition at line 99 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_ad3ad533f3fecb500ca598863388a8e1f}{}\index{Grid\+Tile@{Grid\+Tile}!get\+Type@{get\+Type}}
+\index{get\+Type@{get\+Type}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{get\+Type}]{\setlength{\rightskip}{0pt plus 5cm}Tile\+Type Grid\+Tile\+::get\+Type (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_ad3ad533f3fecb500ca598863388a8e1f}
+
+
+get\+Type gets the type of the tile 
+
+\begin{DoxyReturn}{Returns}
+the Tile\+Type stored in the tile 
+\end{DoxyReturn}
+
+
+Definition at line 28 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a2aad8cf6129ba54b034b64e2831777c5}{}\index{Grid\+Tile@{Grid\+Tile}!is\+Traversable@{is\+Traversable}}
+\index{is\+Traversable@{is\+Traversable}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{is\+Traversable}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+Tile\+::is\+Traversable (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a2aad8cf6129ba54b034b64e2831777c5}
+
+
+is\+Traversable returns a bool to indicate if the tile can be walked across, currently trees and buildings are not traversable 
+
+\begin{DoxyReturn}{Returns}
+bool returned 
+\end{DoxyReturn}
+
+
+Definition at line 19 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_ade3a37f993cb0e0aa28a93df6a2d7c03}{}\index{Grid\+Tile@{Grid\+Tile}!set\+Height@{set\+Height}}
+\index{set\+Height@{set\+Height}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{set\+Height}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+Tile\+::set\+Height (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+height}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_ade3a37f993cb0e0aa28a93df6a2d7c03}
+
+
+set\+Height sets the height of the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+height} & is the height to be set \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 43 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a1a5b16033129e696a04d1158afd30f4a}{}\index{Grid\+Tile@{Grid\+Tile}!set\+Num\+Trees@{set\+Num\+Trees}}
+\index{set\+Num\+Trees@{set\+Num\+Trees}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{set\+Num\+Trees}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+Tile\+::set\+Num\+Trees (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+num\+\_\+trees}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a1a5b16033129e696a04d1158afd30f4a}
+
+
+set\+Num\+Trees sets the number of trees stored in the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+num\+\_\+trees} & is the number of trees to be set \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 53 of file Grid\+Tile.\+cpp.
+
+\hypertarget{class_grid_tile_a85f7230f5cc42c6b7e878f2d32c965d4}{}\index{Grid\+Tile@{Grid\+Tile}!set\+Type@{set\+Type}}
+\index{set\+Type@{set\+Type}!Grid\+Tile@{Grid\+Tile}}
+\subsubsection[{set\+Type}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+Tile\+::set\+Type (
+\begin{DoxyParamCaption}
+\item[{Tile\+Type}]{\+\_\+t}
+\end{DoxyParamCaption}
+)}\label{class_grid_tile_a85f7230f5cc42c6b7e878f2d32c965d4}
+
+
+set\+Type sets the type of the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+t} & is the type to be set \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 33 of file Grid\+Tile.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_grid_tile_8hpp}{Grid\+Tile.\+hpp}\item 
+src/Grid\+Tile.\+cpp\end{DoxyCompactItemize}

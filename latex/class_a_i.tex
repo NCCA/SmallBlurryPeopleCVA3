@@ -1,0 +1,393 @@
+\hypertarget{class_a_i}{}\section{A\+I Class Reference}
+\label{class_a_i}\index{A\+I@{A\+I}}
+
+
+Parent class for ingame characters and enemies, containing position, states and targets.  
+
+
+
+
+{\ttfamily \#include $<$A\+I.\+hpp$>$}
+
+Inheritance diagram for A\+I\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_a_i}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_a_i_a15e2ae4f8d6d1fd5956fad8c5c84b307}{A\+I} (\hyperlink{class_terrain_height_tracer}{Terrain\+Height\+Tracer} $\ast$\+\_\+height\+\_\+tracer, \hyperlink{class_grid}{Grid} $\ast$\+\_\+grid)
+\begin{DoxyCompactList}\small\item\em ctor, sets reference to grid and initialised values \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_afc9d262315171e5d7bbac258353a2a67}{}\hyperlink{class_a_i_afc9d262315171e5d7bbac258353a2a67}{$\sim$\+A\+I} ()=default\label{class_a_i_afc9d262315171e5d7bbac258353a2a67}
+
+\begin{DoxyCompactList}\small\item\em destructor \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a4ad19449eed657aeae4bb42532b52c23}{}virtual void \hyperlink{class_a_i_a4ad19449eed657aeae4bb42532b52c23}{idle\+State} ()=0\label{class_a_i_a4ad19449eed657aeae4bb42532b52c23}
+
+\begin{DoxyCompactList}\small\item\em idle\+State, randomly moves \hyperlink{class_a_i}{A\+I} while not active \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a1082c4d60e50896e533b6ac1d6629fea}{}virtual void \hyperlink{class_a_i_a1082c4d60e50896e533b6ac1d6629fea}{update} ()=0\label{class_a_i_a1082c4d60e50896e533b6ac1d6629fea}
+
+\begin{DoxyCompactList}\small\item\em update, updates \hyperlink{class_a_i}{A\+I} based on its current state \end{DoxyCompactList}\item 
+bool \hyperlink{class_a_i_a65e5672452841ad5a70f9f1a3222d02f}{move} ()
+\begin{DoxyCompactList}\small\item\em move, moves \hyperlink{class_a_i}{A\+I} along its path \end{DoxyCompactList}\item 
+void \hyperlink{class_a_i_a585e6fe1a3cd64bdf0cba371a9db9bbd}{find\+Path} (ngl\+::\+Vec2 \+\_\+target)
+\begin{DoxyCompactList}\small\item\em find\+Path, pathfinding function to get nodes for pathfinding \end{DoxyCompactList}\item 
+void \hyperlink{class_a_i_a8e704a8ffa258823306d7dd1ae103b1a}{find\+Path} (int \+\_\+target\+\_\+id)
+\begin{DoxyCompactList}\small\item\em find\+Path, pathfinding function to get nodes for pathfinding \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_a_i_ad7a47f053f84dc38c7c540cf4e1d8046}{get\+Path} (int \+\_\+target\+\_\+id)
+\begin{DoxyCompactList}\small\item\em get\+Path, path finds to a tile and returns the path \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_a_i_a3cd7d72bff6ac6336d3ac32ac65f00fb}{calc\+Aim\+Vec} (float $\ast$dist)
+\begin{DoxyCompactList}\small\item\em calc\+Aim\+Vec, calculate vector towards next point \end{DoxyCompactList}\item 
+bool \hyperlink{class_a_i_a43528f0cd7c1953db42b847816303a8a}{set\+Target} (ngl\+::\+Vec2 \+\_\+target\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em set\+Target, set a new target position based on a position \end{DoxyCompactList}\item 
+bool \hyperlink{class_a_i_ab4e657a6832120bacba8c8ee411d4ddf}{set\+Target} (int \+\_\+tile\+\_\+id)
+\begin{DoxyCompactList}\small\item\em set\+Target, set a new target based on the grid tile id \end{DoxyCompactList}\item 
+float \hyperlink{class_a_i_ad2dca986cdfeac6c4ccdc2fa31fb2855}{get\+Health} ()
+\begin{DoxyCompactList}\small\item\em gethealth, get \hyperlink{class_a_i}{A\+I}\textquotesingle{}s health \end{DoxyCompactList}\item 
+void \hyperlink{class_a_i_a364a78bb417b943e083c38237b21824a}{take\+Health} (float m\+\_\+amount)
+\begin{DoxyCompactList}\small\item\em take\+Health, take health away from a \hyperlink{class_a_i}{A\+I} \end{DoxyCompactList}\item 
+ngl\+::\+Vec3 \hyperlink{class_a_i_a0d180bd6336d12a64708c50fd1830239}{get\+Pos} ()
+\begin{DoxyCompactList}\small\item\em get\+Pos, get \hyperlink{class_a_i}{A\+I}\textquotesingle{}s position \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_a_i_a5cf42ee567408414abd0891027fdf21a}{get\+Pos2\+D} ()
+\begin{DoxyCompactList}\small\item\em get\+Pos2\+D, get 2\+D position \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_afd0023af3a765422d081f1974740fe6e}{}void \hyperlink{class_a_i_afd0023af3a765422d081f1974740fe6e}{update\+Rot} ()\label{class_a_i_afd0023af3a765422d081f1974740fe6e}
+
+\begin{DoxyCompactList}\small\item\em update\+Rot update m\+\_\+rot, eg if direction has changed \end{DoxyCompactList}\item 
+float \hyperlink{class_a_i_a78032a4a909bf3071547788d9a251a4f}{get\+Rot} ()
+\begin{DoxyCompactList}\small\item\em get\+Rot return rotation of \hyperlink{class_a_i}{A\+I} \end{DoxyCompactList}\item 
+bool \hyperlink{class_a_i_a64329bcb5cf1ce9d38587a5a9c2520a5}{is\+Idle} ()
+\begin{DoxyCompactList}\small\item\em is\+Idle, returns whether the \hyperlink{class_a_i}{A\+I} is idle \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_a_i_a5579c03c5cb1dafb02822b8a8502ef49}{}\hyperlink{class_grid}{Grid} $\ast$ \hyperlink{class_a_i_a5579c03c5cb1dafb02822b8a8502ef49}{m\+\_\+grid}\label{class_a_i_a5579c03c5cb1dafb02822b8a8502ef49}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+grid, grid pointer to reference for pathfinding \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_afd437cd4e6ff0da1adb5c27d852ee60a}{}\hyperlink{class_terrain_height_tracer}{Terrain\+Height\+Tracer} $\ast$ \hyperlink{class_a_i_afd437cd4e6ff0da1adb5c27d852ee60a}{m\+\_\+height\+\_\+tracer}\label{class_a_i_afd437cd4e6ff0da1adb5c27d852ee60a}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+height\+\_\+tracer, for grid height \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a2bddebe59cace08a8832d4d3c7162676}{}ngl\+::\+Vec2 \hyperlink{class_a_i_a2bddebe59cace08a8832d4d3c7162676}{m\+\_\+pos}\label{class_a_i_a2bddebe59cace08a8832d4d3c7162676}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+pos, \hyperlink{class_a_i}{A\+I}\textquotesingle{}s position /// \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a7f112045e81aabb5226ce5d2257555ac}{}float \hyperlink{class_a_i_a7f112045e81aabb5226ce5d2257555ac}{m\+\_\+offset}\label{class_a_i_a7f112045e81aabb5226ce5d2257555ac}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+offset, offset \hyperlink{class_a_i}{A\+I} on current tile, to avoid clipping between A\+Is \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a97f4e8721ae67e58432682764377466e}{}int \hyperlink{class_a_i_a97f4e8721ae67e58432682764377466e}{m\+\_\+target\+\_\+id}\label{class_a_i_a97f4e8721ae67e58432682764377466e}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+target\+\_\+id, id of target tile on grid \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_ad4ebaada567bc96cefdd757bc2bedf49}{}float \hyperlink{class_a_i_ad4ebaada567bc96cefdd757bc2bedf49}{m\+\_\+health}\label{class_a_i_ad4ebaada567bc96cefdd757bc2bedf49}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+health, how much health the character has\+: 1 = full health, 0 = no health/dead \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_af2ef88fd6f0e45912fe0273ad031274a}{}float \hyperlink{class_a_i_af2ef88fd6f0e45912fe0273ad031274a}{m\+\_\+rot}\label{class_a_i_af2ef88fd6f0e45912fe0273ad031274a}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+rot character\textquotesingle{}s rotation to face current direction (degrees) \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a1de298736f7531aa92a3f53a27f8b4fd}{}float \hyperlink{class_a_i_a1de298736f7531aa92a3f53a27f8b4fd}{m\+\_\+speed}\label{class_a_i_a1de298736f7531aa92a3f53a27f8b4fd}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+speed, max speed of character \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a61901b6945955efec6266752095fe6a6}{}std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_a_i_a61901b6945955efec6266752095fe6a6}{m\+\_\+path}\label{class_a_i_a61901b6945955efec6266752095fe6a6}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+path, vector of target positions for movement \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_aed2d1975dff23be480a7d7237c87a187}{}Q\+Time \hyperlink{class_a_i_aed2d1975dff23be480a7d7237c87a187}{m\+\_\+action\+\_\+timer}\label{class_a_i_aed2d1975dff23be480a7d7237c87a187}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+action\+\_\+timer, timer for characters actions such as chopping wood and building \end{DoxyCompactList}\item 
+\hypertarget{class_a_i_a2ec67b57f68060494ec097aa20e8aab8}{}bool \hyperlink{class_a_i_a2ec67b57f68060494ec097aa20e8aab8}{m\+\_\+idle}\label{class_a_i_a2ec67b57f68060494ec097aa20e8aab8}
+
+\begin{DoxyCompactList}\small\item\em m\+\_\+idle, set when character is idle, for checking if idle \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Parent class for ingame characters and enemies, containing position, states and targets. 
+
+Definition at line 19 of file A\+I.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_a_i_a15e2ae4f8d6d1fd5956fad8c5c84b307}{}\index{A\+I@{A\+I}!A\+I@{A\+I}}
+\index{A\+I@{A\+I}!A\+I@{A\+I}}
+\subsubsection[{A\+I}]{\setlength{\rightskip}{0pt plus 5cm}A\+I\+::\+A\+I (
+\begin{DoxyParamCaption}
+\item[{{\bf Terrain\+Height\+Tracer} $\ast$}]{\+\_\+height\+\_\+tracer, }
+\item[{{\bf Grid} $\ast$}]{\+\_\+grid}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a15e2ae4f8d6d1fd5956fad8c5c84b307}
+
+
+ctor, sets reference to grid and initialised values 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+grid,pointer} & to the grid to reference for pathfinding \\
+\hline
+\mbox{\tt in}  & {\em \+\_\+height\+\_\+tracer,pointer} & to \hyperlink{class_terrain_height_tracer}{Terrain\+Height\+Tracer} to get the height of the \hyperlink{class_a_i}{A\+I} at its position \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 8 of file A\+I.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_a_i_a3cd7d72bff6ac6336d3ac32ac65f00fb}{}\index{A\+I@{A\+I}!calc\+Aim\+Vec@{calc\+Aim\+Vec}}
+\index{calc\+Aim\+Vec@{calc\+Aim\+Vec}!A\+I@{A\+I}}
+\subsubsection[{calc\+Aim\+Vec}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 A\+I\+::calc\+Aim\+Vec (
+\begin{DoxyParamCaption}
+\item[{float $\ast$}]{dist}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a3cd7d72bff6ac6336d3ac32ac65f00fb}
+
+
+calc\+Aim\+Vec, calculate vector towards next point 
+
+\begin{DoxyReturn}{Returns}
+vec2 of direction vector character is aiming towards 
+\end{DoxyReturn}
+
+
+Definition at line 76 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a585e6fe1a3cd64bdf0cba371a9db9bbd}{}\index{A\+I@{A\+I}!find\+Path@{find\+Path}}
+\index{find\+Path@{find\+Path}!A\+I@{A\+I}}
+\subsubsection[{find\+Path}]{\setlength{\rightskip}{0pt plus 5cm}void A\+I\+::find\+Path (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+target}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a585e6fe1a3cd64bdf0cba371a9db9bbd}
+
+
+find\+Path, pathfinding function to get nodes for pathfinding 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+target,coordinate} & to path find to \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 58 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a8e704a8ffa258823306d7dd1ae103b1a}{}\index{A\+I@{A\+I}!find\+Path@{find\+Path}}
+\index{find\+Path@{find\+Path}!A\+I@{A\+I}}
+\subsubsection[{find\+Path}]{\setlength{\rightskip}{0pt plus 5cm}void A\+I\+::find\+Path (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+target\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a8e704a8ffa258823306d7dd1ae103b1a}
+
+
+find\+Path, pathfinding function to get nodes for pathfinding 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+target\+\_\+id,tile} & to path find to \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 64 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_ad2dca986cdfeac6c4ccdc2fa31fb2855}{}\index{A\+I@{A\+I}!get\+Health@{get\+Health}}
+\index{get\+Health@{get\+Health}!A\+I@{A\+I}}
+\subsubsection[{get\+Health}]{\setlength{\rightskip}{0pt plus 5cm}float A\+I\+::get\+Health (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_a_i_ad2dca986cdfeac6c4ccdc2fa31fb2855}
+
+
+gethealth, get \hyperlink{class_a_i}{A\+I}\textquotesingle{}s health 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+health, \hyperlink{class_a_i}{A\+I}\textquotesingle{}s health value 
+\end{DoxyReturn}
+
+
+Definition at line 83 of file A\+I.\+hpp.
+
+\hypertarget{class_a_i_ad7a47f053f84dc38c7c540cf4e1d8046}{}\index{A\+I@{A\+I}!get\+Path@{get\+Path}}
+\index{get\+Path@{get\+Path}!A\+I@{A\+I}}
+\subsubsection[{get\+Path}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ A\+I\+::get\+Path (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+target\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_a_i_ad7a47f053f84dc38c7c540cf4e1d8046}
+
+
+get\+Path, path finds to a tile and returns the path 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+target\+\_\+id,tile} & to path find to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of vec2\textquotesingle{}s that store the path to the target tile 
+\end{DoxyReturn}
+
+
+Definition at line 70 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a0d180bd6336d12a64708c50fd1830239}{}\index{A\+I@{A\+I}!get\+Pos@{get\+Pos}}
+\index{get\+Pos@{get\+Pos}!A\+I@{A\+I}}
+\subsubsection[{get\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec3 A\+I\+::get\+Pos (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a0d180bd6336d12a64708c50fd1830239}
+
+
+get\+Pos, get \hyperlink{class_a_i}{A\+I}\textquotesingle{}s position 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+pos, \hyperlink{class_a_i}{A\+I}\textquotesingle{}s position 
+\end{DoxyReturn}
+
+
+Definition at line 120 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a5cf42ee567408414abd0891027fdf21a}{}\index{A\+I@{A\+I}!get\+Pos2\+D@{get\+Pos2\+D}}
+\index{get\+Pos2\+D@{get\+Pos2\+D}!A\+I@{A\+I}}
+\subsubsection[{get\+Pos2\+D}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 A\+I\+::get\+Pos2\+D (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a5cf42ee567408414abd0891027fdf21a}
+
+
+get\+Pos2\+D, get 2\+D position 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+pos, \hyperlink{class_a_i}{A\+I}\textquotesingle{}s position 
+\end{DoxyReturn}
+
+
+Definition at line 127 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a78032a4a909bf3071547788d9a251a4f}{}\index{A\+I@{A\+I}!get\+Rot@{get\+Rot}}
+\index{get\+Rot@{get\+Rot}!A\+I@{A\+I}}
+\subsubsection[{get\+Rot}]{\setlength{\rightskip}{0pt plus 5cm}float A\+I\+::get\+Rot (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_a_i_a78032a4a909bf3071547788d9a251a4f}
+
+
+get\+Rot return rotation of \hyperlink{class_a_i}{A\+I} 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+rot, character\textquotesingle{}s rotation 
+\end{DoxyReturn}
+
+
+Definition at line 107 of file A\+I.\+hpp.
+
+\hypertarget{class_a_i_a64329bcb5cf1ce9d38587a5a9c2520a5}{}\index{A\+I@{A\+I}!is\+Idle@{is\+Idle}}
+\index{is\+Idle@{is\+Idle}!A\+I@{A\+I}}
+\subsubsection[{is\+Idle}]{\setlength{\rightskip}{0pt plus 5cm}bool A\+I\+::is\+Idle (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_a_i_a64329bcb5cf1ce9d38587a5a9c2520a5}
+
+
+is\+Idle, returns whether the \hyperlink{class_a_i}{A\+I} is idle 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+idle, the boolean stored in the \hyperlink{class_a_i}{A\+I} determining if it is idle or not 
+\end{DoxyReturn}
+
+
+Definition at line 112 of file A\+I.\+hpp.
+
+\hypertarget{class_a_i_a65e5672452841ad5a70f9f1a3222d02f}{}\index{A\+I@{A\+I}!move@{move}}
+\index{move@{move}!A\+I@{A\+I}}
+\subsubsection[{move}]{\setlength{\rightskip}{0pt plus 5cm}bool A\+I\+::move (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a65e5672452841ad5a70f9f1a3222d02f}
+
+
+move, moves \hyperlink{class_a_i}{A\+I} along its path 
+
+\begin{DoxyReturn}{Returns}
+a boolean determing if its reached its target 
+\end{DoxyReturn}
+
+
+Definition at line 22 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a43528f0cd7c1953db42b847816303a8a}{}\index{A\+I@{A\+I}!set\+Target@{set\+Target}}
+\index{set\+Target@{set\+Target}!A\+I@{A\+I}}
+\subsubsection[{set\+Target}]{\setlength{\rightskip}{0pt plus 5cm}bool A\+I\+::set\+Target (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+target\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_a_i_a43528f0cd7c1953db42b847816303a8a}
+
+
+set\+Target, set a new target position based on a position 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+target\+\_\+pos,the} & position to pathfind to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a boolean determining whether the target is viable 
+\end{DoxyReturn}
+
+
+Definition at line 94 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_ab4e657a6832120bacba8c8ee411d4ddf}{}\index{A\+I@{A\+I}!set\+Target@{set\+Target}}
+\index{set\+Target@{set\+Target}!A\+I@{A\+I}}
+\subsubsection[{set\+Target}]{\setlength{\rightskip}{0pt plus 5cm}bool A\+I\+::set\+Target (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+tile\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_a_i_ab4e657a6832120bacba8c8ee411d4ddf}
+
+
+set\+Target, set a new target based on the grid tile id 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em \+\_\+tile\+\_\+id,the} & tile id to pathfind to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a boolean determining whether the target is viable 
+\end{DoxyReturn}
+
+
+Definition at line 99 of file A\+I.\+cpp.
+
+\hypertarget{class_a_i_a364a78bb417b943e083c38237b21824a}{}\index{A\+I@{A\+I}!take\+Health@{take\+Health}}
+\index{take\+Health@{take\+Health}!A\+I@{A\+I}}
+\subsubsection[{take\+Health}]{\setlength{\rightskip}{0pt plus 5cm}void A\+I\+::take\+Health (
+\begin{DoxyParamCaption}
+\item[{float}]{m\+\_\+amount}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_a_i_a364a78bb417b943e083c38237b21824a}
+
+
+take\+Health, take health away from a \hyperlink{class_a_i}{A\+I} 
+
+
+\begin{DoxyParams}{Parameters}
+{\em m\+\_\+amount,amount} & of health to take away \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 88 of file A\+I.\+hpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_a_i_8hpp}{A\+I.\+hpp}\item 
+src/A\+I.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,154 @@
+\hypertarget{class_camera}{}\section{Camera Class Reference}
+\label{class_camera}\index{Camera@{Camera}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_camera_a01f94c3543f56ede7af49dc778f19331}{}\hyperlink{class_camera_a01f94c3543f56ede7af49dc778f19331}{Camera} ()\label{class_camera_a01f94c3543f56ede7af49dc778f19331}
+
+\begin{DoxyCompactList}\small\item\em Default camera constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_adcb96efefa7af58e3ee6534b15d4979b}{}\hyperlink{class_camera_adcb96efefa7af58e3ee6534b15d4979b}{$\sim$\+Camera} ()=default\label{class_camera_adcb96efefa7af58e3ee6534b15d4979b}
+
+\begin{DoxyCompactList}\small\item\em Default camera destructor. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_ab6dad3dafd585946ab18b9f58d9a6b15}{}void \hyperlink{class_camera_ab6dad3dafd585946ab18b9f58d9a6b15}{calculate\+View\+Mat} ()\label{class_camera_ab6dad3dafd585946ab18b9f58d9a6b15}
+
+\begin{DoxyCompactList}\small\item\em Calculates the view matrix from the transformation of the camera about the pivot and the pivot in the world. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a73ea6a131382a08917260447a7ff2db5}{}void \hyperlink{class_camera_a73ea6a131382a08917260447a7ff2db5}{calculate\+Projection\+Mat} ()\label{class_camera_a73ea6a131382a08917260447a7ff2db5}
+
+\begin{DoxyCompactList}\small\item\em Calculate the projection matrix. Unless you are changing the F\+O\+V or screen aspect, this shouldn\textquotesingle{}t be called much. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_aaeb9aa4787c11b48bca4c46b0dfb1cb1}{}void \hyperlink{class_camera_aaeb9aa4787c11b48bca4c46b0dfb1cb1}{update\+Smooth\+Camera} ()\label{class_camera_aaeb9aa4787c11b48bca4c46b0dfb1cb1}
+
+\begin{DoxyCompactList}\small\item\em Updates all of the smooth camera values. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a7f012165f2f2e474cbd4ff05b05c0249}{}ngl\+::\+Mat4 \hyperlink{class_camera_a7f012165f2f2e474cbd4ff05b05c0249}{get\+V} () const \label{class_camera_a7f012165f2f2e474cbd4ff05b05c0249}
+
+\begin{DoxyCompactList}\small\item\em Get view matrix. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_abf7459390834b21d242c759ea6ec2b14}{}ngl\+::\+Mat4 \hyperlink{class_camera_abf7459390834b21d242c759ea6ec2b14}{get\+P} () const \label{class_camera_abf7459390834b21d242c759ea6ec2b14}
+
+\begin{DoxyCompactList}\small\item\em Get projection matrix. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a02c31a04acb4ace52e3337048deee6f0}{}ngl\+::\+Mat4 \hyperlink{class_camera_a02c31a04acb4ace52e3337048deee6f0}{get\+V\+P} () const \label{class_camera_a02c31a04acb4ace52e3337048deee6f0}
+
+\begin{DoxyCompactList}\small\item\em Get the view-\/project matrix (this is calculated in calculate\+View\+Mat and calculate\+Projection\+Mat. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a067b629d59f005fa12a7e0fede7a95ef}{}ngl\+::\+Vec3 \hyperlink{class_camera_a067b629d59f005fa12a7e0fede7a95ef}{get\+Pos} () const \label{class_camera_a067b629d59f005fa12a7e0fede7a95ef}
+
+\begin{DoxyCompactList}\small\item\em Gets the world space position of the camera. I find this useful for fancy shaders. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_accfc15174be472e47240d80c4dc7c1f3}{}ngl\+::\+Vec3 \hyperlink{class_camera_accfc15174be472e47240d80c4dc7c1f3}{get\+Pivot} () const \label{class_camera_accfc15174be472e47240d80c4dc7c1f3}
+
+\begin{DoxyCompactList}\small\item\em Returns the world space position of the pivot. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a07c785e3973493dbcb278f2a63e8cbdf}{}float {\bfseries get\+Aspect} () const \label{class_camera_a07c785e3973493dbcb278f2a63e8cbdf}
+
+\item 
+\hypertarget{class_camera_af1dfad757cc3a4f0b0e238521e178cc8}{}void \hyperlink{class_camera_af1dfad757cc3a4f0b0e238521e178cc8}{set\+Min\+Pitch} (const float \+\_\+p)\label{class_camera_af1dfad757cc3a4f0b0e238521e178cc8}
+
+\begin{DoxyCompactList}\small\item\em Setters to control the range of the cameras pitch. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_ae136c14bb2772effb2960fefb712a921}{}void {\bfseries set\+Max\+Pitch} (const float \+\_\+p)\label{class_camera_ae136c14bb2772effb2960fefb712a921}
+
+\item 
+\hypertarget{class_camera_ae4b323a7d183493534b704926417e412}{}void \hyperlink{class_camera_ae4b323a7d183493534b704926417e412}{set\+Min\+Dolly} (const float \+\_\+d)\label{class_camera_ae4b323a7d183493534b704926417e412}
+
+\begin{DoxyCompactList}\small\item\em Setters to control the range of the cameras dollying. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_aa7c90ca5881c4d42b8bc49fb7ddbe674}{}void {\bfseries set\+Max\+Dolly} (const float \+\_\+d)\label{class_camera_aa7c90ca5881c4d42b8bc49fb7ddbe674}
+
+\item 
+\hypertarget{class_camera_aba54cec293bc594b933a110a2e8094f3}{}void \hyperlink{class_camera_aba54cec293bc594b933a110a2e8094f3}{set\+Aspect} (const float \+\_\+aspect)\label{class_camera_aba54cec293bc594b933a110a2e8094f3}
+
+\begin{DoxyCompactList}\small\item\em Set aspect ratio (x / y). \end{DoxyCompactList}\item 
+\hypertarget{class_camera_add3fbf94b22349e84d19b699d9113276}{}void \hyperlink{class_camera_add3fbf94b22349e84d19b699d9113276}{set\+F\+O\+V} (const float \+\_\+fov)\label{class_camera_add3fbf94b22349e84d19b699d9113276}
+
+\begin{DoxyCompactList}\small\item\em Set horizontal (?) field of view. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_ab01e773741fc2c3b5ecce4f8cf8e1cd2}{}void \hyperlink{class_camera_ab01e773741fc2c3b5ecce4f8cf8e1cd2}{set\+Init\+Pos} (const ngl\+::\+Vec3 \&\+\_\+pos)\label{class_camera_ab01e773741fc2c3b5ecce4f8cf8e1cd2}
+
+\begin{DoxyCompactList}\small\item\em Sets the initial position of the camera, prior to transformation about and of the pivot. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a15a53caa69de3870947178a0314a930b}{}void \hyperlink{class_camera_a15a53caa69de3870947178a0314a930b}{set\+Init\+Pivot} (const ngl\+::\+Vec3 \&\+\_\+pivot)\label{class_camera_a15a53caa69de3870947178a0314a930b}
+
+\begin{DoxyCompactList}\small\item\em Sets the initial pivot position, it may be transformed later. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_aae445f6ca8819afc09bd955afa24d0c3}{}void \hyperlink{class_camera_aae445f6ca8819afc09bd955afa24d0c3}{set\+Up} (const ngl\+::\+Vec3 \&\+\_\+up)\label{class_camera_aae445f6ca8819afc09bd955afa24d0c3}
+
+\begin{DoxyCompactList}\small\item\em Sets the up vector. \mbox{[}0, 1, 0\mbox{]} is usually pretty appropriate. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a52609a8b218a9c12b84e839633b990cf}{}void \hyperlink{class_camera_a52609a8b218a9c12b84e839633b990cf}{clear\+Transforms} ()\label{class_camera_a52609a8b218a9c12b84e839633b990cf}
+
+\begin{DoxyCompactList}\small\item\em Empties the transformation stacks. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_ae965ddddc3a83ba2d37d84d6fee413f7}{}ngl\+::\+Vec3 \hyperlink{class_camera_ae965ddddc3a83ba2d37d84d6fee413f7}{back} ()\label{class_camera_ae965ddddc3a83ba2d37d84d6fee413f7}
+
+\begin{DoxyCompactList}\small\item\em Gets the back vector of the camera. Just ignore the transpose stuff, it works I swear. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a838f222ce4a26cb9dfce763c8b87d475}{}ngl\+::\+Vec3 \hyperlink{class_camera_a838f222ce4a26cb9dfce763c8b87d475}{forwards} ()\label{class_camera_a838f222ce4a26cb9dfce763c8b87d475}
+
+\begin{DoxyCompactList}\small\item\em Gets the forwards vector of the camera. Just ignore the transpose stuff, it works I swear. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a1aad741f1aa633a990a392229979787e}{}ngl\+::\+Vec3 \hyperlink{class_camera_a1aad741f1aa633a990a392229979787e}{up} ()\label{class_camera_a1aad741f1aa633a990a392229979787e}
+
+\begin{DoxyCompactList}\small\item\em Gets the up vector of the camera. Just ignore the transpose stuff, it works I swear. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a9e6e1b08034dfa59780678b01d0f7c3e}{}ngl\+::\+Vec3 \hyperlink{class_camera_a9e6e1b08034dfa59780678b01d0f7c3e}{right} ()\label{class_camera_a9e6e1b08034dfa59780678b01d0f7c3e}
+
+\begin{DoxyCompactList}\small\item\em Gets the right vector of the camera. Just ignore the transpose stuff, it works I swear. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_afb43b49132b3a721de58e851a6ee4600}{}std\+::array$<$ ngl\+::\+Vec3, 8 $>$ \hyperlink{class_camera_afb43b49132b3a721de58e851a6ee4600}{calculate\+Cascade} (float \+\_\+start, float \+\_\+end)\label{class_camera_afb43b49132b3a721de58e851a6ee4600}
+
+\begin{DoxyCompactList}\small\item\em Returns the 8 corners of a frustum starting at \+\_\+start units from the camera, and ending \+\_\+end units away. These vertices are in world space. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_afbbb8430f2b3962d7f08d0e865a06838}{}void \hyperlink{class_camera_afbbb8430f2b3962d7f08d0e865a06838}{move\+Right} (const float \+\_\+d)\label{class_camera_afbbb8430f2b3962d7f08d0e865a06838}
+
+\begin{DoxyCompactList}\small\item\em Moves the camera right, or forwards, relative to its orientation. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_affc95de91347cc008cb745a185f3d0c8}{}void {\bfseries move\+Forward} (const float \+\_\+d)\label{class_camera_affc95de91347cc008cb745a185f3d0c8}
+
+\item 
+\hypertarget{class_camera_a2804829a882cb5395f9067bca7547959}{}void {\bfseries move} (const ngl\+::\+Vec3 \+\_\+d)\label{class_camera_a2804829a882cb5395f9067bca7547959}
+
+\item 
+void \hyperlink{class_camera_a352d3bac2cf10e1320a4227c1a8e065e}{move\+Screen\+Space} (const ngl\+::\+Vec3 \+\_\+d)
+\begin{DoxyCompactList}\small\item\em move\+Screen\+Space moves camera in screenspace\+: x for left/right, z for forwards/backwards, y for up/down (world space, because it\textquotesingle{}s more intuitive for input) \end{DoxyCompactList}\item 
+\hypertarget{class_camera_ad4acc2682141575e73881de21a587572}{}void {\bfseries dolly} (const float \+\_\+d)\label{class_camera_ad4acc2682141575e73881de21a587572}
+
+\item 
+\hypertarget{class_camera_aaf1a443438194f054d985586dbaba91c}{}void {\bfseries set\+Pos} (const ngl\+::\+Vec3 \+\_\+p)\label{class_camera_aaf1a443438194f054d985586dbaba91c}
+
+\item 
+\hypertarget{class_camera_ab84a163e6ac327d30a86de88b80a40e4}{}ngl\+::\+Vec3 {\bfseries get\+Targ\+Pos} () const \label{class_camera_ab84a163e6ac327d30a86de88b80a40e4}
+
+\item 
+\hypertarget{class_camera_a6a23d151bb200186d0b1e9a264e6ab9d}{}void \hyperlink{class_camera_a6a23d151bb200186d0b1e9a264e6ab9d}{rotate} (const float \+\_\+pitch, const float \+\_\+yaw)\label{class_camera_a6a23d151bb200186d0b1e9a264e6ab9d}
+
+\begin{DoxyCompactList}\small\item\em Rotates the camera. \end{DoxyCompactList}\item 
+\hypertarget{class_camera_a2bfc21739f790432f59d2a040ad8e7e6}{}float {\bfseries get\+Target\+Dolly} () const \label{class_camera_a2bfc21739f790432f59d2a040ad8e7e6}
+
+\item 
+\hypertarget{class_camera_a73029042cca12b111d00f7f280e57ec2}{}void {\bfseries set\+Focal\+Depth} (const float \+\_\+d)\label{class_camera_a73029042cca12b111d00f7f280e57ec2}
+
+\item 
+\hypertarget{class_camera_aaba759a842848048e9e3e7c161d73396}{}float {\bfseries get\+Focal\+Depth} () const \label{class_camera_aaba759a842848048e9e3e7c161d73396}
+
+\item 
+\hypertarget{class_camera_a13b319d80b43767682672c60c88b8900}{}void {\bfseries immediate\+Transform} (const ngl\+::\+Mat4 \&\+\_\+mat)\label{class_camera_a13b319d80b43767682672c60c88b8900}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 17 of file Camera.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_camera_a352d3bac2cf10e1320a4227c1a8e065e}{}\index{Camera@{Camera}!move\+Screen\+Space@{move\+Screen\+Space}}
+\index{move\+Screen\+Space@{move\+Screen\+Space}!Camera@{Camera}}
+\subsubsection[{move\+Screen\+Space}]{\setlength{\rightskip}{0pt plus 5cm}void Camera\+::move\+Screen\+Space (
+\begin{DoxyParamCaption}
+\item[{const ngl\+::\+Vec3}]{\+\_\+d}
+\end{DoxyParamCaption}
+)}\label{class_camera_a352d3bac2cf10e1320a4227c1a8e065e}
+
+
+move\+Screen\+Space moves camera in screenspace\+: x for left/right, z for forwards/backwards, y for up/down (world space, because it\textquotesingle{}s more intuitive for input) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+d} & vector with x, y, z movement components \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 135 of file Camera.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_camera_8hpp}{Camera.\+hpp}\item 
+src/Camera.\+cpp\end{DoxyCompactItemize}

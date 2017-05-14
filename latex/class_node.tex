@@ -1,0 +1,282 @@
+\hypertarget{class_node}{}\section{Node Class Reference}
+\label{class_node}\index{Node@{Node}}
+
+
+Pathfinding node class.  
+
+
+
+
+{\ttfamily \#include $<$Node.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_node_a892b1a884acf99dc73e1e7c125c259bc}{Node} (\hyperlink{class_grid}{Grid} $\ast$\+\_\+grid, std\+::vector$<$ \hyperlink{class_node}{Node} $>$ $\ast$nodes, ngl\+::\+Vec2 \+\_\+pos, ngl\+::\+Vec2 \+\_\+target\+\_\+pos, int \+\_\+parent\+\_\+id)
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_node}{Node} constructor used to set up position, target position and parent\+\_\+id, and pointers to grid and vector of nodes. \end{DoxyCompactList}\item 
+\hypertarget{class_node_af8cfc7b3fb2f102914daa5fc3b9c52f6}{}void \hyperlink{class_node_af8cfc7b3fb2f102914daa5fc3b9c52f6}{close} ()\label{class_node_af8cfc7b3fb2f102914daa5fc3b9c52f6}
+
+\begin{DoxyCompactList}\small\item\em close turns the node \char`\"{}off\char`\"{}, after it has been fully explored \end{DoxyCompactList}\item 
+float \hyperlink{class_node_af95509316f58304a109ec6219852e9a6}{manhattan\+Dist} (ngl\+::\+Vec2 \+\_\+target\+\_\+pos)
+\begin{DoxyCompactList}\small\item\em manhattan\+Dist get the x + y distance to given target \end{DoxyCompactList}\item 
+float \hyperlink{class_node_a6e381c2bfd15c2dc9ed143365069d5c5}{calc\+New\+G\+Cost} (int \+\_\+parent\+\_\+id)
+\begin{DoxyCompactList}\small\item\em calc\+New\+G\+Cost calculate a g\+\_\+cost using a potential parent \end{DoxyCompactList}\item 
+float \hyperlink{class_node_a035520f62e2915be93c7856a77fdf6de}{get\+F\+Cost} ()
+\begin{DoxyCompactList}\small\item\em get\+F\+Cost get the node\textquotesingle{}s current f cost \end{DoxyCompactList}\item 
+bool \hyperlink{class_node_a9b974f25fc2cd0faf1e4c2908e5cda81}{is\+Open} ()
+\begin{DoxyCompactList}\small\item\em is\+Open check if node is still open or if it is closed \end{DoxyCompactList}\item 
+int \hyperlink{class_node_a8dd9a1d6ac9638fd1168283ad47e5127}{get\+I\+D} ()
+\begin{DoxyCompactList}\small\item\em get\+I\+D get node\textquotesingle{}s position in vector \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_node_adafb39921bb5ec7f52dc2d4fd7488663}{get\+Pos} ()
+\begin{DoxyCompactList}\small\item\em get\+Pos get the position of the node \end{DoxyCompactList}\item 
+float \hyperlink{class_node_a2fb8eb3885cfa725ed0ea3a877b15e95}{get\+G\+Cost} ()
+\begin{DoxyCompactList}\small\item\em get\+G\+Cost get the current g cost of the node \end{DoxyCompactList}\item 
+void \hyperlink{class_node_ad60939032f602e799a6f3ffe9d7cb986}{set\+Parent} (int \+\_\+parent\+\_\+id)
+\begin{DoxyCompactList}\small\item\em set\+Parent change parent of node \end{DoxyCompactList}\item 
+int \hyperlink{class_node_ac577c9dff5309fd998e103a6e1fed9aa}{get\+Parent\+I\+D} ()
+\begin{DoxyCompactList}\small\item\em get\+Parent\+I\+D get the parent position in vector \end{DoxyCompactList}\item 
+std\+::array$<$ int, 4 $>$ \hyperlink{class_node_aeb9a77aa7a3a95079dc433131d914330}{get\+Neighbours} ()
+\begin{DoxyCompactList}\small\item\em get\+Neighbours return list of neighbour positions in vector \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Pathfinding node class. 
+
+Definition at line 23 of file Node.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_node_a892b1a884acf99dc73e1e7c125c259bc}{}\index{Node@{Node}!Node@{Node}}
+\index{Node@{Node}!Node@{Node}}
+\subsubsection[{Node}]{\setlength{\rightskip}{0pt plus 5cm}Node\+::\+Node (
+\begin{DoxyParamCaption}
+\item[{{\bf Grid} $\ast$}]{\+\_\+grid, }
+\item[{std\+::vector$<$ {\bf Node} $>$ $\ast$}]{nodes, }
+\item[{ngl\+::\+Vec2}]{\+\_\+pos, }
+\item[{ngl\+::\+Vec2}]{\+\_\+target\+\_\+pos, }
+\item[{int}]{\+\_\+parent\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_node_a892b1a884acf99dc73e1e7c125c259bc}
+
+
+\hyperlink{class_node}{Node} constructor used to set up position, target position and parent\+\_\+id, and pointers to grid and vector of nodes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+grid} & used to reference traversability and size \\
+\hline
+{\em nodes} & for referencing other nodes in the vector \\
+\hline
+{\em \+\_\+pos} & the position of the node being constructed \\
+\hline
+{\em \+\_\+target\+\_\+pos} & the target position for calculating manhatten distance for h cost \\
+\hline
+{\em \+\_\+parent\+\_\+id} & the position of the parent node in the vector \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 5 of file Node.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_node_a6e381c2bfd15c2dc9ed143365069d5c5}{}\index{Node@{Node}!calc\+New\+G\+Cost@{calc\+New\+G\+Cost}}
+\index{calc\+New\+G\+Cost@{calc\+New\+G\+Cost}!Node@{Node}}
+\subsubsection[{calc\+New\+G\+Cost}]{\setlength{\rightskip}{0pt plus 5cm}float Node\+::calc\+New\+G\+Cost (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+parent\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_node_a6e381c2bfd15c2dc9ed143365069d5c5}
+
+
+calc\+New\+G\+Cost calculate a g\+\_\+cost using a potential parent 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+parent\+\_\+id} & potential parent to check against \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+distance jumping node to node until reaching original position 
+\end{DoxyReturn}
+
+
+Definition at line 26 of file Node.\+cpp.
+
+\hypertarget{class_node_a035520f62e2915be93c7856a77fdf6de}{}\index{Node@{Node}!get\+F\+Cost@{get\+F\+Cost}}
+\index{get\+F\+Cost@{get\+F\+Cost}!Node@{Node}}
+\subsubsection[{get\+F\+Cost}]{\setlength{\rightskip}{0pt plus 5cm}float Node\+::get\+F\+Cost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_a035520f62e2915be93c7856a77fdf6de}
+
+
+get\+F\+Cost get the node\textquotesingle{}s current f cost 
+
+\begin{DoxyReturn}{Returns}
+node\textquotesingle{}s f cost 
+\end{DoxyReturn}
+
+
+Definition at line 43 of file Node.\+cpp.
+
+\hypertarget{class_node_a2fb8eb3885cfa725ed0ea3a877b15e95}{}\index{Node@{Node}!get\+G\+Cost@{get\+G\+Cost}}
+\index{get\+G\+Cost@{get\+G\+Cost}!Node@{Node}}
+\subsubsection[{get\+G\+Cost}]{\setlength{\rightskip}{0pt plus 5cm}float Node\+::get\+G\+Cost (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_a2fb8eb3885cfa725ed0ea3a877b15e95}
+
+
+get\+G\+Cost get the current g cost of the node 
+
+\begin{DoxyReturn}{Returns}
+the current g cost of the node 
+\end{DoxyReturn}
+
+
+Definition at line 63 of file Node.\+cpp.
+
+\hypertarget{class_node_a8dd9a1d6ac9638fd1168283ad47e5127}{}\index{Node@{Node}!get\+I\+D@{get\+I\+D}}
+\index{get\+I\+D@{get\+I\+D}!Node@{Node}}
+\subsubsection[{get\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}int Node\+::get\+I\+D (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_a8dd9a1d6ac9638fd1168283ad47e5127}
+
+
+get\+I\+D get node\textquotesingle{}s position in vector 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+id, which is the position in the vector 
+\end{DoxyReturn}
+
+
+Definition at line 53 of file Node.\+cpp.
+
+\hypertarget{class_node_aeb9a77aa7a3a95079dc433131d914330}{}\index{Node@{Node}!get\+Neighbours@{get\+Neighbours}}
+\index{get\+Neighbours@{get\+Neighbours}!Node@{Node}}
+\subsubsection[{get\+Neighbours}]{\setlength{\rightskip}{0pt plus 5cm}std\+::array$<$ int, 4 $>$ Node\+::get\+Neighbours (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_aeb9a77aa7a3a95079dc433131d914330}
+
+
+get\+Neighbours return list of neighbour positions in vector 
+
+\begin{DoxyReturn}{Returns}
+array of 4 potential neighbour positions, with -\/1 if not found 
+\end{DoxyReturn}
+
+
+Definition at line 78 of file Node.\+cpp.
+
+\hypertarget{class_node_ac577c9dff5309fd998e103a6e1fed9aa}{}\index{Node@{Node}!get\+Parent\+I\+D@{get\+Parent\+I\+D}}
+\index{get\+Parent\+I\+D@{get\+Parent\+I\+D}!Node@{Node}}
+\subsubsection[{get\+Parent\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}int Node\+::get\+Parent\+I\+D (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_ac577c9dff5309fd998e103a6e1fed9aa}
+
+
+get\+Parent\+I\+D get the parent position in vector 
+
+\begin{DoxyReturn}{Returns}
+parent position in vector 
+\end{DoxyReturn}
+
+
+Definition at line 74 of file Node.\+cpp.
+
+\hypertarget{class_node_adafb39921bb5ec7f52dc2d4fd7488663}{}\index{Node@{Node}!get\+Pos@{get\+Pos}}
+\index{get\+Pos@{get\+Pos}!Node@{Node}}
+\subsubsection[{get\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 Node\+::get\+Pos (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_adafb39921bb5ec7f52dc2d4fd7488663}
+
+
+get\+Pos get the position of the node 
+
+\begin{DoxyReturn}{Returns}
+the position of the node 
+\end{DoxyReturn}
+
+
+Definition at line 58 of file Node.\+cpp.
+
+\hypertarget{class_node_a9b974f25fc2cd0faf1e4c2908e5cda81}{}\index{Node@{Node}!is\+Open@{is\+Open}}
+\index{is\+Open@{is\+Open}!Node@{Node}}
+\subsubsection[{is\+Open}]{\setlength{\rightskip}{0pt plus 5cm}bool Node\+::is\+Open (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_node_a9b974f25fc2cd0faf1e4c2908e5cda81}
+
+
+is\+Open check if node is still open or if it is closed 
+
+\begin{DoxyReturn}{Returns}
+true for open, false for closed 
+\end{DoxyReturn}
+
+
+Definition at line 48 of file Node.\+cpp.
+
+\hypertarget{class_node_af95509316f58304a109ec6219852e9a6}{}\index{Node@{Node}!manhattan\+Dist@{manhattan\+Dist}}
+\index{manhattan\+Dist@{manhattan\+Dist}!Node@{Node}}
+\subsubsection[{manhattan\+Dist}]{\setlength{\rightskip}{0pt plus 5cm}float Node\+::manhattan\+Dist (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+target\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_node_af95509316f58304a109ec6219852e9a6}
+
+
+manhattan\+Dist get the x + y distance to given target 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+target\+\_\+pos} & the target to check position against \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+x dist + y dist 
+\end{DoxyReturn}
+
+
+Definition at line 38 of file Node.\+cpp.
+
+\hypertarget{class_node_ad60939032f602e799a6f3ffe9d7cb986}{}\index{Node@{Node}!set\+Parent@{set\+Parent}}
+\index{set\+Parent@{set\+Parent}!Node@{Node}}
+\subsubsection[{set\+Parent}]{\setlength{\rightskip}{0pt plus 5cm}void Node\+::set\+Parent (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+parent\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_node_ad60939032f602e799a6f3ffe9d7cb986}
+
+
+set\+Parent change parent of node 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+parent\+\_\+id} & position of new parent in vector \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 68 of file Node.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_node_8hpp}{Node.\+hpp}\item 
+src/Node.\+cpp\end{DoxyCompactItemize}

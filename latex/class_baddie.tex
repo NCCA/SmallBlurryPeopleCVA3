@@ -1,0 +1,154 @@
+\hypertarget{class_baddie}{}\section{Baddie Class Reference}
+\label{class_baddie}\index{Baddie@{Baddie}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_baddie}{Baddie} class is the ingame enemy, with attacking and tracking states.  
+
+
+
+
+{\ttfamily \#include $<$Baddie.\+hpp$>$}
+
+Inheritance diagram for Baddie\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_baddie}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_baddie_a748dc5a3026f75412dbff8d21e33fee0}{Baddie} (ngl\+::\+Vec2 \+\_\+pos, \hyperlink{class_terrain_height_tracer}{Terrain\+Height\+Tracer} $\ast$\+\_\+height\+\_\+tracer, \hyperlink{class_grid}{Grid} $\ast$\+\_\+grid, std\+::vector$<$ \hyperlink{class_character}{Character} $>$ $\ast$\+\_\+characters)
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_baddie}{Baddie} create baddie with a position on the grid and a references to the characters. \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_a4186db9e136db274323cffd1c6d8b317}{}void \hyperlink{class_baddie_a4186db9e136db274323cffd1c6d8b317}{update} ()\label{class_baddie_a4186db9e136db274323cffd1c6d8b317}
+
+\begin{DoxyCompactList}\small\item\em update calculate behaviours for baddie \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_ab6483fa4a6e34da1f0b226dccc58a929}{}void \hyperlink{class_baddie_ab6483fa4a6e34da1f0b226dccc58a929}{tracking\+State} ()\label{class_baddie_ab6483fa4a6e34da1f0b226dccc58a929}
+
+\begin{DoxyCompactList}\small\item\em tracking\+State, baddie intiates fight with character and follows it \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_ab743103a8081194f40467d4c53b01249}{}void \hyperlink{class_baddie_ab743103a8081194f40467d4c53b01249}{invaded\+State} (int \+\_\+target)\label{class_baddie_ab743103a8081194f40467d4c53b01249}
+
+\begin{DoxyCompactList}\small\item\em invaded\+State, character intiates fight with baddie \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_a081b30d002df632d9fe3285dc8cca125}{}void \hyperlink{class_baddie_a081b30d002df632d9fe3285dc8cca125}{stop\+Searching} ()\label{class_baddie_a081b30d002df632d9fe3285dc8cca125}
+
+\begin{DoxyCompactList}\small\item\em set\+Invade, stop character looking for an enemy \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_a990beca4ceda08987016ef154b02043d}{}void \hyperlink{class_baddie_a990beca4ceda08987016ef154b02043d}{fight} ()\label{class_baddie_a990beca4ceda08987016ef154b02043d}
+
+\begin{DoxyCompactList}\small\item\em fight, baddies actions when fighting \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_a12f930c2838459fd8ec218e4b849d6ff}{}void \hyperlink{class_baddie_a12f930c2838459fd8ec218e4b849d6ff}{idle\+State} ()\label{class_baddie_a12f930c2838459fd8ec218e4b849d6ff}
+
+\begin{DoxyCompactList}\small\item\em idle\+State, sets baddie to not be in a fithing state \end{DoxyCompactList}\item 
+\hypertarget{class_baddie_af6ff48b973d7f5c9e20774918bfd8638}{}bool \hyperlink{class_baddie_af6ff48b973d7f5c9e20774918bfd8638}{find\+Nearest\+Target} ()\label{class_baddie_af6ff48b973d7f5c9e20774918bfd8638}
+
+\begin{DoxyCompactList}\small\item\em find\+Nearest\+Target, finds character nearest to baddie \end{DoxyCompactList}\item 
+float \hyperlink{class_baddie_a70eab6bc59c0b057553d40382295ac5e}{get\+Scale} ()
+\begin{DoxyCompactList}\small\item\em get\+Scale, returns baddie\textquotesingle{}s scale for drawing \end{DoxyCompactList}\item 
+void \hyperlink{class_baddie_a1ac904c81d042107fec6b853de2af5e3}{add\+Scale} (float \+\_\+scale)
+\begin{DoxyCompactList}\small\item\em add\+Scale, adds onto scale of baddie \end{DoxyCompactList}\item 
+float \hyperlink{class_baddie_a6f82148ee1c08fa35390e17ce8e5c679}{get\+I\+D} ()
+\begin{DoxyCompactList}\small\item\em get\+I\+D, return baddie I\+D \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_baddie}{Baddie} class is the ingame enemy, with attacking and tracking states. 
+
+Definition at line 22 of file Baddie.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_baddie_a748dc5a3026f75412dbff8d21e33fee0}{}\index{Baddie@{Baddie}!Baddie@{Baddie}}
+\index{Baddie@{Baddie}!Baddie@{Baddie}}
+\subsubsection[{Baddie}]{\setlength{\rightskip}{0pt plus 5cm}Baddie\+::\+Baddie (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+pos, }
+\item[{{\bf Terrain\+Height\+Tracer} $\ast$}]{\+\_\+height\+\_\+tracer, }
+\item[{{\bf Grid} $\ast$}]{\+\_\+grid, }
+\item[{std\+::vector$<$ {\bf Character} $>$ $\ast$}]{\+\_\+characters}
+\end{DoxyParamCaption}
+)}\label{class_baddie_a748dc5a3026f75412dbff8d21e33fee0}
+
+
+\hyperlink{class_baddie}{Baddie} create baddie with a position on the grid and a references to the characters. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+pos} & spawn position \\
+\hline
+{\em \+\_\+height\+\_\+tracer} & height tracer to use \\
+\hline
+{\em \+\_\+grid} & pointer to grid for pathfinding and positions \\
+\hline
+{\em \+\_\+characters} & reference to character vector in scene \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 11 of file Baddie.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_baddie_a1ac904c81d042107fec6b853de2af5e3}{}\index{Baddie@{Baddie}!add\+Scale@{add\+Scale}}
+\index{add\+Scale@{add\+Scale}!Baddie@{Baddie}}
+\subsubsection[{add\+Scale}]{\setlength{\rightskip}{0pt plus 5cm}void Baddie\+::add\+Scale (
+\begin{DoxyParamCaption}
+\item[{float}]{\+\_\+scale}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_baddie_a1ac904c81d042107fec6b853de2af5e3}
+
+
+add\+Scale, adds onto scale of baddie 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+scale,amount} & to add onto scale \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 70 of file Baddie.\+hpp.
+
+\hypertarget{class_baddie_a6f82148ee1c08fa35390e17ce8e5c679}{}\index{Baddie@{Baddie}!get\+I\+D@{get\+I\+D}}
+\index{get\+I\+D@{get\+I\+D}!Baddie@{Baddie}}
+\subsubsection[{get\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}float Baddie\+::get\+I\+D (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_baddie_a6f82148ee1c08fa35390e17ce8e5c679}
+
+
+get\+I\+D, return baddie I\+D 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+id, baddies I\+D 
+\end{DoxyReturn}
+
+
+Definition at line 75 of file Baddie.\+hpp.
+
+\hypertarget{class_baddie_a70eab6bc59c0b057553d40382295ac5e}{}\index{Baddie@{Baddie}!get\+Scale@{get\+Scale}}
+\index{get\+Scale@{get\+Scale}!Baddie@{Baddie}}
+\subsubsection[{get\+Scale}]{\setlength{\rightskip}{0pt plus 5cm}float Baddie\+::get\+Scale (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_baddie_a70eab6bc59c0b057553d40382295ac5e}
+
+
+get\+Scale, returns baddie\textquotesingle{}s scale for drawing 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+scale, scale of baddie 
+\end{DoxyReturn}
+
+
+Definition at line 65 of file Baddie.\+hpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_baddie_8hpp}{Baddie.\+hpp}\item 
+src/Baddie.\+cpp\end{DoxyCompactItemize}

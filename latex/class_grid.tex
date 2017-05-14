@@ -1,0 +1,834 @@
+\hypertarget{class_grid}{}\section{Grid Class Reference}
+\label{class_grid}\index{Grid@{Grid}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_grid}{Grid} class holds information about what is contained in each cell of the map. \hyperlink{namespace_the}{The} \hyperlink{class_grid}{Grid} class is a wrapper around a std\+::vector of Tile enums. \hyperlink{namespace_the}{The} Tile enums illustrate what is contained within each cell of the map, which can be used by other classes for rendering and path finding.  
+
+
+
+
+{\ttfamily \#include $<$Grid.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_grid_af14a4ade43f6d65ecb752a82b608edb1}{}\hyperlink{class_grid_af14a4ade43f6d65ecb752a82b608edb1}{Grid} (\hyperlink{class_inventory}{Inventory} $\ast$\+\_\+world\+\_\+inventory)\label{class_grid_af14a4ade43f6d65ecb752a82b608edb1}
+
+\begin{DoxyCompactList}\small\item\em default ctor that sets the grid to a default 50 by 50 set of empty tiles and runs the initialiser \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_a9b6047de5eb6eda425753ce3a274ddd4}{update\+Script} (std\+::string \+\_\+script\+\_\+path, int \+\_\+new\+\_\+w=100, int \+\_\+new\+\_\+h=100, int \+\_\+new\+\_\+seed=8)
+\begin{DoxyCompactList}\small\item\em update\+Script loads the specified script and runs it to create a new map \end{DoxyCompactList}\item 
+\hypertarget{class_grid_ae2879c5a643d4521ea198d9ad6ab54d5}{}void {\bfseries print\+Trees} ()\label{class_grid_ae2879c5a643d4521ea198d9ad6ab54d5}
+
+\item 
+\hypertarget{class_grid_ac9b8600f35b8c9a526bd7559be5e3b3e}{}void {\bfseries print\+Types} ()\label{class_grid_ac9b8600f35b8c9a526bd7559be5e3b3e}
+
+\item 
+Tile\+Type \hyperlink{class_grid_a92c51a87c9693b764c39baba06e7a163}{get\+Tile\+Type} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Tile\+Type gets the tile type at the requested coordinates \end{DoxyCompactList}\item 
+Tile\+Type \hyperlink{class_grid_ada5f2b20c1addc6427858440e10fc0f7}{get\+Tile\+Type} (ngl\+::\+Vec2 \+\_\+coord)
+\begin{DoxyCompactList}\small\item\em get\+Tile\+Type gets the tile type from a ngl\+::\+Vec2 \end{DoxyCompactList}\item 
+Tile\+Type \hyperlink{class_grid_a30afc3618fcf00a6d4684679ce8ef4ca}{get\+Tile\+Type} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em get\+Tile\+Type gets the tile type at the given tile id \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a1b5974e4c82ad6524e893b137961ff51}{get\+Tile\+Height} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Tile\+Height gets the tile height at the given position \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a5f18d590b116be8e0ea88b10e91dd4bd}{get\+Tile\+Height} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em get\+Tile\+Height gets the tile height using an integer tile id \end{DoxyCompactList}\item 
+float \hyperlink{class_grid_af228e1b51546bcf3ca7e4266a9fb1b74}{get\+Interpolated\+Height} (float \+\_\+x, float \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Interpolated\+Height interpolates the height between tiles at integer coordinates \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_a9e679439e6905cb81d5809cb1f9cd5ea}{is\+Tile\+Traversable} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em is\+Tile\+Traversable returns a bool that indicated if a character can walk across this tile \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_a541a681c0497176f4e4aa36e23a687bc}{is\+Tile\+Traversable} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em is\+Tile\+Traversable returns a bool that indicated if a character can walk across this tile \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_grid_a28e2f58bb6da036f9ee7d4c4fef1b0a4}{get\+Tree\+Positions} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Tree\+Positions returns a vector of tree positions on the tile \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a3af04499bd5cc782c2eb8c49e69fe240}{cut\+Tile\+Trees} (int \+\_\+id, int \+\_\+goal\+\_\+amount)
+\begin{DoxyCompactList}\small\item\em cut\+Tile\+Trees reduces the amount of trees on the tile by the requested amount, with a limit of 0 when the tile reaches 0 trees it is converted from a tree tile to an empty tile \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_a52522ff5ff2989211007b9e414bc1644}{set\+Tile\+Type} (int \+\_\+id, Tile\+Type \+\_\+type)
+\begin{DoxyCompactList}\small\item\em set\+Tile\+Type sets the tile type at the given id \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_a3e3cf7aee6df8ed97a75ecc6a52e34e0}{set\+Tile\+Type} (int \+\_\+x, int \+\_\+y, Tile\+Type \+\_\+type)
+\begin{DoxyCompactList}\small\item\em set\+Tile\+Type sets the tile type at the given coordinate \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_ab701ece767c2ddb1054521fb7332ab87}{add\+Build\+State} (int \+\_\+id, float \+\_\+value, Tile\+Type \+\_\+type)
+\begin{DoxyCompactList}\small\item\em add\+Build\+State adds to the build state of the tile, which represents the stage of completion of the building \end{DoxyCompactList}\item 
+void \hyperlink{class_grid_a8700734fcba19c23807a4774f3b386ff}{add\+Build\+State} (int \+\_\+x, int \+\_\+y, float \+\_\+value, Tile\+Type \+\_\+type)
+\begin{DoxyCompactList}\small\item\em add\+Build\+State adds to the build state of the tile, which represents the stage of completion of the building \end{DoxyCompactList}\item 
+float \hyperlink{class_grid_a97946c69f980f92b346fda6e7f79c43d}{get\+Build\+State} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em get\+Build\+State gets the build state of the tile with the given id \end{DoxyCompactList}\item 
+float \hyperlink{class_grid_a9fd9d738f30f7ff7520ad2e61372d4d8}{get\+Build\+State} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Build\+State gets the build state of the tile with the given id \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a1948d865b653c8f9ab0db8d0345655d2}{get\+Num\+Trees} (int \+\_\+x, int \+\_\+y)
+\begin{DoxyCompactList}\small\item\em get\+Num\+Trees gets the number of trees at the tile \end{DoxyCompactList}\item 
+\hypertarget{class_grid_a1b687d4b17e9e38a25e96f40b154c0a5}{}void \hyperlink{class_grid_a1b687d4b17e9e38a25e96f40b154c0a5}{house\+Added} ()\label{class_grid_a1b687d4b17e9e38a25e96f40b154c0a5}
+
+\begin{DoxyCompactList}\small\item\em house\+Added increment number of houses in scene \end{DoxyCompactList}\item 
+\hypertarget{class_grid_a7d3b7faad6b2885178d1740afb631817}{}void \hyperlink{class_grid_a7d3b7faad6b2885178d1740afb631817}{house\+Destroyed} ()\label{class_grid_a7d3b7faad6b2885178d1740afb631817}
+
+\begin{DoxyCompactList}\small\item\em house\+Destroyed decrement number of houses in scene \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a5c3951f16d8972674ac03d30503f566d}{get\+Num\+Houses} ()
+\begin{DoxyCompactList}\small\item\em get\+Num\+Houses get the number of houses on the grid \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_grid_a9eeef6b776349215a24523cc570c7122}{id\+To\+Coord} (int \+\_\+tile\+Id)
+\begin{DoxyCompactList}\small\item\em converts a tile id to a coordinate, the tile id is the one dimensional coordinate of the tile \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_abed85ae949d4b4f7a71a27ecefcf6386}{coord\+To\+Id} (ngl\+::\+Vec2 \+\_\+coord)
+\begin{DoxyCompactList}\small\item\em converts a coordinate to a tile id \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a08562d512a6aba648746e5bb057ddb45}{get\+W} ()
+\begin{DoxyCompactList}\small\item\em returns grid width \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_aefd9a1af08cb42c6b492ba48e00db985}{get\+H} ()
+\begin{DoxyCompactList}\small\item\em returns grid height \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a326a5bc1b98800807b6fae91c73ab93d}{get\+Global\+Mountain\+Height} ()
+\begin{DoxyCompactList}\small\item\em get\+Global\+Mountain\+Height returns the height limit that divides mountains from normal terrain set in the python script \end{DoxyCompactList}\item 
+int \hyperlink{class_grid_a58700cc20a47233e076aa70801f73d75}{get\+Global\+Water\+Level} ()
+\begin{DoxyCompactList}\small\item\em get\+Global\+Water\+Level returns the water level, set in the python script \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_a432ceeb0a83639a4e6da8a70909a135e}{has\+Changes} ()
+\begin{DoxyCompactList}\small\item\em has\+Changes returns a boolean flag that indicated if changes have been made to the grid. changes include cutting down trees and building new houses, this is used to re-\/build the mesh instances \end{DoxyCompactList}\item 
+\hypertarget{class_grid_a2b229f174c7458baaf7ebeb3eb378707}{}void \hyperlink{class_grid_a2b229f174c7458baaf7ebeb3eb378707}{reset\+Has\+Changes} ()\label{class_grid_a2b229f174c7458baaf7ebeb3eb378707}
+
+\begin{DoxyCompactList}\small\item\em reset\+Has\+Changes resets the has changes flag to false \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \hyperlink{class_grid_a943153054fb09f6b5fa3aa1f55037ef5}{get\+Spawn\+Point} ()
+\begin{DoxyCompactList}\small\item\em get\+Spawn\+Point retrieves the spawn point set by the python script \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_aae6d8f0a0674d84bd1cd025283170634}{check\+I\+D} (int \+\_\+id)
+\begin{DoxyCompactList}\small\item\em check\+I\+D checks that the id asked for is valid \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_a00195f02ce6c6815e283ee7cf66ff5da}{check\+Coord} (double \+\_\+x, double \+\_\+y)
+\begin{DoxyCompactList}\small\item\em check\+Coord checks that the coordinate asked for is valid \end{DoxyCompactList}\item 
+bool \hyperlink{class_grid_ab8ba8c914145187f720a1d1f4a73552a}{check\+Coord} (ngl\+::\+Vec2 \+\_\+p)
+\begin{DoxyCompactList}\small\item\em check\+Coord checks that the coordinate asked for is valid \end{DoxyCompactList}\item 
+std\+::vector$<$ ngl\+::\+Vec2 $>$ \hyperlink{class_grid_a93fefe7048f80ba8166cda07b915b225}{get\+Store\+Houses} ()
+\begin{DoxyCompactList}\small\item\em get\+Store\+House\+Ids returns the vector of storehouse positions \end{DoxyCompactList}\item 
+\hypertarget{class_grid_ab8e5a859cb7fc0e6395958d1b3c824f7}{}std\+::vector$<$ ngl\+::\+Vec2 $>$ {\bfseries get\+Changed\+Tiles} ()\label{class_grid_ab8e5a859cb7fc0e6395958d1b3c824f7}
+
+\item 
+\hypertarget{class_grid_afe0ea9252eaf09643cc6ef472123e994}{}void {\bfseries reset\+Changed\+Tiles} ()\label{class_grid_afe0ea9252eaf09643cc6ef472123e994}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_grid}{Grid} class holds information about what is contained in each cell of the map. \hyperlink{namespace_the}{The} \hyperlink{class_grid}{Grid} class is a wrapper around a std\+::vector of Tile enums. \hyperlink{namespace_the}{The} Tile enums illustrate what is contained within each cell of the map, which can be used by other classes for rendering and path finding. 
+
+Definition at line 23 of file Grid.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_grid_ab701ece767c2ddb1054521fb7332ab87}{}\index{Grid@{Grid}!add\+Build\+State@{add\+Build\+State}}
+\index{add\+Build\+State@{add\+Build\+State}!Grid@{Grid}}
+\subsubsection[{add\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+::add\+Build\+State (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id, }
+\item[{float}]{\+\_\+value, }
+\item[{Tile\+Type}]{\+\_\+type}
+\end{DoxyParamCaption}
+)}\label{class_grid_ab701ece767c2ddb1054521fb7332ab87}
+
+
+add\+Build\+State adds to the build state of the tile, which represents the stage of completion of the building 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is id of the tile of interest \\
+\hline
+{\em \+\_\+value} & the increment value of the build state \\
+\hline
+{\em \+\_\+type} & the type of building being built \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 244 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a8700734fcba19c23807a4774f3b386ff}{}\index{Grid@{Grid}!add\+Build\+State@{add\+Build\+State}}
+\index{add\+Build\+State@{add\+Build\+State}!Grid@{Grid}}
+\subsubsection[{add\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+::add\+Build\+State (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y, }
+\item[{float}]{\+\_\+value, }
+\item[{Tile\+Type}]{\+\_\+type}
+\end{DoxyParamCaption}
+)}\label{class_grid_a8700734fcba19c23807a4774f3b386ff}
+
+
+add\+Build\+State adds to the build state of the tile, which represents the stage of completion of the building 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x component of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y component of the tile of interest \\
+\hline
+{\em \+\_\+value} & is the value to increase the tiles build state by \\
+\hline
+{\em \+\_\+type} & is the type of building being built \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 255 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a00195f02ce6c6815e283ee7cf66ff5da}{}\index{Grid@{Grid}!check\+Coord@{check\+Coord}}
+\index{check\+Coord@{check\+Coord}!Grid@{Grid}}
+\subsubsection[{check\+Coord}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::check\+Coord (
+\begin{DoxyParamCaption}
+\item[{double}]{\+\_\+x, }
+\item[{double}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a00195f02ce6c6815e283ee7cf66ff5da}
+
+
+check\+Coord checks that the coordinate asked for is valid 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate \\
+\hline
+{\em \+\_\+y} & is the y coordinate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the coordinate is valid 
+\end{DoxyReturn}
+
+
+Definition at line 314 of file Grid.\+cpp.
+
+\hypertarget{class_grid_ab8ba8c914145187f720a1d1f4a73552a}{}\index{Grid@{Grid}!check\+Coord@{check\+Coord}}
+\index{check\+Coord@{check\+Coord}!Grid@{Grid}}
+\subsubsection[{check\+Coord}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::check\+Coord (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+p}
+\end{DoxyParamCaption}
+)}\label{class_grid_ab8ba8c914145187f720a1d1f4a73552a}
+
+
+check\+Coord checks that the coordinate asked for is valid 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+p} & the coordinate as an ngl vec2 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the coordinate is valid 
+\end{DoxyReturn}
+
+
+Definition at line 326 of file Grid.\+cpp.
+
+\hypertarget{class_grid_aae6d8f0a0674d84bd1cd025283170634}{}\index{Grid@{Grid}!check\+I\+D@{check\+I\+D}}
+\index{check\+I\+D@{check\+I\+D}!Grid@{Grid}}
+\subsubsection[{check\+I\+D}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::check\+I\+D (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_aae6d8f0a0674d84bd1cd025283170634}
+
+
+check\+I\+D checks that the id asked for is valid 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & the id to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the id is valid 
+\end{DoxyReturn}
+
+
+Definition at line 302 of file Grid.\+cpp.
+
+\hypertarget{class_grid_abed85ae949d4b4f7a71a27ecefcf6386}{}\index{Grid@{Grid}!coord\+To\+Id@{coord\+To\+Id}}
+\index{coord\+To\+Id@{coord\+To\+Id}!Grid@{Grid}}
+\subsubsection[{coord\+To\+Id}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::coord\+To\+Id (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+coord}
+\end{DoxyParamCaption}
+)}\label{class_grid_abed85ae949d4b4f7a71a27ecefcf6386}
+
+
+converts a coordinate to a tile id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em the} & tile id to convert \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a ngl\+::vec2 that is the 2d coordinate of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 111 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a3af04499bd5cc782c2eb8c49e69fe240}{}\index{Grid@{Grid}!cut\+Tile\+Trees@{cut\+Tile\+Trees}}
+\index{cut\+Tile\+Trees@{cut\+Tile\+Trees}!Grid@{Grid}}
+\subsubsection[{cut\+Tile\+Trees}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::cut\+Tile\+Trees (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id, }
+\item[{int}]{\+\_\+goal\+\_\+amount}
+\end{DoxyParamCaption}
+)}\label{class_grid_a3af04499bd5cc782c2eb8c49e69fe240}
+
+
+cut\+Tile\+Trees reduces the amount of trees on the tile by the requested amount, with a limit of 0 when the tile reaches 0 trees it is converted from a tree tile to an empty tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile of interest (aka its position in the 1\+D array of tiles \\
+\hline
+{\em \+\_\+goal\+\_\+amount} & is the desired number of trees to cut \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of trees cut, not necessarily the goal amount in cases where the tile has no trees left 
+\end{DoxyReturn}
+
+
+Definition at line 224 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a97946c69f980f92b346fda6e7f79c43d}{}\index{Grid@{Grid}!get\+Build\+State@{get\+Build\+State}}
+\index{get\+Build\+State@{get\+Build\+State}!Grid@{Grid}}
+\subsubsection[{get\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}float Grid\+::get\+Build\+State (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_a97946c69f980f92b346fda6e7f79c43d}
+
+
+get\+Build\+State gets the build state of the tile with the given id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile of interest \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the build state \mbox{[}0 ... 1\mbox{]} of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 266 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a9fd9d738f30f7ff7520ad2e61372d4d8}{}\index{Grid@{Grid}!get\+Build\+State@{get\+Build\+State}}
+\index{get\+Build\+State@{get\+Build\+State}!Grid@{Grid}}
+\subsubsection[{get\+Build\+State}]{\setlength{\rightskip}{0pt plus 5cm}float Grid\+::get\+Build\+State (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a9fd9d738f30f7ff7520ad2e61372d4d8}
+
+
+get\+Build\+State gets the build state of the tile with the given id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y coordinate of the tile of interest \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+Definition at line 271 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a326a5bc1b98800807b6fae91c73ab93d}{}\index{Grid@{Grid}!get\+Global\+Mountain\+Height@{get\+Global\+Mountain\+Height}}
+\index{get\+Global\+Mountain\+Height@{get\+Global\+Mountain\+Height}!Grid@{Grid}}
+\subsubsection[{get\+Global\+Mountain\+Height}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Global\+Mountain\+Height (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a326a5bc1b98800807b6fae91c73ab93d}
+
+
+get\+Global\+Mountain\+Height returns the height limit that divides mountains from normal terrain set in the python script 
+
+\begin{DoxyReturn}{Returns}
+the height of the mountains 
+\end{DoxyReturn}
+
+
+Definition at line 140 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a58700cc20a47233e076aa70801f73d75}{}\index{Grid@{Grid}!get\+Global\+Water\+Level@{get\+Global\+Water\+Level}}
+\index{get\+Global\+Water\+Level@{get\+Global\+Water\+Level}!Grid@{Grid}}
+\subsubsection[{get\+Global\+Water\+Level}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Global\+Water\+Level (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a58700cc20a47233e076aa70801f73d75}
+
+
+get\+Global\+Water\+Level returns the water level, set in the python script 
+
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+Definition at line 145 of file Grid.\+cpp.
+
+\hypertarget{class_grid_aefd9a1af08cb42c6b492ba48e00db985}{}\index{Grid@{Grid}!get\+H@{get\+H}}
+\index{get\+H@{get\+H}!Grid@{Grid}}
+\subsubsection[{get\+H}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+H (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_aefd9a1af08cb42c6b492ba48e00db985}
+
+
+returns grid height 
+
+\begin{DoxyReturn}{Returns}
+int height of grid 
+\end{DoxyReturn}
+
+
+Definition at line 135 of file Grid.\+cpp.
+
+\hypertarget{class_grid_af228e1b51546bcf3ca7e4266a9fb1b74}{}\index{Grid@{Grid}!get\+Interpolated\+Height@{get\+Interpolated\+Height}}
+\index{get\+Interpolated\+Height@{get\+Interpolated\+Height}!Grid@{Grid}}
+\subsubsection[{get\+Interpolated\+Height}]{\setlength{\rightskip}{0pt plus 5cm}float Grid\+::get\+Interpolated\+Height (
+\begin{DoxyParamCaption}
+\item[{float}]{\+\_\+x, }
+\item[{float}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_af228e1b51546bcf3ca7e4266a9fb1b74}
+
+
+get\+Interpolated\+Height interpolates the height between tiles at integer coordinates 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x component for the interpolated height \\
+\hline
+{\em \+\_\+y} & is the y component for the interpolated height \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the height value interpolated from the 4 surrounding tiles 
+\end{DoxyReturn}
+
+
+Definition at line 150 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a5c3951f16d8972674ac03d30503f566d}{}\index{Grid@{Grid}!get\+Num\+Houses@{get\+Num\+Houses}}
+\index{get\+Num\+Houses@{get\+Num\+Houses}!Grid@{Grid}}
+\subsubsection[{get\+Num\+Houses}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Num\+Houses (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_grid_a5c3951f16d8972674ac03d30503f566d}
+
+
+get\+Num\+Houses get the number of houses on the grid 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+num\+\_\+houses, number of houses on grid 
+\end{DoxyReturn}
+
+
+Definition at line 190 of file Grid.\+hpp.
+
+\hypertarget{class_grid_a1948d865b653c8f9ab0db8d0345655d2}{}\index{Grid@{Grid}!get\+Num\+Trees@{get\+Num\+Trees}}
+\index{get\+Num\+Trees@{get\+Num\+Trees}!Grid@{Grid}}
+\subsubsection[{get\+Num\+Trees}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Num\+Trees (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a1948d865b653c8f9ab0db8d0345655d2}
+
+
+get\+Num\+Trees gets the number of trees at the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y coordinate of the tile of interest \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the number of trees remaining on the tile 
+\end{DoxyReturn}
+
+
+Definition at line 292 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a943153054fb09f6b5fa3aa1f55037ef5}{}\index{Grid@{Grid}!get\+Spawn\+Point@{get\+Spawn\+Point}}
+\index{get\+Spawn\+Point@{get\+Spawn\+Point}!Grid@{Grid}}
+\subsubsection[{get\+Spawn\+Point}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 Grid\+::get\+Spawn\+Point (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a943153054fb09f6b5fa3aa1f55037ef5}
+
+
+get\+Spawn\+Point retrieves the spawn point set by the python script 
+
+\begin{DoxyReturn}{Returns}
+the spwan point as an ngl\+::\+Vec2 
+\end{DoxyReturn}
+
+
+Definition at line 297 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a93fefe7048f80ba8166cda07b915b225}{}\index{Grid@{Grid}!get\+Store\+Houses@{get\+Store\+Houses}}
+\index{get\+Store\+Houses@{get\+Store\+Houses}!Grid@{Grid}}
+\subsubsection[{get\+Store\+Houses}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ Grid\+::get\+Store\+Houses (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a93fefe7048f80ba8166cda07b915b225}
+
+
+get\+Store\+House\+Ids returns the vector of storehouse positions 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+store\+\_\+houses 
+\end{DoxyReturn}
+
+
+Definition at line 355 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a1b5974e4c82ad6524e893b137961ff51}{}\index{Grid@{Grid}!get\+Tile\+Height@{get\+Tile\+Height}}
+\index{get\+Tile\+Height@{get\+Tile\+Height}!Grid@{Grid}}
+\subsubsection[{get\+Tile\+Height}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Tile\+Height (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a1b5974e4c82ad6524e893b137961ff51}
+
+
+get\+Tile\+Height gets the tile height at the given position 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x component of the position \\
+\hline
+{\em \+\_\+y} & is the y component of the position \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the height value of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 190 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a5f18d590b116be8e0ea88b10e91dd4bd}{}\index{Grid@{Grid}!get\+Tile\+Height@{get\+Tile\+Height}}
+\index{get\+Tile\+Height@{get\+Tile\+Height}!Grid@{Grid}}
+\subsubsection[{get\+Tile\+Height}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+Tile\+Height (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_a5f18d590b116be8e0ea88b10e91dd4bd}
+
+
+get\+Tile\+Height gets the tile height using an integer tile id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile (aka its position in the 1\+D tile array) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the height value of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 195 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a92c51a87c9693b764c39baba06e7a163}{}\index{Grid@{Grid}!get\+Tile\+Type@{get\+Tile\+Type}}
+\index{get\+Tile\+Type@{get\+Tile\+Type}!Grid@{Grid}}
+\subsubsection[{get\+Tile\+Type}]{\setlength{\rightskip}{0pt plus 5cm}Tile\+Type Grid\+::get\+Tile\+Type (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a92c51a87c9693b764c39baba06e7a163}
+
+
+get\+Tile\+Type gets the tile type at the requested coordinates 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x component of the coordinate \\
+\hline
+{\em \+\_\+y} & is the y component of the coordinate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the Tile\+Type of the tile at position \+\_\+x, \+\_\+y 
+\end{DoxyReturn}
+
+
+Definition at line 180 of file Grid.\+cpp.
+
+\hypertarget{class_grid_ada5f2b20c1addc6427858440e10fc0f7}{}\index{Grid@{Grid}!get\+Tile\+Type@{get\+Tile\+Type}}
+\index{get\+Tile\+Type@{get\+Tile\+Type}!Grid@{Grid}}
+\subsubsection[{get\+Tile\+Type}]{\setlength{\rightskip}{0pt plus 5cm}Tile\+Type Grid\+::get\+Tile\+Type (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+coord}
+\end{DoxyParamCaption}
+)}\label{class_grid_ada5f2b20c1addc6427858440e10fc0f7}
+
+
+get\+Tile\+Type gets the tile type from a ngl\+::\+Vec2 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+coord} & the coordinate as Vec2 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the Tile\+Type at the given position 
+\end{DoxyReturn}
+
+
+Definition at line 175 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a30afc3618fcf00a6d4684679ce8ef4ca}{}\index{Grid@{Grid}!get\+Tile\+Type@{get\+Tile\+Type}}
+\index{get\+Tile\+Type@{get\+Tile\+Type}!Grid@{Grid}}
+\subsubsection[{get\+Tile\+Type}]{\setlength{\rightskip}{0pt plus 5cm}Tile\+Type Grid\+::get\+Tile\+Type (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_a30afc3618fcf00a6d4684679ce8ef4ca}
+
+
+get\+Tile\+Type gets the tile type at the given tile id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile (aka its position in the 2\+D tile array) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the Tile\+Type at the given id 
+\end{DoxyReturn}
+
+
+Definition at line 185 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a28e2f58bb6da036f9ee7d4c4fef1b0a4}{}\index{Grid@{Grid}!get\+Tree\+Positions@{get\+Tree\+Positions}}
+\index{get\+Tree\+Positions@{get\+Tree\+Positions}!Grid@{Grid}}
+\subsubsection[{get\+Tree\+Positions}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ ngl\+::\+Vec2 $>$ Grid\+::get\+Tree\+Positions (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a28e2f58bb6da036f9ee7d4c4fef1b0a4}
+
+
+get\+Tree\+Positions returns a vector of tree positions on the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y coordinate of the tile of interest \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a vector of ngl\+::\+Vec2, one for each tree in the tile 
+\end{DoxyReturn}
+
+
+Definition at line 287 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a08562d512a6aba648746e5bb057ddb45}{}\index{Grid@{Grid}!get\+W@{get\+W}}
+\index{get\+W@{get\+W}!Grid@{Grid}}
+\subsubsection[{get\+W}]{\setlength{\rightskip}{0pt plus 5cm}int Grid\+::get\+W (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a08562d512a6aba648746e5bb057ddb45}
+
+
+returns grid width 
+
+\begin{DoxyReturn}{Returns}
+int width of grid 
+\end{DoxyReturn}
+
+
+Definition at line 130 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a432ceeb0a83639a4e6da8a70909a135e}{}\index{Grid@{Grid}!has\+Changes@{has\+Changes}}
+\index{has\+Changes@{has\+Changes}!Grid@{Grid}}
+\subsubsection[{has\+Changes}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::has\+Changes (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_grid_a432ceeb0a83639a4e6da8a70909a135e}
+
+
+has\+Changes returns a boolean flag that indicated if changes have been made to the grid. changes include cutting down trees and building new houses, this is used to re-\/build the mesh instances 
+
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+Definition at line 276 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a9eeef6b776349215a24523cc570c7122}{}\index{Grid@{Grid}!id\+To\+Coord@{id\+To\+Coord}}
+\index{id\+To\+Coord@{id\+To\+Coord}!Grid@{Grid}}
+\subsubsection[{id\+To\+Coord}]{\setlength{\rightskip}{0pt plus 5cm}ngl\+::\+Vec2 Grid\+::id\+To\+Coord (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+tile\+Id}
+\end{DoxyParamCaption}
+)}\label{class_grid_a9eeef6b776349215a24523cc570c7122}
+
+
+converts a tile id to a coordinate, the tile id is the one dimensional coordinate of the tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em the} & tile id to convert \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a ngl\+::vec2 that is the 2d coordinate of the tile 
+\end{DoxyReturn}
+
+
+Definition at line 104 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a9e679439e6905cb81d5809cb1f9cd5ea}{}\index{Grid@{Grid}!is\+Tile\+Traversable@{is\+Tile\+Traversable}}
+\index{is\+Tile\+Traversable@{is\+Tile\+Traversable}!Grid@{Grid}}
+\subsubsection[{is\+Tile\+Traversable}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::is\+Tile\+Traversable (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y}
+\end{DoxyParamCaption}
+)}\label{class_grid_a9e679439e6905cb81d5809cb1f9cd5ea}
+
+
+is\+Tile\+Traversable returns a bool that indicated if a character can walk across this tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y coordinate of the tile of interest \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a bool value that is true if a character can walk on the tile 
+\end{DoxyReturn}
+
+
+Definition at line 200 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a541a681c0497176f4e4aa36e23a687bc}{}\index{Grid@{Grid}!is\+Tile\+Traversable@{is\+Tile\+Traversable}}
+\index{is\+Tile\+Traversable@{is\+Tile\+Traversable}!Grid@{Grid}}
+\subsubsection[{is\+Tile\+Traversable}]{\setlength{\rightskip}{0pt plus 5cm}bool Grid\+::is\+Tile\+Traversable (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id}
+\end{DoxyParamCaption}
+)}\label{class_grid_a541a681c0497176f4e4aa36e23a687bc}
+
+
+is\+Tile\+Traversable returns a bool that indicated if a character can walk across this tile 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile of interest (aka its position in the 1 array of tiles) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a bool value that is true if a character can walk on the tile 
+\end{DoxyReturn}
+
+
+Definition at line 212 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a52522ff5ff2989211007b9e414bc1644}{}\index{Grid@{Grid}!set\+Tile\+Type@{set\+Tile\+Type}}
+\index{set\+Tile\+Type@{set\+Tile\+Type}!Grid@{Grid}}
+\subsubsection[{set\+Tile\+Type}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+::set\+Tile\+Type (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+id, }
+\item[{Tile\+Type}]{\+\_\+type}
+\end{DoxyParamCaption}
+)}\label{class_grid_a52522ff5ff2989211007b9e414bc1644}
+
+
+set\+Tile\+Type sets the tile type at the given id 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+id} & is the id of the tile of interest (aka its position in the 1\+D array of tiles) \\
+\hline
+{\em \+\_\+type} & the new type of the tile \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 232 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a3e3cf7aee6df8ed97a75ecc6a52e34e0}{}\index{Grid@{Grid}!set\+Tile\+Type@{set\+Tile\+Type}}
+\index{set\+Tile\+Type@{set\+Tile\+Type}!Grid@{Grid}}
+\subsubsection[{set\+Tile\+Type}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+::set\+Tile\+Type (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+x, }
+\item[{int}]{\+\_\+y, }
+\item[{Tile\+Type}]{\+\_\+type}
+\end{DoxyParamCaption}
+)}\label{class_grid_a3e3cf7aee6df8ed97a75ecc6a52e34e0}
+
+
+set\+Tile\+Type sets the tile type at the given coordinate 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+x} & is the x coordinate of the tile of interest \\
+\hline
+{\em \+\_\+y} & is the y coordinate of the tile of interest \\
+\hline
+{\em \+\_\+type} & is the new type of the tile \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 238 of file Grid.\+cpp.
+
+\hypertarget{class_grid_a9b6047de5eb6eda425753ce3a274ddd4}{}\index{Grid@{Grid}!update\+Script@{update\+Script}}
+\index{update\+Script@{update\+Script}!Grid@{Grid}}
+\subsubsection[{update\+Script}]{\setlength{\rightskip}{0pt plus 5cm}void Grid\+::update\+Script (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+script\+\_\+path, }
+\item[{int}]{\+\_\+new\+\_\+w = {\ttfamily 100}, }
+\item[{int}]{\+\_\+new\+\_\+h = {\ttfamily 100}, }
+\item[{int}]{\+\_\+new\+\_\+seed = {\ttfamily 8}}
+\end{DoxyParamCaption}
+)}\label{class_grid_a9b6047de5eb6eda425753ce3a274ddd4}
+
+
+update\+Script loads the specified script and runs it to create a new map 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+script\+\_\+path} & is the file path to the python script \\
+\hline
+{\em \+\_\+new\+\_\+w} & is the width of the map to generate \\
+\hline
+{\em \+\_\+new\+\_\+h} & is the new height of the map \\
+\hline
+{\em \+\_\+new\+\_\+seed} & is the seed value for random number generation in the map script \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 35 of file Grid.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{_grid_8hpp}{Grid.\+hpp}\item 
+src/\hyperlink{_grid_8cpp}{Grid.\+cpp}\end{DoxyCompactItemize}

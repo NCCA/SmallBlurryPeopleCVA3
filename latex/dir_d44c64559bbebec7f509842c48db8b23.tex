@@ -1,0 +1,55 @@
+\hypertarget{dir_d44c64559bbebec7f509842c48db8b23}{}\section{include Directory Reference}
+\label{dir_d44c64559bbebec7f509842c48db8b23}\index{include Directory Reference@{include Directory Reference}}
+\subsection*{Files}
+\begin{DoxyCompactItemize}
+\item 
+file \hyperlink{_a_i_8hpp}{A\+I.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} \hyperlink{class_a_i}{A\+I} refers to the grid for pathfinding and keeps track of a target for pathfinding. \end{DoxyCompactList}\item 
+file {\bfseries Asset\+Store.\+hpp}
+\item 
+file \hyperlink{_baddie_8hpp}{Baddie.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} enemy class that wanders around searching for characters, when one comes into range it follows and attacks the character. \end{DoxyCompactList}\item 
+file {\bfseries Button.\+hpp}
+\item 
+file \hyperlink{_camera_8hpp}{Camera.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} camera class is essentially a wrapper around a load of mat4s. Similar to N\+G\+Ls default camera class but it represents both the camera and a lookat target. \hyperlink{namespace_the}{The} user can transform both of these. When happy with the transformations they have set up, they can call methods to calculate the view and projection matrices. \end{DoxyCompactList}\item 
+file \hyperlink{_character_8hpp}{Character.\+hpp}
+\begin{DoxyCompactList}\small\item\em Has multiple states for actions, responsible for updating itself. \end{DoxyCompactList}\item 
+file {\bfseries Commands.\+hpp}
+\item 
+file {\bfseries Framebuffer.\+hpp}
+\item 
+file \hyperlink{_grid_8hpp}{Grid.\+hpp}
+\begin{DoxyCompactList}\small\item\em header file for the \hyperlink{class_grid}{Grid} class \end{DoxyCompactList}\item 
+file \hyperlink{_grid_tile_8hpp}{Grid\+Tile.\+hpp}
+\begin{DoxyCompactList}\small\item\em header file for the \hyperlink{class_grid_tile}{Grid\+Tile} class \end{DoxyCompactList}\item 
+file \hyperlink{_gui_8hpp}{Gui.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} \hyperlink{class_gui}{Gui} is used for user interaction, and managing and drawing the buttons. \end{DoxyCompactList}\item 
+file \hyperlink{_inventory_8hpp}{Inventory.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} world inventory, globally shared across storehouses. \end{DoxyCompactList}\item 
+file \hyperlink{_i_val_8hpp}{I\+Val.\+hpp}
+\begin{DoxyCompactList}\small\item\em When doing a smooth interpolation between two values, I usually have to define them in a header somewhere and then write cur += (targ -\/ cur) / x This gets pretty tiresome and clutters the code up, especially in \hyperlink{_scene_8hpp_source}{Scene.\+hpp} which until recently suffered from my excessive variables used to track the camera transformation. I figure that wrapping this all up into a class lets me clean this up a bit. \end{DoxyCompactList}\item 
+file \hyperlink{_light_8hpp}{Light.\+hpp}
+\begin{DoxyCompactList}\small\item\em This class acts as a simple point light. \end{DoxyCompactList}\item 
+file \hyperlink{_map_list_8hpp}{Map\+List.\+hpp}
+\item 
+file \hyperlink{_node_8hpp}{Node.\+hpp}
+\begin{DoxyCompactList}\small\item\em Utility class used for pathfinding, holds information position, cost, parent node etc. \end{DoxyCompactList}\item 
+file \hyperlink{_node_network_8hpp}{Node\+Network.\+hpp}
+\begin{DoxyCompactList}\small\item\em \hyperlink{namespace_the}{The} \hyperlink{class_node_network}{Node\+Network} can be created as a temporary helper object for finding a path. All pathfinding logic is contained within it. \end{DoxyCompactList}\item 
+file {\bfseries Particle\+System.\+hpp}
+\item 
+file {\bfseries Preferences.\+hpp}
+\item 
+file {\bfseries Prefs.\+hpp}
+\item 
+file {\bfseries Prefs\+Parser.\+hpp}
+\item 
+file {\bfseries Scene.\+hpp}
+\item 
+file {\bfseries Terrain\+Height\+Tracer.\+hpp}
+\item 
+file {\bfseries Text.\+hpp}
+\item 
+file {\bfseries Utility.\+hpp}
+\end{DoxyCompactItemize}

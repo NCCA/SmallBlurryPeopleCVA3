@@ -1,0 +1,17 @@
+\hypertarget{_i_val_8hpp}{}\section{include/\+I\+Val.hpp File Reference}
+\label{_i_val_8hpp}\index{include/\+I\+Val.\+hpp@{include/\+I\+Val.\+hpp}}
+
+
+When doing a smooth interpolation between two values, I usually have to define them in a header somewhere and then write cur += (targ -\/ cur) / x This gets pretty tiresome and clutters the code up, especially in \hyperlink{_scene_8hpp_source}{Scene.\+hpp} which until recently suffered from my excessive variables used to track the camera transformation. I figure that wrapping this all up into a class lets me clean this up a bit.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_i_val}{I\+Val$<$ T $>$}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+When doing a smooth interpolation between two values, I usually have to define them in a header somewhere and then write cur += (targ -\/ cur) / x This gets pretty tiresome and clutters the code up, especially in \hyperlink{_scene_8hpp_source}{Scene.\+hpp} which until recently suffered from my excessive variables used to track the camera transformation. I figure that wrapping this all up into a class lets me clean this up a bit. 
+

@@ -1,0 +1,459 @@
+\hypertarget{class_scene}{}\section{Scene Class Reference}
+\label{class_scene}\index{Scene@{Scene}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_scene_aa8f0812a5e5695b1ee9a9e86ed7c0308}{Scene} (ngl\+::\+Vec2 \+\_\+viewport)
+\begin{DoxyCompactList}\small\item\em constructor \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a631eef7493cafce5d74739a2cad12a58}{}\hyperlink{class_scene_a631eef7493cafce5d74739a2cad12a58}{$\sim$\+Scene} ()=default\label{class_scene_a631eef7493cafce5d74739a2cad12a58}
+
+\begin{DoxyCompactList}\small\item\em deconstructor \end{DoxyCompactList}\item 
+\hypertarget{class_scene_ac0e3d2c98ba6063a086467fb2c19142f}{}void \hyperlink{class_scene_ac0e3d2c98ba6063a086467fb2c19142f}{draw} ()\label{class_scene_ac0e3d2c98ba6063a086467fb2c19142f}
+
+\begin{DoxyCompactList}\small\item\em draw \end{DoxyCompactList}\item 
+\hypertarget{class_scene_ae3c83b1fcccc713f629dbc2f26d62e05}{}void \hyperlink{class_scene_ae3c83b1fcccc713f629dbc2f26d62e05}{draw\+Sky} (bool \+\_\+flipped=false)\label{class_scene_ae3c83b1fcccc713f629dbc2f26d62e05}
+
+\begin{DoxyCompactList}\small\item\em draws the sky \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a88618a97b26bef8af37f573821c91300}{}void \hyperlink{class_scene_a88618a97b26bef8af37f573821c91300}{draw\+Terrain} (bool \+\_\+should\+Clip=false)\label{class_scene_a88618a97b26bef8af37f573821c91300}
+
+\begin{DoxyCompactList}\small\item\em draws the terrain \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a38a6e83c991e5c3d7afe018a586b0a4b}{}void \hyperlink{class_scene_a38a6e83c991e5c3d7afe018a586b0a4b}{draw\+Meshes} ()\label{class_scene_a38a6e83c991e5c3d7afe018a586b0a4b}
+
+\begin{DoxyCompactList}\small\item\em draws the meshes \end{DoxyCompactList}\item 
+\hypertarget{class_scene_aa24c7e636c10e4e42650c1374b90bb80}{}void \hyperlink{class_scene_aa24c7e636c10e4e42650c1374b90bb80}{update} ()\label{class_scene_aa24c7e636c10e4e42650c1374b90bb80}
+
+\begin{DoxyCompactList}\small\item\em update \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a505299cfe99c98fb5088ec1fbc8189c2}{}void \hyperlink{class_scene_a505299cfe99c98fb5088ec1fbc8189c2}{quit} ()\label{class_scene_a505299cfe99c98fb5088ec1fbc8189c2}
+
+\begin{DoxyCompactList}\small\item\em quit close the program \end{DoxyCompactList}\item 
+bool \hyperlink{class_scene_aac02dec89aa4d67ea4187b9decf4f772}{is\+Active} ()
+\begin{DoxyCompactList}\small\item\em is\+Active check whether program should still be running \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_ac54bef2fcf9164ad1ffc632cf549620c}{mouse\+Press\+Event} (const S\+D\+L\+\_\+\+Mouse\+Button\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em Checks which mouse button has been pressed and sets relevenat mouse state to active. \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_ac4cc3bf5097dbe7ef52ca7192c6af779}{mouse\+Release\+Event} (const S\+D\+L\+\_\+\+Mouse\+Button\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em Checks which mouse button has been released and sets relevant mouse state to false, also calls mouse\+Selection for clicks. \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a1eabb6ccf35b335f8213d0d532d9f1cb}{wheel\+Event} (const S\+D\+L\+\_\+\+Mouse\+Wheel\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em Sets the mouse pan according to the mouse wheel. \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a9d27776b008877319a9bb6e1ab548a55}{zoom} (int \+\_\+direction)
+\begin{DoxyCompactList}\small\item\em zoom move the camera in or out \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a5d470ed921657d92bf73f030db4b0188}{key\+Down\+Event} (const S\+D\+L\+\_\+\+Keyboard\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em key\+Down\+Event called when a key is pressed \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a5a211a9ced3f0c52d898533fe5534269}{key\+Up\+Event} (const S\+D\+L\+\_\+\+Keyboard\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em key\+Up\+Event called when a key is released \end{DoxyCompactList}\item 
+\hypertarget{class_scene_affbeeb5ca9cc57ba94f73b5292e5e1fe}{}void \hyperlink{class_scene_affbeeb5ca9cc57ba94f73b5292e5e1fe}{update\+Mouse\+Pos} ()\label{class_scene_affbeeb5ca9cc57ba94f73b5292e5e1fe}
+
+\begin{DoxyCompactList}\small\item\em update\+Mouse\+Pos check where mouse is for gui \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a568509fe7dc4aa04ac22731f2eb9a4a0}{window\+Event} (const S\+D\+L\+\_\+\+Window\+Event \&\+\_\+event)
+\begin{DoxyCompactList}\small\item\em window\+Event called upon window event such as resize to update resolution parameters \end{DoxyCompactList}\item 
+\hypertarget{class_scene_af1f2fc30a45e73e85835c7b08aac45ca}{}void \hyperlink{class_scene_af1f2fc30a45e73e85835c7b08aac45ca}{initialise\+Framebuffers} ()\label{class_scene_af1f2fc30a45e73e85835c7b08aac45ca}
+
+\begin{DoxyCompactList}\small\item\em Initialises all of the framebuffers. Separated into its own unit so it can be called when the viewport resizes. \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a8dd3993030da7b44743027c953590453}{}void \hyperlink{class_scene_a8dd3993030da7b44743027c953590453}{resize} (const ngl\+::\+Vec2 \&\+\_\+dim)\label{class_scene_a8dd3993030da7b44743027c953590453}
+
+\begin{DoxyCompactList}\small\item\em All the messy code to resize the viewport. Updates shaders, framebuffers etc. \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a5c481d7867f659b06a444f918faeea45}{}void \hyperlink{class_scene_a5c481d7867f659b06a444f918faeea45}{centre\+Camera} ()\label{class_scene_a5c481d7867f659b06a444f918faeea45}
+
+\begin{DoxyCompactList}\small\item\em Centre camera on the active character. \end{DoxyCompactList}\item 
+\hyperlink{class_character}{Character} $\ast$ \hyperlink{class_scene_aacea659211775a5183345fca5fe5538f}{get\+Active\+Character} ()
+\begin{DoxyCompactList}\small\item\em get\+Active\+Character get the active character in the scene \end{DoxyCompactList}\item 
+std\+::string \hyperlink{class_scene_aa67671db968512d32662be353cd3d712}{get\+Active\+Character\+Name} ()
+\begin{DoxyCompactList}\small\item\em get\+Active\+Character\+Name get the name of the active character \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a42465f8df38eae566a70e6cbcbda5fb5}{}void \hyperlink{class_scene_a42465f8df38eae566a70e6cbcbda5fb5}{toggle\+Pause} ()\label{class_scene_a42465f8df38eae566a70e6cbcbda5fb5}
+
+\begin{DoxyCompactList}\small\item\em toggle\+Pause switch between paused and unpaused mode \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a6073a008412ba841b4702c5164d54e56}{}void \hyperlink{class_scene_a6073a008412ba841b4702c5164d54e56}{start\+Game} ()\label{class_scene_a6073a008412ba841b4702c5164d54e56}
+
+\begin{DoxyCompactList}\small\item\em start\+Game leave main menu and start the game \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_acaa15aad62df413e0db0a1a3975eabbc}{start\+Move} (Direction \+\_\+d)
+\begin{DoxyCompactList}\small\item\em start\+Move set movement flag in given direction to true \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a876e586bda5be0100e4be8accf5e17ff}{stop\+Move} (Direction \+\_\+d)
+\begin{DoxyCompactList}\small\item\em stop\+Move set movement flag in given direction to false \end{DoxyCompactList}\item 
+\hypertarget{class_scene_aea689152a0f2758c0304573e3f0696e0}{}void \hyperlink{class_scene_aea689152a0f2758c0304573e3f0696e0}{prefs\+Mode} ()\label{class_scene_aea689152a0f2758c0304573e3f0696e0}
+
+\begin{DoxyCompactList}\small\item\em prefs\+Mode show/hide preferences \end{DoxyCompactList}\item 
+\hypertarget{class_scene_abace53541c8953cdc68e257b5eed8176}{}void \hyperlink{class_scene_abace53541c8953cdc68e257b5eed8176}{escape\+State} ()\label{class_scene_abace53541c8953cdc68e257b5eed8176}
+
+\begin{DoxyCompactList}\small\item\em escape\+State leave current state \end{DoxyCompactList}\item 
+Game\+State \hyperlink{class_scene_a57eddbc5e7d0d4ca4316c407b6367338}{get\+State} ()
+\begin{DoxyCompactList}\small\item\em get\+State return the game state \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_ab9546d85443d18c0115eeeb07e4297b4}{focus\+Cam\+To\+Grid\+Pos} (ngl\+::\+Vec2 \+\_\+pos)
+\begin{DoxyCompactList}\small\item\em focus\+Cam\+To\+Grid\+Pos send the target to the given position \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a8c8d724395041f1d1830a936d778f291}{}void \hyperlink{class_scene_a8c8d724395041f1d1830a936d778f291}{baddies\+Spawn} ()\label{class_scene_a8c8d724395041f1d1830a936d778f291}
+
+\begin{DoxyCompactList}\small\item\em baddies\+Spawn manage baddie spawning \end{DoxyCompactList}\item 
+\hypertarget{class_scene_a4a22ab4d4d660a71d70933758d367395}{}void \hyperlink{class_scene_a4a22ab4d4d660a71d70933758d367395}{characters\+Spawn} ()\label{class_scene_a4a22ab4d4d660a71d70933758d367395}
+
+\begin{DoxyCompactList}\small\item\em characters\+Spawn spawn characters at houses if there\textquotesingle{}s space \end{DoxyCompactList}\item 
+void \hyperlink{class_scene_a35792d52ad44dcdb7f687c0baaf613fa}{end\+Game} (const std\+::string \&\+\_\+message)
+\begin{DoxyCompactList}\small\item\em end\+Game return to main menu \end{DoxyCompactList}\item 
+int \hyperlink{class_scene_aa15fa1f0e2dc66a89b014290eb48d134}{get\+Population} ()
+\begin{DoxyCompactList}\small\item\em get\+Population get the number of characters in the scene \end{DoxyCompactList}\item 
+int \hyperlink{class_scene_a9ca1d4cb4fd7303456cfab9c0d70b27b}{get\+Max\+Population} ()
+\begin{DoxyCompactList}\small\item\em get\+Max\+Population get maximum possible population \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 51 of file Scene.\+hpp.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_scene_aa8f0812a5e5695b1ee9a9e86ed7c0308}{}\index{Scene@{Scene}!Scene@{Scene}}
+\index{Scene@{Scene}!Scene@{Scene}}
+\subsubsection[{Scene}]{\setlength{\rightskip}{0pt plus 5cm}Scene\+::\+Scene (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+viewport}
+\end{DoxyParamCaption}
+)}\label{class_scene_aa8f0812a5e5695b1ee9a9e86ed7c0308}
+
+
+constructor 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+viewport} & \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 29 of file Scene.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_scene_a35792d52ad44dcdb7f687c0baaf613fa}{}\index{Scene@{Scene}!end\+Game@{end\+Game}}
+\index{end\+Game@{end\+Game}!Scene@{Scene}}
+\subsubsection[{end\+Game}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::end\+Game (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{\+\_\+message}
+\end{DoxyParamCaption}
+)}\label{class_scene_a35792d52ad44dcdb7f687c0baaf613fa}
+
+
+end\+Game return to main menu 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+message} & text for first button in main menu \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 2943 of file Scene.\+cpp.
+
+\hypertarget{class_scene_ab9546d85443d18c0115eeeb07e4297b4}{}\index{Scene@{Scene}!focus\+Cam\+To\+Grid\+Pos@{focus\+Cam\+To\+Grid\+Pos}}
+\index{focus\+Cam\+To\+Grid\+Pos@{focus\+Cam\+To\+Grid\+Pos}!Scene@{Scene}}
+\subsubsection[{focus\+Cam\+To\+Grid\+Pos}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::focus\+Cam\+To\+Grid\+Pos (
+\begin{DoxyParamCaption}
+\item[{ngl\+::\+Vec2}]{\+\_\+pos}
+\end{DoxyParamCaption}
+)}\label{class_scene_ab9546d85443d18c0115eeeb07e4297b4}
+
+
+focus\+Cam\+To\+Grid\+Pos send the target to the given position 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+pos} & position for the camera to focus in on \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 2897 of file Scene.\+cpp.
+
+\hypertarget{class_scene_aacea659211775a5183345fca5fe5538f}{}\index{Scene@{Scene}!get\+Active\+Character@{get\+Active\+Character}}
+\index{get\+Active\+Character@{get\+Active\+Character}!Scene@{Scene}}
+\subsubsection[{get\+Active\+Character}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Character} $\ast$ Scene\+::get\+Active\+Character (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_scene_aacea659211775a5183345fca5fe5538f}
+
+
+get\+Active\+Character get the active character in the scene 
+
+\begin{DoxyReturn}{Returns}
+a pointer to the active character 
+\end{DoxyReturn}
+
+
+Definition at line 2724 of file Scene.\+cpp.
+
+\hypertarget{class_scene_aa67671db968512d32662be353cd3d712}{}\index{Scene@{Scene}!get\+Active\+Character\+Name@{get\+Active\+Character\+Name}}
+\index{get\+Active\+Character\+Name@{get\+Active\+Character\+Name}!Scene@{Scene}}
+\subsubsection[{get\+Active\+Character\+Name}]{\setlength{\rightskip}{0pt plus 5cm}std\+::string Scene\+::get\+Active\+Character\+Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_scene_aa67671db968512d32662be353cd3d712}
+
+
+get\+Active\+Character\+Name get the name of the active character 
+
+\begin{DoxyReturn}{Returns}
+active character\textquotesingle{}s name, or an empty string if no active character 
+\end{DoxyReturn}
+
+
+Definition at line 2740 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a9ca1d4cb4fd7303456cfab9c0d70b27b}{}\index{Scene@{Scene}!get\+Max\+Population@{get\+Max\+Population}}
+\index{get\+Max\+Population@{get\+Max\+Population}!Scene@{Scene}}
+\subsubsection[{get\+Max\+Population}]{\setlength{\rightskip}{0pt plus 5cm}int Scene\+::get\+Max\+Population (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_scene_a9ca1d4cb4fd7303456cfab9c0d70b27b}
+
+
+get\+Max\+Population get maximum possible population 
+
+\begin{DoxyReturn}{Returns}
+maximum population 
+\end{DoxyReturn}
+
+
+Definition at line 212 of file Scene.\+hpp.
+
+\hypertarget{class_scene_aa15fa1f0e2dc66a89b014290eb48d134}{}\index{Scene@{Scene}!get\+Population@{get\+Population}}
+\index{get\+Population@{get\+Population}!Scene@{Scene}}
+\subsubsection[{get\+Population}]{\setlength{\rightskip}{0pt plus 5cm}int Scene\+::get\+Population (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_scene_aa15fa1f0e2dc66a89b014290eb48d134}
+
+
+get\+Population get the number of characters in the scene 
+
+\begin{DoxyReturn}{Returns}
+size of the characters vector 
+\end{DoxyReturn}
+
+
+Definition at line 207 of file Scene.\+hpp.
+
+\hypertarget{class_scene_a57eddbc5e7d0d4ca4316c407b6367338}{}\index{Scene@{Scene}!get\+State@{get\+State}}
+\index{get\+State@{get\+State}!Scene@{Scene}}
+\subsubsection[{get\+State}]{\setlength{\rightskip}{0pt plus 5cm}Game\+State Scene\+::get\+State (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_scene_a57eddbc5e7d0d4ca4316c407b6367338}
+
+
+get\+State return the game state 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+state 
+\end{DoxyReturn}
+
+
+Definition at line 2892 of file Scene.\+cpp.
+
+\hypertarget{class_scene_aac02dec89aa4d67ea4187b9decf4f772}{}\index{Scene@{Scene}!is\+Active@{is\+Active}}
+\index{is\+Active@{is\+Active}!Scene@{Scene}}
+\subsubsection[{is\+Active}]{\setlength{\rightskip}{0pt plus 5cm}bool Scene\+::is\+Active (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_scene_aac02dec89aa4d67ea4187b9decf4f772}
+
+
+is\+Active check whether program should still be running 
+
+\begin{DoxyReturn}{Returns}
+m\+\_\+active to see if program should quit if it\textquotesingle{}s false 
+\end{DoxyReturn}
+
+
+Definition at line 3002 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a5d470ed921657d92bf73f030db4b0188}{}\index{Scene@{Scene}!key\+Down\+Event@{key\+Down\+Event}}
+\index{key\+Down\+Event@{key\+Down\+Event}!Scene@{Scene}}
+\subsubsection[{key\+Down\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::key\+Down\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Keyboard\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_a5d470ed921657d92bf73f030db4b0188}
+
+
+key\+Down\+Event called when a key is pressed 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & S\+D\+L keyboard event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1937 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a5a211a9ced3f0c52d898533fe5534269}{}\index{Scene@{Scene}!key\+Up\+Event@{key\+Up\+Event}}
+\index{key\+Up\+Event@{key\+Up\+Event}!Scene@{Scene}}
+\subsubsection[{key\+Up\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::key\+Up\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Keyboard\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_a5a211a9ced3f0c52d898533fe5534269}
+
+
+key\+Up\+Event called when a key is released 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & S\+D\+L keyboard event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1967 of file Scene.\+cpp.
+
+\hypertarget{class_scene_ac54bef2fcf9164ad1ffc632cf549620c}{}\index{Scene@{Scene}!mouse\+Press\+Event@{mouse\+Press\+Event}}
+\index{mouse\+Press\+Event@{mouse\+Press\+Event}!Scene@{Scene}}
+\subsubsection[{mouse\+Press\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::mouse\+Press\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Mouse\+Button\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_ac54bef2fcf9164ad1ffc632cf549620c}
+
+
+Checks which mouse button has been pressed and sets relevenat mouse state to active. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event,S\+D\+L} & mouse event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1862 of file Scene.\+cpp.
+
+\hypertarget{class_scene_ac4cc3bf5097dbe7ef52ca7192c6af779}{}\index{Scene@{Scene}!mouse\+Release\+Event@{mouse\+Release\+Event}}
+\index{mouse\+Release\+Event@{mouse\+Release\+Event}!Scene@{Scene}}
+\subsubsection[{mouse\+Release\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::mouse\+Release\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Mouse\+Button\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_ac4cc3bf5097dbe7ef52ca7192c6af779}
+
+
+Checks which mouse button has been released and sets relevant mouse state to false, also calls mouse\+Selection for clicks. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event,S\+D\+L} & mouse event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1890 of file Scene.\+cpp.
+
+\hypertarget{class_scene_acaa15aad62df413e0db0a1a3975eabbc}{}\index{Scene@{Scene}!start\+Move@{start\+Move}}
+\index{start\+Move@{start\+Move}!Scene@{Scene}}
+\subsubsection[{start\+Move}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::start\+Move (
+\begin{DoxyParamCaption}
+\item[{Direction}]{\+\_\+d}
+\end{DoxyParamCaption}
+)}\label{class_scene_acaa15aad62df413e0db0a1a3975eabbc}
+
+
+start\+Move set movement flag in given direction to true 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+d} & direction to move \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 2829 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a876e586bda5be0100e4be8accf5e17ff}{}\index{Scene@{Scene}!stop\+Move@{stop\+Move}}
+\index{stop\+Move@{stop\+Move}!Scene@{Scene}}
+\subsubsection[{stop\+Move}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::stop\+Move (
+\begin{DoxyParamCaption}
+\item[{Direction}]{\+\_\+d}
+\end{DoxyParamCaption}
+)}\label{class_scene_a876e586bda5be0100e4be8accf5e17ff}
+
+
+stop\+Move set movement flag in given direction to false 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+d} & direction to move \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 2834 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a1eabb6ccf35b335f8213d0d532d9f1cb}{}\index{Scene@{Scene}!wheel\+Event@{wheel\+Event}}
+\index{wheel\+Event@{wheel\+Event}!Scene@{Scene}}
+\subsubsection[{wheel\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::wheel\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Mouse\+Wheel\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_a1eabb6ccf35b335f8213d0d532d9f1cb}
+
+
+Sets the mouse pan according to the mouse wheel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event,S\+D\+L} & mouse event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1918 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a568509fe7dc4aa04ac22731f2eb9a4a0}{}\index{Scene@{Scene}!window\+Event@{window\+Event}}
+\index{window\+Event@{window\+Event}!Scene@{Scene}}
+\subsubsection[{window\+Event}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::window\+Event (
+\begin{DoxyParamCaption}
+\item[{const S\+D\+L\+\_\+\+Window\+Event \&}]{\+\_\+event}
+\end{DoxyParamCaption}
+)}\label{class_scene_a568509fe7dc4aa04ac22731f2eb9a4a0}
+
+
+window\+Event called upon window event such as resize to update resolution parameters 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & S\+D\+L window event \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1996 of file Scene.\+cpp.
+
+\hypertarget{class_scene_a9d27776b008877319a9bb6e1ab548a55}{}\index{Scene@{Scene}!zoom@{zoom}}
+\index{zoom@{zoom}!Scene@{Scene}}
+\subsubsection[{zoom}]{\setlength{\rightskip}{0pt plus 5cm}void Scene\+::zoom (
+\begin{DoxyParamCaption}
+\item[{int}]{\+\_\+direction}
+\end{DoxyParamCaption}
+)}\label{class_scene_a9d27776b008877319a9bb6e1ab548a55}
+
+
+zoom move the camera in or out 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+direction} & direction, positive to zoom in, negative to zoom out \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 1931 of file Scene.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Scene.\+hpp\item 
+src/Scene.\+cpp\end{DoxyCompactItemize}

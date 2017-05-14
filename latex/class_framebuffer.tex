@@ -1,0 +1,66 @@
+\hypertarget{class_framebuffer}{}\section{Framebuffer Class Reference}
+\label{class_framebuffer}\index{Framebuffer@{Framebuffer}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_framebuffer_a037bf3e17455354d5d907ceea00313dd}{}\hyperlink{class_framebuffer_a037bf3e17455354d5d907ceea00313dd}{$\sim$\+Framebuffer} ()\label{class_framebuffer_a037bf3e17455354d5d907ceea00313dd}
+
+\begin{DoxyCompactList}\small\item\em Destroys the framebuffer and all associated textures. \end{DoxyCompactList}\item 
+\hypertarget{class_framebuffer_a42333b68b7a236213c847c67f565757a}{}void \hyperlink{class_framebuffer_a42333b68b7a236213c847c67f565757a}{initialise} (int \+\_\+w, int \+\_\+h)\label{class_framebuffer_a42333b68b7a236213c847c67f565757a}
+
+\begin{DoxyCompactList}\small\item\em Initialises the framebuffer to a given width and height. All textures added later will conform to these dimensions. \end{DoxyCompactList}\item 
+\hypertarget{class_framebuffer_ac6cbf17aec474eeea93606b74a0edae3}{}void {\bfseries active\+Colour\+Attachments} ()\label{class_framebuffer_ac6cbf17aec474eeea93606b74a0edae3}
+
+\item 
+\hypertarget{class_framebuffer_a0a1ca4ce2d650f2605c4ac67b117b43b}{}void {\bfseries active\+Colour\+Attachments} (const std\+::vector$<$ G\+Lenum $>$ \+\_\+bufs)\label{class_framebuffer_a0a1ca4ce2d650f2605c4ac67b117b43b}
+
+\item 
+\hypertarget{class_framebuffer_a16ab496a93c687f1ee7b95a629b19bd2}{}void {\bfseries active\+Read\+Attachment} (const G\+Lenum \+\_\+buf)\label{class_framebuffer_a16ab496a93c687f1ee7b95a629b19bd2}
+
+\item 
+\hypertarget{class_framebuffer_a268363c1d77db0580a5c409fb1fc6720}{}void {\bfseries add\+Texture} (const std\+::string \&\+\_\+identifier, G\+Luint \+\_\+tex, G\+Lenum \+\_\+attachment)\label{class_framebuffer_a268363c1d77db0580a5c409fb1fc6720}
+
+\item 
+\hypertarget{class_framebuffer_a978c4f74eaeb6befedb4490571bfcba1}{}void {\bfseries add\+Renderbuffer\+Multisampled} (const std\+::string \&\+\_\+identifier, G\+Luint \+\_\+tex, G\+Lenum \+\_\+attachment)\label{class_framebuffer_a978c4f74eaeb6befedb4490571bfcba1}
+
+\item 
+\hypertarget{class_framebuffer_ad528f4c2209360de2b31b0d827a07607}{}void {\bfseries add\+Texture} (const std\+::string \&\+\_\+identifier, G\+Lenum \+\_\+format, G\+Lenum \+\_\+iformat, G\+Lenum \+\_\+attachment, G\+Lint \+\_\+type=G\+L\+\_\+\+F\+L\+O\+A\+T)\label{class_framebuffer_ad528f4c2209360de2b31b0d827a07607}
+
+\item 
+\hypertarget{class_framebuffer_a0ed353e8588bcb16374bac09335c059e}{}void {\bfseries add\+Depth\+Attachment} (const std\+::string \&\+\_\+identifier)\label{class_framebuffer_a0ed353e8588bcb16374bac09335c059e}
+
+\item 
+\hypertarget{class_framebuffer_a5875dc510c665523d647026b742219a0}{}void {\bfseries bind} ()\label{class_framebuffer_a5875dc510c665523d647026b742219a0}
+
+\item 
+\hypertarget{class_framebuffer_ab7e59b32a393df0bd05a029a4b469d37}{}void {\bfseries bind\+Texture} (const G\+Lint \+\_\+shader\+I\+D, const std\+::string \&\+\_\+tex, const char $\ast$\+\_\+uniform, int \+\_\+target)\label{class_framebuffer_ab7e59b32a393df0bd05a029a4b469d37}
+
+\item 
+\hypertarget{class_framebuffer_a9358db7f628159f5ba16e82343c5a841}{}bool {\bfseries check\+Complete} ()\label{class_framebuffer_a9358db7f628159f5ba16e82343c5a841}
+
+\item 
+\hypertarget{class_framebuffer_a29f3edfceab261b122f09a8a1b067b41}{}void {\bfseries clear} ()\label{class_framebuffer_a29f3edfceab261b122f09a8a1b067b41}
+
+\item 
+\hypertarget{class_framebuffer_ad33c86c5ae1b508306464077f7425683}{}void {\bfseries unbind} ()\label{class_framebuffer_ad33c86c5ae1b508306464077f7425683}
+
+\item 
+\hypertarget{class_framebuffer_a711c61b91f56d36d1bc5650ca5f82d72}{}G\+Luint {\bfseries get} (const std\+::string \+\_\+id)\label{class_framebuffer_a711c61b91f56d36d1bc5650ca5f82d72}
+
+\item 
+\hypertarget{class_framebuffer_a326f3e89e2cab64ac78dd02de22f3f52}{}G\+Luint {\bfseries get\+I\+D} ()\label{class_framebuffer_a326f3e89e2cab64ac78dd02de22f3f52}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 9 of file Framebuffer.\+hpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Framebuffer.\+hpp\item 
+src/Framebuffer.\+cpp\end{DoxyCompactItemize}

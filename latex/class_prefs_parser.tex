@@ -1,0 +1,57 @@
+\hypertarget{class_prefs_parser}{}\section{Prefs\+Parser Class Reference}
+\label{class_prefs_parser}\index{Prefs\+Parser@{Prefs\+Parser}}
+
+
+\hyperlink{namespace_the}{The} \hyperlink{class_prefs_parser}{Prefs\+Parser} class is resposible for reading in a preferences text file and parsing the text into integer, float and string preferences that it stores in the \hyperlink{class_prefs}{Prefs} singelton class.  
+
+
+
+
+{\ttfamily \#include $<$Prefs\+Parser.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_prefs_parser_a185832a1c19c5f5c95baf1ce5621f91a}{}\hyperlink{class_prefs_parser_a185832a1c19c5f5c95baf1ce5621f91a}{Prefs\+Parser} ()=default\label{class_prefs_parser_a185832a1c19c5f5c95baf1ce5621f91a}
+
+\begin{DoxyCompactList}\small\item\em default constructor \end{DoxyCompactList}\item 
+void \hyperlink{class_prefs_parser_a166117037558f1164bf68c7e1eeb4ddb}{parse\+File} (std\+::string \+\_\+file\+\_\+name)
+\begin{DoxyCompactList}\small\item\em parse\+File parses te given text file and stores the result in an instance of the Pefs singelton class \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{namespace_the}{The} \hyperlink{class_prefs_parser}{Prefs\+Parser} class is resposible for reading in a preferences text file and parsing the text into integer, float and string preferences that it stores in the \hyperlink{class_prefs}{Prefs} singelton class. 
+
+\hyperlink{namespace_the}{The} parsing is done using boost\+:spirit\+:\+:classic which uses ruled defined in an E\+B\+N\+F format to decide what to do with different combinations of characters. 
+
+Definition at line 20 of file Prefs\+Parser.\+hpp.
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_prefs_parser_a166117037558f1164bf68c7e1eeb4ddb}{}\index{Prefs\+Parser@{Prefs\+Parser}!parse\+File@{parse\+File}}
+\index{parse\+File@{parse\+File}!Prefs\+Parser@{Prefs\+Parser}}
+\subsubsection[{parse\+File}]{\setlength{\rightskip}{0pt plus 5cm}void Prefs\+Parser\+::parse\+File (
+\begin{DoxyParamCaption}
+\item[{std\+::string}]{\+\_\+file\+\_\+name}
+\end{DoxyParamCaption}
+)}\label{class_prefs_parser_a166117037558f1164bf68c7e1eeb4ddb}
+
+
+parse\+File parses te given text file and stores the result in an instance of the Pefs singelton class 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+file\+\_\+name} & is the path to the preferences.\+conf file \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 4 of file Prefs\+Parser.\+cpp.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Prefs\+Parser.\+hpp\item 
+src/Prefs\+Parser.\+cpp\end{DoxyCompactItemize}
