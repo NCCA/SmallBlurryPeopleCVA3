@@ -229,8 +229,8 @@ Scene::Scene(ngl::Vec2 _viewport) :
 void Scene::initMeshInstances()
 {
     m_meshInstances.clear();
-    int iiterations = m_grid.getW() / m_meshInstanceBlockTileSize;
-    int jiterations = m_grid.getH() / m_meshInstanceBlockTileSize;
+    int iiterations = std::ceil(m_grid.getW() / (float)m_meshInstanceBlockTileSize);
+    int jiterations = std::ceil(m_grid.getH() / (float)m_meshInstanceBlockTileSize);
 
     for(int x = 0; x < iiterations; ++x)
     {
@@ -336,6 +336,8 @@ void Scene::recalculateInstancedMeshes(int _tilex, int _tiley)
     int y = _tiley / m_meshInstanceBlockTileSize;
     int index = x * std::floor(m_grid.getH() / m_meshInstanceBlockTileSize) + y;
 
+    std::cout << "Recalculation requested from " << _tilex << " (" << x << "), " << _tiley << " (" << y << ")" << '\n';
+    std::cout << "index " <<  (x * m_grid.getH() / m_meshInstanceBlockTileSize) << ", " << y << '\n';
     meshInstanceBlock b = generateInstanceMeshTile(x, y);
     std::cout << "Accessing " << index << " of " << m_meshInstances.size() << '\n';
     m_meshInstances[index] = b;
