@@ -17,6 +17,7 @@
 
 struct Light
 {
+    /// @brief Constructor for the light class, takes a position, an RGB colour and a brightness.
     Light(const ngl::Vec4 &_pos, const ngl::Vec3 &_col, const float _lum)
     {
         m_pos = _pos;
@@ -24,8 +25,13 @@ struct Light
         m_lum = _lum;
     }
 
+    /// @brief The position of the light.
     ngl::Vec4 m_pos;
+
+    /// @brief The colour of the light.
     ngl::Vec3 m_col;
+
+    /// @brief The brightness of the light.
     float m_lum;
 };
 

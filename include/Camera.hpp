@@ -12,7 +12,8 @@
 /// @file Camera.hpp
 /// @brief The camera class is essentially a wrapper around a load of mat4s. Similar to NGLs default camera class but it represents
 /// both the camera and a lookat target. The user can transform both of these. When happy with the transformations they have set up,
-/// they can call methods to calculate the view and projection matrices.
+/// they can call methods to calculate the view and projection matrices. Also includes some smooth camera functionality, to make it
+/// easier for the player to use.
 
 class Camera
 {
@@ -42,6 +43,7 @@ public:
     /// @brief Returns the world space position of the pivot.
     ngl::Vec3 getPivot() const {return m_pivot;}
 
+    /// @brief Returns the aspect ratio.
     float getAspect() const {return m_aspect;}
 
     /// @brief Setters to control the range of the cameras pitch.

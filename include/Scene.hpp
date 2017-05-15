@@ -325,13 +325,13 @@ private:
     ///
     void createCharacter();
     ///
-    /// @brief loadMatricesToShader
-    /// @param _M
-    /// @param _MVP
+    /// @brief Loads a custom set of matrices to the active shader
+    /// @param _M, The model matrix.
+    /// @param _MVP, The model-view-project matrix.
     ///
     void loadMatricesToShader(const ngl::Mat4 _M, const ngl::Mat4 _MVP);
     ///
-    /// @brief loadMatricesToShader
+    /// @brief Loads the MVP matrix to the active shader.
     ///
     void loadMatricesToShader();
     ///
@@ -339,102 +339,102 @@ private:
     /// 
     void mouseSelection();
     ///
-    /// @brief bindTextureToShader
-    /// @param _shaderID
-    /// @param _tex
-    /// @param _uniform
-    /// @param _target
-    /// @param _type
+    /// @brief Binds a provided texture to a provided shader.
+    /// @param _shaderID, The id of the shader
+    /// @param _tex, The opengl id of the texture
+    /// @param _uniform, The uniform name
+    /// @param _target, The texture target
+    /// @param _type, The type of texture (normally GL_TEXTURE_2D)
     ///
     void bindTextureToShader(const std::string &_shaderID, const GLuint _tex, const char *_uniform, int _target, GLenum _type = GL_TEXTURE_2D);
     ///
-    /// @brief drawAsset
-    /// @param _model
-    /// @param _texture
-    /// @param _shader
+    /// @brief Draws a specified asset with a texture and shader.
+    /// @param _model, The string id of the model, from the asset store.
+    /// @param _texture, The string id of the texture, from the asset store.
+    /// @param _shader, The string id of the shader.
     ///
     void drawAsset(const std::string &_model, const std::string &_texture, const std::string &_shader);
     ///
-    /// @brief drawInstances
-    /// @param _model
-    /// @param _texture
-    /// @param _shader
-    /// @param _instances
-    /// @param _offset
-    /// @param _index
+    /// @brief Draws a set of instances meshes.
+    /// @param _model, The string id of the model, from the asset store.
+    /// @param _texture, The string id of the texture, from the asset store.
+    /// @param _shader, The string id of the shader.
+    /// @param _instances, The number of instances to draw.
+    /// @param _offset, The offset into the mesh instance TBO to start from.
+    /// @param _index, The index of the mesh instance block to source transformation data from.
     ///
     void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index);
     ///
-    /// @brief drawInstances
-    /// @param _model
-    /// @param _texture
-    /// @param _shader
-    /// @param _instances
-    /// @param _offset
-    /// @param _index
-    /// @param _VP
+    /// @brief Draws a set of instances meshes, with a custom VP matrix. Used for shadow mapping.
+    /// @param _model, The string id of the model, from the asset store.
+    /// @param _texture, The string id of the texture, from the asset store.
+    /// @param _shader, The string id of the shader.
+    /// @param _instances, The number of instances to draw.
+    /// @param _offset, The offset into the mesh instance TBO to start from.
+    /// @param _index, The index of the mesh instance block to source transformation data from.
+    /// @param _VP, The custom VP matrix to use
     ///
     void drawInstances(const std::string &_model, const std::string &_texture, const std::string &_shader, const int _instances, const int _offset, const int _index, const ngl::Mat4 &_VP);
     ///
-    /// @brief createShader
-    /// @param _name
-    /// @param _vert
-    /// @param _frag
-    /// @param _geo
-    /// @param _tessctrl
-    /// @param _tesseval
+    /// @brief Creates a shader with the given attributes
+    /// @param _name, The name the shader will be stored under in ShaderLib
+    /// @param _vert, The filename of the vertex shader (without '.glsl').
+    /// @param _frag, The filename of the fragment shader (without '.glsl').
+    /// @param _geo, The filename of the geometry shader (without '.glsl').
+    /// @param _tessctrl, The filename of the tesselation control shader (without '.glsl').
+    /// @param _tesseval, The filename of the tesselation evaluation shader (without '.glsl').
     ///
     void createShader(const std::string _name, const std::string _vert, const std::string _frag, const std::string _geo = "", const std::string _tessctrl = "", const std::string _tesseval = "");
     ///
-    /// @brief createVAO
-    /// @param _verts
-    /// @return 
+    /// @brief Creates a VAO from a list of supplied points
+    /// @param _verts, The verts to use.
+    /// @return _vao, The finished VAO.
     ///
     GLuint createVAO(std::vector<ngl::Vec4> &_verts);
     ///
-    /// @brief createVAO
-    /// @param _verts
-    /// @param _uvs
-    /// @return 
+    /// @brief Creates a VAO from a list of supplied points and UV coordinates
+    /// @param _verts, The verts to use.
+    /// @param _uvs, The UVs to use.
+    /// @return _vao, The finished VAO.
     ///
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec2> &_uvs);
     ///
-    /// @brief createVAO
-    /// @param _verts
-    /// @param _normals
-    /// @param _uvs
-    /// @return 
+    /// @brief Creates a VAO from a list of supplied points, normal vectors and UV coordinates
+    /// @param _verts, The verts to use.
+    /// @param _normals, The normals to use.
+    /// @param _uvs, The UVs to use.
+    /// @return _vao, The finished VAO.
     ///
     GLuint createVAO(std::vector<ngl::Vec4> &_verts, std::vector<ngl::Vec3> &_normals, std::vector<ngl::Vec2> &_uvs);
     ///
-    /// @brief createBuffer4f
-    /// @param _vec
-    /// @return 
+    /// @brief Creates a VBO containing vec4s.
+    /// @param _vec, The vec4s to use.
+    /// @return _vbo, The finished VBO.
     ///
     GLuint createBuffer4f(std::vector<ngl::Vec4> _vec);
     ///
-    /// @brief createBuffer3f
-    /// @param _vec
-    /// @return 
+    /// @brief Creates a VBO containing vec3s.
+    /// @param _vec, The vec3s to use.
+    /// @return _vbo, The finished VBO.
     ///
     GLuint createBuffer3f(std::vector<ngl::Vec3> _vec);
     ///
-    /// @brief createBuffer2f
-    /// @param _vec
-    /// @return 
+    /// @brief Creates a VBO containing vec2s.
+    /// @param _vec, The vec2s to use.
+    /// @return _vbo, The finished VBO.
     ///
     GLuint createBuffer2f(std::vector<ngl::Vec2> _vec);
     ///
-    /// @brief createBuffer1f
-    /// @param _vec
-    /// @return 
+    /// @brief Creates a VBO containing floats.
+    /// @param _vec, The floats to use.
+    /// @return _vbo, The finished VBO.
     ///
     GLuint createBuffer1f(std::vector<float> _vec);
     ///
-    /// @brief setBufferLocation
-    /// @param _buffer
-    /// @param _index
-    /// @param _size
+    /// @brief Wraps a call to glVertexAttribPointer.
+    /// @param _buffer, The VBO to use.
+    /// @param _index, The index to attach to.
+    /// @param _size, The size of the VBO.
     ///
     void setBufferLocation(GLuint _buffer, int _index, int _size);
     ///
@@ -442,8 +442,8 @@ private:
     /// 
     ngl::Vec4 getTerrainPosAtMouse();
     ///
-    /// @brief getTerrainPickTexture
-    /// @return 
+    /// @brief Gets the texture with terrain position data.
+    /// @return m_utilityBuffer.get("terrainpos");, The texture in the utility FBO with ID "terrainpos".
     ///
     GLuint getTerrainPickTexture() {return m_utilityBuffer.get("terrainpos");}
     ///
@@ -451,29 +451,29 @@ private:
     /// 
     int getCharIDAtMouse();
     ///
-    /// @brief getCharPickTexture
-    /// @return 
+    /// @brief Gets the texture with character id data.
+    /// @return m_utilityBuffer.get("charid");, The texture in the utility FBO with ID "charid".
     ///
     GLuint getCharPickTexture() {return m_utilityBuffer.get("charid");}
     ///
-    /// @brief generateOrthoShadowMatrices
-    /// @param _divisions
-    /// @return 
+    /// @brief Generates the set of bounds for AABBs around different sections of the camera cascades.
+    /// @param _divisions, The distances to split the camera cascades at.
+    /// @return _boxes, A set of AABBs enclosing sections of the camera frustum.
     ///
     std::pair<std::vector<bounds>, std::vector<bounds> > generateOrthoShadowMatrices(const std::vector<float> &_divisions);
     ///
-    /// @brief shadowPass
-    /// @param _worldbox
-    /// @param _lightbox
-    /// @param _index
+    /// @brief Creates a depth texture from sun-light-space of the scene.
+    /// @param _worldbox, The world-space bounding box for the orthographic render box.
+    /// @param _lightbox, The light space bounding box for the orthographic render box, this is used to control the projection matrix.
+    /// @param _index, The index in the vector of depth textures to store the result of the shadow pass in.
     ///
     void shadowPass(bounds _worldbox, bounds _lightbox, size_t _index );
     ///
-    /// @brief m_globalTime
+    /// @brief The time since the start of the game.
     ///
     float m_globalTime;
     ///
-    /// @brief m_sunAngle
+    /// @brief The angle of the sun.
     ///
     ngl::Vec3 m_sunAngle;
     ///
@@ -533,7 +533,7 @@ private:
     ///
     GLuint constructTerrain();
     ///
-    /// @brief The terrainVertex struct
+    /// @brief The terrainVertex struct, contains a position and a normal.
     ///
     struct terrainVertex
     {
@@ -541,7 +541,7 @@ private:
         ngl::Vec3 m_norm;
     };
     ///
-    /// @brief The terrainFace struct
+    /// @brief The terrainFace struct, contains 4 terrain vertices.
     ///
     struct terrainFace
     {
@@ -551,26 +551,26 @@ private:
         std::array< terrainVertex, 4 > m_verts;
     };
     ///
-    /// @brief terrainVerticesToFace
-    /// @param _x
-    /// @param _y
-    /// @param _facePositions
-    /// @param _faceNormals
-    /// @return 
+    /// @brief Constructs a face for a given terrain tile.
+    /// @param _x, The x coordinate of the tile.
+    /// @param _y, The y coordinate of the tile.
+    /// @param _facePositions, A 2d vector of face center positions.
+    /// @param _faceNormals, A 2d vector of face center normals.
+    /// @return _face, The face constructed from the input data.
     ///
     terrainFace terrainVerticesToFace(const int _x,
                                       const int _y, const float _worldX, const float _worldY,
                                       const std::vector<std::vector<ngl::Vec3> > &_facePositions,
                                       const std::vector<std::vector<ngl::Vec3> > &_faceNormals);
     ///
-    /// @brief generateTerrainFaceData
-    /// @param _x
-    /// @param _y
-    /// @param _dirX
-    /// @param _dirY
-    /// @param _facePositions
-    /// @param _faceNormals
-    /// @return 
+    /// @brief Generates a vertex given a terrain tile, and information about the surrounding tiles.
+    /// @param _x, The x coordinate of the tile.
+    /// @param _y, The y coordinate of the tile.
+    /// @param _dirX, The x direction to compare to, ie vertices with a dirX of 1 will look at tiles to the right.
+    /// @param _dirY, The x direction to compare to, ie vertices with a dirY of 1 will look at tiles upwards.
+    /// @param _facePositions, A 2d vector of face center positions.
+    /// @param _faceNormals, A 2d vector of face center normals.
+    /// @return _vert, A vertex creates from nearby tiles.
     ///
     std::pair<ngl::Vec4, ngl::Vec3> generateTerrainFaceData(const int _x,
                                                         const int _y,
@@ -584,35 +584,47 @@ private:
     /// @return vector for camera to move
     ///
     ngl::Vec3 getCamMoveVec();
+
+    /// @brief The size of one side of each mesh instance block. Values below 50 should work well.
+    const int m_meshInstanceBlockTileSize = 20;
+
     ///
     /// @brief Rather than looping through the grid every frame, and drawing based on tile id, I extract out the positions of the meshes that need
     /// to be drawn, and place them in this 2D vector, where the outer index matches their ID. Obviously, there is some wasted space here, I may
     /// improve the design at a later date.
     /// This is now stored in blocks, which cuts down on the recalculation time when a mesh changes.
     /// Each block contains the positions and IDs of each mesh, CPU side, the world space bounds of the chunk (can be used for culling) and the texture buffer object containing the transformation data.
-    const int m_meshInstanceBlockTileSize = 20;
     struct meshInstanceBlock
     {
-        //The positions (and implicitly IDs) of the meshes.
+        /// @brief The positions (and implicitly IDs) of the meshes.
         std::vector< std::vector<ngl::Vec3> > m_meshPositions;
-        //The bounds of the block.
+        /// @brief The bounds of the block.
         std::pair<ngl::Vec3, ngl::Vec3> m_bounds;
-        //The texture buffer object containing the transformation data.
+        /// @brief The texture buffer object containing the transformation data.
         GLuint m_instanceTBO;
     };
+    /// @brief A vector of all the mesh instance blocks in the game.
     std::vector<meshInstanceBlock> m_meshInstances;
+
+    /// @brief Generates mesh instance blocks. This should be called on a new game.
     void initMeshInstances();
+
+    /// @brief Generates a mesh instance block based on an input block (tilecoordinate / m_meshInstanceBlockTileSize) coordinate.
     meshInstanceBlock generateInstanceMeshTile(const int _x, const int _y);
+
+    /// @brief Recalculates the mesh instance block based on a tile coordinate. When the map changes, we can call this function with the coordinates of the tile that has changed, and it will update.
     void recalculateInstancedMeshes(int _tilex, int _tiley);
 
-    //Use these to draw debug points to the screen. Should be deleted/hidden at some point.
+    ///
+    /// @brief Used to draw debug data to the screen.
+    ///
     GLuint m_debugVAO;
     ///
-    /// @brief m_debugVBO
+    /// @brief Used to draw debug data to the screen.
     ///
     GLuint m_debugVBO;
     ///
-    /// @brief m_debugPoints
+    /// @brief Used to draw debug data to the screen.
     ///
     std::vector<ngl::Vec4> m_debugPoints;
     ///

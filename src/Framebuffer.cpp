@@ -76,14 +76,6 @@ void Framebuffer::addTexture(const std::string &_identifier, GLuint _tex, GLenum
     glFramebufferTexture2D(GL_FRAMEBUFFER, _attachment, GL_TEXTURE_2D, m_textures[ _identifier ], 0);
 }
 
-void Framebuffer::addRenderbufferMultisampled(const std::string &_identifier, GLuint _tex, GLenum _attachment)
-{
-    m_textures.insert( std::make_pair(_identifier, _tex) );
-    m_colorAttachments.push_back( _attachment );
-
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, _attachment, GL_RENDERBUFFER, m_textures[ _identifier ]);
-}
-
 void Framebuffer::addTexture(const std::string &_identifier, GLenum _format, GLenum _iformat , GLenum _attachment, GLint _type)
 {
     //Create texture.
